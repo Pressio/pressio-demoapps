@@ -2,18 +2,11 @@
 #include "swe.hpp"
 #include <iomanip>
 
-int main(int argc, char *argv[])
+template<class T>
+bool testRhs(T & appObj)
 {
-  using scalar_t = double;
-  using app_t       = pressiodemoapps::Swe;
-  using app_state_t = typename app_t::state_type;
-  using app_rhs_t   = typename app_t::velocity_type;
-
-  std::array<scalar_t,3> params = {0.25, 0.5, 0.1};
-  app_t appObj(".", params);
-
   auto fomVelo = appObj.createVelocity();
-  app_state_t fomState(fomVelo.size());
+  typename T::state_type fomState(fomVelo.size());
   for (int i=0; i<fomState.size(); ++i){
     fomState(i) = (double) (i+1);
   }
@@ -21,7 +14,7 @@ int main(int argc, char *argv[])
   appObj.velocity(fomState, 0., fomVelo);
   //std::cout << std::setprecision(14) << fomVelo << std::endl;
 
-  app_state_t goldVelo(fomVelo.size());
+  typename T::state_type goldVelo(fomVelo.size());
   goldVelo <<
     440.19802377938, 460.99843957979, 739.39885538021,
     356.61259942078, 346.77688513507, 696.24117084935,
@@ -41,10 +34,50 @@ int main(int argc, char *argv[])
     -412.87868107042, -288.36857643775, -144.75847180507;
 
   if (!goldVelo.isApprox(fomVelo)){
-    std::puts("FAIL");
+    return false;
   }
   else{
+    return true;
+  }
+}
+
+template<class T>
+bool testJacobian(T & appObj)
+{
+  auto fomJac = appObj.createJacobian();
+  typename T::state_type fomState(appObj.totalDofStencilMesh());
+  for (int i=0; i<fomState.size(); ++i){
+    fomState(i) = (double) (i+1);
+  }
+
+  appObj.jacobian(fomState, 0., fomJac);
+  std::cout << fomJac.rows() << " " << fomJac.cols() << std::endl;
+  std::cout << std::setprecision(14) << fomJac << std::endl;
+  std::cout << Eigen::MatrixXd(fomJac) << std::endl;
+
+  // app_state_t goldVelo(fomVelo.size());
+
+  return true;
+}
+
+int main(int argc, char *argv[])
+{
+  using scalar_t = double;
+  using app_t       = pressiodemoapps::Swe;
+  using app_state_t = typename app_t::state_type;
+  using app_rhs_t   = typename app_t::velocity_type;
+
+  std::array<scalar_t,3> params = {0.25, 0.5, 0.1};
+  app_t appObj(".", params);
+
+  auto rhsStr = testRhs(appObj);
+  auto jacStr = testJacobian(appObj);
+
+  if (rhsStr and jacStr){
     std::puts("PASS");
+  }
+  else{
+    std::puts("FAIL");
   }
 
   return 0;

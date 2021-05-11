@@ -14,22 +14,19 @@ class Swe
   using eigVec = Eigen::VectorXd;
 
 public:
-  using scalar_type	= double;
-  using state_type	= eigVec;
-  using velocity_type	= eigVec;
-  using dense_matrix_type = Eigen::MatrixXd;
-
   // type to use for all indexing, has to be large enough
   // to support indexing fairly large systems
   using index_t  = int32_t;
 
+  using scalar_type	= double;
+  using state_type	= eigVec;
+  using velocity_type	= eigVec;
+  using dense_matrix_type = Eigen::MatrixXd;
+  using eig_sp_mat = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int>;
+  using jacobian_type = eig_sp_mat;
+
   // number of dofs for each cell
   static constexpr index_t numDofPerCell_{3};
-
-  // // type for the adjacency list for each mesh graph
-  // // we use an array of 5 indices since all graph nodes have
-  // // the same number of connections
-  // using node_al_t = std::array<index_t,5>;
 
   // type to represent connectivity
   using mesh_graph_t  = Eigen::Matrix<index_t,-1,-1,Eigen::RowMajor>;
@@ -185,6 +182,135 @@ public:
       }
   }
 
+  jacobian_type createJacobian() const{
+    jacobian_type J(numDofSampleMesh_, numDofStencilMesh_);
+    return J;
+  }
+
+  void jacobian(const state_type & U,
+                const scalar_type /*t*/,
+                jacobian_type & jac) const
+  {
+    scalar_type JL_L[3][3];
+    scalar_type JR_L[3][3];
+    scalar_type JL_R[3][3];
+    scalar_type JR_R[3][3];
+    scalar_type JD_D[3][3];
+    scalar_type JU_D[3][3];
+    scalar_type JD_U[3][3];
+    scalar_type JU_U[3][3];
+
+    tripletList.clear();
+    for (index_t smPt=0; smPt < numGptSampleMesh_; ++smPt)
+    {
+      const auto & thisCellAdList = graph_.row(smPt);
+      const auto cellGID = thisCellAdList(0);
+      const auto vIndex = smPt*numDofPerCell_;
+      const auto uIndex = cellGID*numDofPerCell_;
+
+      const auto westCellGid  = thisCellAdList[1];
+      const auto northCellGid = thisCellAdList[2];
+      const auto eastCellGid  = thisCellAdList[3];
+      const auto southCellGid = thisCellAdList[4];
+      uWestIndex_  = westCellGid*numDofPerCell_;
+      uNorthIndex_ = northCellGid*numDofPerCell_;
+      uEastIndex_  = eastCellGid*numDofPerCell_;
+      uSouthIndex_ = southCellGid*numDofPerCell_;
+
+      rusanovFluxJacobianFullStateIn(JL_L, JR_L, U, uWestIndex_ , uIndex      , normalX_, g_);
+      rusanovFluxJacobianFullStateIn(JL_R, JR_R, U, uIndex      , uEastIndex_ , normalX_, g_);
+      rusanovFluxJacobianFullStateIn(JD_D, JU_D, U, uSouthIndex_, uIndex      , normalY_, g_);
+      rusanovFluxJacobianFullStateIn(JD_U, JU_U, U, uIndex      , uNorthIndex_, normalY_, g_);
+
+      for (int j = 0; j < 3; ++j) {
+	for (int i = 0; i < 3; ++i) {
+	  auto val = -dxInv_*(JL_R[i][j] - JR_L[i][j]) - dyInv_*(JD_U[i][j] - JU_D[i][j]);
+	  tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+i, uIndex+j, val ) );
+
+	  val =  dxInv_*JL_L[i][j];
+	  tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+i, uWestIndex_+j, val ) );
+
+	  val = -dxInv_*JR_R[i][j];
+	  tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+i, uEastIndex_+j, val ) );
+
+	  val = dyInv_*JD_D[i][j];
+	  tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+i, uSouthIndex_+j, val ) );
+
+	  val = -dyInv_*JU_U[i][j];
+	  tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+i, uNorthIndex_+j, val ) );
+	}
+      }
+
+      // forcing term
+      auto val = mu_f_;
+      tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+1, uIndex+2, val ) );
+      tripletList.push_back( Eigen::Triplet<scalar_type>( vIndex+2, uIndex+1, val ) );
+    }
+
+    jac.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    // for (int smIndexCounter=0; smIndexCounter < nDofsSample_; smIndexCounter++)
+    //   {
+    // 	const auto sampleMeshGlobalIndex = smLidToGidMap_(smIndexCounter);
+    // 	const auto ij = get_ij_from_gid(sampleMeshGlobalIndex);
+    // 	const auto smps_lid =     3*smpsGidToLidMap_.find(index_mapper(ij[0]    ,ij[1]    ))->second;
+    // 	const auto smps_lid_im1 = 3*smpsGidToLidMap_.find(index_mapper(ij[0] - 1,ij[1]    ))->second;
+    // 	const auto smps_lid_ip1 = 3*smpsGidToLidMap_.find(index_mapper(ij[0] + 1,ij[1]    ))->second;
+    // 	const auto smps_lid_jm1 = 3*smpsGidToLidMap_.find(index_mapper(ij[0]    ,ij[1] - 1))->second;
+    // 	const auto smps_lid_jp1 = 3*smpsGidToLidMap_.find(index_mapper(ij[0]    ,ij[1] + 1))->second;
+
+    // 	rusanovFluxJacobianFullStateIn(JL_L,JR_L,U,smps_lid_im1, smps_lid    ,nx,g_);
+    // 	rusanovFluxJacobianFullStateIn(JL_R,JR_R,U,smps_lid    , smps_lid_ip1,nx,g_);
+    // 	rusanovFluxJacobianFullStateIn(JD_D,JU_D,U,smps_lid_jm1, smps_lid    ,ny,g_);
+    // 	rusanovFluxJacobianFullStateIn(JD_U,JU_U,U,smps_lid    , smps_lid_jp1,ny,g_);
+
+    // 	const auto sm_lid = smIndexCounter*3;
+    // 	for (int j = 0; j < 3; ++j) {
+    // 	  for (int i = 0; i < 3; ++i) {
+    // 	    auto val = -1./dx_*(JL_R[i][j] - JR_L[i][j]) - 1./dy_*(JD_U[i][j] - JU_D[i][j]);
+    // 	    tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+i,smps_lid+j,val ) );
+
+    // 	    val =  1./dx_*JL_L[i][j];
+    // 	    tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+i,smps_lid_im1+j,val ) );
+
+    // 	    val = -1./dx_*JR_R[i][j];
+    // 	    tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+i,smps_lid_ip1+j,val ) );
+
+    // 	    val = 1./dy_*JD_D[i][j];
+    // 	    tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+i,smps_lid_jm1+j,val ) );
+
+    // 	    val = -1./dy_*JU_U[i][j];
+    // 	    tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+i,smps_lid_jp1+j,val ) );
+
+    // 	  }
+    // 	}
+
+    //   // forcing term
+    //   auto val = mu_f_;
+    //   tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+1,smps_lid+2,val ) );
+    //   tripletList.push_back( Eigen::Triplet<scalar_type>( sm_lid+2,smps_lid+1,val ) );
+    // }
+    //jac.setFromTriplets(tripletList.begin(), tripletList.end());
+  }
+
+  dense_matrix_type createApplyJacobianResult(const dense_matrix_type & A) const
+  {
+    jacobian_type JA(numDofSampleMesh_, A.cols() );
+    return JA;
+  }
+
+  void applyJacobian(const state_type & U,
+         const dense_matrix_type & A,
+         scalar_type t,
+         dense_matrix_type & JA) const
+  {
+    if (jac_.rows() == 0){
+      jac_ = createJacobian();
+    }
+    jacobian(U, t, jac_);
+    JA = jac_*A;
+  }
+
 private:
   void readMeshInfo(const std::string & meshDir)
   {
@@ -324,6 +450,9 @@ private:
   */
   int stencilSize_ = {};
   mesh_graph_t graph_ = {};
+
+  mutable std::vector<Eigen::Triplet<scalar_type>> tripletList;
+  mutable jacobian_type jac_;
 
   mutable index_t uWestIndex_  = {};
   mutable index_t uNorthIndex_ = {};

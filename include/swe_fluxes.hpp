@@ -65,6 +65,90 @@ void sweRusanovFluxFullStateIn(flux_t & F,
 }
 
 
+/* Rusanov flux Jacobian that takes the entire state vector as an input
+   JL \in R^{3x3}, left jacobian
+   JR \in R^{3x3}, right jacobian
+   q \in R^N, state
+   isL \in NaturalNumbers, left index
+   isR \in NaturalNumbers, right index
+   n \in R^2, normalv ector
+   g \in R, gravity
+*/
+template<typename jac_t,typename state_t, typename normal_t, typename scalar_t>
+void rusanovFluxJacobianFullStateIn(jac_t & JL,
+				    jac_t & JR,
+				    const state_t & q,
+				    const int gidL,
+				    const int gidR,
+				    const normal_t & n,
+				    const scalar_t g)
+{
+  const scalar_t es = 1.e-30;
+  const scalar_t hL = q(gidL + 0);
+  const scalar_t uL = q(gidL + 1)/(hL + es);
+  const scalar_t vL = q(gidL + 2)/(hL + es);
+  const scalar_t unL = uL*n[0] + vL*n[1];
+
+  const scalar_t hR = q(gidR + 0);
+  const scalar_t uR = q(gidR + 1)/(hR + es);
+  const scalar_t vR = q(gidR + 2)/(hR + es);
+  const scalar_t unR = uR*n[0] + vR*n[1];
+
+  // rho average
+  const scalar_t hm = 0.5*(hL + hR);
+  const scalar_t um = (unL*std::pow(hL,0.5) + unR*std::pow(hR,0.5) )/( std::pow(hL,0.5) + std::pow(hR,0.5)  + es);
+  // eigenvalues
+  const scalar_t smax = abs(um) + abs(std::pow(g*hm, 0.5));
+
+  const scalar_t termL = (n[0]*q(gidL + 1) + n[1]*q(gidL + 2)) / std::pow(q(gidL + 0),2.);
+  const scalar_t termR = (n[0]*q(gidR + 1) + n[1]*q(gidR + 2)) / std::pow(q(gidR + 0),2.);
+  const scalar_t hL_sqrt = std::pow(hL,0.5);
+  const scalar_t hR_sqrt = std::pow(hR,0.5);
+
+  const scalar_t hsqrt_un = hL_sqrt*unL + hR_sqrt*unR + es;
+  scalar_t dsmaxL[3];
+  scalar_t dsmaxR[3];
+  dsmaxL[0] = - std::abs(hsqrt_un) / (2.*hL_sqrt*std::pow(hL_sqrt + hR_sqrt,2.) ) +
+    (0.5*unL / hL_sqrt - hL_sqrt*termL )*hsqrt_un  / ( (hL_sqrt + hR_sqrt)*std::abs( hsqrt_un  ) ) +
+    g/(std::pow(2.,3./2.)*std::pow(g*(hL + hR),0.5) );
+  dsmaxL[1] = n[0]*hsqrt_un / ( hL_sqrt*(hL_sqrt + hR_sqrt) * std::abs( hsqrt_un) );
+  dsmaxL[2] = n[1]*hsqrt_un / ( hL_sqrt*(hL_sqrt + hR_sqrt) * std::abs( hsqrt_un) );
+
+  dsmaxR[0] = - std::abs(hsqrt_un) / (2.*hR_sqrt*std::pow(hL_sqrt + hR_sqrt,2.) ) +
+    (0.5*unR / hR_sqrt - hR_sqrt*termR )*hsqrt_un  / ( (hL_sqrt + hR_sqrt)*std::abs( hsqrt_un ) ) +
+    g/(std::pow(2.,3./2.)*std::pow(g*(hL + hR),0.5) );
+  dsmaxR[1] = n[0]*hsqrt_un / ( hR_sqrt*(hL_sqrt + hR_sqrt) * std::abs( hsqrt_un) );
+  dsmaxR[2] = n[1]*hsqrt_un / ( hR_sqrt*(hL_sqrt + hR_sqrt) * std::abs( hsqrt_un) );
+
+  // jacobian w.r.p to the left state
+  JL[0][0] = -0.5*dsmaxL[0]*(q(gidR + 0) - q(gidL + 0)) + 0.5*(n[0]*uL + n[1]*vL - q(gidL + 0)*termL)  + 0.5*smax;
+  JL[0][1] = 0.5*n[0] - 0.5*dsmaxL[1]*(q(gidR + 0) - q(gidL + 0));
+  JL[0][2] = 0.5*n[1] - 0.5*dsmaxL[2]*(q(gidR + 0) - q(gidL + 0));
+
+  JL[1][0] = 0.5*(g*n[0]*q(gidL + 0) - q(gidL + 1)*termL) - 0.5*dsmaxL[0]*(q(gidR + 1) - q(gidL + 1));
+  JL[1][1] = n[0]*uL  + 0.5*n[1]*vL + 0.5*smax -0.5*dsmaxL[1]*(q(gidR + 1) - q(gidL + 1));
+  JL[1][2] = 0.5*n[1]*uL  -0.5*dsmaxL[2]*(q(gidR + 1) - q(gidL + 1));
+
+  JL[2][0] = 0.5*(g*n[1]*q(gidL + 0) - q(gidL + 2)*termL) - 0.5*dsmaxL[0]*(q(gidR + 2) - q(gidL + 2));
+  JL[2][1] = 0.5*n[0]*vL  -0.5*dsmaxL[1]*(q(gidR + 2) - q(gidL + 2));
+  JL[2][2] = n[1]*vL + 0.5*n[0]*uL + 0.5*smax -0.5*dsmaxL[2]*(q(gidR + 2) - q(gidL + 2));
+
+  // jacobian w.r.p to the right state
+  JR[0][0] = -0.5*dsmaxR[0]*(q(gidR + 0) - q(gidL + 0)) + 0.5*(n[0]*uR + n[1]*vR - q(gidR + 0)*termR)  - 0.5*smax;
+  JR[0][1] = 0.5*n[0] - 0.5*dsmaxR[1]*(q(gidR + 0) - q(gidL + 0));
+  JR[0][2] = 0.5*n[1] - 0.5*dsmaxR[2]*(q(gidR + 0) - q(gidL + 0));
+
+  JR[1][0] = 0.5*(g*n[0]*q(gidR + 0) - q(gidR + 1)*termR) - 0.5*dsmaxR[0]*(q(gidR + 1) - q(gidL + 1));
+  JR[1][1] = n[0]*uR + 0.5*n[1]*vR - 0.5*smax - 0.5*dsmaxR[1]*(q(gidR + 1) - q(gidL + 1));
+  JR[1][2] = 0.5*n[1]*uR -0.5*dsmaxR[2]*(q(gidR + 1) - q(gidL + 1));
+
+  JR[2][0] = 0.5*(g*n[1]*q(gidR + 0)  - q(gidR + 2)*termR) - 0.5*dsmaxR[0]*(q(gidR + 2) - q(gidL + 2));
+  JR[2][1] = 0.5*n[0]*vR - 0.5*dsmaxR[1]*(q(gidR + 2) - q(gidL + 2));
+  JR[2][2] = n[1]*vR + 0.5*n[0]*uR - 0.5*smax - 0.5*dsmaxR[2]*(q(gidR + 2) - q(gidL + 2));
+
+}
+
+
 template<typename sc_t, class normal_t>
 void sweLF(std::array<sc_t,3> & F,
 	const std::array<sc_t,3> & qL,
