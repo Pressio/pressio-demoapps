@@ -227,13 +227,13 @@ class NatOrdMeshRow:
         tmpList[5]=self.gigjToGlobalID(gi, 0)
         tmpList[9]=self.gigjToGlobalID(gi, 1)
       if gj==self.Ny_-3:
-        tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[5]=self.gigjToGlobalID(gi, self.Ny_-2)
+        tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-2)
+        tmpList[5]=self.gigjToGlobalID(gi, self.Ny_-1)
         tmpList[9]=self.gigjToGlobalID(gi, 0)
       if gj<self.Ny_-3:
-        tmpList[1]=iPt+self.Nx_
-        tmpList[5]=iPt+self.Nx_*2
-        tmpList[9]=iPt+self.Nx_*3
+        tmpList[1]=self.gigjToGlobalID(gi, gj+1)
+        tmpList[5]=self.gigjToGlobalID(gi, gj+2)
+        tmpList[9]=self.gigjToGlobalID(gi, gj+3)
 
       # east neighbor
       # if gi==self.Nx_-1, we are on Right BD
