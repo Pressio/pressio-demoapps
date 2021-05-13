@@ -17,7 +17,7 @@ from mesh_utils import *
 def main(workDir, debug, Nx, Ny, \
          plotting, orderingType, \
          xL, xR, yL, yR, \
-         stencilSize, plotFontSize, periodicBc):
+         stencilSize, plotFontSize, enablePeriodicBc):
 
   L = [xR-xL, yR-yL]
   numCells = Nx*Ny
@@ -30,10 +30,12 @@ def main(workDir, debug, Nx, Ny, \
     axFM = figFM.gca()
 
   # ---------------------------------------------
-  if orderingType in ["natural-row", "rcm"]:
+  if orderingType in ["naturalRow", "naturalRowRcm"]:
     meshObj = NatOrdMeshRow(Nx, Ny, dx, dy, xL,xR,yL,yR, stencilSize)
-  elif orderingType=="natural-col":
-    meshObj = NatOrdMeshCol(Nx, Ny, dx, dy, xL,xR,yL,yR, stencilSize)
+  else:
+    print("invalid orderingType = ", orderingType)
+    sys.exit(1)
+
 
   [x, y] = meshObj.getXY()
   gids = meshObj.getGIDs()
@@ -141,50 +143,63 @@ if __name__== "__main__":
   # where x is horizontal, y is vertical
 
   parser = ArgumentParser()
-  parser.add_argument("-d", "--debug",
-                      type=bool, dest="debug", default=False,
-                      help="Turn on more verbose for debug mode.")
+  parser.add_argument(
+    "--outDir", dest="outDir",
+    help="Full path to where to store all the mesh output files.")
 
-  parser.add_argument("--outDir", dest="wdir",
-                      help="Where to store all the output files.")
+  parser.add_argument(
+    "-n", "--numCells",
+    nargs="*", type=int, dest="numCells",
+    help="Num of cells along x and y. \
+If you only pass one value, I use the same for both axis.")
 
-  parser.add_argument("-n", "--n", "--numCells",
-                      nargs="*", type=int, dest="numCells",
-                      help="Num of cells along x and y. If you only pass x, I use the same for y.")
+  parser.add_argument(
+    "-b", "--bounds",
+    nargs="*", dest="bounds", type=float,
+    help="Domain bounds along x and y. \
+If you only pass the bounds for x, then I use the same for y.")
 
-  parser.add_argument("-b", "--bounds",
-                      nargs="*", dest="bounds", type=float,
-                      help="Domain bounds along x and y. If you only pass bounds for x, y are set equal.")
+  parser.add_argument(
+    "-o", "--ordering",
+    dest="orderingType",
+    default="naturalRow",
+    help="What cell ordering you want: use <naturalRow> for \
+row natural ordering of the mesh cells, use <naturalRowRcm> for \
+applying reverse Cuthill-Mckee")
 
-  parser.add_argument("-o", "--ordering",
-                      dest="orderingType",
-                      default="natural-row",
-                      help="What type of ordering you want:\n"+
-                           "use <natural-row> for row natural ordering of the mesh cells,\n"+
-                           "use <rcm> for reverse cuthill-mckee")
+  parser.add_argument(
+    "-p", "--plotting",
+    nargs="*",
+    dest="plottingInfo",
+    default="none",
+    help="What type of plotting you want: use <show> for showing plots \
+use <print> for printing only, use <none> for no plots")
 
-  parser.add_argument("-p", "--plotting",
-                      nargs="*",
-                      dest="plottingInfo",
-                      default="none",
-                      help="What type of plotting you want:\n"+
-                           "use <show> for showing plots,\n"+
-                           "use <print> for printing only, \n"+
-                           "use <none> for no plots")
+  parser.add_argument(
+    "-s", "--stencilSize",
+    type=int, dest="stencilSize", default=3,
+    help="Stencil size for connectivity: choices are 3,5,7.")
 
-  parser.add_argument("-s", "--s", "--stencilSize",
-                      type=int, dest="stencilSize", default=3)
+  parser.add_argument(
+    "--periodic",
+    type=bool, dest="periodic", default=True,
+    help="True/False to enable/disable periodic BC so that mesh connectivity\
+has that info embedded in.")
 
-  parser.add_argument("--periodic",
-                      type=bool, dest="periodic", default=True)
+  parser.add_argument(
+    "-d", "--debug",
+    type=bool, dest="debug", default=False,
+    help="True/False to eanble debug mode.")
 
   args = parser.parse_args()
 
+  # -------------------------------------------------------
+  # check that args make sense
   assert(args.periodic == True)
   assert(len(args.numCells) == 1 or len(args.numCells) == 2)
   assert(len(args.bounds) == 4 or len(args.bounds) == 2)
   assert( args.stencilSize in [3, 5, 7] )
-  assert( args.orderingType in ["natural-row", "rcm"] )
+  assert( args.orderingType in ["naturalRow", "naturalRowRcm"] )
 
   nx = int(args.numCells[0])
   ny = nx
@@ -206,14 +221,14 @@ if __name__== "__main__":
     sys.exit(1)
 
   # check if working dir exists, if not, make it
-  if not os.path.exists(args.wdir):
-    os.system('mkdir -p ' + args.wdir)
+  if not os.path.exists(args.outDir):
+    os.system('mkdir -p ' + args.outDir)
 
   plotFontSize = 0
   if len(args.plottingInfo) == 2:
     plotFontSize = int(args.plottingInfo[1])
 
-  main(args.wdir, args.debug,
+  main(args.outDir, args.debug,
        nx, ny,
        args.plottingInfo[0],  args.orderingType,
        float(xL), float(xR), float(yL), float(yR),
