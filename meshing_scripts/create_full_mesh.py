@@ -11,37 +11,70 @@ import scipy.sparse as sp
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import reverse_cuthill_mckee
 
+from one_dim_mesh import OneDimMesh
 from natural_order_mesh import NatOrdMeshRow
 from mesh_utils import *
 
+# ------------------------------------------------
+def checkDomainBoundsCoordinates(xValues, yValues):
+  # x coordiantes must be in increasing order
+  for i in range(1, len(xValues)):
+    assert(xValues[i] > xValues[i-1])
+
+  # y coordiantes must be in increasing order
+  for i in range(1, len(yValues)):
+    assert(yValues[i] > yValues[i-1])
+
+# ------------------------------------------------
+def str2bool(v):
+  if isinstance(v, bool):
+    return v
+  if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    return True
+  elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    return False
+  else:
+    raise argparse.ArgumentTypeError('Boolean value expected.')
+
+# ------------------------------------------------
 def main(workDir, debug, Nx, Ny, \
          plotting, orderingType, \
-         xL, xR, yL, yR, \
-         stencilSize, plotFontSize, enablePeriodicBc):
+         xBd, yBd, stencilSize, \
+         plotFontSize, enablePeriodicBc, dim):
 
-  L = [xR-xL, yR-yL]
-  numCells = Nx*Ny
-  dx,dy = L[0]/Nx, L[1]/Ny
-  print ("Bounds for x = ", xL, xR, " with dx = ", dx)
-  print ("Bounds for y = ", yL, yR, " with dy = ", dy)
+  # figure out if domain is a plain rectangle or has a step in it
+  plainDomain = True
+  if dim!=1 and len(xBd) > 4:
+    plainDomain = False
+
+  if plainDomain:
+    numCells = Nx*Ny
+    L = [xBd[1]-xBd[0], yBd[1]-yBd[0]]
+    dx,dy = L[0]/Nx, L[1]/Ny
+    print ("Bounds for x = ", xBd[0], xBd[1], " with dx = ", dx)
+    print ("Bounds for y = ", yBd[0], yBd[1], " with dy = ", dy)
 
   if (plotting != "none"):
     figFM = plt.figure(0)
     axFM = figFM.gca()
 
   # ---------------------------------------------
-  if orderingType in ["naturalRow", "naturalRowRcm"]:
-    meshObj = NatOrdMeshRow(Nx, Ny, dx, dy, xL,xR,yL,yR, stencilSize)
+  if dim == 1:
+    meshObj = OneDimMesh(Nx, dx, xBd[0], xBd[1], stencilSize, enablePeriodicBc)
+
+  elif dim==2 and plainDomain:
+    meshObj = NatOrdMeshRow(Nx,Ny, dx,dy,\
+                            xBd[0], xBd[1], yBd[0], yBd[1], \
+                            stencilSize, enablePeriodicBc)
+
   else:
-    print("invalid orderingType = ", orderingType)
+    print("invalid domain: with step not impl yet")
     sys.exit(1)
 
-
-  [x, y] = meshObj.getXY()
+  # get mesh coordinates, gids and graph
+  [x, y] = meshObj.getCoordinates()
   gids = meshObj.getGIDs()
   G = meshObj.getGraph()
-  spMat = meshObj.getSparseMatrixRepr()
-
   if debug:
     print("full mesh connectivity")
     printDicPretty(G)
@@ -51,6 +84,8 @@ def main(workDir, debug, Nx, Ny, \
   # if needed, apply reverse cuthill mckee (RCM)
   # -----------------------------------------------------
   if (orderingType == "rcm"):
+    spMat = meshObj.getSparseMatrixRepr()
+
     # the starting matrix will always be symmetric because it is full mesh
     # with a symmetric stencil
     [rcmPermInd, spMatRCM] = reverseCuthillMckee(spMat, symmetric=True)
@@ -91,18 +126,30 @@ def main(workDir, debug, Nx, Ny, \
   # -----------------------------------------------------
   # info file
   f = open(workDir + "/info.dat","w+")
-  f.write("xMin %.14f\n" % xL)
-  f.write("xMax %.14f\n" % xR)
-  f.write("yMin %.14f\n" % yL)
-  f.write("yMax %.14f\n" % yR)
-  f.write("dx %.14f\n" % dx)
-  f.write("dy %.14f\n" % dy)
-  f.write("sampleMeshSize %8d\n"  % meshSize)
-  f.write("stencilMeshSize %8d\n" % meshSize)
-  f.write("stencilSize %2d\n" % stencilSize)
-  f.write("nx %8d\n" % Nx)
-  f.write("ny %8d\n" % Ny)
-  f.close()
+  if dim==1:
+    f.write("dim %1d\n" % 1)
+    f.write("xMin %.14f\n" % xBd[0])
+    f.write("xMax %.14f\n" % xBd[1])
+    f.write("dx %.14f\n" % dx)
+    f.write("sampleMeshSize %8d\n"  % meshSize)
+    f.write("stencilMeshSize %8d\n" % meshSize)
+    f.write("stencilSize %2d\n" % stencilSize)
+    f.write("nx %8d\n" % Nx)
+    f.close()
+  else:
+    f.write("dim %1d\n" % 2)
+    f.write("xMin %.14f\n" % xBd[0])
+    f.write("xMax %.14f\n" % xBd[1])
+    f.write("yMin %.14f\n" % yBd[0])
+    f.write("yMax %.14f\n" % yBd[1])
+    f.write("dx %.14f\n" % dx)
+    f.write("dy %.14f\n" % dy)
+    f.write("sampleMeshSize %8d\n"  % meshSize)
+    f.write("stencilMeshSize %8d\n" % meshSize)
+    f.write("stencilSize %2d\n" % stencilSize)
+    f.write("nx %8d\n" % Nx)
+    f.write("ny %8d\n" % Ny)
+    f.close()
 
   # -----------------------------------------------------
   # connectivity file
@@ -127,8 +174,9 @@ def main(workDir, debug, Nx, Ny, \
   if plotting != "none":
     plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
-    axFM.set_xlim(xL,xR)
-    axFM.set_ylim(yL,yR)
+    axFM.set_xlim(xBd[0], xBd[1])
+    if dim!=1:
+      axFM.set_ylim(yBd[0], yBd[1])
 
   if plotting == "show":
     plt.show()
@@ -151,13 +199,14 @@ if __name__== "__main__":
     "-n", "--numCells",
     nargs="*", type=int, dest="numCells",
     help="Num of cells along x and y. \
-If you only pass one value, I use the same for both axis.")
+If you only pass one value, I assume 1d.\
+If you pass two values, I assume 2d.")
 
   parser.add_argument(
     "-b", "--bounds",
     nargs="*", dest="bounds", type=float,
     help="Domain bounds along x and y. \
-If you only pass the bounds for x, then I use the same for y.")
+First, you pass all values of x, then pass all values of y.")
 
   parser.add_argument(
     "-o", "--ordering",
@@ -182,55 +231,66 @@ use <print> for printing only, use <none> for no plots")
 
   parser.add_argument(
     "--periodic",
-    type=bool, dest="periodic", default=True,
+    dest="periodic", type=str2bool, default=True,
     help="True/False to enable/disable periodic BC so that mesh connectivity\
 has that info embedded in.")
 
   parser.add_argument(
     "-d", "--debug",
-    type=bool, dest="debug", default=False,
+    dest="debug", type=str2bool, default=False,
     help="True/False to eanble debug mode.")
 
   args = parser.parse_args()
 
   # -------------------------------------------------------
   # check that args make sense
-  assert(args.periodic == True)
-  assert(len(args.numCells) == 1 or len(args.numCells) == 2)
-  assert(len(args.bounds) == 4 or len(args.bounds) == 2)
+  assert( len(args.numCells) == 1 or len(args.numCells) == 2 )
   assert( args.stencilSize in [3, 5, 7] )
   assert( args.orderingType in ["naturalRow", "naturalRowRcm"] )
-
-  nx = int(args.numCells[0])
-  ny = nx
-  if len(args.numCells) == 2:
-    ny = int(args.numCells[1])
-
-  xL = float(args.bounds[0])
-  xR = float(args.bounds[1])
-  yL,yR = xL, xR
-  if len(args.bounds) == 4:
-      yL = float(args.bounds[2])
-      yR = float(args.bounds[3])
-
-  if (xR <= xL):
-    print(" xRight <= xLeft: the right bound must be larger than left bound")
-    sys.exit(1)
-  if (yR <= yL):
-    print(" yRight <= yLeft: the right bound must be larger than left bound")
-    sys.exit(1)
 
   # check if working dir exists, if not, make it
   if not os.path.exists(args.outDir):
     os.system('mkdir -p ' + args.outDir)
 
+  nx = int(args.numCells[0])
+  ny = 1
+  if len(args.numCells) == 2:
+    ny = int(args.numCells[1])
+  print(nx, ny)
+
+  dim = -1
+  if ny==1:
+    if len(args.bounds)!=2:
+      print("For 1d, you need to pass ny=1 and the domain's bounds")
+      sys.exit()
+    else:
+      xCoords = [args.bounds[0], args.bounds[1]]
+      yCoords = [0.0, 0.0]
+      dim = 1
+
+  elif nx!=1 and ny!=1 and len(args.bounds) == 4:
+    xCoords = [args.bounds[0], args.bounds[1]]
+    yCoords = [args.bounds[2], args.bounds[3]]
+    dim = 2
+
+  # other things
   plotFontSize = 0
   if len(args.plottingInfo) == 2:
     plotFontSize = int(args.plottingInfo[1])
 
   main(args.outDir, args.debug,
-       nx, ny,
-       args.plottingInfo[0],  args.orderingType,
-       float(xL), float(xR), float(yL), float(yR),
+       nx, ny, args.plottingInfo[0],
+       args.orderingType,
+       xCoords, yCoords,
        args.stencilSize, plotFontSize,
-       args.periodic)
+       args.periodic, dim)
+
+
+
+  # coords = args.bounds
+  # assert(numCoordsIn % 2 == 0)
+  # xPoints = args.bounds[0:int(numCoordsIn/2)] if ny!=1 else args.bounds
+  # if nx != 1:
+  #   yPoints = args.bounds[int(numCoordsIn/2):]
+  # checkDomainBoundsCoordinates(xPoints, yPoints)
+  # print(xPoints)

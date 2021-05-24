@@ -13,10 +13,6 @@ from scipy.sparse.csgraph import reverse_cuthill_mckee
 
 from mesh_utils import *
 
-#-------------------------------------------------------
-# Cell-centered, natural order mesh with periodic BC
-#-------------------------------------------------------
-
 # natural row ordering
 #
 #  ...
@@ -27,7 +23,8 @@ from mesh_utils import *
 
 class NatOrdMeshRow:
   def __init__(self, Nx, Ny, dx, dy, \
-               xL, xR, yL, yR, stencilSize):
+               xL, xR, yL, yR,
+               stencilSize, enablePeriodicBc):
     self.stSize_ = stencilSize
     self.numNeighbors_ = int((stencilSize-1))
     self.Nx_ = Nx
@@ -41,13 +38,18 @@ class NatOrdMeshRow:
     self.y_ = np.zeros(self.numCells_)
     self.gids_ = np.zeros(self.numCells_)
     self.G_ = {}
-
     self.createFullGrid()
-    self.buildGraph()
-    #convert the graph dictionary to sparse matrix
-    self.spMat_ = convertGraphDicToSparseMatrix(self.G_)
 
-  def getXY(self):
+    # these tags are used when we deal with nonperiodic BC
+    self.cellOutsideWest_  = -1
+    self.cellOutsideNorth_ = -1
+    self.cellOutsideEast_  = -1
+    self.cellOutsideSouth_ = -1
+
+    self.buildGraph(enablePeriodicBc)
+    #self.spMat_ = convertGraphDicToSparseMatrix(self.G_)
+
+  def getCoordinates(self):
     return [self.x_, self.y_]
 
   def getGIDs(self):
@@ -68,7 +70,6 @@ class NatOrdMeshRow:
   def gigjToGlobalID(self, gi, gj):
     return np.int64( gj*self.Nx_ + gi )
 
-  # lower-left corner is where origin is
   def createFullGrid(self):
     ox = self.xBounds_[0] + 0.5*self.dx_
     oy = self.yBounds_[0] + 0.5*self.dy_
@@ -78,16 +79,15 @@ class NatOrdMeshRow:
       self.y_[i] = oy + gj * self.dy_
       self.gids_[i] = i
 
-
-  def buildGraph(self):
+  def buildGraph(self, enablePeriodicBc):
     if self.numNeighbors_ == 2:
-      self._buildGraphStencil3()
+      self._buildGraphStencil3(enablePeriodicBc)
     elif self.numNeighbors_ == 4:
-      self._buildGraphStencil5()
+      self._buildGraphStencil5(enablePeriodicBc)
     elif self.numNeighbors_ == 6:
-      self._buildGraphStencil7()
+      self._buildGraphStencil7(enablePeriodicBc)
 
-  def _buildGraphStencil3(self):
+  def _buildGraphStencil3(self, pBc):
     # neighbors are listed as west, north, east, south
     # since we have PBC, ensure these are met
     for iPt in range(self.numCells_):
@@ -99,28 +99,36 @@ class NatOrdMeshRow:
 
       # west neighbor
       # if gi==0, we are on left BD
-      if gi==0: tmpList[0]=iPt+self.Nx_-1
-      if gi>0 : tmpList[0]=iPt-1
+      if gi==0:
+        tmpList[0]=iPt+self.Nx_-1 if pBc else self.cellOutsideWest_
+      if gi>0:
+        tmpList[0]=iPt-1
 
       # north naighbor
       # if gj==self.Ny_-1, we are on TOP BD
-      if gj==self.Ny_-1: tmpList[1]=iPt-self.Nx_*(self.Ny_-1)
-      if gj<self.Ny_-1 : tmpList[1]=iPt+self.Nx_
+      if gj==self.Ny_-1:
+        tmpList[1]=iPt-self.Nx_*(self.Ny_-1) if pBc else self.cellOutsideNorth_
+      if gj<self.Ny_-1:
+        tmpList[1]=iPt+self.Nx_
 
       # east neighbor
       # if gi==self.Nx_-1, we are on Right BD
-      if gi==self.Nx_-1: tmpList[2]=iPt-self.Nx_+1
-      if gi<self.Nx_-1 : tmpList[2]=iPt+1
+      if gi==self.Nx_-1:
+        tmpList[2]=iPt-self.Nx_+1 if pBc else self.cellOutsideEast_
+      if gi<self.Nx_-1:
+        tmpList[2]=iPt+1
 
       # south naighbor
       # if gj==0, we are on bottom BD
-      if gj==0: tmpList[3]=iPt+self.Nx_*(self.Ny_-1)
-      if gj>0 : tmpList[3]=iPt-self.Nx_
+      if gj==0:
+        tmpList[3]=iPt+self.Nx_*(self.Ny_-1) if pBc else self.cellOutsideSouth_
+      if gj>0:
+        tmpList[3]=iPt-self.Nx_
 
       # store currrent neighboring list
       self.G_[iPt] = tmpList
 
-  def _buildGraphStencil5(self):
+  def _buildGraphStencil5(self, pBc):
     # neighbors are listed as west, north, east, south degree 1
     # neighbors are listed as west, north, east, south degree 2
     # first we put the closest, then we put the ones one layer after
@@ -184,7 +192,7 @@ class NatOrdMeshRow:
       # store currrent neighboring list
       self.G_[iPt] = tmpList
 
-  def _buildGraphStencil7(self):
+  def _buildGraphStencil7(self, pBc):
     # neighbors are listed as west, north, east, south degree 1
     # neighbors are listed as west, north, east, south degree 2
     # neighbors are listed as west, north, east, south degree 3
@@ -200,17 +208,17 @@ class NatOrdMeshRow:
       # west neighbors
       # if gi==0, we are on left BD
       if gi==0:
-        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj)
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj)
+        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else self.cellOutsideWest_
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj) if pBc else self.cellOutsideWest_
       elif gi==1:
         tmpList[0]=self.gigjToGlobalID(0, gj)
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj)
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else self.cellOutsideWest_
       elif gi==2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj)
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
       elif gi>2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
@@ -219,17 +227,17 @@ class NatOrdMeshRow:
       # north naighbor
       # if gj==self.Ny_-1, we are on TOP BD
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjToGlobalID(gi, 0)
-        tmpList[5]=self.gigjToGlobalID(gi, 1)
-        tmpList[9]=self.gigjToGlobalID(gi, 2)
+        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
+        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else self.cellOutsideNorth_
+        tmpList[9]=self.gigjToGlobalID(gi, 2) if pBc else self.cellOutsideNorth_
       if gj==self.Ny_-2:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[5]=self.gigjToGlobalID(gi, 0)
-        tmpList[9]=self.gigjToGlobalID(gi, 1)
+        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
+        tmpList[9]=self.gigjToGlobalID(gi, 1) if pBc else self.cellOutsideNorth_
       if gj==self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-2)
         tmpList[5]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[9]=self.gigjToGlobalID(gi, 0)
+        tmpList[9]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
       if gj<self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, gj+1)
         tmpList[5]=self.gigjToGlobalID(gi, gj+2)
@@ -238,17 +246,17 @@ class NatOrdMeshRow:
       # east neighbor
       # if gi==self.Nx_-1, we are on Right BD
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjToGlobalID(0, gj)
-        tmpList[6]=self.gigjToGlobalID(1, gj)
-        tmpList[10]=self.gigjToGlobalID(2, gj)
+        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
+        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else self.cellOutsideEast_
+        tmpList[10]=self.gigjToGlobalID(2, gj) if pBc else self.cellOutsideEast_
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[6]=self.gigjToGlobalID(0, gj)
-        tmpList[10]=self.gigjToGlobalID(1, gj)
+        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
+        tmpList[10]=self.gigjToGlobalID(1, gj) if pBc else self.cellOutsideEast_
       if gi==self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-2, gj)
         tmpList[6]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[10]=self.gigjToGlobalID(0, gj)
+        tmpList[10]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
       if gi<self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(gi+1, gj)
         tmpList[6]=self.gigjToGlobalID(gi+2, gj)
@@ -257,17 +265,17 @@ class NatOrdMeshRow:
       # south naighbor
       # if gj==0, we are on bottom BD
       if gj==0:
-        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2)
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3)
+        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else self.cellOutsideSouth_
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3) if pBc else self.cellOutsideSouth_
       if gj==1:
         tmpList[3]=self.gigjToGlobalID(gi, 0)
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2)
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else self.cellOutsideSouth_
       if gj==2:
         tmpList[3]=self.gigjToGlobalID(gi, 1)
         tmpList[7]=self.gigjToGlobalID(gi, 0)
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1)
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
       if gj>2:
         tmpList[3]=self.gigjToGlobalID(gi,  gj-1)
         tmpList[7]=self.gigjToGlobalID(gi,  gj-2)

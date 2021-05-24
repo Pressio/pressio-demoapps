@@ -1,0 +1,8 @@
+dim 1
+xMin -1.00000000000000
+xMax 1.00000000000000
+dx 0.00625000000000
+sampleMeshSize      320
+stencilMeshSize      320
+stencilSize  7
+nx      320

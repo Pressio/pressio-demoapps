@@ -41,7 +41,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #=====================================================================
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
+  ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
 
 #=====================================================================
 # tests are enabled if PRESSIODEMOAPPS_ENABLE_TESTS = ON
