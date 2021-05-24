@@ -2,6 +2,10 @@
 #ifndef PRESSIODEMOAPPS_LINEAR_ADVECTION_1D_HPP_
 #define PRESSIODEMOAPPS_LINEAR_ADVECTION_1D_HPP_
 
+// note that the code below is pretty ugly for now, but it works.
+// this is inside impl namespace for a reason, and will need to be 
+// improved later on but we have a starting point.
+
 namespace pressiodemoapps{ namespace ad{ namespace impl{
 
 template<class scalar_t, class mesh_t>

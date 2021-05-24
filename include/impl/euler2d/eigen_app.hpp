@@ -2,6 +2,10 @@
 #ifndef PRESSIODEMOAPPS_EULER2D_HPP_
 #define PRESSIODEMOAPPS_EULER2D_HPP_
 
+// note that the code below is pretty ugly for now, but it works.
+// this is inside impl namespace for a reason, and will need to be 
+// improved later on but we have a starting point.
+
 /*
   problemId = 0: generic problem with periodic BC so ghosts are not used
   problemId = 1: Sedov
