@@ -3,13 +3,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
-add_subdirectory(mesh_s3_5x5_periodic)
-add_subdirectory(mesh_s3_6x5_periodic)
+add_subdirectory(meshing)
 
-add_subdirectory(mesh_s5_8x8_periodic)
-add_subdirectory(mesh_s5_8x7_periodic)
+add_subdirectory(linadv1d_convergence)
+add_subdirectory(euler1d_convergence)
+add_subdirectory(sod1d)
 
-add_subdirectory(mesh_s7_8x8_periodic)
-add_subdirectory(mesh_s7_8x7_periodic)
-
-add_subdirectory(swe_s3)
+add_subdirectory(sedov2d)
+add_subdirectory(riemann2d)
