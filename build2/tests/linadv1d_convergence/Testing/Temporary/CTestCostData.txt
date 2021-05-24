@@ -1,3 +1,0 @@
-lind_adv1d_periodic 0 0
----
-lind_adv1d_periodic
