@@ -14,6 +14,7 @@ from scipy.sparse.csgraph import reverse_cuthill_mckee
 from one_dim_mesh import OneDimMesh
 from natural_order_mesh import NatOrdMeshRow
 from mesh_utils import *
+from remove_cells_step import *
 
 # ------------------------------------------------
 def checkDomainBoundsCoordinates(xValues, yValues):
@@ -44,6 +45,8 @@ def main(workDir, debug, Nx, Ny, \
 
   # figure out if domain is a plain rectangle or has a step in it
   plainDomain = True
+  print(len(xBd))
+  print(xBd)
   if dim!=1 and len(xBd) > 4:
     plainDomain = False
 
@@ -59,22 +62,39 @@ def main(workDir, debug, Nx, Ny, \
     axFM = figFM.gca()
 
   # ---------------------------------------------
+  x = None
+  y = None
+  G = None
+  gids = None
   if dim == 1:
     meshObj = OneDimMesh(Nx, dx, xBd[0], xBd[1], stencilSize, enablePeriodicBc)
+    # get mesh coordinates, gids and graph
+    [x, y] = meshObj.getCoordinates()
+    gids = meshObj.getGIDs()
+    G = meshObj.getGraph()
 
   elif dim==2 and plainDomain:
     meshObj = NatOrdMeshRow(Nx,Ny, dx,dy,\
                             xBd[0], xBd[1], yBd[0], yBd[1], \
                             stencilSize, enablePeriodicBc)
 
-  else:
-    print("invalid domain: with step not impl yet")
-    sys.exit(1)
+    # get mesh coordinates, gids and graph
+    [x, y] = meshObj.getCoordinates()
+    gids = meshObj.getGIDs()
+    G = meshObj.getGraph()
 
-  # get mesh coordinates, gids and graph
-  [x, y] = meshObj.getCoordinates()
-  gids = meshObj.getGIDs()
-  G = meshObj.getGraph()
+  elif dim==2 and not plainDomain:
+    minX, maxX = min(xBd), max(xBd)
+    minY, maxY = min(yBd), max(yBd)
+    L = [maxX-minX, maxY-minY]
+    dx,dy = L[0]/Nx, L[1]/Ny
+
+    meshObj = NatOrdMeshRow(Nx, Ny, dx, dy,\
+                            minX, maxX, minY, maxY, \
+                            stencilSize, False)
+
+    x,y,G,gids = removeStepCells(meshObj, xBd, yBd)
+
   if debug:
     print("full mesh connectivity")
     printDicPretty(G)
@@ -136,12 +156,13 @@ def main(workDir, debug, Nx, Ny, \
     f.write("stencilSize %2d\n" % stencilSize)
     f.write("nx %8d\n" % Nx)
     f.close()
+
   else:
     f.write("dim %1d\n" % 2)
-    f.write("xMin %.14f\n" % xBd[0])
-    f.write("xMax %.14f\n" % xBd[1])
-    f.write("yMin %.14f\n" % yBd[0])
-    f.write("yMax %.14f\n" % yBd[1])
+    f.write("xMin %.14f\n" % min(xBd))
+    f.write("xMax %.14f\n" % max(xBd))
+    f.write("yMin %.14f\n" % min(yBd))
+    f.write("yMax %.14f\n" % max(yBd))
     f.write("dx %.14f\n" % dx)
     f.write("dy %.14f\n" % dy)
     f.write("sampleMeshSize %8d\n"  % meshSize)
@@ -174,9 +195,9 @@ def main(workDir, debug, Nx, Ny, \
   if plotting != "none":
     plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
-    axFM.set_xlim(xBd[0], xBd[1])
+    axFM.set_xlim(min(xBd), max(xBd))
     if dim!=1:
-      axFM.set_ylim(yBd[0], yBd[1])
+      axFM.set_ylim(min(yBd), max(yBd))
 
   if plotting == "show":
     plt.show()
@@ -271,6 +292,17 @@ has that info embedded in.")
   elif nx!=1 and ny!=1 and len(args.bounds) == 4:
     xCoords = [args.bounds[0], args.bounds[1]]
     yCoords = [args.bounds[2], args.bounds[3]]
+    dim = 2
+
+  elif nx!=1 and ny!=1 and len(args.bounds) == 12:
+    xCoords = []
+    yCoords = []
+    print(args.bounds)
+    for i,v in enumerate(args.bounds):
+      if i % 2 == 0:
+        xCoords.append(v)
+      else:
+        yCoords.append(v)
     dim = 2
 
   # other things

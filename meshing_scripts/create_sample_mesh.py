@@ -36,13 +36,9 @@ def readFullMeshConnec(fullMeshDir):
       lineList = line.split()
       numNeigh = len(lineList[1:])
       connections = [np.int64(i) for i in lineList[1:]]
-      #np.zeros(numNeigh, dtype=np.int64)
-      #for i in range(numNeigh):
-      #connections[i] = np.int64(lineList[1+i])
       pt = np.int64(lineList[0])
       gids.append(pt)
       G[pt] = np.copy(connections)
-
       line = fp.readline()
       cnt += 1
 
@@ -51,6 +47,7 @@ def readFullMeshConnec(fullMeshDir):
 
 #====================================================================
 def readFullMeshInfo(fullMeshDir):
+  dim=2
   bounds=[None]*4
   dx,dy = 0., 0.
   sampleMeshSize = 0
@@ -105,6 +102,7 @@ def readFullMeshCoordinates(fullMeshDir):
   return np.array(x), np.array(y)
 
 #====================================================================
+#====================================================================
 def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   dx,dy,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
   x,y = readFullMeshCoordinates(fullMeshDir)
@@ -119,8 +117,8 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   if plotting != "none":
     plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
-    axFM.set_xlim(np.min(x)-0.5,np.max(x)+0.5)
-    axFM.set_ylim(np.min(y)-0.5,np.max(y)+0.5)
+    axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    axFM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
 
   if debug:
     print("natural order full mesh connectivity")
@@ -141,7 +139,7 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   # -----------------------------------------------------
   smGraph0 = collections.OrderedDict()
   for rPt in sampleMeshGIDs:
-      smGraph0[rPt] = G[rPt]
+    smGraph0[rPt] = G[rPt]
   print("\n")
   if debug:
     print("sample mesh graph0 (IDs wrt full mesh)")
@@ -150,10 +148,11 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   stencilMeshGIDs = []
   # loop over target cells wherw we want residual
   for k,v in smGraph0.items():
-      # append the GID of this cell
-      stencilMeshGIDs.append(k)
-      # append GID of stencils/neighborin cells
-      for j in v:
+    # append the GID of this cell
+    stencilMeshGIDs.append(k)
+    # append GID of stencils/neighborin cells
+    for j in v:
+      if j != -1:
         stencilMeshGIDs.append(np.int64(j))
 
   # remove duplicates and sort
@@ -180,6 +179,7 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
 
   if tilingDir!=None:
     gidsfiles = glob.glob(tilingDir+"/cell_gids_p_*.txt")
+
     # sort based on the ID, so need to extract ID which is last of dir name
     def func(elem): return int(elem.split('_')[-1].split('.')[0])
     gidsfiles = sorted(gidsfiles, key=func)
@@ -211,14 +211,14 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   if debug:
     for k,v in fm_to_sm_map.items(): print(k, v)
 
-
   print("doing now the sm -> fm gids mapping ")
   sm_to_fm_map = collections.OrderedDict()
   for k,v in fm_to_sm_map.items():
     sm_to_fm_map[v] = k
   print("Done with sm_to_fm_map")
   if debug:
-    for k,v in sm_to_fm_map.items(): print(k, v)
+    for k,v in sm_to_fm_map.items():
+      print(k, v)
 
   # -----------------------------------------------------
   # Here we have a list of unique GIDs for the sample mesh.
@@ -227,12 +227,13 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   # -----------------------------------------------------
   sampleMeshGraph = collections.OrderedDict()
   for rGidFM, v in smGraph0.items():
-      smGID = fm_to_sm_map[rGidFM]
-      smStencilGIDs = v
-      for i in range(len(smStencilGIDs)):
-          thisGID = smStencilGIDs[i]
-          smStencilGIDs[i] = fm_to_sm_map[thisGID]
-      sampleMeshGraph[smGID] = smStencilGIDs
+    smGID = fm_to_sm_map[rGidFM]
+    smStencilGIDs = v
+    for i in range(len(smStencilGIDs)):
+      thisGID = smStencilGIDs[i]
+      if thisGID != -1:
+        smStencilGIDs[i] = fm_to_sm_map[thisGID]
+    sampleMeshGraph[smGID] = smStencilGIDs
 
   print("\n")
   print("Done with sampleMeshGraph")
@@ -245,8 +246,9 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     x2, y2 = x[ list(fm_to_sm_map.keys()) ], y[ list(fm_to_sm_map.keys()) ]
     plotLabels(x2, y2, dx, dy, gids_sm, axSM, 's', 'r', 0, fontSz=plotFontSize)
     axSM.set_aspect(1.0)
-    axSM.set_xlim(np.min(x)-0.5,np.max(x)+0.5)
-    axSM.set_ylim(np.min(y)-0.5,np.max(y)+0.5)
+    axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
+
 
   # -----------------------------------------------------
   sampleMeshSize = len(sampleMeshGraph)

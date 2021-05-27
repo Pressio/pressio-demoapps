@@ -49,6 +49,9 @@ class NatOrdMeshRow:
     self.buildGraph(enablePeriodicBc)
     #self.spMat_ = convertGraphDicToSparseMatrix(self.G_)
 
+  def getTotCells(self):
+    return self.Nx_ * self.Ny_
+
   def getCoordinates(self):
     return [self.x_, self.y_]
 
