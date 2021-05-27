@@ -2,6 +2,11 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_APP_HPP_
 #define PRESSIODEMOAPPS_EULER1D_APP_HPP_
 
+// note that the code below is pretty ugly for now, but it works.
+// this is inside impl namespace for a reason, and will need to be 
+// improved later on but we have a starting point.
+
+
 /*
   probid = 1 (Sod) taken from: https://www.mdpi.com/2227-7390/6/10/211/pdf
  */
