@@ -29,4 +29,4 @@ if __name__== "__main__":
   assert(np.allclose(p.shape, goldD.shape))
   assert(np.isnan(p).all() == False)
   assert(np.isnan(goldD).all() == False)
-  assert(np.allclose(p, goldD))
+  assert(np.allclose(p, goldD,rtol=1e-10, atol=1e-12))

@@ -29,10 +29,10 @@ if __name__== "__main__":
   assert(np.allclose(rho.shape, goldR.shape))
   assert(np.isnan(rho).all() == False)
   assert(np.isnan(goldR).all() == False)
-  assert(np.allclose(rho, goldR))
+  assert(np.allclose(rho, goldR,rtol=1e-10, atol=1e-12))
 
   goldP = np.loadtxt("p_golds"+str(st)+".txt")
   assert(np.allclose(p.shape, goldP.shape))
   assert(np.isnan(p).all() == False)
   assert(np.isnan(goldP).all() == False)
-  assert(np.allclose(p, goldP))
+  assert(np.allclose(p, goldP,rtol=1e-10, atol=1e-12))

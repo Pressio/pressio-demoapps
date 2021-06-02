@@ -38,6 +38,6 @@ if __name__== "__main__":
              8.82400025065122e-05, \
              2.828379264019354e-06]
 
-  assert(np.allclose( goldErr, errors))
+  assert(np.allclose(goldErr, errors, rtol=1e-10, atol=1e-12))
   for i in range(1,4):
     print( np.log2(errors[i-1]/errors[i]) )

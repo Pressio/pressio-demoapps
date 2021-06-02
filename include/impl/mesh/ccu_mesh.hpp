@@ -4,83 +4,131 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-template<class scalar_type>
-class CellCenteredUniformMeshEigen
+template<
+  class scalar_type,
+  class index_type,
+  class xy_type,
+  class mesh_g_type,
+  bool is_binding
+  >
+class CellCenteredUniformMesh
 {
 public:
-  using scalar_t = scalar_type;
+  using scalar_t     = scalar_type;
+  using index_t	     = index_type;
+  using x_t	     = xy_type;
+  using y_t	     = xy_type;
+  using mesh_graph_t = mesh_g_type;
 
-  // type to use for all indexing, has to be large enough
-  // to support indexing fairly large systems
-  using index_t  = int32_t;
+  CellCenteredUniformMesh() = delete;
 
-  using x_t = Eigen::Matrix<scalar_type,-1,1>;
-  using y_t = x_t;
-  using mesh_graph_t  = Eigen::Matrix<index_t,-1,-1,Eigen::RowMajor>;
-
-  CellCenteredUniformMeshEigen(const std::string & meshDir)
+  template<
+    bool _is_binding = is_binding,
+    typename std::enable_if<!_is_binding>::type * = nullptr
+    >
+  explicit CellCenteredUniformMesh(const std::string & meshDir)
   {
-    pressiodemoapps::readMeshInfo(meshDir, dim_,
-				  cellDeltas_,
-				  stencilSize_,
-				  numGptStencilMesh_,
-				  numGptSampleMesh_);
-
-    x_.resize(numGptStencilMesh_);
-    y_.resize(numGptStencilMesh_);
-    pressiodemoapps::readMeshCoordinates(meshDir, x_, y_);
-
-    const auto graphSize = (stencilSize_-1)*dim_;
-    graph_.resize(numGptSampleMesh_, graphSize+1);
-    pressiodemoapps::readMeshConnectivity(meshDir, graph_);
+    resizeAndSetup(meshDir);
   }
 
-  const mesh_graph_t & graph() const{
-    return graph_;
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+  template<
+    bool _is_binding = is_binding,
+    typename std::enable_if<_is_binding>::type * = nullptr
+    >
+  explicit CellCenteredUniformMesh(const std::string & meshDir)
+    : m_x(1), m_y(1), m_graph({1,1})
+  {
+    resizeAndSetup(meshDir);
   }
+#endif
 
-  const scalar_type dx() const{
-    return cellDeltas_[0];
-  }
-
-  const scalar_type dxInv() const{
-    return cellDeltas_[1];
-  }
-
-  const scalar_type dy() const{
-    return cellDeltas_[2];
-  }
-
-  const scalar_type dyInv() const{
-    return cellDeltas_[3];
+  int dimensionality() const{
+    return m_dim;
   }
 
   index_t stencilMeshSize() const{
-    return numGptStencilMesh_;
+    return m_stencilMeshSize;
   }
 
   index_t sampleMeshSize() const{
-    return numGptSampleMesh_;
+    return m_sampleMeshSize;
   }
 
   const int stencilSize() const {
-    return stencilSize_;
+    return m_stencilSize;
+  }
+
+  const mesh_graph_t & graph() const{
+    return m_graph;
+  }
+
+  const scalar_type dx() const{
+    return m_cellDeltas[0];
+  }
+
+  const scalar_type dxInv() const{
+    return m_cellDeltas[1];
+  }
+
+  const scalar_type dy() const{
+    return m_cellDeltas[2];
+  }
+
+  const scalar_type dyInv() const{
+    return m_cellDeltas[3];
   }
 
   const x_t & viewX() const{
-    return x_;
+    return m_x;
   }
 
   const y_t & viewY() const{
-    return y_;
+    return m_y;
+  }
+
+// #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+
+//   // ptIndex is not the global id
+//   auto neighborsOf(const index_t smPt) const{
+//     return m_graph.row(smPt);
+//   }
+
+// #elif defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+
+//   auto neighborsOf(const index_t smPt) const
+//   {
+//     auto res = m_graph[pybind11::make_tuple(smPt, pybind11::slice(0, m_graph.shape(1), 1))];
+//     // auto tp = pybind11::make_tuple(pybind11::slice(0, m_graph.shape(1), 1));
+//     // pybind11::array Aslice = m_graph(smPt, tp);
+//     return res;
+//   }
+// #endif
+
+private:
+  void resizeAndSetup(const std::string & meshDir)
+  {
+    pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
+					m_cellDeltas,
+					m_stencilSize,
+					m_stencilMeshSize,
+					m_sampleMeshSize);
+
+    pressiodemoapps::impl::resize(m_x, m_stencilMeshSize);
+    pressiodemoapps::impl::resize(m_y, m_stencilMeshSize);
+    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_x, m_y);
+
+    const auto graphSize = (m_stencilSize-1)*m_dim;
+    pressiodemoapps::impl::resize(m_graph, m_sampleMeshSize, graphSize+1);
+    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphSize+1);
   }
 
 private:
-  int dim_;
-  std::array<scalar_type,4> cellDeltas_{};
+  int m_dim = {};
+  std::array<scalar_type,4> m_cellDeltas{};
 
-  index_t numGptStencilMesh_ = {};
-  index_t numGptSampleMesh_  = {};
+  index_t m_stencilMeshSize = {};
+  index_t m_sampleMeshSize  = {};
 
   /*
     graph: contains a list such that
@@ -90,17 +138,17 @@ private:
     col 1,2,3,4 : contains GIDs of neighboring cells needed for stencil
     the order of the neighbors is: west, north, east, south
     if needed:
-       col 4,5,6,7 : contains GIDs of degree2 neighboring cells needed for stencil
+       col 4,5,6,7 : GIDs of degree2 neighboring cells needed for stencil
        the order of the neighbors is: west, north, east, south
 
-       col 8,9,10,11 : contains GIDs of degree3 neighboring cells needed for stencil
+       col 8,9,10,11: GIDs of degree3 neighboring cells needed for stencil
        the order of the neighbors is: west, north, east, south
   */
-  int stencilSize_ = {};
-  mesh_graph_t graph_ = {};
+  mesh_graph_t m_graph = {};
+  int m_stencilSize = {};
 
-  x_t x_ = {};
-  y_t y_ = {};
+  x_t m_x = {};
+  y_t m_y = {};
 };
 
 }}

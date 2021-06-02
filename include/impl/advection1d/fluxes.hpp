@@ -9,14 +9,12 @@ void linAdvRusanovFlux(sc_t & F,
 		       const sc_t & qL,
 		       const sc_t & qR)
 {
-  constexpr sc_t es = 1.e-30;
-  sc_t FL;
-  sc_t FR;
-
-  FL = qL;
-  FR = qR;
-  F = 0.5*( FL + FR + (qL - qR) );
-  //F = qL;
+  //constexpr auto oneHalf = static_cast<sc_t>(0.5);
+  // sc_t FL;
+  // sc_t FR;
+  // FL = qL;
+  // FR = qR;
+  F = qL; // = 0.5*( qL + qR + (qL - qR) );
 }
 
 }}}

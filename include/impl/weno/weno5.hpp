@@ -53,65 +53,79 @@ void weno5(sc_t & uNeg,
   // WENO stencil: S{i} = [ I{i-2}, ..., I{i+3} ]
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  constexpr auto epsilon = 1e-6;
+  constexpr auto epsilon  = static_cast<sc_t>(1e-6);
+  constexpr auto one	  = static_cast<sc_t>(1);
+  constexpr auto two	  = static_cast<sc_t>(2);
+  constexpr auto three	  = static_cast<sc_t>(3);
+  constexpr auto four	  = two*two;
+  constexpr auto five	  = three+two;
+  constexpr auto six	  = three*two;
+  constexpr auto seven	  = four+three;
+  constexpr auto ten      = five*two;
+  constexpr auto eleven   = five+six;
+  constexpr auto twelve   = six*two;
+  constexpr auto thirteen = six+seven;
 
-  auto vmm  = qim2;
-  auto vm   = qim1;
-  auto v    = qi;
-  auto vp   = qip1;
-  auto vpp  = qip2;
+  constexpr auto oneOvfour= one/four;
+  constexpr auto oneOvsix = one/six;
+  constexpr auto oneOvten = one/ten;
+  constexpr auto threeOvten = three/ten;
+  constexpr auto sixOvten = six/ten;
+  constexpr auto thirteenOvtwelve = thirteen/twelve;
 
-  // u_{i+1/2}^{-}
-  const auto p0n = (2.*vmm - 7.*vm + 11.*v)/6.;
-  const auto p1n = ( -vm   + 5.*v  + 2.*vp)/6.;
-  const auto p2n = (2.*v   + 5.*vp - vpp )/6.;
+  {
+    // u_{i+1/2}^{-}
+    const auto p0 = (two*qim2 - seven*qim1 + eleven*qi)*oneOvsix;
+    const auto p1 = ( -qim1   + five*qi    + two*qip1 )*oneOvsix;
+    const auto p2 = (two*qi   + five*qip1  - qip2     )*oneOvsix;
 
-  const auto B0n = (13./12.)* std::pow(vmm-2.*vm+v,  2.) + (1./4.)*std::pow(vmm-4.*vm+3.*v, 2.);
-  const auto B1n = (13./12.)* std::pow(vm -2.*v +vp, 2.) + (1./4.)*std::pow(vm-vp, 2.);
-  const auto B2n = (13./12.)* std::pow(v  -2.*vp+vpp,2.) + (1./4.)*std::pow(3.*v-4.*vp+vpp, 2.);
+    const auto B0 = thirteenOvtwelve* std::pow(qim2-two*qim1+qi  , two) +
+		    oneOvfour*std::pow(qim2-four*qim1+three*qi, two);
 
-  constexpr auto d0n = 1./10.;
-  constexpr auto d1n = 6./10.;
-  constexpr auto d2n = 3./10.;
-  const auto alpha0n = d0n/std::pow(epsilon + B0n, 2.);
-  const auto alpha1n = d1n/std::pow(epsilon + B1n, 2.);
-  const auto alpha2n = d2n/std::pow(epsilon + B2n, 2.);
-  const auto alphasumn = alpha0n + alpha1n + alpha2n;
+    const auto B1 = thirteenOvtwelve* std::pow(qim1 -two*qi +qip1, two) +
+                    oneOvfour*std::pow(qim1-qip1, two);
 
-  const auto w0n = alpha0n/alphasumn;
-  const auto w1n = alpha1n/alphasumn;
-  const auto w2n = alpha2n/alphasumn;
+    const auto B2 = thirteenOvtwelve* std::pow(qi  -two*qip1+qip2, two) +
+		    oneOvfour*std::pow(three*qi-four*qip1+qip2, two);
 
-  uNeg = w0n*p0n + w1n*p1n + w2n*p2n;
+    const auto alpha0    = oneOvten/std::pow(epsilon   + B0, two);
+    const auto alpha1    = sixOvten/std::pow(epsilon   + B1, two);
+    const auto alpha2    = threeOvten/std::pow(epsilon + B2, two);
+    const auto alphaSInv = one/(alpha0 + alpha1 + alpha2);
 
-  // u_{i+1/2}^{+}
-  vmm  = qim1;
-  vm   = qi;
-  v    = qip1;
-  vp   = qip2;
-  vpp  = qip3;
+    const auto w0 = alpha0*alphaSInv;
+    const auto w1 = alpha1*alphaSInv;
+    const auto w2 = alpha2*alphaSInv;
 
-  const auto p0p = (-vmm   + 5.*vm + 2.*v   )/6.;
-  const auto p1p = (2*vm   + 5.*v  - vp     )/6.;
-  const auto p2p = (11.*v  - 7.*vp + 2.*vpp )/6.;
+    uNeg = w0*p0 + w1*p1 + w2*p2;
+  }
 
-  const auto B0p = (13./12.)* std::pow(vmm-2.*vm+v,  2.) + (1./4.)*std::pow(vmm-4.*vm+3.*v, 2.);
-  const auto B1p = (13./12.)* std::pow(vm -2.*v +vp, 2.) + (1./4.)*std::pow(vm-vp, 2.);
-  const auto B2p = (13./12.)* std::pow(v  -2.*vp+vpp,2.) + (1./4.)*std::pow(3.*v-4.*vp+vpp, 2.);
+  {
+    // u_{i+1/2}^{+}
+    const auto p0 = (-qim1        + five*qi    + two*qip1 )*oneOvsix;
+    const auto p1 = (two*qi       + five*qip1  - qip2     )*oneOvsix;
+    const auto p2 = (eleven*qip1  - seven*qip2 + two*qip3 )*oneOvsix;
 
-  constexpr auto d0p = 3./10.;
-  constexpr auto d1p = 6./10.;
-  constexpr auto d2p = 1./10.;
-  const auto alpha0p = d0p/std::pow(epsilon + B0p, 2.);
-  const auto alpha1p = d1p/std::pow(epsilon + B1p, 2.);
-  const auto alpha2p = d2p/std::pow(epsilon + B2p, 2.);
-  const auto alphasump = alpha0p + alpha1p + alpha2p;
+    const auto B0 = thirteenOvtwelve* std::pow(qim1-two*qi+qip1   , two) +
+		    oneOvfour*std::pow(qim1-four*qi+three*qip1, two);
 
-  const auto w0p = alpha0p/alphasump;
-  const auto w1p = alpha1p/alphasump;
-  const auto w2p = alpha2p/alphasump;
+    const auto B1 = thirteenOvtwelve* std::pow(qi  -two*qip1 +qip2, two) +
+		    oneOvfour*std::pow(qi-qip2, two);
 
-  uPos = w0p*p0p + w1p*p1p + w2p*p2p;
+    const auto B2 = thirteenOvtwelve* std::pow(qip1-two*qip2+qip3 , two) +
+		    oneOvfour*std::pow(three*qip1-four*qip2+qip3, two);
+
+    const auto alpha0    = threeOvten/std::pow(epsilon + B0, two);
+    const auto alpha1    = sixOvten/std::pow(epsilon   + B1, two);
+    const auto alpha2    = oneOvten/std::pow(epsilon   + B2, two);
+    const auto alphaSInv = one/(alpha0 + alpha1 + alpha2);
+
+    const auto w0 = alpha0*alphaSInv;
+    const auto w1 = alpha1*alphaSInv;
+    const auto w2 = alpha2*alphaSInv;
+
+    uPos = w0*p0 + w1*p1 + w2*p2;
+  }
 }
 
 }}

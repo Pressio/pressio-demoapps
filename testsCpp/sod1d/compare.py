@@ -12,9 +12,10 @@ if __name__== "__main__":
   nt = int(np.size(D)/fomTotDofs)
   D = np.reshape(D, (nt, fomTotDofs))
   D = D[-1, :]
+  np.savetxt("gigi.txt", D)
 
   goldD = np.loadtxt("golds"+str(st)+".txt")
   assert(np.allclose(D.shape, goldD.shape))
   assert(np.isnan(D).all() == False)
   assert(np.isnan(goldD).all() == False)
-  assert(np.allclose(D, goldD))
+  assert(np.allclose(D, goldD,rtol=1e-8, atol=1e-10))

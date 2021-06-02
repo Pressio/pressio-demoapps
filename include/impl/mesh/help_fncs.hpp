@@ -2,135 +2,92 @@
 #ifndef PRESSIODEMOAPPS_MESH_FUNCS_HPP_
 #define PRESSIODEMOAPPS_MESH_FUNCS_HPP_
 
-// #include <sstream>
-// #include <string>
-// #include <iostream>
-// #include <iomanip>
-// #include <fstream>
-// #include <array>
+namespace pressiodemoapps{ namespace impl{
 
-namespace pressiodemoapps{
-
-template<class sc_t, class int_t>
-void readMeshInfo(const std::string & meshDir,
-		  int & dim,
-		  std::array<sc_t, 4> & cellDeltas,
-		  int & stencilSize,
-		  int_t & numGptStencilMesh,
-		  int_t & numGptSampleMesh)
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+template<class scalar_type, class sizetype>
+void resize(Eigen::Matrix<scalar_type, -1, 1> & objIn,
+	    sizetype newSize)
 {
-  const auto inFile   = meshDir+"/info.dat";
-  std::ifstream foundFile(inFile);
-  if(!foundFile){
-    std::cout << "file not found " << inFile << std::endl;
-    exit(EXIT_FAILURE);
+  objIn.resize(newSize);
+}
+
+template<class int_type, class sizetype>
+void resize(Eigen::Matrix<int_type, -1, -1, Eigen::RowMajor> & objIn,
+	    sizetype rows,
+	    sizetype cols)
+{
+  objIn.resize(rows, cols);
+}
+#endif
+
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class T, class sizetype>
+typename std::enable_if<
+  pressiodemoapps::predicates::is_array_pybind<T>::value
+  >::type
+resize(T & objIn, sizetype newSize)
+{
+  if (objIn.ndim() != 1 ){
+    throw std::runtime_error
+      ("Wrong resize overload called on pybind array");
   }
 
-  constexpr auto one = static_cast<sc_t>(1);
-  std::ifstream source( inFile, std::ios_base::in);
-  std::string line;
-  while (std::getline(source, line) )
-    {
-      std::istringstream ss(line);
-      std::string colVal;
-      ss >> colVal;
-
-      if (colVal == "dim"){
-	ss >> colVal;
-	dim = std::stoi(colVal);
-	std::cout << "dim = " << dim << "\n";
-      }
-
-      else if (colVal == "dx"){
-	ss >> colVal;
-	cellDeltas[0] = std::stod(colVal);
-	cellDeltas[1] = one/cellDeltas[0];
-	std::cout << "dx = " << cellDeltas[0] << "\n";
-      }
-
-      else if (colVal == "dy"){
-	ss >> colVal;
-	cellDeltas[2] = std::stod(colVal);
-	cellDeltas[3] = one/cellDeltas[2];
-	std::cout << "dy = " << cellDeltas[2] << "\n";
-      }
-
-      else if (colVal == "sampleMeshSize"){
-	ss >> colVal;
-	numGptSampleMesh = std::stoi(colVal);
-	std::cout << "numGptSampleMesh = " << numGptSampleMesh << "\n";
-      }
-
-      else if (colVal == "stencilMeshSize"){
-	ss >> colVal;
-	numGptStencilMesh = std::stoi(colVal);
-	std::cout << "numGptStencilMesh = " << numGptStencilMesh << "\n";
-      }
-
-      else if (colVal == "stencilSize"){
-	ss >> colVal;
-	stencilSize = std::stoi(colVal);
-	std::cout << "stencilSize = " << stencilSize << "\n";
-      }
-    }
-  source.close();
+  objIn.resize({newSize}, false);
 }
 
-template<class T>
-void readMeshCoordinates(const std::string & meshDir,
-			 T& x, T& y)
+template<class T, class sizetype>
+typename std::enable_if<
+  pressiodemoapps::predicates::is_array_pybind<T>::value
+  >::type
+resize(T & objIn, sizetype rows, sizetype cols)
 {
-  const auto inFile   = meshDir+"/coordinates.dat";
-  std::ifstream foundFile(inFile);
-  if(!foundFile){
-    std::cout << "file not found " << inFile << "\n";
-    exit(EXIT_FAILURE);
+  if (objIn.ndim() != 2 ){
+    throw std::runtime_error
+      ("Wrong resize overload called on pybind array");
   }
-
-  std::ifstream source( inFile, std::ios_base::in);
-  std::string line;
-  while (std::getline(source, line) )
-    {
-      std::istringstream ss(line);
-      std::string colVal;
-      ss >> colVal;
-      auto thisGid = std::stoi(colVal);
-      ss >> colVal; x(thisGid) = std::stod(colVal);
-      ss >> colVal; y(thisGid) = std::stod(colVal);
-    }
-  source.close();
+  objIn.resize({rows, cols}, false);
 }
+#endif
 
-template<class g_t>
-void readMeshConnectivity(const std::string & meshDir,
-			  g_t & graph)
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+template<class mesh_t>
+auto neighbors(const mesh_t & mesh, int loc){
+  return mesh.graph().row(loc);
+}
+#endif
+
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t>
+struct Neighbors
 {
-  const auto inFile   = meshDir+"/connectivity.dat";
-  std::ifstream foundFile(inFile);
-  if(!foundFile){
-    std::cout << "file not found " << inFile << "\n";
-    exit(EXIT_FAILURE);
+  using index_t = typename mesh_t::index_t;
+  using graph_t  = typename mesh_t::mesh_graph_t;
+
+  graph_t m_graph;
+  int m_loc;
+
+  Neighbors() = delete;
+
+  Neighbors(const mesh_t & meshIn, int loc)
+    : m_graph(meshIn.graph()), m_loc(loc)
+  {}
+
+  // const auto & operator[](int k) const{
+  //   return m_graph(m_loc, k);
+  // }
+
+  const auto & operator()(int k) const{
+    return m_graph(m_loc, k);
   }
+};
 
-  std::cout << graph.cols() << std::endl;
-  std::ifstream source(inFile, std::ios_base::in);
-  std::string line;
-  std::size_t count = 0;
-  while (std::getline(source, line) )
-    {
-      std::istringstream ss(line);
-      std::string colVal;
-      ss >> colVal;
-      graph(count, 0) = std::stoi(colVal);
-      // store others on same row
-      for (auto i=1; i<=graph.cols()-1; ++i){
-	ss >> colVal;
-	graph(count,i) = std::stoi(colVal);
-      }
-      count++;
-    }
-  source.close();
+template<class mesh_t>
+Neighbors<mesh_t> neighbors(const mesh_t & mesh, int loc){
+  return Neighbors<mesh_t>(mesh, loc);
 }
+#endif
 
-}
+}}
 #endif
