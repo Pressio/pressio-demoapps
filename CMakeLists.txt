@@ -50,18 +50,3 @@ if(PRESSIODEMOAPPS_ENABLE_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
-
-
-
-
-
-#include_directories(
-#  ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
-#  ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include
-#  ${CMAKE_CURRENT_SOURCE_DIR})
-#add_executable(reconstructFullFom ${CMAKE_CURRENT_SOURCE_DIR}/src/main_reconstruct_fom_state.cc)
-#add_executable(reconstructFullFomOd ${CMAKE_CURRENT_SOURCE_DIR}/src/main_reconstruct_fom_state_od.cc)
-#add_executable(fom ${CMAKE_CURRENT_SOURCE_DIR}/src/main_fom.cc)
-#add_executable(rom ${CMAKE_CURRENT_SOURCE_DIR}/src/main_rom.cc)
-#add_executable(hrrom ${CMAKE_CURRENT_SOURCE_DIR}/src/main_hr_rom.cc)
-#add_executable(odrom ${CMAKE_CURRENT_SOURCE_DIR}/src/main_od_rom.cc)

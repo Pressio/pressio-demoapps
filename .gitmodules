@@ -1,0 +1,3 @@
+[submodule "pybind11"]
+	path = pybind11
+	url = https://github.com/Pressio/pybind11.git
