@@ -31,39 +31,39 @@ void readMeshInfo(const std::string & meshDir,
       if (colVal == "dim"){
 	ss >> colVal;
 	dim = std::stoi(colVal);
-	std::cout << "dim = " << dim << "\n";
+	//std::cout << "dim = " << dim << "\n";
       }
 
       else if (colVal == "dx"){
 	ss >> colVal;
 	cellDeltas[0] = std::stod(colVal);
 	cellDeltas[1] = one/cellDeltas[0];
-	std::cout << "dx = " << cellDeltas[0] << "\n";
+	//std::cout << "dx = " << cellDeltas[0] << "\n";
       }
 
       else if (colVal == "dy"){
 	ss >> colVal;
 	cellDeltas[2] = std::stod(colVal);
 	cellDeltas[3] = one/cellDeltas[2];
-	std::cout << "dy = " << cellDeltas[2] << "\n";
+	//std::cout << "dy = " << cellDeltas[2] << "\n";
       }
 
       else if (colVal == "sampleMeshSize"){
 	ss >> colVal;
 	numGptSampleMesh = std::stoi(colVal);
-	std::cout << "numGptSampleMesh = " << numGptSampleMesh << "\n";
+	//std::cout << "numGptSampleMesh = " << numGptSampleMesh << "\n";
       }
 
       else if (colVal == "stencilMeshSize"){
 	ss >> colVal;
 	numGptStencilMesh = std::stoi(colVal);
-	std::cout << "numGptStencilMesh = " << numGptStencilMesh << "\n";
+	//std::cout << "numGptStencilMesh = " << numGptStencilMesh << "\n";
       }
 
       else if (colVal == "stencilSize"){
 	ss >> colVal;
 	stencilSize = std::stoi(colVal);
-	std::cout << "stencilSize = " << stencilSize << "\n";
+	//std::cout << "stencilSize = " << stencilSize << "\n";
       }
     }
   source.close();

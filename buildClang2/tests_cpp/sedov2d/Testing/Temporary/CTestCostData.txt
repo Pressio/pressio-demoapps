@@ -1,0 +1,4 @@
+sedov_s3 2 0.694874
+sedov_s7 1 0
+---
+sedov_s7

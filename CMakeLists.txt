@@ -37,7 +37,7 @@ endif()
 
 #=====================================================================
 if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
-  set(PYSRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pysrc)
+  set(PYSRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src_py)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tpls/pybind11)
 
@@ -56,6 +56,6 @@ else()
 
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()
-    add_subdirectory(testsCpp)
+    add_subdirectory(tests_cpp)
   endif()
 endif()

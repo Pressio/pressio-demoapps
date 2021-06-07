@@ -9,24 +9,20 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-#include "./meta/is_native_pybind_array.hpp"
-#endif
-
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include "Eigen/Core"
 #endif
 
-#include "./impl/mesh/read_info.hpp"
-#include "./impl/mesh/read_coords.hpp"
-#include "./impl/mesh/read_connectivity.hpp"
-#include "./impl/mesh/help_fncs.hpp"
+#include "./predicates/all.hpp"
+#include "./resize.hpp"
+#include "./extent.hpp"
+#include "./reconstruction_enums.hpp"
 #include "./impl/mesh/ccu_mesh.hpp"
 
 namespace pressiodemoapps{
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-template<class scalar_type>
+template<class scalar_type = double>
 using CellCenteredUniformMeshEigen =
   pressiodemoapps::impl::CellCenteredUniformMesh<
   scalar_type,
@@ -35,6 +31,19 @@ using CellCenteredUniformMeshEigen =
   Eigen::Matrix<int32_t, -1, -1, Eigen::RowMajor>,
   false
   >;
+
+auto loadCellCenterUniformMeshEigen(const std::string & meshFilesPath)
+{
+  return CellCenteredUniformMeshEigen<double>(meshFilesPath);
+}
+#endif
+
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class T>
+T loadCellCenterUniformMesh(const std::string & meshFilesPath)
+{
+  return T(meshFilesPath);
+}
 #endif
 
 }

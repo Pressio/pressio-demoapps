@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/impl/weno/weno5.hpp
+
+../include/weno.hpp
+cmath
+-
+limits
+-
+array
+../include/array
+./impl/weno/weno5.hpp
+../include/impl/weno/weno5.hpp
+
+/Users/fnrizzi/Desktop/work/ROM/gitrepos/pressio-demoapps/tests_cpp/weno5/main.cc
+weno.hpp
+/Users/fnrizzi/Desktop/work/ROM/gitrepos/pressio-demoapps/tests_cpp/weno5/weno.hpp
+array
+-
+iostream
+-
+iomanip
+-
+

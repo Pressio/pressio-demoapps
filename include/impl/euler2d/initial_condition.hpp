@@ -26,7 +26,7 @@ void sedov2dInitialCondition(state_type & state,
   const auto gammaMinusOneInv = 1./gammaMinusOne;
 
   std::array<scalar_type, 4> prim;
-  for (int i=0; i<x.size(); ++i)
+  for (int i=0; i<pressiodemoapps::extent(x,0); ++i)
     {
 
       const auto ind = i*numDofPerCell;
@@ -62,7 +62,6 @@ void sedov2dInitialCondition(state_type & state,
 
 }
 
-
 /*
   first case page 15 of
   https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations
@@ -81,24 +80,23 @@ void riemann2dInitialCondition1(state_type & state,
   const auto y= meshObj.viewY();
   const auto gammaMinusOne = gamma - 1.;
   const auto gammaMinusOneInv = 1./gammaMinusOne;
-
   constexpr auto x0 = 0.5;
   constexpr auto y0 = 0.5;
 
   std::array<scalar_type, 4> prim;
-  for (int i=0; i<x.size(); ++i)
+  for (int i=0; i<pressiodemoapps::extent(x,0); ++i)
     {
 
-      if (x[i] >= x0 and y[i] >= y0){
+      if (x(i) >= x0 and y(i) >= y0){
 	prim = {0.5313, 0., 0., 0.4};
       }
-      else if (x[i] < x0 and y[i] >= y0){
+      else if (x(i) < x0 and y(i) >= y0){
 	prim = {1., 0.7276, 0., 1.};
       }
-      else if (x[i] < x0 and y[i] < y0){
+      else if (x(i) < x0 and y(i) < y0){
 	prim = {0.8, 0., 0., 1.};
       }
-      else if (x[i] > x0 and y[i] < y0){
+      else if (x(i) > x0 and y(i) < y0){
 	prim = {1., 0., 0.7276, 1.};
       }
 
@@ -133,18 +131,18 @@ void riemann2dInitialCondition2(state_type & state,
   const auto x= meshObj.viewX();
   const auto y= meshObj.viewY();
   std::array<scalar_type, 4> prim;
-  for (int i=0; i<x.size(); ++i)
+  for (int i=0; i<pressiodemoapps::extent(x,0); ++i)
     {
-      if (x[i] >= x0 and y[i] >= y0){
+      if (x(i) >= x0 and y(i) >= y0){
 	prim = {1.5, 0., 0., 1.5};
       }
-      else if (x[i] < x0 and y[i] >= y0){
+      else if (x(i) < x0 and y(i) >= y0){
 	prim = {0.5323, 1.206, 0., 0.3};
       }
-      else if (x[i] < x0 and y[i] < y0){
+      else if (x(i) < x0 and y(i) < y0){
 	prim = {0.138, 1.206, 1.206, 0.029};
       }
-      else if (x[i] > x0 and y[i] < y0){
+      else if (x(i) > x0 and y(i) < y0){
 	prim = {0.5323, 0., 1.206, 0.3};
       }
 

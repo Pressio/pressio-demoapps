@@ -1,0 +1,2 @@
+euler1d_periodic 1 3.78773
+---

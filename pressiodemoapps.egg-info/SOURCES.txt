@@ -2,6 +2,8 @@ README.md
 setup.py
 pressiodemoapps/__init__.py
 pressiodemoapps/advection.py
+pressiodemoapps/enums.py
+pressiodemoapps/euler.py
 pressiodemoapps/mesh.py
 pressiodemoapps.egg-info/PKG-INFO
 pressiodemoapps.egg-info/SOURCES.txt

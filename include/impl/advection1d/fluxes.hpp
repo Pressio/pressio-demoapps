@@ -1,6 +1,6 @@
 
-#ifndef PRESSIODEMOAPPS_EE_FLUXES_HPP_
-#define PRESSIODEMOAPPS_EE_FLUXES_HPP_
+#ifndef PRESSIODEMOAPPS_LINDADV_FLUXES_HPP_
+#define PRESSIODEMOAPPS_LINDADV_FLUXES_HPP_
 
 namespace pressiodemoapps{ namespace ad{ namespace impl{
 

@@ -2,6 +2,12 @@
 #ifndef PRESSIODEMOAPPS_CCU_MESH_HPP_
 #define PRESSIODEMOAPPS_CCU_MESH_HPP_
 
+#include <tuple>
+#include "./read_info.hpp"
+#include "./read_coords.hpp"
+#include "./read_connectivity.hpp"
+//#include "./mesh/help_fncs.hpp"
+
 namespace pressiodemoapps{ namespace impl{
 
 template<
@@ -14,11 +20,11 @@ template<
 class CellCenteredUniformMesh
 {
 public:
-  using scalar_t     = scalar_type;
-  using index_t	     = index_type;
-  using x_t	     = xy_type;
-  using y_t	     = xy_type;
-  using mesh_graph_t = mesh_g_type;
+  using scalar_t  = scalar_type;
+  using index_t	  = index_type;
+  using x_t	  = xy_type;
+  using y_t	  = xy_type;
+  using graph_t   = mesh_g_type;
 
   CellCenteredUniformMesh() = delete;
 
@@ -28,20 +34,74 @@ public:
     >
   explicit CellCenteredUniformMesh(const std::string & meshDir)
   {
-    resizeAndSetup(meshDir);
+    allocateAndSetup(meshDir);
   }
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+  // note that when doing bindings, I need to first construct
+  // with {1,1} just so that the numpy array picks up they
+  // are 2dim array otherwise it thinks they are 1d array.
   template<
     bool _is_binding = is_binding,
     typename std::enable_if<_is_binding>::type * = nullptr
     >
   explicit CellCenteredUniformMesh(const std::string & meshDir)
-    : m_x(1), m_y(1), m_graph({1,1})
+    : m_x(1), m_y(1), m_graph({10,5})
   {
-    resizeAndSetup(meshDir);
+    allocateAndSetup(meshDir);
   }
 #endif
+
+  void checkStencilSupportsOrder(pressiodemoapps::reconstructionEnum eIn) const
+  {
+    if (m_stencilSize == 3)
+    {
+      if (eIn == reconstructionEnum::fifthOrderWeno){
+	throw std::runtime_error
+	  ("Mesh stencil size not large enough for target reconstruction order.");
+      }
+    }
+  }
+
+  bool isPeriodic() const{
+    const auto gSize = (m_stencilSize-1)*m_dim;
+
+    // mesh connectivity is periodi if all neighboring GIDs are positive
+    for (index_t i=0; i<m_sampleMeshSize; ++i){
+      for (index_t j=0; j<gSize+1; ++j){
+	if (m_graph(i, j) < 0){
+	  return false;
+	}
+      }
+    }
+    return true;
+  }
+
+  auto boundsX() const{
+    auto res = std::make_tuple(std::numeric_limits<scalar_type>::max(),
+			       std::numeric_limits<scalar_type>::min());
+
+    for (int i=0; i<m_stencilMeshSize; ++i){
+      auto & v1 = res.get<0>(res);
+      auto & v2 = res.get<1>(res);
+      v1 = std::min(v1, m_x(i));
+      v2 = std::max(v2, m_x(i));
+    }
+    return res;
+  }
+
+  auto boundsY() const{
+    auto res = std::make_tuple(std::numeric_limits<scalar_type>::max(),
+			       std::numeric_limits<scalar_type>::min());
+
+    for (int i=0; i<m_stencilMeshSize; ++i){
+      auto & v1 = res.get<0>(res);
+      auto & v2 = res.get<1>(res);
+      v1 = std::min(v1, m_y(i));
+      v2 = std::max(v2, m_y(i));
+    }
+    return res;
+  }
 
   int dimensionality() const{
     return m_dim;
@@ -59,7 +119,7 @@ public:
     return m_stencilSize;
   }
 
-  const mesh_graph_t & graph() const{
+  const graph_t & graph() const{
     return m_graph;
   }
 
@@ -87,26 +147,8 @@ public:
     return m_y;
   }
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-
-//   // ptIndex is not the global id
-//   auto neighborsOf(const index_t smPt) const{
-//     return m_graph.row(smPt);
-//   }
-
-// #elif defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-
-//   auto neighborsOf(const index_t smPt) const
-//   {
-//     auto res = m_graph[pybind11::make_tuple(smPt, pybind11::slice(0, m_graph.shape(1), 1))];
-//     // auto tp = pybind11::make_tuple(pybind11::slice(0, m_graph.shape(1), 1));
-//     // pybind11::array Aslice = m_graph(smPt, tp);
-//     return res;
-//   }
-// #endif
-
 private:
-  void resizeAndSetup(const std::string & meshDir)
+  void allocateAndSetup(const std::string & meshDir)
   {
     pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
 					m_cellDeltas,
@@ -114,12 +156,12 @@ private:
 					m_stencilMeshSize,
 					m_sampleMeshSize);
 
-    pressiodemoapps::impl::resize(m_x, m_stencilMeshSize);
-    pressiodemoapps::impl::resize(m_y, m_stencilMeshSize);
+    pressiodemoapps::resize(m_x, m_stencilMeshSize);
+    pressiodemoapps::resize(m_y, m_stencilMeshSize);
     pressiodemoapps::impl::readMeshCoordinates(meshDir, m_x, m_y);
 
     const auto graphSize = (m_stencilSize-1)*m_dim;
-    pressiodemoapps::impl::resize(m_graph, m_sampleMeshSize, graphSize+1);
+    pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphSize+1);
     pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphSize+1);
   }
 
@@ -132,7 +174,6 @@ private:
 
   /*
     graph: contains a list such that
-    1 0 3 2 -1
 
     first col   : contains GIDs of cells where we want velocity
     col 1,2,3,4 : contains GIDs of neighboring cells needed for stencil
@@ -144,7 +185,7 @@ private:
        col 8,9,10,11: GIDs of degree3 neighboring cells needed for stencil
        the order of the neighbors is: west, north, east, south
   */
-  mesh_graph_t m_graph = {};
+  graph_t m_graph = {};
   int m_stencilSize = {};
 
   x_t m_x = {};

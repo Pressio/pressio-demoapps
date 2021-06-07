@@ -15,7 +15,7 @@ void readMeshCoordinates(const std::string & meshDir,
     exit(EXIT_FAILURE);
   }
 
-  std::ifstream source( inFile, std::ios_base::in);
+  std::ifstream source(inFile, std::ios_base::in);
   std::string line;
   while (std::getline(source, line) )
     {

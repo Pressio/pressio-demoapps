@@ -1,0 +1,23 @@
+cellCenterUniformMeshObj 11 0.0220599
+full_mesh_5x1_s3_periodic 11 0.323822
+full_mesh_5x5_s3_periodic 11 0.329554
+full_mesh_5x6_s3_periodic 11 0.329632
+full_mesh_6x5_s3_periodic 11 0.333577
+full_mesh_8x8_s5_periodic 11 0.333
+full_mesh_7x8_s5_periodic 11 0.333658
+full_mesh_8x7_s5_periodic 11 0.329962
+full_mesh_8x8_s7_periodic 11 0.332456
+full_mesh_7x8_s7_periodic 11 0.308256
+full_mesh_8x7_s7_periodic 11 0.328185
+weno5 11 0.00144107
+linadv1d_periodic 11 1.20301
+euler1d_periodic 11 2.25205
+sod1d_s3 11 0.368105
+sod1d_s7 11 0.374426
+sedov_s3 11 0.809288
+sedov_s7 8 1.36078
+riemann2d_s3 9 1.01203
+riemann2d_s7 7 1.76664
+---
+sedov_s7
+riemann2d_s7

@@ -12,8 +12,7 @@ template<
   class scalar_t,
   class mesh_t,
   class state_t,
-  class velo_t,
-  class ghost_t
+  class velo_t
   >
 class LinearAdvT
 {
@@ -21,38 +20,47 @@ class LinearAdvT
   (std::is_same<scalar_t, typename mesh_t::scalar_t>::value, "");
 
 public:
-  using index_t		= typename mesh_t::index_t;
-  using scalar_type	= scalar_t;
-  using state_type	= state_t;
-  using velocity_type	= state_t;
-  using ghost_type	= ghost_t;
+  using index_t		 = typename mesh_t::index_t;
+  using scalar_type	 = scalar_t;
+  using state_type	 = state_t;
+  using velocity_type	 = state_t;
+  using stencil_values_t = state_t;
+
+  static constexpr int numDofPerCell{1};
+  static constexpr int dimensionality{1};
 
 public:
-  LinearAdvT(const mesh_t & meshObj)
-    : m_meshObj(meshObj)
+  explicit LinearAdvT(const mesh_t & meshObj,
+		      ::pressiodemoapps::reconstructionEnum enIn =
+		      ::pressiodemoapps::reconstructionEnum::firstOrder)
+    : m_recEn(enIn), m_meshObj(meshObj)
   {
-    // here we have one dof per cell
     m_numDofStencilMesh = m_meshObj.stencilMeshSize();
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize();
-    m_stencilVals.resize(m_meshObj.stencilSize());
+
+    const auto stencilSize = reconstructionEnumToStencilSize(enIn);
+    ::pressiodemoapps::resize(m_stencilVals, stencilSize);
   }
 
-  index_t totalDofSampleMesh() const{
-    return m_numDofSampleMesh;
-  }
-
-  index_t totalDofStencilMesh() const{
-    return m_numDofStencilMesh;
-  }
+  index_t totalDofSampleMesh() const{ return m_numDofSampleMesh; }
+  index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 
   velocity_type createVelocity() const {
     velocity_type V(m_numDofSampleMesh);
     return V;
   }
 
-  void velocity(const state_type & U,
-		const scalar_type t,
-		velocity_type & V) const
+  void velocity(const state_type & stateO,
+		const scalar_type timeValue,
+		velocity_type & veloO) const
+  {
+    velocityImpl(stateO, timeValue, veloO);
+  }
+
+private:
+  void velocityImpl(const state_type & U,
+		    const scalar_type t,
+		    velocity_type & V) const
   {
     scalar_type FL{0};
     scalar_type FR{0};
@@ -61,94 +69,39 @@ public:
     scalar_type uPlusHalfNeg {0};
     scalar_type uPlusHalfPos {0};
 
-    const auto dxInv = m_meshObj.dxInv();
-    const auto & x = m_meshObj.viewX();
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    const auto & graph = m_meshObj.graph();
+    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
+      dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, void>;
+    using rec_fnct_t = ::pressiodemoapps::impl::Reconstructor<
+      numDofPerCell, scalar_type, stencil_values_t>;
 
+    const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
+    sfiller_t StencilFiller(stencilSize, U, m_meshObj, m_stencilVals);
+    rec_fnct_t Reconstructor(m_recEn, m_stencilVals,
+			     uMinusHalfNeg, uMinusHalfPos,
+			     uPlusHalfNeg,  uPlusHalfPos);
+
+    const auto dxInv = m_meshObj.dxInv();
+    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
     {
-      //const auto & gigi = graph(smPt, 0);
-      // const auto & gigi2 = thisCellAdList(0);
-      auto thisCellAdList = pressiodemoapps::impl::neighbors(m_meshObj, smPt);
-      const auto cellGID = thisCellAdList(0);
+      StencilFiller(smPt);
+      Reconstructor();
+      linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
+      linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
 
-      const index_t w0 = thisCellAdList(1);
-      //m_stencilVals[0] = U[w0];
-      //fillStencil(smPt, cellGID, thisCellAdList, U);
-
-    //   reconstruct(m_stencilVals,
-    // 		  uMinusHalfNeg, uMinusHalfPos,
-    // 		  uPlusHalfNeg, uPlusHalfPos);
-
-    //   linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
-    //   linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
-
-    //   V(cellGID) = dxInv*(FL - FR);
+      const auto vIndex = smPt*numDofPerCell;
+      V(vIndex) = dxInv*(FL - FR);
     }
   }
 
 private:
-  template<class adlist_t, class uindex_t>
-  void fillStencil(index_t & smPt,
-		   const uindex_t uIndex,
-		   const adlist_t & adList,
-		   const state_type & U) const
-  {
-    const index_t w0 = adList(1);
-    const index_t e0 = adList(2);
-    const index_t w1 = adList(3);
-    const index_t e1 = adList(4);
-    const index_t w2 = adList(5);
-    const index_t e2 = adList(6);
-    const auto stencilSize = m_meshObj.stencilSize();
+  pressiodemoapps::reconstructionEnum m_recEn =
+    pressiodemoapps::reconstructionEnum::firstOrder;
 
-    if (stencilSize ==3)
-    {
-      m_stencilVals[0] = U[w0];
-      m_stencilVals[1] = U[uIndex];
-      m_stencilVals[2] = U[e0];
-    }
-    else if (stencilSize ==7){
-      m_stencilVals[0] = U[w2];
-      m_stencilVals[1] = U[w1];
-      m_stencilVals[2] = U[w0];
-      m_stencilVals[3] = U[uIndex];
-      m_stencilVals[4] = U[e0];
-      m_stencilVals[5] = U[e1];
-      m_stencilVals[6] = U[e2];
-    }
-  }
-
-  template<class T, class T2>
-  void reconstruct(const T2 & m_stencilVals,
-		   T & uMinusHalfNeg,
-		   T & uMinusHalfPos,
-		   T & uPlusHalfNeg,
-		   T & uPlusHalfPos) const
-  {
-
-    const auto stencilSize = m_meshObj.stencilSize();
-    if (stencilSize==3)
-    {
-      uMinusHalfNeg = m_stencilVals[0];
-      uMinusHalfPos = m_stencilVals[1];
-      uPlusHalfNeg  = m_stencilVals[1];
-      uPlusHalfPos  = m_stencilVals[2];
-    }
-    else if (stencilSize==7)
-    {
-      pressiodemoapps::weno5(uMinusHalfNeg, uMinusHalfPos,
-			     uPlusHalfNeg, uPlusHalfPos,
-			     m_stencilVals);
-    }
-  }
-
-private:
   const mesh_t & m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
-  mutable std::vector<scalar_type> m_stencilVals;
+  mutable stencil_values_t m_stencilVals;
 };
 
 }}}//end namespace
