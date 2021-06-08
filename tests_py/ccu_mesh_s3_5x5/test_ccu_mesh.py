@@ -6,7 +6,6 @@ file_path = pathlib.Path(__file__).parent.absolute()
 
 def test1():
   meshPath = str(file_path)
-  #meshO = mesh.CellCenteredUniformMesh(meshPath)
   meshO = mesh.loadCellCenterUniformMesh(meshPath)
 
   assert( meshO.dimensionality() == 2 )
@@ -32,7 +31,7 @@ def test1():
   assert( np.allclose(meshO.viewX(), goldX) )
   assert( np.allclose(meshO.viewY(), goldY) )
 
-def testGrahp():
+def testGraph():
   meshPath = str(file_path)
   meshO = mesh.CellCenteredUniformMesh(meshPath)
   G = meshO.graph()

@@ -38,8 +38,8 @@ public:
   Euler2dAppT(const mesh_t & meshObj,
 	      pressiodemoapps::reconstructionEnum recEn,
 	      pressiodemoapps::euler2dproblemsEnum probEn,
-	      int icId = 1)
-    : m_recEn(recEn), m_probEn(probEn), m_icId(icId), m_meshObj(meshObj)
+	      int icIdentifier = 1)
+    : m_recEn(recEn), m_probEn(probEn), m_icIdentifier(icIdentifier), m_meshObj(meshObj)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -57,8 +57,8 @@ public:
   Euler2dAppT(const mesh_t & meshObj,
 	      pressiodemoapps::reconstructionEnum recEn,
 	      pressiodemoapps::euler2dproblemsEnum probEn,
-	      int icId = 1)
-    : m_recEn(recEn), m_probEn(probEn), m_icId(icId),
+	      int icIdentifier = 1)
+    : m_recEn(recEn), m_probEn(probEn), m_icIdentifier(icIdentifier),
       m_meshObj(meshObj),
       m_stencilVals(1),
       m_ghostLeft({1,1}),
@@ -73,7 +73,6 @@ public:
     ::pressiodemoapps::resize(m_stencilVals,  numDofPerCell*stencilSize);
     allocateGhosts();
   }
-
 #endif
 
   state_type initialCondition() const
@@ -92,11 +91,11 @@ public:
       }
 
       case pressiodemoapps::euler2dproblemsEnum::riemann:{
-	if( m_icId == 1){
+	if( m_icIdentifier == 1){
 	  riemann2dInitialCondition1(IC, m_meshObj, numDofPerCell, m_gamma);
 	  return IC;
 	}
-	else if (m_icId == 2){
+	else if (m_icIdentifier == 2){
 	  riemann2dInitialCondition2(IC, m_meshObj, numDofPerCell, m_gamma);
 	  return IC;
 	}
@@ -109,11 +108,12 @@ public:
     return IC;
   }
 
-  scalar_type gamma() const{ return m_gamma; }
-  index_t totalDofSampleMesh() const{ return m_numDofSampleMesh; }
+  scalar_type gamma()           const{ return m_gamma; }
+  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
   index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 
-  velocity_type createVelocity() const {
+  velocity_type createVelocity() const
+  {
     velocity_type V(m_numDofSampleMesh);
     return V;
   }
@@ -122,30 +122,6 @@ public:
 		const scalar_type timeValue,
 		velocity_type & V) const
   {
-    velocityImpl(state, timeValue, V);
-  }
-
-private:
-  void velocityImpl(const state_type & U,
-		    const scalar_type timeIn,
-		    velocity_type & V) const
-  {
-    // const auto & graph = m_meshObj.graph();
-    // const index_t sampleMeshSize = m_meshObj.sampleMeshSize();
-    // for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
-    //   {
-    // 	const auto cellGID = G(smPt, 0);
-    // 	//const auto cellGID = smPt;
-    // 	const auto uIndex = cellGID*4;
-    // 	const auto vIndex = smPt*numDofPerCell;
-    // 	const auto uIndexP1 = uIndex+1;
-    // 	const auto vIndexP1 = vIndex+1;
-    // 	V(vIndex)   = 1.34*U(uIndex);
-    // 	V(vIndexP1) = 2.31*U(uIndexP1);
-    // 	// V(vIndex+2) = std::sin(U(uIndex+2));
-    // 	// V(vIndex+3) = std::sin(U(uIndex+3));
-    //   }
-
     flux_t FL(numDofPerCell);
     flux_t FR(numDofPerCell);
     flux_t FU(numDofPerCell);
@@ -155,13 +131,33 @@ private:
     edge_rec_t uPlusHalfNeg (numDofPerCell);
     edge_rec_t uPlusHalfPos (numDofPerCell);
 
-    fillGhosts(U);
+    fillGhosts(state);
+    velocityCellsNearBdImpl(state, timeValue, V, FL, FR, FD, FU,
+			    uMinusHalfNeg, uMinusHalfPos,
+			    uPlusHalfNeg,  uPlusHalfPos);
+    velocityInnerCellsImpl(state, timeValue, V, FL, FR, FD, FU,
+			   uMinusHalfNeg, uMinusHalfPos,
+			   uPlusHalfNeg,  uPlusHalfPos);
+  }
 
-    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell,
-      stencil_values_t, state_type, mesh_t, ghost_t>;
-    using rec_fnct_t = ::pressiodemoapps::impl::Reconstructor<
-      numDofPerCell, edge_rec_t, stencil_values_t>;
+private:
+  void velocityCellsNearBdImpl(const state_type & U,
+			       const scalar_type timeIn,
+			       velocity_type & V,
+			       flux_t & FL,
+			       flux_t & FR,
+			       flux_t & FD,
+			       flux_t & FU,
+			       edge_rec_t & uMinusHalfNeg,
+			       edge_rec_t & uMinusHalfPos,
+			       edge_rec_t & uPlusHalfNeg,
+			       edge_rec_t & uPlusHalfPos) const
+  {
+
+    using sfiller_t = ::pressiodemoapps::impl::StencilFiller<
+      dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
+    using rec_fnct_t =
+      ::pressiodemoapps::impl::ReconstructorFromStencil<edge_rec_t, stencil_values_t>;
 
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
@@ -176,37 +172,103 @@ private:
 			     uMinusHalfNeg, uMinusHalfPos,
 			     uPlusHalfNeg,  uPlusHalfPos);
 
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    const auto dxInv  = m_meshObj.dxInv();
-    const auto dyInv  = m_meshObj.dyInv();
+    const auto dxInv   = m_meshObj.dxInv();
+    const auto dyInv   = m_meshObj.dyInv();
+    auto vEval = [&](index_t vIndex){
+      V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FD(0) - FU(0));
+      V(vIndex+1) = dxInv*(FL(1) - FR(1)) + dyInv*(FD(1) - FU(1));
+      V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2));
+      V(vIndex+3) = dxInv*(FL(3) - FR(3)) + dyInv*(FD(3) - FU(3));
+    };
+
     const auto & graph = m_meshObj.graph();
-    for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
-      {
-	const auto cellGID = graph(smPt, 0);
-	const auto uIndex = cellGID*numDofPerCell;
+    const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
+    for (std::size_t it=0; it<specialRows.size(); ++it)
+    {
+      const auto smPt    = specialRows[it];
+      const auto cellGID = graph(smPt, 0);
+      const auto uIndex  = cellGID*numDofPerCell;
 
-	// X
-	StencilFillerX(smPt);
-	Reconstructor();
-	eeRusanovFluxFourDof(FL, uMinusHalfNeg,
-			     uMinusHalfPos, normalX_, m_gamma);
-	eeRusanovFluxFourDof(FR, uPlusHalfNeg,
-			     uPlusHalfPos,  normalX_, m_gamma);
+      // X
+      StencilFillerX(smPt, it);
+      Reconstructor.template operator()<numDofPerCell>();
+      eeRusanovFluxFourDof(FL, uMinusHalfNeg,
+			   uMinusHalfPos, normalX_, m_gamma);
+      eeRusanovFluxFourDof(FR, uPlusHalfNeg,
+			   uPlusHalfPos,  normalX_, m_gamma);
 
-	// Y
-	StencilFillerY(smPt);
-	Reconstructor();
-	eeRusanovFluxFourDof(FD, uMinusHalfNeg,
-			     uMinusHalfPos, normalY_, m_gamma);
-	eeRusanovFluxFourDof(FU, uPlusHalfNeg,
-			     uPlusHalfPos,  normalY_, m_gamma);
+      // Y
+      StencilFillerY(smPt, it);
+      Reconstructor.template operator()<numDofPerCell>();
+      eeRusanovFluxFourDof(FD, uMinusHalfNeg,
+			   uMinusHalfPos, normalY_, m_gamma);
+      eeRusanovFluxFourDof(FU, uPlusHalfNeg,
+			   uPlusHalfPos,  normalY_, m_gamma);
 
-	const auto vIndex = smPt*numDofPerCell;
-	V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FD(0) - FU(0));
-	V(vIndex+1) = dxInv*(FL(1) - FR(1)) + dyInv*(FD(1) - FU(1));
-	V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2));
-	V(vIndex+3) = dxInv*(FL(3) - FR(3)) + dyInv*(FD(3) - FU(3));
-      }
+      const auto vIndex = smPt*numDofPerCell;
+      vEval(vIndex);
+    }
+  }
+
+  void velocityInnerCellsImpl(const state_type & U,
+			      const scalar_type timeIn,
+			      velocity_type & V,
+			      flux_t & FL,
+			      flux_t & FR,
+			      flux_t & FD,
+			      flux_t & FU,
+			      edge_rec_t & uMinusHalfNeg,
+			      edge_rec_t & uMinusHalfPos,
+			      edge_rec_t & uPlusHalfNeg,
+			      edge_rec_t & uPlusHalfPos) const
+  {
+
+    const auto dxInv   = m_meshObj.dxInv();
+    const auto dyInv   = m_meshObj.dyInv();
+    auto vEval = [&](index_t vIndex){
+      V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FD(0) - FU(0));
+      V(vIndex+1) = dxInv*(FL(1) - FR(1)) + dyInv*(FD(1) - FU(1));
+      V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2));
+      V(vIndex+3) = dxInv*(FL(3) - FR(3)) + dyInv*(FD(3) - FU(3));
+    };
+
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
+      edge_rec_t, state_type, mesh_t>;
+
+    rec_fnct_t ReconstructorX(1, m_recEn, U, m_meshObj,
+			      uMinusHalfNeg, uMinusHalfPos,
+			      uPlusHalfNeg,  uPlusHalfPos);
+
+    rec_fnct_t ReconstructorY(2, m_recEn, U, m_meshObj,
+			      uMinusHalfNeg, uMinusHalfPos,
+			      uPlusHalfNeg,  uPlusHalfPos);
+
+    // deal with cells away from boundaries
+    const auto & graph = m_meshObj.graph();
+    const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
+    for (int it=0; it<rowsIn.size(); ++it){
+      const auto smPt = rowsIn[it];
+      const auto cellGID = graph(smPt, 0);
+      const auto uIndex = cellGID*numDofPerCell;
+
+      // X
+      ReconstructorX.template operator()<numDofPerCell>(smPt);
+      eeRusanovFluxFourDof(FL, uMinusHalfNeg,
+			   uMinusHalfPos, normalX_, m_gamma);
+      eeRusanovFluxFourDof(FR, uPlusHalfNeg,
+			   uPlusHalfPos,  normalX_, m_gamma);
+
+      // Y
+      ReconstructorY.template operator()<numDofPerCell>(smPt);
+      eeRusanovFluxFourDof(FD, uMinusHalfNeg,
+			   uMinusHalfPos, normalY_, m_gamma);
+      eeRusanovFluxFourDof(FU, uPlusHalfNeg,
+			   uPlusHalfPos,  normalY_, m_gamma);
+
+      const auto vIndex = smPt*numDofPerCell;
+      vEval(vIndex);
+    }
+
   }
 
   void fillGhosts(const state_type & U) const
@@ -221,11 +283,16 @@ private:
 			 m_ghostLeft, m_ghostTop,
 			 m_ghostRight, m_ghostBottom);
 
-      const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-      for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
-	{
-	  ghF(smPt);
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      if (stencilSize==3){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<3>(rowsBd[it], it);
 	}
+      }else{
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<7>(rowsBd[it], it);
+	}
+      }
     }
   }
 
@@ -251,16 +318,16 @@ private:
       | rho v,      | rho*v   | rho*v     ||
       | E	    | E       | E         ||
       --------------------------------------
-
      */
 
     const auto stencilSize    = reconstructionEnumToStencilSize(m_recEn);
     const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    pressiodemoapps::resize(m_ghostLeft,   sampleMeshSize, numGhostValues);
-    pressiodemoapps::resize(m_ghostTop,    sampleMeshSize, numGhostValues);
-    pressiodemoapps::resize(m_ghostRight,  sampleMeshSize, numGhostValues);
-    pressiodemoapps::resize(m_ghostBottom, sampleMeshSize, numGhostValues);
+
+    const index_t s1 = m_meshObj.numCellsBd();
+    pressiodemoapps::resize(m_ghostLeft,   s1, numGhostValues);
+    pressiodemoapps::resize(m_ghostTop,    s1, numGhostValues);
+    pressiodemoapps::resize(m_ghostRight,  s1, numGhostValues);
+    pressiodemoapps::resize(m_ghostBottom, s1, numGhostValues);
   }
 
 private:
@@ -272,7 +339,7 @@ private:
   pressiodemoapps::euler2dproblemsEnum m_probEn;
 
   // which initial condition to use
-  int m_icId = 1;
+  int m_icIdentifier = 1;
 
   const mesh_t & m_meshObj;
   mutable stencil_values_t m_stencilVals;

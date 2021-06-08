@@ -71,8 +71,8 @@ private:
 
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, void>;
-    using rec_fnct_t = ::pressiodemoapps::impl::Reconstructor<
-      numDofPerCell, scalar_type, stencil_values_t>;
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencil<
+      scalar_type, stencil_values_t>;
 
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
     sfiller_t StencilFiller(stencilSize, U, m_meshObj, m_stencilVals);
@@ -85,7 +85,7 @@ private:
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
     {
       StencilFiller(smPt);
-      Reconstructor();
+      Reconstructor.template operator()<numDofPerCell>();
       linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
       linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
 

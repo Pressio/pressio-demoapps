@@ -34,10 +34,10 @@ int main(int argc, char *argv[])
   auto time = 0.0;
   app_state_t state1(stateSize);
   app_state_t state2(stateSize);
+  app_state_t veloTmp(stateSize);
   Obs(0, time, state);
   for (int step=1; step<=Nsteps; ++step)
   {
-    app_state_t veloTmp(stateSize);
     appObj.velocity(*state.data(), time, veloTmp);
     state1 = *state.data() + dt*veloTmp;
 

@@ -2,6 +2,7 @@
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../../meshing_scripts)
 
 add_subdirectory(ccuMeshObj)
+add_subdirectory(ccuMeshObjSpecialCellsLists)
 add_subdirectory(mesh_s3_5x1_periodic)
 add_subdirectory(mesh_s3_5x5_periodic)
 add_subdirectory(mesh_s3_5x6_periodic)

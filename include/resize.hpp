@@ -4,6 +4,13 @@
 
 namespace pressiodemoapps{
 
+template<class value_type, class sizetype>
+void resize(std::vector<value_type> & objIn,
+	    sizetype newSize)
+{
+  objIn.resize(newSize);
+}
+
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class value_type, class sizetype>
 void resize(Eigen::Matrix<value_type, -1, 1> & objIn,

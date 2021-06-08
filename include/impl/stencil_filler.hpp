@@ -14,8 +14,9 @@ template<
   >
 class StencilFiller;
 
-
+//------------------------------
 // dim=1, 1 dof/cell
+//------------------------------
 template<class stencil_values_t, class state_t, class mesh_t>
 class StencilFiller<
   1, 1, stencil_values_t, state_t, mesh_t, void
@@ -77,7 +78,9 @@ private:
   stencil_values_t & m_stencilVals;
 };
 
+//------------------------------
 // dim=1, 3 dofs/cell
+//------------------------------
 template<class stencil_values_t, class state_t, class mesh_t, class ghost_t>
 class StencilFiller<
   1, 3, stencil_values_t, state_t, mesh_t, ghost_t
@@ -128,13 +131,10 @@ public:
 
       case 7:
 	{
-	  // indices of the neighboring cells
 	  const auto w1 = graph(smPt, 3);
 	  const auto e1 = graph(smPt, 4);
 	  const auto w2 = graph(smPt, 5);
 	  const auto e2 = graph(smPt, 6);
-
-	  // indices of the states from neighboring cells
 	  const auto w1i = w1*3;
 	  const auto e1i = e1*3;
 	  const auto w2i = w2*3;
@@ -175,8 +175,9 @@ private:
   stencil_values_t & m_stencilVals;
 };
 
-
+//------------------------------
 // dim=2, 4 dofs/cell
+//------------------------------
 template<class stencil_values_t, class state_t, class mesh_t, class ghost_t>
 class StencilFiller<
   2, 4, stencil_values_t, state_t, mesh_t, ghost_t
@@ -202,7 +203,7 @@ public:
   {}
 
   template<class index_t>
-  void operator()(const index_t smPt)
+  void operator()(const index_t smPt, int ghostRow)
   {
     constexpr auto numDofPerCell = 4;
     const auto & graph = m_meshObj.graph();
@@ -212,13 +213,14 @@ public:
     {
     case 3:
       {
-	const auto l0 = (m_axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	const auto r0 = (m_axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+	const auto l0 = (m_axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
+	const auto r0 = (m_axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+
 	if (l0 == -1){
-	  m_stencilVals(0) = m_ghostLeft(smPt, 0);
-	  m_stencilVals(1) = m_ghostLeft(smPt, 1);
-	  m_stencilVals(2) = m_ghostLeft(smPt, 2);
-	  m_stencilVals(3) = m_ghostLeft(smPt, 3);
+	  m_stencilVals(0) = m_ghostLeft(ghostRow, 0);
+	  m_stencilVals(1) = m_ghostLeft(ghostRow, 1);
+	  m_stencilVals(2) = m_ghostLeft(ghostRow, 2);
+	  m_stencilVals(3) = m_ghostLeft(ghostRow, 3);
 	}else{
 	  const auto index = l0*4;
 	  m_stencilVals(0) = m_state(index);
@@ -233,10 +235,10 @@ public:
 	m_stencilVals(7)  = m_state(uIndex+3);
 
 	if (r0 == -1){
-	  m_stencilVals(8)  = m_ghostRight(smPt, 0);
-	  m_stencilVals(9)  = m_ghostRight(smPt, 1);
-	  m_stencilVals(10) = m_ghostRight(smPt, 2);
-	  m_stencilVals(11) = m_ghostRight(smPt, 3);
+	  m_stencilVals(8)  = m_ghostRight(ghostRow, 0);
+	  m_stencilVals(9)  = m_ghostRight(ghostRow, 1);
+	  m_stencilVals(10) = m_ghostRight(ghostRow, 2);
+	  m_stencilVals(11) = m_ghostRight(ghostRow, 3);
 	}else{
 	  const auto index = r0*4;
 	  m_stencilVals(8)  = m_state(index);
@@ -258,10 +260,10 @@ public:
 	const auto uIndex = graph(smPt, 0)*numDofPerCell;
 
 	if (l2 == -1){
-	  m_stencilVals(0) = m_ghostLeft(smPt, 8);
-	  m_stencilVals(1) = m_ghostLeft(smPt, 9);
-	  m_stencilVals(2) = m_ghostLeft(smPt, 10);
-	  m_stencilVals(3) = m_ghostLeft(smPt, 11);
+	  m_stencilVals(0) = m_ghostLeft(ghostRow, 8);
+	  m_stencilVals(1) = m_ghostLeft(ghostRow, 9);
+	  m_stencilVals(2) = m_ghostLeft(ghostRow, 10);
+	  m_stencilVals(3) = m_ghostLeft(ghostRow, 11);
 	}else{
 	  const auto index = l2*numDofPerCell;
 	  m_stencilVals(0) = m_state(index);
@@ -271,10 +273,10 @@ public:
 	}
 
 	if (l1 == -1){
-	  m_stencilVals(4) = m_ghostLeft(smPt, 4);
-	  m_stencilVals(5) = m_ghostLeft(smPt, 5);
-	  m_stencilVals(6) = m_ghostLeft(smPt, 6);
-	  m_stencilVals(7) = m_ghostLeft(smPt, 7);
+	  m_stencilVals(4) = m_ghostLeft(ghostRow, 4);
+	  m_stencilVals(5) = m_ghostLeft(ghostRow, 5);
+	  m_stencilVals(6) = m_ghostLeft(ghostRow, 6);
+	  m_stencilVals(7) = m_ghostLeft(ghostRow, 7);
 	}else{
 	  const auto index = l1*numDofPerCell;
 	  m_stencilVals(4) = m_state(index);
@@ -284,10 +286,10 @@ public:
 	}
 
 	if (l0 == -1){
-	  m_stencilVals(8)  = m_ghostLeft(smPt, 0);
-	  m_stencilVals(9)  = m_ghostLeft(smPt, 1);
-	  m_stencilVals(10) = m_ghostLeft(smPt, 2);
-	  m_stencilVals(11) = m_ghostLeft(smPt, 3);
+	  m_stencilVals(8)  = m_ghostLeft(ghostRow, 0);
+	  m_stencilVals(9)  = m_ghostLeft(ghostRow, 1);
+	  m_stencilVals(10) = m_ghostLeft(ghostRow, 2);
+	  m_stencilVals(11) = m_ghostLeft(ghostRow, 3);
 	}else{
 	  const auto index = l0*numDofPerCell;
 	  m_stencilVals(8)  = m_state(index);
@@ -302,10 +304,10 @@ public:
 	m_stencilVals(15) = m_state(uIndex+3);
 
 	if (r0 == -1){
-	  m_stencilVals(16) = m_ghostRight(smPt, 0);
-	  m_stencilVals(17) = m_ghostRight(smPt, 1);
-	  m_stencilVals(18) = m_ghostRight(smPt, 2);
-	  m_stencilVals(19) = m_ghostRight(smPt, 3);
+	  m_stencilVals(16) = m_ghostRight(ghostRow, 0);
+	  m_stencilVals(17) = m_ghostRight(ghostRow, 1);
+	  m_stencilVals(18) = m_ghostRight(ghostRow, 2);
+	  m_stencilVals(19) = m_ghostRight(ghostRow, 3);
 	}else{
 	  const auto index = r0*numDofPerCell;
 	  m_stencilVals(16) = m_state(index);
@@ -315,10 +317,10 @@ public:
 	}
 
 	if (r1 == -1){
-	  m_stencilVals(20) = m_ghostRight(smPt, 4);
-	  m_stencilVals(21) = m_ghostRight(smPt, 5);
-	  m_stencilVals(22) = m_ghostRight(smPt, 6);
-	  m_stencilVals(23) = m_ghostRight(smPt, 7);
+	  m_stencilVals(20) = m_ghostRight(ghostRow, 4);
+	  m_stencilVals(21) = m_ghostRight(ghostRow, 5);
+	  m_stencilVals(22) = m_ghostRight(ghostRow, 6);
+	  m_stencilVals(23) = m_ghostRight(ghostRow, 7);
 	}else{
 	  const auto index = r1*numDofPerCell;
 	  m_stencilVals(20) = m_state(index);
@@ -328,10 +330,10 @@ public:
 	}
 
 	if (r2 == -1){
-	  m_stencilVals(24) = m_ghostRight(smPt, 8);
-	  m_stencilVals(25) = m_ghostRight(smPt, 9);
-	  m_stencilVals(26) = m_ghostRight(smPt, 10);
-	  m_stencilVals(27) = m_ghostRight(smPt, 11);
+	  m_stencilVals(24) = m_ghostRight(ghostRow, 8);
+	  m_stencilVals(25) = m_ghostRight(ghostRow, 9);
+	  m_stencilVals(26) = m_ghostRight(ghostRow, 10);
+	  m_stencilVals(27) = m_ghostRight(ghostRow, 11);
 	}else{
 	  const auto index = r2*numDofPerCell;
 	  m_stencilVals(24) = m_state(index);
@@ -340,7 +342,7 @@ public:
 	  m_stencilVals(27) = m_state(index+3);
 	}
 	break;
-      }
+      }//case 7
     }
   }
 

@@ -18,7 +18,8 @@
 #include "./impl/eulerCommon/energy.hpp"
 #include "./impl/eulerCommon/fluxes.hpp"
 #include "./impl/stencil_filler.hpp"
-#include "./impl/reconstructor.hpp"
+#include "./impl/reconstructor_from_stencil.hpp"
+#include "./impl/reconstructor_from_state.hpp"
 
 namespace pressiodemoapps{
 enum class euler2dproblemsEnum{

@@ -86,12 +86,11 @@ private:
     edge_rec_t uMinusHalfPos(numDofPerCell);
     edge_rec_t uPlusHalfNeg (numDofPerCell);
     edge_rec_t uPlusHalfPos (numDofPerCell);
-
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
+
     // only need ghosts for specific problems
     if (m_probEn == pressiodemoapps::euler1dproblemsEnum::sod)
     {
-
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
 	numDofPerCell, state_type, mesh_t, ghost_t>;
       ghost_filler_t ghF(stencilSize, U, m_meshObj, m_ghostLeft, m_ghostRight);
@@ -100,8 +99,8 @@ private:
 
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
-    using rec_fnct_t = ::pressiodemoapps::impl::Reconstructor<
-      numDofPerCell, edge_rec_t, stencil_values_t>;
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencil<
+      edge_rec_t, stencil_values_t>;
 
     sfiller_t StencilFiller(stencilSize, U, m_meshObj,
 			    m_ghostLeft, m_ghostRight, m_stencilVals);
@@ -114,7 +113,7 @@ private:
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
       {
 	StencilFiller(smPt);
-	Reconstructor();
+	Reconstructor.template operator()<numDofPerCell>();
 	eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
 	eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
 

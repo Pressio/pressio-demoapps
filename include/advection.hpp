@@ -9,7 +9,8 @@
 #include "./reconstruction_enums.hpp"
 #include "./mesh.hpp"
 #include "./impl/stencil_filler.hpp"
-#include "./impl/reconstructor.hpp"
+#include "./impl/reconstructor_from_stencil.hpp"
+#include "./impl/reconstructor_from_state.hpp"
 #include "./impl/advection1d/fluxes.hpp"
 #include "./impl/advection1d/linear_adv_impl.hpp"
 
