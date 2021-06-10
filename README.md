@@ -31,6 +31,7 @@ python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -out
 
 C++ problem object syntax:
 ```c++
+namespace pda      = pressiodemoapps;
 const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>);
 const auto probId  = pda::euler1dproblemsEnum::{sod, lax}
 const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
@@ -54,6 +55,7 @@ python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx>
 
 C++ problem object syntax:
 ```c++
+namespace pda      = pressiodemoapps;
 const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>);
 const auto probId  = pda::euler2dproblemsEnum::{sedov, riemann};
 const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
