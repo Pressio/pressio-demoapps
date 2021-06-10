@@ -13,7 +13,7 @@ git clone --recursive git@github.com:Pressio/pressio-demoapps.git
 
 export CXX=<path-to-your-CXX-compiler>
 cd pressio-demoapps && mkdir build && cd build
-cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On ..
+cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON ..
 make -j4
 ctest -j4
 ```
