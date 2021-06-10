@@ -5,7 +5,7 @@ While the primary purpose of this repository is to contain mini-apps
 to use for testing ROMs in Pressio, this repository is self-contained in the sense
 that the code here does *not* depend on Pressio.
 
-# Building Tests
+# Building Tests C++
 Requires CMake > 3.18.0 and a C++ compiler with C++14 support:
 
 ```
@@ -20,7 +20,7 @@ ctest -j4
 Note that to use the code as a library, you don't need to build anything.
 Just point to the include directory.
 
-# Building Python bindings
+# Python bindings
 Requires CMake > 3.18.0 and a C++ compiler with C++14 support:
 
 ```
