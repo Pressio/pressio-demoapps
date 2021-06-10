@@ -33,7 +33,7 @@ pytest -s # this runs the tests, located in side tests_py
 ```
 
 
-# Problems Synopsis
+# Synopsis
 
 ## 1d Problems: Sod, Lax
 
