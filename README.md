@@ -25,8 +25,8 @@ ctest -j4
 
 Mesh generation: 
 ```py
-python create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere>
-python create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere>
+python ./meshing_scripts/create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere>
+python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere>
 ```
 
 C++ problem object syntax:
@@ -48,8 +48,8 @@ appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId)
 
 Mesh generation: 
 ```py
-python create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
-python create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
+python ./meshing_scripts/create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
+python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
 ```
 
 C++ problem object syntax:
