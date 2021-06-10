@@ -6,12 +6,12 @@ to use for testing ROMs in Pressio, this repository is self-contained in the sen
 that the code here does *not* depend on Pressio.
 
 # Building Tests
-Requires CMake > 3.18.0 and a C++ compiler with C++11 support:
+Requires CMake > 3.18.0 and a C++ compiler with C++14 support:
 
 ```
 git clone --recursive git@github.com:Pressio/pressio-demoapps.git
 
-export CXX=<path-to-your-CXX-compiler>
+export CXX=<path-to-your-CXX-compiler> #must support C++14
 cd pressio-demoapps && mkdir build && cd build
 cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON ..
 make -j4
