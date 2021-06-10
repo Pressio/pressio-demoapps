@@ -17,13 +17,27 @@ cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON ..
 make -j4
 ctest -j4
 ```
+Note that to use the code as a library, you don't need to build anything.
+Just point to the include directory.
+
+# Building Python bindings
+Requires CMake > 3.18.0 and a C++ compiler with C++14 support:
+
+```
+git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+
+export CXX=<path-to-your-CXX-compiler> #must support C++14
+cd pressio-demoapps
+python setup.py install
+pytest -s # this runs the tests, located in side tests_py
+```
 
 
-# Problems Synopsis 
+# Problems Synopsis
 
 ## 1d Problems: Sod, Lax
 
-Mesh generation: 
+Mesh generation:
 ```py
 python ./meshing_scripts/create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere>
 python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere>
@@ -38,7 +52,7 @@ const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
 auto appObj        = pda::createEuler1dEigen(meshObj, order, probId);
 ```
 
-Python object syntax: 
+Python object syntax:
 ```py
 meshO    = loadCellCenterUniformMesh(meshPath)
 probId   = euler1d.{sod, lax}
@@ -47,7 +61,7 @@ appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId)
 
 ## 2d problems: Sedov, Riemann
 
-Mesh generation: 
+Mesh generation:
 ```py
 python ./meshing_scripts/create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
 python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
@@ -62,7 +76,7 @@ const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
 auto appObj        = pda::createEuler1dEigen(meshObj, order, probId);
 ```
 
-Python object syntax: 
+Python object syntax:
 ```py
 meshO    = loadCellCenterUniformMesh(meshPath)
 probId   = euler2d.{sedov, riemann}
