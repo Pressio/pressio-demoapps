@@ -96,7 +96,8 @@ PYBIND11_MODULE(MODNAME, mParent)
   // ---------------------------------------
   pybind11::enum_<pressiodemoapps::euler1dproblemsEnum>(mParent, "euler1d")
     .value("periodic", pressiodemoapps::euler1dproblemsEnum::periodic)
-    .value("sod",      pressiodemoapps::euler1dproblemsEnum::sod);
+    .value("sod",      pressiodemoapps::euler1dproblemsEnum::sod)
+    .value("lax",      pressiodemoapps::euler1dproblemsEnum::lax);
 
   pybind11::enum_<pressiodemoapps::euler2dproblemsEnum>(mParent, "euler2d")
     .value("periodic", pressiodemoapps::euler2dproblemsEnum::periodic)

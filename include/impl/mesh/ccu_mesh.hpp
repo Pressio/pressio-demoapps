@@ -27,15 +27,10 @@ public:
   using y_t	  = xy_type;
   using graph_t   = mesh_g_type;
   using indices_v_t = std::vector<index_t>;
-// #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-//   using proxy_t = decltype(std::declval<graph_t>().unchecked());
-//   using g_ret_type = proxy_t;
-// #else
-//   using g_ret_type = const graph_t &;
-// #endif
 
   CellCenteredUniformMesh() = delete;
 
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   template<
     bool _is_binding = is_binding,
     typename std::enable_if<!_is_binding>::type * = nullptr
@@ -45,7 +40,7 @@ public:
     allocateAndSetup(meshDir);
   }
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+#else
   // note that when doing bindings, I need to first construct
   // with {1,1} just so that the numpy array picks up they
   // are 2dim array otherwise it thinks they are 1d array.

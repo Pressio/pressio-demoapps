@@ -25,7 +25,8 @@ namespace pressiodemoapps{
 enum class euler2dproblemsEnum{
   periodic,
   sedov,
-  riemann
+  riemann,
+  testingonlyneumann
 };
 
 namespace impl{

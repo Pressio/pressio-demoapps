@@ -47,7 +47,7 @@ def readFullMeshConnec(fullMeshDir):
 
 #====================================================================
 def readFullMeshInfo(fullMeshDir):
-  dim=2
+  dim=0
   bounds=[None]*4
   dx,dy = 0., 0.
   sampleMeshSize = 0
@@ -59,7 +59,9 @@ def readFullMeshInfo(fullMeshDir):
     cnt = 1
     while line:
       lineList = line.split()
-      if "dx" in lineList:
+      if "dim" in lineList:
+        dim = int(lineList[1])
+      elif "dx" in lineList:
         dx = float(lineList[1])
       elif "dy" in lineList:
         dy = float(lineList[1])
@@ -83,7 +85,7 @@ def readFullMeshInfo(fullMeshDir):
 
   # in the full mesh, the sample and stencil size must be equal
   assert(sampleMeshSize == stencilMeshSize)
-  return [dx,dy, int(sampleMeshSize), bounds, stencilSize]
+  return [dim, dx,dy, int(sampleMeshSize), bounds, stencilSize]
 
 #====================================================================
 def readFullMeshCoordinates(fullMeshDir):
@@ -104,7 +106,7 @@ def readFullMeshCoordinates(fullMeshDir):
 #====================================================================
 #====================================================================
 def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
-  dx,dy,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
+  dim,dx,dy,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
   x,y = readFullMeshCoordinates(fullMeshDir)
   G,gids = readFullMeshConnec(fullMeshDir)
 
@@ -261,6 +263,7 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   # -----------------------------------------------------
   # print info file
   f = open(workDir+"/info.dat","w+")
+  f.write("dim %1d\n" % dim)
   f.write("xMin %.14f\n" % domainBounds[0])
   f.write("xMax %.14f\n" % domainBounds[1])
   f.write("yMin %.14f\n" % domainBounds[2])

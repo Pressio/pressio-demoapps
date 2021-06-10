@@ -55,12 +55,17 @@ public:
 						   numDofPerCell,
 						   m_gamma);
     }
+    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::lax){
+      ::pressiodemoapps::ee::lax1dInitialCondition(res, m_meshObj,
+						   numDofPerCell,
+						   m_gamma);
+    }
 
     return res;
   }
 
-  scalar_type gamma() const{ return m_gamma; }
-  index_t totalDofSampleMesh() const{ return m_numDofSampleMesh; }
+  scalar_type gamma()		const{ return m_gamma; }
+  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
   index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 
   velocity_type createVelocity() const {
@@ -89,7 +94,8 @@ private:
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
 
     // only need ghosts for specific problems
-    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::sod)
+    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::sod or
+	m_probEn == pressiodemoapps::euler1dproblemsEnum::lax)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
 	numDofPerCell, state_type, mesh_t, ghost_t>;

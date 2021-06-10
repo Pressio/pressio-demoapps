@@ -1,13 +1,20 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
-add_subdirectory(meshing)
-add_subdirectory(weno5)
-add_subdirectory(linadv1d_convergence)
-add_subdirectory(euler1d_convergence)
-add_subdirectory(sod1d)
+add_subdirectory(ccuMeshObj)
+add_subdirectory(ccuMeshObjSpecialCellsLists)
+add_subdirectory(mesh_generation_full)
+add_subdirectory(mesh_generation_sample)
 
-add_subdirectory(sedov2d)
-add_subdirectory(riemann2d)
+add_subdirectory(weno5)
+
+add_subdirectory(1d_linear_adv_convergence)
+add_subdirectory(1d_euler_convergence)
+add_subdirectory(1d_sod)
+add_subdirectory(1d_lax)
+
+add_subdirectory(2d_sedov)
+add_subdirectory(2d_riemann)
+add_subdirectory(2d_euler_sample_mesh_test1)
+

@@ -103,6 +103,10 @@ public:
 	  throw std::runtime_error("invalid IC");
 	}
       }
+
+      case pressiodemoapps::euler2dproblemsEnum::testingonlyneumann:{
+	return IC;
+      }
       };
 
     return IC;
@@ -246,7 +250,8 @@ private:
     // deal with cells away from boundaries
     const auto & graph = m_meshObj.graph();
     const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
-    for (int it=0; it<rowsIn.size(); ++it){
+    for (int it=0; it<rowsIn.size(); ++it)
+    {
       const auto smPt = rowsIn[it];
       const auto cellGID = graph(smPt, 0);
       const auto uIndex = cellGID*numDofPerCell;
@@ -275,7 +280,8 @@ private:
   {
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
     if (m_probEn == pressiodemoapps::euler2dproblemsEnum::sedov or
-	m_probEn == pressiodemoapps::euler2dproblemsEnum::riemann)
+	m_probEn == pressiodemoapps::euler2dproblemsEnum::riemann or
+	m_probEn == pressiodemoapps::euler2dproblemsEnum::testingonlyneumann)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost2dNeumannFiller<
 	numDofPerCell, state_type, mesh_t, ghost_t>;

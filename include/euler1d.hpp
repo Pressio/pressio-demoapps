@@ -29,7 +29,12 @@ enum class euler1dproblemsEnum{
   // sod taken from: https://www.mdpi.com/2227-7390/6/10/211/pdf
   // x \in [-0.5, 0.5]
   // initial condition is provided by the app class
-  sod
+  sod,
+
+  // from https://www.sciencedirect.com/science/article/abs/pii/S0045793019300234
+  // x \in [-5., 5.]
+  // initial condition is provided by the app class
+  lax
 };
 }
 
