@@ -64,8 +64,8 @@ If you pass two values, I assume 2d.")
             "--outDir", args.outDir, 
             "--stencilSize", str(s), 
             "--bounds", str(-0.5), str(0.5), str(-0.5), str(0.5),
-            "--periodic", "false",
-            "-p", "print", str(5))
+            "--periodic", "false")
+            # "-p", "print", str(0))
 
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
   
@@ -77,8 +77,8 @@ If you pass two values, I assume 2d.")
             "--outDir", args.outDir, 
             "--stencilSize", str(s), 
             "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
-            "--periodic", "false",
-            "-p", "print", str(5))
+            "--periodic", "false")
+            # "-p", "print", str(0))
 
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
