@@ -48,12 +48,13 @@ def readFullMeshConnec(fullMeshDir):
 #====================================================================
 def readFullMeshInfo(fullMeshDir):
   dim=0
-  bounds=[None]*4
-  dx,dy = 0., 0.
+  bounds=[None]*6
+  dx,dy,dz = 0., 0., 0.
   sampleMeshSize = 0
   stencilMeshSize = 0
   stencilSize = 0
   infoFile = fullMeshDir+"/info.dat"
+
   with open(infoFile) as fp:
     line = fp.readline()
     cnt = 1
@@ -61,22 +62,40 @@ def readFullMeshInfo(fullMeshDir):
       lineList = line.split()
       if "dim" in lineList:
         dim = int(lineList[1])
+
       elif "dx" in lineList:
         dx = float(lineList[1])
+
       elif "dy" in lineList:
         dy = float(lineList[1])
+
+      elif "dz" in lineList:
+        dz = float(lineList[1])
+
       elif "xMin" in lineList:
         bounds[0] = float(lineList[1])
+
       elif "xMax" in lineList:
         bounds[1] = float(lineList[1])
+
       elif "yMin" in lineList:
         bounds[2] = float(lineList[1])
+
       elif "yMax" in lineList:
         bounds[3] = float(lineList[1])
+
+      elif "zMin" in lineList:
+        bounds[4] = float(lineList[1])
+
+      elif "zMax" in lineList:
+        bounds[5] = float(lineList[1])
+
       elif "sampleMeshSize" in lineList:
         sampleMeshSize = np.int64(lineList[1])
+
       elif "stencilMeshSize" in lineList:
         stencilMeshSize = np.int64(lineList[1])
+
       elif "stencilSize" in lineList:
         stencilSize = np.int64(lineList[1])
 
@@ -85,11 +104,11 @@ def readFullMeshInfo(fullMeshDir):
 
   # in the full mesh, the sample and stencil size must be equal
   assert(sampleMeshSize == stencilMeshSize)
-  return [dim, dx,dy, int(sampleMeshSize), bounds, stencilSize]
+  return [dim, dx,dy,dz, int(sampleMeshSize), bounds, stencilSize]
 
 #====================================================================
-def readFullMeshCoordinates(fullMeshDir):
-  x,y = [], []
+def readFullMeshCoordinates(fullMeshDir,dim):
+  x,y,z = [], [], []
   inFile = fullMeshDir+"/coordinates.dat"
   with open(inFile) as fp:
     line = fp.readline()
@@ -98,29 +117,39 @@ def readFullMeshCoordinates(fullMeshDir):
       lineList = line.split()
       x.append(float(lineList[1]))
       y.append(float(lineList[2]))
+      if dim==3:
+        z.append(float(lineList[3]))
 
       line = fp.readline()
       cnt += 1
-  return np.array(x), np.array(y)
+  return np.array(x), np.array(y), np.array(z)
 
-#====================================================================
-#====================================================================
+
+#=========================================================================
 def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
-  dim,dx,dy,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
-  x,y = readFullMeshCoordinates(fullMeshDir)
+#=========================================================================
+  dim,dx,dy,dz,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
+  x,y,z = readFullMeshCoordinates(fullMeshDir, dim)
   G,gids = readFullMeshConnec(fullMeshDir)
 
   if (plotting != "none"):
     figFM = plt.figure(0)
-    axFM = figFM.gca()
     figSM = plt.figure(1)
-    axSM = figSM.gca()
+    if dim<=2:
+      axFM = figFM.gca()
+      axSM = figSM.gca()
+    elif dim==3:
+      axFM = figFM.gca(projection='3d')
+      axSM = figSM.gca(projection='3d')
 
-  if plotting != "none":
+  if plotting != "none" and dim<=2:
     plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
     axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axFM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
+
+  if plotting != "none" and dim==3:
+    plotLabels3d(x, y, z, dx, dy, dz, gids, axFM, fontSz=plotFontSize)
 
   if debug:
     print("natural order full mesh connectivity")
@@ -244,13 +273,26 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     printDicPretty(sampleMeshGraph)
 
   gids_sm = list(sm_to_fm_map.keys())
-  if plotting != "none":
+  if plotting != "none" and dim<=2:
     x2, y2 = x[ list(fm_to_sm_map.keys()) ], y[ list(fm_to_sm_map.keys()) ]
     plotLabels(x2, y2, dx, dy, gids_sm, axSM, 's', 'r', 0, fontSz=plotFontSize)
     axSM.set_aspect(1.0)
     axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
 
+  if plotting != "none" and dim==3:
+    sampleMeshOnlyGIDs = list(set(stencilMeshGIDs) - set(sampleMeshGIDs))
+
+    # plot stencil mesh cells
+    x2, y2, z2 = x[sampleMeshOnlyGIDs], y[sampleMeshOnlyGIDs], z[sampleMeshOnlyGIDs]
+    plotLabels3d(x2, y2, z2, dx, dy, dz, gids_sm, axSM, fontSz=plotFontSize, facecol='w')
+
+    x3, y3, z3 = x[sampleMeshGIDs], y[sampleMeshGIDs], z[sampleMeshGIDs]
+    plotLabels3d(x3, y3, z3, dx, dy, dz, gids_sm, axSM, fontSz=plotFontSize, facecol='r', alpha=0.3)
+
+    #axSM.set_aspect(1.0)
+    #axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    #axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
 
   # -----------------------------------------------------
   sampleMeshSize = len(sampleMeshGraph)

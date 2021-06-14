@@ -24,17 +24,17 @@
 namespace pressiodemoapps{
 enum class euler1dproblemsEnum{
   // for periodic, the user must provide a periodic domain and IC
-  periodic,
+  PeriodicSmooth,
 
   // sod taken from: https://www.mdpi.com/2227-7390/6/10/211/pdf
   // x \in [-0.5, 0.5]
   // initial condition is provided by the app class
-  sod,
+  Sod,
 
   // from https://www.sciencedirect.com/science/article/abs/pii/S0045793019300234
   // x \in [-5., 5.]
   // initial condition is provided by the app class
-  lax
+  Lax
 };
 }
 
@@ -52,10 +52,10 @@ T createEe1dImpl(const mesh_t & meshObj,
 {
   meshObj.checkStencilSupportsOrder(enIn);
 
-  if (probEn == pressiodemoapps::euler1dproblemsEnum::periodic){
+  if (probEn == pressiodemoapps::euler1dproblemsEnum::PeriodicSmooth){
     if (!meshObj.isPeriodic()){
       throw std::runtime_error
-      ("For periodic euler1d, mesh must be periodic.");
+      ("For periodicSmooth euler1d, mesh must be periodic.");
     }
   }
 

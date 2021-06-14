@@ -13,31 +13,17 @@ int main(int argc, char *argv[])
   const auto order   = pda::reconstructionEnum::firstOrder;
 #endif
 
-  const auto probId  = pda::euler2dproblemsEnum::riemann;
+  const auto probId  = pda::euler2dproblemsEnum::Riemann;
   auto appObj      = pda::createEuler2dEigen(meshObj, order, probId, 2);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;
   using scalar_t = typename app_t::scalar_type;
 
-  // // pressio::log::initialize(pressio::logto::terminal);
-  // // pressio::log::setVerbosity({pressio::log::level::debug});
-  // using scalar_t = double;
-  // using mesh_t = pressiodemoapps::CellCenteredUniformMeshEigen<scalar_t>;
-  // using app_t       = pressiodemoapps::Riemann2dEigen<scalar_t, mesh_t>;
-  // using app_state_t = typename app_t::state_type;
-  // using app_rhs_t   = typename app_t::velocity_type;
-  // mesh_t meshObj(".");
-  // app_t appObj(meshObj, 2);
-  // const auto gamma = appObj.gamma();
-
   const auto stateSize = appObj.totalDofStencilMesh();
-  auto ic = appObj.initialCondition();
-  ode_state_t state(ic);
+  ode_state_t state(appObj.initialCondition());
 
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
   FomObserver<ode_state_t> Obs("riemann2d_solution.bin", 100);
-
   const auto dt = 0.001;
   const auto Nsteps = 0.6/dt;
 

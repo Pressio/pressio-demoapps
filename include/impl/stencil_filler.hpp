@@ -356,5 +356,105 @@ private:
   int m_axis;
 };
 
+
+//------------------------------
+// dim=3, 5 dofs/cell
+//------------------------------
+template<class stencil_values_t, class state_t, class mesh_t, class ghost_t>
+class StencilFiller<
+  3, 5, stencil_values_t, state_t, mesh_t, ghost_t
+  >
+{
+
+public:
+  StencilFiller() = delete;
+  StencilFiller(const int stencilSize,
+		const state_t & stateIn,
+		const mesh_t & meshIn,
+		const ghost_t & ghostLeft,
+		const ghost_t & ghostRight,
+		stencil_values_t & stencilVals,
+		const int axis)
+    : m_stencilSize(stencilSize),
+      m_state(stateIn),
+      m_meshObj(meshIn),
+      m_ghostLeft(ghostLeft),
+      m_ghostRight(ghostRight),
+      m_stencilVals(stencilVals),
+      m_axis(axis)
+  {}
+
+  template<class index_t>
+  void operator()(const index_t smPt, int ghostRow)
+  {
+    constexpr auto numDofPerCell = 5;
+    const auto & graph = m_meshObj.graph();
+    const auto uIndex = graph(smPt, 0)*numDofPerCell;
+
+    switch(m_stencilSize)
+    {
+    case 3:
+      {
+
+	auto l0 = (m_axis == 1) ? graph(smPt, 1) : (m_axis==2) ? graph(smPt, 4) : graph(smPt, 5);
+	auto r0 = (m_axis == 1) ? graph(smPt, 3) : (m_axis==2) ? graph(smPt, 2) : graph(smPt, 6);
+
+	if (l0 == -1){
+	  m_stencilVals(0) = m_ghostLeft(ghostRow, 0);
+	  m_stencilVals(1) = m_ghostLeft(ghostRow, 1);
+	  m_stencilVals(2) = m_ghostLeft(ghostRow, 2);
+	  m_stencilVals(3) = m_ghostLeft(ghostRow, 3);
+	  m_stencilVals(4) = m_ghostLeft(ghostRow, 4);
+	}else{
+	  const auto index = l0*numDofPerCell;
+	  m_stencilVals(0) = m_state(index);
+	  m_stencilVals(1) = m_state(index+1);
+	  m_stencilVals(2) = m_state(index+2);
+	  m_stencilVals(3) = m_state(index+3);
+	  m_stencilVals(4) = m_state(index+4);
+	}
+
+	m_stencilVals(5)  = m_state(uIndex);
+	m_stencilVals(6)  = m_state(uIndex+1);
+	m_stencilVals(7)  = m_state(uIndex+2);
+	m_stencilVals(8)  = m_state(uIndex+3);
+	m_stencilVals(9)  = m_state(uIndex+4);
+
+	if (r0 == -1){
+	  m_stencilVals(10) = m_ghostRight(ghostRow, 0);
+	  m_stencilVals(11) = m_ghostRight(ghostRow, 1);
+	  m_stencilVals(12) = m_ghostRight(ghostRow, 2);
+	  m_stencilVals(13) = m_ghostRight(ghostRow, 3);
+	  m_stencilVals(14) = m_ghostRight(ghostRow, 4);
+	}else{
+	  const auto index = r0*numDofPerCell;
+	  m_stencilVals(10) = m_state(index);
+	  m_stencilVals(11) = m_state(index+1);
+	  m_stencilVals(12) = m_state(index+2);
+	  m_stencilVals(13) = m_state(index+3);
+	  m_stencilVals(14) = m_state(index+4);
+	}
+	break;
+      } // case 3
+
+    case 7:
+      {
+	throw std::runtime_error("missing impl");
+	break;
+      } // case 7
+
+    }
+  }
+
+private:
+  const int m_stencilSize;
+  const state_t & m_state;
+  const mesh_t & m_meshObj;
+  const ghost_t & m_ghostLeft;
+  const ghost_t & m_ghostRight;
+  stencil_values_t & m_stencilVals;
+  int m_axis;
+};
+
 }}
 #endif

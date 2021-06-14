@@ -4,5 +4,6 @@
 
 #include "euler1d.hpp"
 #include "euler2d.hpp"
+#include "euler3d.hpp"
 
 #endif

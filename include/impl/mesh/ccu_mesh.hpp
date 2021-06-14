@@ -14,7 +14,7 @@ namespace pressiodemoapps{ namespace impl{
 template<
   class scalar_type,
   class index_type,
-  class xy_type,
+  class xyz_type,
   class mesh_g_type,
   bool is_binding
   >
@@ -23,8 +23,9 @@ class CellCenteredUniformMesh
 public:
   using scalar_t  = scalar_type;
   using index_t	  = index_type;
-  using x_t	  = xy_type;
-  using y_t	  = xy_type;
+  using x_t	  = xyz_type;
+  using y_t	  = xyz_type;
+  using z_t	  = xyz_type;
   using graph_t   = mesh_g_type;
   using indices_v_t = std::vector<index_t>;
 
@@ -49,7 +50,7 @@ public:
     typename std::enable_if<_is_binding>::type * = nullptr
     >
   explicit CellCenteredUniformMesh(const std::string & meshDir)
-    : m_x(1), m_y(1), m_graph({1,1})
+    : m_x(1), m_y(1), m_z(1), m_graph({1,1})
   {
     allocateAndSetup(meshDir);
   }
@@ -106,6 +107,19 @@ public:
     return res;
   }
 
+  auto boundsZ() const{
+    auto res = std::make_tuple(std::numeric_limits<scalar_type>::max(),
+			       std::numeric_limits<scalar_type>::min());
+
+    for (int i=0; i<m_stencilMeshSize; ++i){
+      auto & v1 = res.get<0>(res);
+      auto & v2 = res.get<1>(res);
+      v1 = std::min(v1, m_z(i));
+      v2 = std::max(v2, m_z(i));
+    }
+    return res;
+  }
+
   int dimensionality() const{
     return m_dim;
   }
@@ -126,37 +140,20 @@ public:
     return m_graph;
   }
 
-  const scalar_type dx() const{
-    return m_cellDeltas[0];
-  }
+  const scalar_type dx() const{ return m_cellDeltas[0]; }
+  const scalar_type dy() const{ return m_cellDeltas[1]; }
+  const scalar_type dz() const{ return m_cellDeltas[2]; }
 
-  const scalar_type dxInv() const{
-    return m_cellDeltas[1];
-  }
+  const scalar_type dxInv() const{ return m_cellDeltasInv[0]; }
+  const scalar_type dyInv() const{ return m_cellDeltasInv[1]; }
+  const scalar_type dzInv() const{ return m_cellDeltasInv[2]; }
 
-  const scalar_type dy() const{
-    return m_cellDeltas[2];
-  }
+  const x_t & viewX() const{ return m_x; }
+  const y_t & viewY() const{ return m_y; }
+  const z_t & viewZ() const{ return m_z; }
 
-  const scalar_type dyInv() const{
-    return m_cellDeltas[3];
-  }
-
-  const x_t & viewX() const{
-    return m_x;
-  }
-
-  const y_t & viewY() const{
-    return m_y;
-  }
-
-  auto numCellsInner() const{
-    return m_rowsForCellsInner.size();
-  }
-
-  auto numCellsBd() const{
-    return m_rowsForCellsBd.size();
-  }
+  auto numCellsInner() const{ return m_rowsForCellsInner.size(); }
+  auto numCellsBd() const   { return m_rowsForCellsBd.size(); }
 
   const indices_v_t & graphRowsOfCellsAwayFromBd() const{
     return m_rowsForCellsInner;
@@ -171,23 +168,27 @@ private:
   {
     pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
 					m_cellDeltas,
+					m_cellDeltasInv,
 					m_stencilSize,
 					m_stencilMeshSize,
 					m_sampleMeshSize);
 
     pressiodemoapps::resize(m_x, m_stencilMeshSize);
     pressiodemoapps::resize(m_y, m_stencilMeshSize);
-    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_x, m_y);
+    pressiodemoapps::resize(m_z, m_stencilMeshSize);
+    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_dim, m_x, m_y, m_z);
 
     const auto graphNumCols = (m_stencilSize-1)*m_dim;
     pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols+1);
-
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-    auto gmu = m_graph.mutable_unchecked();
-    pressiodemoapps::impl::readMeshConnectivity(meshDir, gmu, graphNumCols+1);
-#else
     pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols+1);
-#endif
+
+    // for (index_t it=0; it<m_sampleMeshSize; ++it)
+    // {
+    //   for (int j=0; j<graphNumCols; ++j){
+    // 	std::cout << m_graph(it, j) << " ";
+    //   }
+    //   std::cout << std::endl;
+    // }
 
     // figure out how many cells are near the boundaries
     for (index_t it=0; it<m_sampleMeshSize; ++it)
@@ -204,6 +205,7 @@ private:
 	  m_rowsForCellsInner.push_back(it);
 	}
       }
+
       else if (m_dim==2)
       {
 
@@ -218,10 +220,31 @@ private:
 	  m_rowsForCellsInner.push_back(it);
 	}
       }
-      else{
 
+      else if (m_dim==3)
+      {
+	const auto b1 = hasBdLeft3d(it);
+	const auto b2 = hasBdFront3d(it);
+	const auto b3 = hasBdRight3d(it);
+	const auto b4 = hasBdBack3d(it);
+	const auto b5 = hasBdBottom3d(it);
+	const auto b6 = hasBdTop3d(it);
+
+	if(m_stencilSize==7){
+	  throw std::runtime_error("3D with 7pt stencil not supported yet.");
+	}
+
+	if (b1 or b2 or b3 or b4 or b5 or b6){
+	  m_rowsForCellsBd.push_back(it);
+	}
+	else{
+	  m_rowsForCellsInner.push_back(it);
+	}
+      }
+      else{
 	throw std::runtime_error("Invalid dimension");
       }
+
     }
 
   }
@@ -299,14 +322,46 @@ private:
     return false;
   }
 
+  bool hasBdLeft3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 1)==-1) return true;
+    return false;
+  }
+
+  bool hasBdFront3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 2)==-1) return true;
+    return false;
+  }
+
+  bool hasBdRight3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 3)==-1) return true;
+    return false;
+  }
+
+  bool hasBdBack3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 4)==-1) return true;
+    return false;
+  }
+
+  bool hasBdBottom3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 5)==-1) return true;
+    return false;
+  }
+
+  bool hasBdTop3d(const index_t rowInd) const{
+    if (m_graph(rowInd, 6)==-1) return true;
+    return false;
+  }
+
 private:
   int m_dim = {};
-  std::array<scalar_type,4> m_cellDeltas{};
+  std::array<scalar_type,3> m_cellDeltas{};
+  std::array<scalar_type,3> m_cellDeltasInv{};
   int m_stencilSize = {};
   index_t m_stencilMeshSize = {};
   index_t m_sampleMeshSize  = {};
   x_t m_x = {};
   y_t m_y = {};
+  z_t m_z = {};
 
   /*
     graph: contains a list such that

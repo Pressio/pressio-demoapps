@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
   pressio::log::initialize(pressio::logto::terminal);
   pressio::log::setVerbosity({pressio::log::level::debug});
 
-  const auto probId  = pda::euler1dproblemsEnum::lax;
+  const auto probId  = pda::euler1dproblemsEnum::Lax;
   auto appObj      = pda::createEuler1dEigen(meshObj, order, probId);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   const auto gamma = appObj.gamma();
   const auto stateSize = appObj.totalDofStencilMesh();
   using ode_state_t = pressio::containers::Vector<app_state_t>;
-  ode_state_t state = appObj.initialCondition();
+  ode_state_t state(appObj.initialCondition());
 
   auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
   FomObserver<ode_state_t> Obs("1d_lax_solution.bin", 1);

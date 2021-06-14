@@ -12,6 +12,8 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import reverse_cuthill_mckee
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
 # d is a dictionary with the full mesh graph
 # returns the graph in sparse matrix format
@@ -58,6 +60,38 @@ def plotLabels(x, y, dx, dy, gids, ax, m='o', col='b', ms='0', fontSz=7):
   ax.add_collection(pc)
   ax.set_aspect(aspect=1)
 
+
+def cuboid_data2(o, size=(1,1,1)):
+  X = [[[0, 1, 0], [0, 0, 0], [1, 0, 0], [1, 1, 0]],
+       [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 0, 0]],
+       [[1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]],
+       [[0, 0, 1], [0, 0, 0], [0, 1, 0], [0, 1, 1]],
+       [[0, 1, 0], [0, 1, 1], [1, 1, 1], [1, 1, 0]],
+       [[0, 1, 1], [0, 0, 1], [1, 0, 1], [1, 1, 1]]]
+  X = np.array(X).astype(float)
+  for i in range(3):
+    X[:,:,i] *= size[i]
+  X += np.array(o)
+  return X
+
+def plotCubeAt2(positions, sizes=None, colors=None, **kwargs):
+  if not isinstance(colors,(list,np.ndarray)): colors=["C0"]*len(positions)
+  if not isinstance(sizes,(list,np.ndarray)): sizes=[(1,1,1)]*len(positions)
+  g = []
+  for p,s,c in zip(positions,sizes,colors):
+    g.append( cuboid_data2(p, size=s) )
+  #return Poly3DCollection(np.concatenate(g),
+  #                        facecolors=np.repeat(colors,6), **kwargs)
+  #return Line3DCollection(np.concatenate(g), colors='k', linewidths=0.1, linestyles=':')
+  return Poly3DCollection(np.concatenate(g), **kwargs)
+
+def plotLabels3d(x, y, z, dx, dy, dz, gids, ax, facecol='w', ms='0', fontSz=7, alpha=0.1):
+  for i in range(0, len(x)):
+    cellOrigin = [(x[i]-dx*0.5, y[i]-dy*0.5, z[i]-dz*0.5)]
+    cellSize = [(dx, dy, dz)]
+    pc = plotCubeAt2(cellOrigin, cellSize, edgecolor='k', alpha=alpha)
+    pc.set_facecolor(facecol)
+    ax.add_collection3d(pc)
 
 def printDicPretty(d):
   for key, value in d.items():

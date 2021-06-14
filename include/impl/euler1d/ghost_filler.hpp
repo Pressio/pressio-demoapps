@@ -32,7 +32,7 @@ public:
 
   void operator()()
   {
-    const auto x  = m_meshObj.viewX();
+    const auto & x  = m_meshObj.viewX();
     const auto sampleMeshSize = m_meshObj.sampleMeshSize();
     const auto & graph = m_meshObj.graph();
 

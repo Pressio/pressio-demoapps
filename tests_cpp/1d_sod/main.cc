@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
   const auto order   = pda::reconstructionEnum::firstOrder;
 #endif
 
-  const auto probId  = pda::euler1dproblemsEnum::sod;
+  const auto probId  = pda::euler1dproblemsEnum::Sod;
   auto appObj      = pda::createEuler1dEigen(meshObj, order, probId);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;

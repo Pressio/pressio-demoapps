@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   const auto order   = pda::reconstructionEnum::firstOrder;
 #endif
 
-  const auto probId  = pda::euler2dproblemsEnum::sedov;
+  const auto probId  = pda::euler2dproblemsEnum::SedovFull;
   auto appObj      = pda::createEuler2dEigen(meshObj, order, probId);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   auto ic = appObj.initialCondition();
   ode_state_t state(ic);
 
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
+  // auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
   FomObserver<ode_state_t> Obs("sedov2d_solution.bin", 5);
 
   const auto dt = 0.0001;

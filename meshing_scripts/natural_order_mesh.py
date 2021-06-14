@@ -39,13 +39,6 @@ class NatOrdMeshRow:
     self.gids_ = np.zeros(self.numCells_)
     self.G_ = {}
     self.createFullGrid()
-
-    # these tags are used when we deal with nonperiodic BC
-    self.cellOutsideWest_  = -1
-    self.cellOutsideNorth_ = -1
-    self.cellOutsideEast_  = -1
-    self.cellOutsideSouth_ = -1
-
     self.buildGraph(enablePeriodicBc)
     #self.spMat_ = convertGraphDicToSparseMatrix(self.G_)
 
@@ -91,40 +84,32 @@ class NatOrdMeshRow:
       self._buildGraphStencil7(enablePeriodicBc)
 
   def _buildGraphStencil3(self, pBc):
-    # neighbors are listed as west, north, east, south
-    # since we have PBC, ensure these are met
+    # neighbors are listed as left, front, right, bottom
     for iPt in range(self.numCells_):
-      # convert from globa enumeration to (i,j)
       [gi, gj] = self.globalIDToGiGj(iPt)
-
-      # temporary list holding neighbors
       tmpList = np.zeros(4, dtype=np.int64)
 
-      # west neighbor
-      # if gi==0, we are on left BD
+      # left
       if gi==0:
-        tmpList[0]=iPt+self.Nx_-1 if pBc else self.cellOutsideWest_
+        tmpList[0]=iPt+self.Nx_-1 if pBc else -1
       if gi>0:
         tmpList[0]=iPt-1
 
-      # north naighbor
-      # if gj==self.Ny_-1, we are on TOP BD
+      # front
       if gj==self.Ny_-1:
-        tmpList[1]=iPt-self.Nx_*(self.Ny_-1) if pBc else self.cellOutsideNorth_
+        tmpList[1]=iPt-self.Nx_*(self.Ny_-1) if pBc else -1
       if gj<self.Ny_-1:
         tmpList[1]=iPt+self.Nx_
 
-      # east neighbor
-      # if gi==self.Nx_-1, we are on Right BD
+      # right
       if gi==self.Nx_-1:
-        tmpList[2]=iPt-self.Nx_+1 if pBc else self.cellOutsideEast_
+        tmpList[2]=iPt-self.Nx_+1 if pBc else -1
       if gi<self.Nx_-1:
         tmpList[2]=iPt+1
 
-      # south naighbor
-      # if gj==0, we are on bottom BD
+      # back
       if gj==0:
-        tmpList[3]=iPt+self.Nx_*(self.Ny_-1) if pBc else self.cellOutsideSouth_
+        tmpList[3]=iPt+self.Nx_*(self.Ny_-1) if pBc else -1
       if gj>0:
         tmpList[3]=iPt-self.Nx_
 
@@ -132,23 +117,23 @@ class NatOrdMeshRow:
       self.G_[iPt] = tmpList
 
   def _buildGraphStencil5(self, pBc):
-    # neighbors are listed as west, north, east, south degree 1
-    # neighbors are listed as west, north, east, south degree 2
-    # first we put the closest, then we put the ones one layer after
+    # neighbors are listed as left, front, right, back degree 1
+    # neighbors are listed as left, front, right, back degree 2
+    '''
+    left0 front0 right0 back0 left1 front1 right1 back1
+      0     1      2      3     4    5       6      7
+    '''
 
     for iPt in range(self.numCells_):
-      # convert to (i,j)
       [gi, gj] = self.globalIDToGiGj(iPt)
 
       # temporary list holding neighbors
       tmpList = np.zeros(8, dtype=np.int64)
 
-      # west neighbors
-      # if gi==0, we are on left BD
+      # left
       if gi==0:
         tmpList[0]=iPt+self.Nx_-1
         tmpList[4]=iPt+self.Nx_-2
-      # if gi==1, we are one inside from left BD
       elif gi==1:
         tmpList[0]=iPt-1
         tmpList[4]=iPt+self.Nx_-2
@@ -156,8 +141,7 @@ class NatOrdMeshRow:
         tmpList[0]=iPt-1
         tmpList[4]=iPt-2
 
-      # north naighbor
-      # if gj==self.Ny_-1, we are on TOP BD
+      # front
       if gj==self.Ny_-1:
         tmpList[1]=iPt-self.Nx_*(self.Ny_-1)
         tmpList[5]=tmpList[1]+self.Nx_
@@ -168,8 +152,7 @@ class NatOrdMeshRow:
         tmpList[1]=iPt+self.Nx_
         tmpList[5]=iPt+self.Nx_*2
 
-      # east neighbor
-      # if gi==self.Nx_-1, we are on Right BD
+      # right
       if gi==self.Nx_-1:
         tmpList[2]=iPt-self.Nx_+1
         tmpList[6]=tmpList[2]+1
@@ -180,8 +163,7 @@ class NatOrdMeshRow:
         tmpList[2]=iPt+1
         tmpList[6]=iPt+2
 
-      # south naighbor
-      # if gj==0, we are on bottom BD
+      # back
       if gj==0:
         tmpList[3]=iPt+self.Nx_*(self.Ny_-1)
         tmpList[7]=tmpList[3]-self.Nx_
@@ -196,89 +178,87 @@ class NatOrdMeshRow:
       self.G_[iPt] = tmpList
 
   def _buildGraphStencil7(self, pBc):
-    # neighbors are listed as west, north, east, south degree 1
-    # neighbors are listed as west, north, east, south degree 2
-    # neighbors are listed as west, north, east, south degree 3
-    # first we put the closest, then we put the ones one layer after
+    '''
+    neighbors are listed as:
+    l0,f0,r0,b0, l1,f1,r1,b1, l2,f2,r2,b2
 
+    0,1,2 indicate the closeness. So 0 is for the closest points,
+    1 is for one layer out, and 2 is for 2 layers out
+
+    left0 front0 right0 back0 left1 front1 right1 back1 left2 front2 right2 back2
+      0     1      2      3     4    5       6      7     8     9      10     11
+    '''
     for iPt in range(self.numCells_):
-      # convert to (i,j)
       [gi, gj] = self.globalIDToGiGj(iPt)
-
-      # temporary list holding neighbors
       tmpList = np.zeros(12, dtype=np.int64)
 
-      # west neighbors
-      # if gi==0, we are on left BD
+      # left
       if gi==0:
-        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else self.cellOutsideWest_
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj) if pBc else self.cellOutsideWest_
+        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj) if pBc else -1
       elif gi==1:
         tmpList[0]=self.gigjToGlobalID(0, gj)
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else self.cellOutsideWest_
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
       elif gi==2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else self.cellOutsideWest_
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
       elif gi>2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
         tmpList[8]=self.gigjToGlobalID(gi-3, gj)
 
-      # north naighbor
-      # if gj==self.Ny_-1, we are on TOP BD
+      # front
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
-        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else self.cellOutsideNorth_
-        tmpList[9]=self.gigjToGlobalID(gi, 2) if pBc else self.cellOutsideNorth_
+        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else -1
+        tmpList[9]=self.gigjToGlobalID(gi, 2) if pBc else -1
       if gj==self.Ny_-2:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
-        tmpList[9]=self.gigjToGlobalID(gi, 1) if pBc else self.cellOutsideNorth_
+        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else -1
+        tmpList[9]=self.gigjToGlobalID(gi, 1) if pBc else -1
       if gj==self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-2)
         tmpList[5]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[9]=self.gigjToGlobalID(gi, 0) if pBc else self.cellOutsideNorth_
+        tmpList[9]=self.gigjToGlobalID(gi, 0) if pBc else -1
       if gj<self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, gj+1)
         tmpList[5]=self.gigjToGlobalID(gi, gj+2)
         tmpList[9]=self.gigjToGlobalID(gi, gj+3)
 
-      # east neighbor
-      # if gi==self.Nx_-1, we are on Right BD
+      # right
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
-        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else self.cellOutsideEast_
-        tmpList[10]=self.gigjToGlobalID(2, gj) if pBc else self.cellOutsideEast_
+        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else -1
+        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else -1
+        tmpList[10]=self.gigjToGlobalID(2, gj) if pBc else -1
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
-        tmpList[10]=self.gigjToGlobalID(1, gj) if pBc else self.cellOutsideEast_
+        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else -1
+        tmpList[10]=self.gigjToGlobalID(1, gj) if pBc else -1
       if gi==self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-2, gj)
         tmpList[6]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[10]=self.gigjToGlobalID(0, gj) if pBc else self.cellOutsideEast_
+        tmpList[10]=self.gigjToGlobalID(0, gj) if pBc else -1
       if gi<self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(gi+1, gj)
         tmpList[6]=self.gigjToGlobalID(gi+2, gj)
         tmpList[10]=self.gigjToGlobalID(gi+3, gj)
 
-      # south naighbor
-      # if gj==0, we are on bottom BD
+      # back
       if gj==0:
-        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else self.cellOutsideSouth_
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3) if pBc else self.cellOutsideSouth_
+        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3) if pBc else -1
       if gj==1:
         tmpList[3]=self.gigjToGlobalID(gi, 0)
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else self.cellOutsideSouth_
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
       if gj==2:
         tmpList[3]=self.gigjToGlobalID(gi, 1)
         tmpList[7]=self.gigjToGlobalID(gi, 0)
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else self.cellOutsideSouth_
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
       if gj>2:
         tmpList[3]=self.gigjToGlobalID(gi,  gj-1)
         tmpList[7]=self.gigjToGlobalID(gi,  gj-2)

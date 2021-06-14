@@ -6,6 +6,10 @@
 // this is inside impl namespace for a reason, and will need to be
 // improved later on but we have a starting point.
 
+#include "initial_condition.hpp"
+#include "../ghost_filler_neumann.hpp"
+#include "ghost_filler_sedov2d_sym.hpp"
+
 namespace pressiodemoapps{ namespace ee{ namespace impl{
 
 template<
@@ -39,7 +43,10 @@ public:
 	      pressiodemoapps::reconstructionEnum recEn,
 	      pressiodemoapps::euler2dproblemsEnum probEn,
 	      int icIdentifier = 1)
-    : m_recEn(recEn), m_probEn(probEn), m_icIdentifier(icIdentifier), m_meshObj(meshObj)
+    : m_recEn(recEn),
+      m_probEn(probEn),
+      m_icIdentifier(icIdentifier),
+      m_meshObj(meshObj)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -58,13 +65,15 @@ public:
 	      pressiodemoapps::reconstructionEnum recEn,
 	      pressiodemoapps::euler2dproblemsEnum probEn,
 	      int icIdentifier = 1)
-    : m_recEn(recEn), m_probEn(probEn), m_icIdentifier(icIdentifier),
+    : m_recEn(recEn),
+      m_probEn(probEn),
+      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj),
       m_stencilVals(1),
       m_ghostLeft({1,1}),
-      m_ghostTop({1,1}),
+      m_ghostFront({1,1}),
       m_ghostRight({1,1}),
-      m_ghostBottom({1,1})
+      m_ghostBack({1,1})
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -81,22 +90,28 @@ public:
 
     switch(m_probEn)
       {
-      case pressiodemoapps::euler2dproblemsEnum::periodic:{
+      case pressiodemoapps::euler2dproblemsEnum::PeriodicSmooth:{
+	sin2dEulerIC<numDofPerCell>(IC, m_meshObj, m_gamma);
 	return IC;
       }
 
-      case pressiodemoapps::euler2dproblemsEnum::sedov:{
-	sedov2dInitialCondition(IC, m_meshObj, numDofPerCell, m_gamma);
+      case pressiodemoapps::euler2dproblemsEnum::SedovFull:{
+	sedov2dIC<numDofPerCell>(IC, m_meshObj, m_gamma);
 	return IC;
       }
 
-      case pressiodemoapps::euler2dproblemsEnum::riemann:{
+      case pressiodemoapps::euler2dproblemsEnum::SedovSymmetry:{
+	sedov2dsymmetryIC<numDofPerCell>(IC, m_meshObj, m_gamma);
+	return IC;
+      }
+
+      case pressiodemoapps::euler2dproblemsEnum::Riemann:{
 	if( m_icIdentifier == 1){
-	  riemann2dInitialCondition1(IC, m_meshObj, numDofPerCell, m_gamma);
+	  riemann2dIC1<numDofPerCell>(IC, m_meshObj, m_gamma);
 	  return IC;
 	}
 	else if (m_icIdentifier == 2){
-	  riemann2dInitialCondition2(IC, m_meshObj, numDofPerCell, m_gamma);
+	  riemann2dIC2<numDofPerCell>(IC, m_meshObj, m_gamma);
 	  return IC;
 	}
 	else{
@@ -169,7 +184,7 @@ private:
 			     m_stencilVals, 1);
 
     sfiller_t StencilFillerY(stencilSize, U, m_meshObj,
-			     m_ghostBottom, m_ghostTop,
+			     m_ghostBack, m_ghostFront,
 			     m_stencilVals, 2);
 
     rec_fnct_t Reconstructor(m_recEn, m_stencilVals,
@@ -237,7 +252,7 @@ private:
     };
 
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      edge_rec_t, state_type, mesh_t>;
+      dimensionality, edge_rec_t, state_type, mesh_t>;
 
     rec_fnct_t ReconstructorX(1, m_recEn, U, m_meshObj,
 			      uMinusHalfNeg, uMinusHalfPos,
@@ -258,17 +273,13 @@ private:
 
       // X
       ReconstructorX.template operator()<numDofPerCell>(smPt);
-      eeRusanovFluxFourDof(FL, uMinusHalfNeg,
-			   uMinusHalfPos, normalX_, m_gamma);
-      eeRusanovFluxFourDof(FR, uPlusHalfNeg,
-			   uPlusHalfPos,  normalX_, m_gamma);
+      eeRusanovFluxFourDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
+      eeRusanovFluxFourDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 
       // Y
       ReconstructorY.template operator()<numDofPerCell>(smPt);
-      eeRusanovFluxFourDof(FD, uMinusHalfNeg,
-			   uMinusHalfPos, normalY_, m_gamma);
-      eeRusanovFluxFourDof(FU, uPlusHalfNeg,
-			   uPlusHalfPos,  normalY_, m_gamma);
+      eeRusanovFluxFourDof(FD, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
+      eeRusanovFluxFourDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 
       const auto vIndex = smPt*numDofPerCell;
       vEval(vIndex);
@@ -279,15 +290,15 @@ private:
   void fillGhosts(const state_type & U) const
   {
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
-    if (m_probEn == pressiodemoapps::euler2dproblemsEnum::sedov or
-	m_probEn == pressiodemoapps::euler2dproblemsEnum::riemann or
+    if (m_probEn == pressiodemoapps::euler2dproblemsEnum::SedovFull or
+	m_probEn == pressiodemoapps::euler2dproblemsEnum::Riemann or
 	m_probEn == pressiodemoapps::euler2dproblemsEnum::testingonlyneumann)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost2dNeumannFiller<
 	numDofPerCell, state_type, mesh_t, ghost_t>;
       ghost_filler_t ghF(stencilSize, U, m_meshObj,
-			 m_ghostLeft, m_ghostTop,
-			 m_ghostRight, m_ghostBottom);
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
       if (stencilSize==3){
@@ -300,6 +311,27 @@ private:
 	}
       }
     }
+
+    if (m_probEn == pressiodemoapps::euler2dproblemsEnum::SedovSymmetry)
+    {
+      using ghost_filler_t  = ::pressiodemoapps::impl::Sedov2dSymmetryGhostFiller<
+	state_type, mesh_t, ghost_t>;
+      ghost_filler_t ghF(stencilSize, U, m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      if (stencilSize==3){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<3>(rowsBd[it], it);
+	}
+      }else{
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<7>(rowsBd[it], it);
+	}
+      }
+    }
+
   }
 
 private:
@@ -331,9 +363,9 @@ private:
 
     const index_t s1 = m_meshObj.numCellsBd();
     pressiodemoapps::resize(m_ghostLeft,   s1, numGhostValues);
-    pressiodemoapps::resize(m_ghostTop,    s1, numGhostValues);
+    pressiodemoapps::resize(m_ghostFront,    s1, numGhostValues);
     pressiodemoapps::resize(m_ghostRight,  s1, numGhostValues);
-    pressiodemoapps::resize(m_ghostBottom, s1, numGhostValues);
+    pressiodemoapps::resize(m_ghostBack, s1, numGhostValues);
   }
 
 private:
@@ -354,9 +386,9 @@ private:
   index_t m_numDofSampleMesh  = {};
 
   mutable ghost_t m_ghostLeft;
-  mutable ghost_t m_ghostTop;
+  mutable ghost_t m_ghostFront;
   mutable ghost_t m_ghostRight;
-  mutable ghost_t m_ghostBottom;
+  mutable ghost_t m_ghostBack;
 
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};

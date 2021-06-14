@@ -4,9 +4,12 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-template<class T>
+template<class x_t, class y_t, class z_t>
 void readMeshCoordinates(const std::string & meshDir,
-			 T& x, T& y)
+			 int dim,
+			 x_t& x,
+			 y_t& y,
+			 z_t& z)
 {
   const auto inFile   = meshDir+"/coordinates.dat";
   std::ifstream foundFile(inFile);
@@ -25,6 +28,13 @@ void readMeshCoordinates(const std::string & meshDir,
       auto thisGid = std::stoi(colVal);
       ss >> colVal; x(thisGid) = std::stod(colVal);
       ss >> colVal; y(thisGid) = std::stod(colVal);
+
+      if (dim<=2){
+	z(thisGid) = 0.0;
+      }
+      else{
+	ss >> colVal; z(thisGid) = std::stod(colVal);
+      }
     }
   source.close();
 }

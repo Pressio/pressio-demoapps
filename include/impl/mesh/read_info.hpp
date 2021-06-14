@@ -7,7 +7,8 @@ namespace pressiodemoapps{ namespace impl{
 template<class sc_t, class int_t>
 void readMeshInfo(const std::string & meshDir,
 		  int & dim,
-		  std::array<sc_t, 4> & cellDeltas,
+		  std::array<sc_t, 3> & cellDeltas,
+		  std::array<sc_t, 3> & cellDeltasInv,
 		  int & stencilSize,
 		  int_t & numGptStencilMesh,
 		  int_t & numGptSampleMesh)
@@ -31,40 +32,41 @@ void readMeshInfo(const std::string & meshDir,
       if (colVal == "dim"){
 	ss >> colVal;
 	dim = std::stoi(colVal);
-	//std::cout << "dim = " << dim << "\n";
       }
 
       else if (colVal == "dx"){
 	ss >> colVal;
-	cellDeltas[0] = std::stod(colVal);
-	cellDeltas[1] = one/cellDeltas[0];
-	//std::cout << "dx = " << cellDeltas[0] << "\n";
+	cellDeltas[0]    = std::stod(colVal);
+	cellDeltasInv[0] = one/cellDeltas[0];
       }
 
       else if (colVal == "dy"){
 	ss >> colVal;
-	cellDeltas[2] = std::stod(colVal);
-	cellDeltas[3] = one/cellDeltas[2];
-	//std::cout << "dy = " << cellDeltas[2] << "\n";
+	cellDeltas[1]    = std::stod(colVal);
+	cellDeltasInv[1] = one/cellDeltas[1];
+      }
+
+      else if (colVal == "dz"){
+	ss >> colVal;
+	cellDeltas[2]    = std::stod(colVal);
+	cellDeltasInv[2] = one/cellDeltas[2];
       }
 
       else if (colVal == "sampleMeshSize"){
 	ss >> colVal;
 	numGptSampleMesh = std::stoi(colVal);
-	//std::cout << "numGptSampleMesh = " << numGptSampleMesh << "\n";
       }
 
       else if (colVal == "stencilMeshSize"){
 	ss >> colVal;
 	numGptStencilMesh = std::stoi(colVal);
-	//std::cout << "numGptStencilMesh = " << numGptStencilMesh << "\n";
       }
 
       else if (colVal == "stencilSize"){
 	ss >> colVal;
 	stencilSize = std::stoi(colVal);
-	//std::cout << "stencilSize = " << stencilSize << "\n";
       }
+
     }
   source.close();
 }

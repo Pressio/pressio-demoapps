@@ -50,15 +50,18 @@ public:
   state_type initialCondition() const
   {
     state_type res(m_numDofStencilMesh);
-    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::sod){
-      ::pressiodemoapps::ee::sod1dInitialCondition(res, m_meshObj,
-						   numDofPerCell,
-						   m_gamma);
+
+    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::PeriodicSmooth){
+      ::pressiodemoapps::ee::euler1dsineInitialCondition(res, m_meshObj, m_gamma);
     }
-    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::lax){
-      ::pressiodemoapps::ee::lax1dInitialCondition(res, m_meshObj,
-						   numDofPerCell,
-						   m_gamma);
+    else if (m_probEn == pressiodemoapps::euler1dproblemsEnum::Sod){
+      ::pressiodemoapps::ee::sod1dInitialCondition(res, m_meshObj, m_gamma);
+    }
+    else if (m_probEn == pressiodemoapps::euler1dproblemsEnum::Lax){
+      ::pressiodemoapps::ee::lax1dInitialCondition(res, m_meshObj, m_gamma);
+    }
+    else{
+      //nothing
     }
 
     return res;
@@ -94,8 +97,8 @@ private:
     const auto stencilSize = reconstructionEnumToStencilSize(m_recEn);
 
     // only need ghosts for specific problems
-    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::sod or
-	m_probEn == pressiodemoapps::euler1dproblemsEnum::lax)
+    if (m_probEn == pressiodemoapps::euler1dproblemsEnum::Sod or
+	m_probEn == pressiodemoapps::euler1dproblemsEnum::Lax)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
 	numDofPerCell, state_type, mesh_t, ghost_t>;

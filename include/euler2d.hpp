@@ -23,9 +23,10 @@
 
 namespace pressiodemoapps{
 enum class euler2dproblemsEnum{
-  periodic,
-  sedov,
-  riemann,
+  PeriodicSmooth,
+  SedovFull,
+  SedovSymmetry,
+  Riemann,
   testingonlyneumann
 };
 
@@ -42,11 +43,11 @@ T createEe2dImpl(const mesh_t & meshObj,
   // but 5-th order reconstruction cannot be done for 3-pt stencil
   meshObj.checkStencilSupportsOrder(enIn);
 
-  if (probEn == pressiodemoapps::euler2dproblemsEnum::periodic)
+  if (probEn == pressiodemoapps::euler2dproblemsEnum::PeriodicSmooth)
   {
     if (!meshObj.isPeriodic()){
       throw std::runtime_error
-      ("For periodic euler2d, mesh must be periodic.");
+      ("For euler2d::PeriodicSmooth, mesh must be periodic.");
     }
   }
 
@@ -55,8 +56,6 @@ T createEe2dImpl(const mesh_t & meshObj,
 }} //end pressiodemoapps::impl
 
 
-#include "./impl/euler2d/ghost_filler.hpp"
-#include "./impl/euler2d/initial_condition.hpp"
 #include "./impl/euler2d/euler2d_app_impl.hpp"
 
 namespace pressiodemoapps{
@@ -91,7 +90,8 @@ T createEuler2dForPy(const mesh_t & meshObj,
 		     pressiodemoapps::euler2dproblemsEnum probEn,
 		     const int initCondIdentifier)
 {
-  return impl::createEe2dImpl<mesh_t, T>(meshObj, enIn, probEn, initCondIdentifier);
+  return impl::createEe2dImpl<mesh_t, T>(meshObj, enIn,
+					 probEn, initCondIdentifier);
 }
 #endif
 
