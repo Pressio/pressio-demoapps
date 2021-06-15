@@ -44,7 +44,7 @@ def main(workDir, debug, dimensionality,\
          Nx, Ny, Nz, \
          plotting, orderingType, \
          xBd, yBd, zBd, stencilSize, \
-         plotFontSize, enablePeriodicBc):
+         plotFontSize, enablePeriodicBc, darkMode):
 
   # figure out if domain is a plain rectangle or has a step in it
   plainDomain = True
@@ -256,20 +256,21 @@ def main(workDir, debug, dimensionality,\
   f.close()
 
   if plotting != "none" and dimensionality==1:
-    plotCells1d(x, dx, gids, axFM, fontSz=plotFontSize)
+    cellsColor  = 'w' if not darkMode else 'none'
+    plotCells1d(x, dx, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
     axFM.set_xlim(min(xBd), max(xBd))
     axFM.set_ylim(-0.025, 0.025)
     axFM.set_yticks([])
 
   if plotting != "none" and dimensionality==2:
-    plotCells2d(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
+    cellsColor  = 'w' if not darkMode else 'none'
+    plotCells2d(x, y, dx, dy, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
     axFM.set_xlim(min(xBd), max(xBd))
     axFM.set_ylim(min(yBd), max(yBd))
 
   if plotting != "none" and dimensionality==3:
-    plotCells3d(x, y, z, dx, dy, dz, axFM, fontSz=plotFontSize)
-    #axFM.set_aspect('equal')
+    plotCells3d(x, y, z, dx, dy, dz, axFM, darkMode, 'w', fontSz=plotFontSize)
     axFM.set_xlim(min(xBd), max(xBd))
     axFM.set_ylim(min(yBd), max(yBd))
     axFM.set_zlim(min(zBd), max(zBd))
@@ -277,8 +278,10 @@ def main(workDir, debug, dimensionality,\
   if plotting == "show":
     plt.show()
   elif plotting =="print":
-    plt.savefig(workDir+'/full.pdf', dpi=150, format='pdf')
-
+    if darkMode==1:
+      plt.savefig(workDir+'/full.png', dpi=250, format='png', transparent=True)
+    else:
+      plt.savefig(workDir+'/full.png', dpi=250, format='png')
 
 ###############################
 if __name__== "__main__":
@@ -395,8 +398,11 @@ has that info embedded in.")
 
   # other things
   plotFontSize = 0
-  if len(args.plottingInfo) == 2:
+  darkMode = 0
+  if len(args.plottingInfo) >= 2:
     plotFontSize = int(args.plottingInfo[1])
+  if len(args.plottingInfo) == 3:
+    darkMode = int(args.plottingInfo[2])
 
   main(args.outDir, args.debug, dim,
        nx, ny, nz,
@@ -404,4 +410,4 @@ has that info embedded in.")
        args.orderingType,
        xCoords, yCoords, zCoords,
        args.stencilSize, plotFontSize,
-       args.periodic)
+       args.periodic, darkMode)

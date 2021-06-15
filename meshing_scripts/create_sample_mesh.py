@@ -136,19 +136,22 @@ def initFigures(dim):
     axSM = figSM.gca(projection='3d')
   return figFM, figSM, axFM, axSM
 
-
+# -----------------------------------------------------------
 def plotReducedMesh(axSM, dim, plotFontSize, \
                     x, y, z, dx, dy, dz, \
                     gids_sm, fm_to_sm_map, \
-                    stencilMeshGIDs, sampleMeshGIDs):
+                    stencilMeshGIDs, sampleMeshGIDs, darkMode):
+
   xStencilMesh    = x[stencilMeshGIDs]
   xSampleMeshOnly = x[sampleMeshGIDs]
-  residualCellsColor = 'g'
+  stencilCellsColor  = 'w' if not darkMode else 'none'
+  residualCellsColor = 'cyan'
 
   if dim==1:
-    plotCells1d(xStencilMesh, dx, gids_sm, axSM, fontSz=plotFontSize)
-    plotCells1d(xSampleMeshOnly, dx, gids_sm, axSM, fontSz=0,
-                facecol=residualCellsColor, alpha=0.25)
+    plotCells1d(xStencilMesh, dx, gids_sm, axSM, darkMode,
+                facecol=stencilCellsColor, fontSz=plotFontSize)
+    plotCells1d(xSampleMeshOnly, dx, gids_sm, axSM, darkMode,
+                fontSz=0, facecol=residualCellsColor, alpha=0.25)
     axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axSM.set_ylim(-0.02, 0.02)
     axSM.set_yticks([])
@@ -156,9 +159,10 @@ def plotReducedMesh(axSM, dim, plotFontSize, \
   if dim==2:
     yStencilMesh    = y[stencilMeshGIDs]
     ySampleMeshOnly = y[sampleMeshGIDs]
-    plotCells2d(xStencilMesh, yStencilMesh, dx, dy, gids_sm, axSM, fontSz=plotFontSize)
-    plotCells2d(xSampleMeshOnly, ySampleMeshOnly, dx, dy, gids_sm, axSM, fontSz=0,
-                facecol=residualCellsColor, alpha=0.25)
+    plotCells2d(xStencilMesh, yStencilMesh, dx, dy, gids_sm, axSM,
+                darkMode, facecol=stencilCellsColor, fontSz=plotFontSize)
+    plotCells2d(xSampleMeshOnly, ySampleMeshOnly, dx, dy, gids_sm, axSM,
+                darkMode, facecol=residualCellsColor, fontSz=0, alpha=0.5)
     axSM.set_aspect(1.0)
     axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
@@ -168,14 +172,14 @@ def plotReducedMesh(axSM, dim, plotFontSize, \
     ySampleMeshOnly = y[sampleMeshGIDs]
     zStencilMesh    = z[stencilMeshGIDs]
     zSampleMeshOnly = z[sampleMeshGIDs]
-    plotCells3d(xStencilMesh, yStencilMesh, zStencilMesh, \
-                dx, dy, dz, ax=axSM, fontSz=plotFontSize, facecol='w')
-    plotCells3d(xSampleMeshOnly, ySampleMeshOnly, zSampleMeshOnly, \
-                dx, dy, dz, ax=axSM, fontSz=0, facecol=residualCellsColor, alpha=0.25)
+    plotCells3d(xStencilMesh, yStencilMesh, zStencilMesh, dx, dy, dz, \
+                axSM, darkMode, facecol='w', fontSz=plotFontSize)
+    plotCells3d(xSampleMeshOnly, ySampleMeshOnly, zSampleMeshOnly, dx, dy, dz, \
+                axSM, darkMode, facecol='cyan', fontSz=0, alpha=0.25)
 
 
 #=========================================================================
-def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
+def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize, darkMode):
 #=========================================================================
   dim,dx,dy,dz,numCells,domainBounds,stencilSize = readFullMeshInfo(fullMeshDir)
   x,y,z = readFullMeshCoordinates(fullMeshDir, dim)
@@ -185,19 +189,21 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     figFM, figSM, axFM, axSM = initFigures(dim)
 
   if plotting != "none" and dim==1:
-    plotCells1d(x, dx, gids, axFM, fontSz=plotFontSize)
+    cellsColor  = 'w' if not darkMode else 'none'
+    plotCells1d(x, dx, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
     axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axFM.set_ylim(-0.02, 0.02)
     axFM.set_yticks([])
 
   if plotting != "none" and dim==2:
-    plotCells2d(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
+    cellsColor  = 'w' if not darkMode else 'none'
+    plotCells2d(x, y, dx, dy, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
     axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axFM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
 
   if plotting != "none" and dim==3:
-    plotCells3d(x, y, z, dx, dy, dz, axFM, fontSz=plotFontSize)
+    plotCells3d(x, y, z, dx, dy, dz, axFM, darkMode, facecol='w', fontSz=plotFontSize)
 
   if debug:
     print("natural order full mesh connectivity")
@@ -320,7 +326,8 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     plotReducedMesh(axSM, dim, plotFontSize, \
                     x, y, z, dx, dy, dz, \
                     gids_sm, fm_to_sm_map,
-                    stencilMeshGIDs, sampleMeshGIDs)
+                    stencilMeshGIDs, sampleMeshGIDs,\
+                    darkMode)
 
   # -----------------------------------------------------
   sampleMeshSize = len(sampleMeshGraph)
@@ -405,8 +412,12 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   if plotting == "show":
     plt.show()
   elif plotting =="print":
-    figFM.savefig(workDir+'/full.pdf'  ,dpi=120,format="pdf")
-    figSM.savefig(workDir+'/sample.pdf',dpi=120,format="pdf")
+    if darkMode==1:
+      figFM.savefig(workDir+'/full.png'  ,dpi=250,format="png", transparent=True)
+      figSM.savefig(workDir+'/sample.png',dpi=250,format="png", transparent=True)
+    else:
+      figFM.savefig(workDir+'/full.png'  ,dpi=250,format="png")
+      figSM.savefig(workDir+'/sample.png',dpi=250,format="png")
 
 
 ###############################
@@ -438,9 +449,12 @@ if __name__== "__main__":
   assert(args.fullMeshDir != None)
 
   plotFontSize = 0
-  if len(args.plottingInfo) == 2:
+  darkMode = 0
+  if len(args.plottingInfo) >= 2:
     plotFontSize = int(args.plottingInfo[1])
+  if len(args.plottingInfo) == 3:
+    darkMode = int(args.plottingInfo[2])
 
   main(args.wdir, args.debug, \
        args.fullMeshDir, args.tilingDir, \
-       args.plottingInfo[0], plotFontSize)
+       args.plottingInfo[0], plotFontSize, darkMode)
