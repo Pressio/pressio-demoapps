@@ -35,8 +35,7 @@ public:
 
 public:
   explicit LinearAdvT(const mesh_t & meshObj,
-		      ::pressiodemoapps::ReconstructionType enIn =
-		      ::pressiodemoapps::ReconstructionType::firstOrder)
+		      ::pressiodemoapps::ReconstructionType enIn)
     : m_recEn(enIn), m_meshObj(meshObj)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize();
@@ -110,9 +109,7 @@ private:
   }
 
 private:
-  ::pressiodemoapps::ReconstructionType m_recEn =
-    ::pressiodemoapps::ReconstructionType::firstOrder;
-
+  ::pressiodemoapps::ReconstructionType m_recEn;
   const mesh_t & m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};

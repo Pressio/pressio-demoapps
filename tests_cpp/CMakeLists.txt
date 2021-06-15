@@ -8,6 +8,8 @@ add_subdirectory(weno5)
 
 ### 1d problems ###
 add_subdirectory(1d_linear_adv_convergence)
+add_subdirectory(1d_linear_adv_sample_mesh_testA)
+add_subdirectory(1d_linear_adv_sample_mesh_testB)
 add_subdirectory(1d_euler_convergence)
 add_subdirectory(1d_sod)
 add_subdirectory(1d_lax)

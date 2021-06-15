@@ -154,7 +154,6 @@ def plotReducedMesh(axSM, dim, plotFontSize, \
     axSM.set_yticks([])
 
   if dim==2:
-    print("gg")
     yStencilMesh    = y[stencilMeshGIDs]
     ySampleMeshOnly = y[sampleMeshGIDs]
     plotCells2d(xStencilMesh, yStencilMesh, dx, dy, gids_sm, axSM, fontSz=plotFontSize)
@@ -281,16 +280,17 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
       fm_to_sm_map[pt] = i
       i+=1
 
-  print("Done with fm_to_sm_map")
   if debug:
+    print("Done with fm_to_sm_map")
     for k,v in fm_to_sm_map.items(): print(k, v)
 
-  print("doing now the sm -> fm gids mapping ")
+  if debug:
+    print("doing now the sm -> fm gids mapping ")
   sm_to_fm_map = collections.OrderedDict()
   for k,v in fm_to_sm_map.items():
     sm_to_fm_map[v] = k
-  print("Done with sm_to_fm_map")
   if debug:
+    print("Done with sm_to_fm_map")
     for k,v in sm_to_fm_map.items():
       print(k, v)
 
@@ -309,10 +309,10 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
         smStencilGIDs[i] = fm_to_sm_map[thisGID]
     sampleMeshGraph[smGID] = smStencilGIDs
 
-  print("\n")
-  print("Done with sampleMeshGraph")
-  print("sample mesh connectivity")
   if debug:
+    print("\n")
+    print("Done with sampleMeshGraph")
+    print("sample mesh connectivity")
     printDicPretty(sampleMeshGraph)
 
   gids_sm = list(sm_to_fm_map.keys())
