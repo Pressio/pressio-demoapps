@@ -71,7 +71,7 @@ def test_eval_vel():
   end = time.time()
   print(end - start)
 
-  makePlot(meshPath, yn)
+  # makePlot(meshPath, yn)
 
   nx=50
   ny=50

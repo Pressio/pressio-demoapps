@@ -50,7 +50,7 @@ T createEe3dImpl(const mesh_t & meshObj,
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t>
-auto createEuler3dEigen(const mesh_t & meshObj,
+auto create3dProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum,
 			::pressiodemoapps::FluxType fluxEnum,
@@ -69,11 +69,11 @@ auto createEuler3dEigen(const mesh_t & meshObj,
 }
 
 template<class mesh_t>
-auto createEuler3dEigen(const mesh_t & meshObj,
+auto create3dProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum)
 {
-  return createEuler3dEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 0);
+  return create3dProblemEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 0);
 }
 #endif
 

@@ -54,7 +54,7 @@ T createEe2dImpl(const mesh_t & meshObj,
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t>
-auto createEuler2dEigen(const mesh_t & meshObj,
+auto create2dProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum,
 			::pressiodemoapps::FluxType fluxEnum,
@@ -74,21 +74,21 @@ auto createEuler2dEigen(const mesh_t & meshObj,
 }
 
 template<class mesh_t>
-auto createEuler2dEigen(const mesh_t & meshObj,
+auto create2dProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum,
 			const int initCondIdentifier)
 {
-  return createEuler2dEigen(meshObj, probEnum, recEnum,
+  return create2dProblemEigen(meshObj, probEnum, recEnum,
 			    FluxType::Rusanov, initCondIdentifier);
 }
 
 template<class mesh_t>
-auto createEuler2dEigen(const mesh_t & meshObj,
+auto create2dProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum)
 {
-  return createEuler2dEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 1);
+  return create2dProblemEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 1);
 }
 #endif
 

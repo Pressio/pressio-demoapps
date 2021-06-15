@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::Riemann;
-  auto appObj      = pda::createEuler2dEigen(meshObj, probId, order, 2);
+  auto appObj      = pda::create2dProblemEigen(meshObj, probId, order, 2);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;

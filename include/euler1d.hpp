@@ -57,10 +57,10 @@ T createEuler1dImpl(const mesh_t & meshObj,
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t>
-auto createEuler1dEigen(const mesh_t & meshObj,
-			::pressiodemoapps::Euler1d probEnum,
-			::pressiodemoapps::ReconstructionType recEnum,
-			::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
+auto create1dProblemEigen(const mesh_t & meshObj,
+			  ::pressiodemoapps::Euler1d probEnum,
+			  ::pressiodemoapps::ReconstructionType recEnum,
+			  ::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
 {
 
   using scalar_t = typename mesh_t::scalar_t;

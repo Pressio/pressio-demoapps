@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
   const auto order   = pda::ReconstructionType::firstOrder;
 #endif
 
-  auto appObj      = pda::createEuler1dEigen(meshObj, pda::Euler1d::Sod, order);
+  auto appObj      = pda::create1dProblemEigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;

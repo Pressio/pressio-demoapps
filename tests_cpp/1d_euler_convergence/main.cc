@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto order   = pda::ReconstructionType::fifthOrderWeno;
   const auto probId  = pda::Euler1d::PeriodicSmooth;
-  auto appObj	     = pda::createEuler1dEigen(meshObj, probId, order);
+  auto appObj	     = pda::create1dProblemEigen(meshObj, probId, order);
 
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
