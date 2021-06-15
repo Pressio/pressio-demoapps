@@ -48,8 +48,6 @@ def main(workDir, debug, dimensionality,\
 
   # figure out if domain is a plain rectangle or has a step in it
   plainDomain = True
-  print(len(xBd))
-  print(xBd)
   if dimensionality==2 and len(xBd) > 4:
     plainDomain = False
   if dimensionality==3:
@@ -60,8 +58,10 @@ def main(workDir, debug, dimensionality,\
     L = [xBd[1]-xBd[0], yBd[1]-yBd[0], zBd[1]-zBd[0]]
     dx,dy,dz = L[0]/Nx, L[1]/Ny, L[2]/Nz
     print ("Bounds for x = ", xBd[0], xBd[1], " with dx = ", dx)
-    print ("Bounds for y = ", yBd[0], yBd[1], " with dy = ", dy)
-    print ("Bounds for z = ", zBd[0], zBd[1], " with dz = ", dz)
+    if dimensionality>1:
+      print ("Bounds for y = ", yBd[0], yBd[1], " with dy = ", dy)
+    if dimensionality==3:
+      print ("Bounds for z = ", zBd[0], zBd[1], " with dz = ", dz)
 
   if (plotting != "none"):
     figFM = plt.figure(0)
@@ -286,9 +286,6 @@ def main(workDir, debug, dimensionality,\
 ###############################
 if __name__== "__main__":
 ###############################
-  # generates a mesh graph for 2d (x,y) cell-centered grid
-  # where x is horizontal, y is vertical
-
   parser = ArgumentParser()
   parser.add_argument(
     "--outDir", dest="outDir",
@@ -399,9 +396,10 @@ has that info embedded in.")
   # other things
   plotFontSize = 0
   darkMode = 0
-  if len(args.plottingInfo) >= 2:
+  if len(args.plottingInfo) == 2:
     plotFontSize = int(args.plottingInfo[1])
   if len(args.plottingInfo) == 3:
+    plotFontSize = int(args.plottingInfo[1])
     darkMode = int(args.plottingInfo[2])
 
   main(args.outDir, args.debug, dim,

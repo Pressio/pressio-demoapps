@@ -450,9 +450,10 @@ if __name__== "__main__":
 
   plotFontSize = 0
   darkMode = 0
-  if len(args.plottingInfo) >= 2:
+  if len(args.plottingInfo) == 2:
     plotFontSize = int(args.plottingInfo[1])
   if len(args.plottingInfo) == 3:
+    plotFontSize = int(args.plottingInfo[1])
     darkMode = int(args.plottingInfo[2])
 
   main(args.wdir, args.debug, \
