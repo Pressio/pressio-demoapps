@@ -27,10 +27,9 @@ if __name__== "__main__":
     print("fomTest: nt = ", nt)
     D = np.reshape(D, (nt, nx))
 
-    coo = np.loadtxt('coords'+str(nx)+'.dat', dtype=float)
-    x_fom = coo[:,1]
+    x = np.loadtxt('coords'+str(nx)+'.dat', dtype=float)[:,1]
 
-    anY = sol(x_fom, 2.)
+    anY = sol(x, 2.)
     errors.append( LA.norm(D[-1,:]-anY, np.inf) )
 
   goldErr = [0.047441409401830836, \
@@ -39,7 +38,7 @@ if __name__== "__main__":
              2.828379264019354e-06]
   print(goldErr)
   print(errors)
-
-  assert(np.allclose(goldErr, errors, rtol=1e-10, atol=1e-12))
   for i in range(1,4):
     print( np.log2(errors[i-1]/errors[i]) )
+
+  assert(np.allclose(goldErr, errors, rtol=1e-10, atol=1e-12))

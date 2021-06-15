@@ -7,7 +7,7 @@ from matplotlib import cm
 import numpy as np
 from numpy import linalg as LA
 import re
-from mayavi import mlab 
+from mayavi import mlab
 
 gamma_ = (5.+2.)/5.
 gammaMinusOne_ = gamma_ - 1.
@@ -36,7 +36,7 @@ if __name__== "__main__":
   fomTotDofs = numCells*5
 
   coords = np.loadtxt('coordinates.dat', dtype=float)
-  x, y, z = coords[:,1], coords[:,2], coords[:,3] 
+  x, y, z = coords[:,1], coords[:,2], coords[:,3]
 
   fomTestD = np.fromfile("solution.bin")
   nt = int(np.size(fomTestD)/fomTotDofs)
@@ -44,7 +44,7 @@ if __name__== "__main__":
   fomTestD = np.reshape(fomTestD, (nt, fomTotDofs))
 
   # X, Y, Z = np.mgrid[0:0.5:25j, 0:0.5:25j, 0:0.5:25j]
-  # targetSol= fomTestD[-1, :] 
+  # targetSol= fomTestD[-1, :]
   # rho0 = targetSol[0::5]
   # u0   = targetSol[1::5]
   # v0   = targetSol[2::5]
@@ -63,7 +63,6 @@ if __name__== "__main__":
   #     surface_count=41 # needs to be a large number for good volume rendering
   #     ))
   # fig.show()
-
 
   for i in range(0,nt):#nt,50):
     fig = plt.figure()

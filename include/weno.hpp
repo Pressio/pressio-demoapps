@@ -1,11 +1,9 @@
 
-#ifndef PRESSIODEMOAPPS_WENO_HPP_
-#define PRESSIODEMOAPPS_WENO_HPP_
+#ifndef PRESSIODEMOAPPS_WENO5_HPP_
+#define PRESSIODEMOAPPS_WENO5_HPP_
 
-#include <cmath>
-#include <limits>
 #include "array"
-#include "./impl/weno/weno5.hpp"
+#include "./impl_reconstruction/weno5.hpp"
 
 namespace pressiodemoapps{
 
@@ -18,12 +16,10 @@ weno5(sc_t & uLeftNeg,
       const std::array<sc_t, 7> & q)
 {
   pressiodemoapps::impl::weno5
-    (uLeftNeg, uLeftPos,
-     q[0], q[1], q[2], q[3], q[4], q[5]);
+    (uLeftNeg, uLeftPos, q[0], q[1], q[2], q[3], q[4], q[5]);
 
   pressiodemoapps::impl::weno5
-    (uRightNeg, uRightPos,
-     q[1], q[2], q[3], q[4], q[5], q[6]);
+    (uRightNeg, uRightPos, q[1], q[2], q[3], q[4], q[5], q[6]);
 }
 
 
@@ -68,11 +64,15 @@ weno5(edge_t & uLeftNeg,
     {
       pressiodemoapps::impl::weno5
 	(uLeftNeg(dof), uLeftPos(dof),
-	 q(l2i+dof), q(l1i+dof), q(l0i+dof), q(uIndex+dof), q(r0i+dof), q(r1i+dof));
+	 q(l2i+dof), q(l1i+dof), q(l0i+dof),
+	 q(uIndex+dof),
+	 q(r0i+dof), q(r1i+dof));
 
       pressiodemoapps::impl::weno5
 	(uRightNeg(dof), uRightPos(dof),
-	 q(l1i+dof), q(l0i+dof), q(uIndex+dof), q(r0i+dof), q(r1i+dof), q(r2i+dof));
+	 q(l1i+dof), q(l0i+dof),
+	 q(uIndex+dof),
+	 q(r0i+dof), q(r1i+dof), q(r2i+dof));
     }
 }
 
@@ -95,11 +95,15 @@ weno5(std::vector<sc_t> & uLeftNeg,
     {
       pressiodemoapps::impl::weno5
 	(uLeftNeg[dof], uLeftPos[dof],
-	 q[l2i+dof], q[l1i+dof], q[l0i+dof], q[uIndex+dof], q[r0i+dof], q[r1i+dof]);
+	 q[l2i+dof], q[l1i+dof], q[l0i+dof],
+	 q[uIndex+dof],
+	 q[r0i+dof], q[r1i+dof]);
 
       pressiodemoapps::impl::weno5
 	(uRightNeg[dof], uRightPos[dof],
-	 q[l1i+dof], q[l0i+dof], q[uIndex+dof], q[r0i+dof], q[r1i+dof], q[r2i+dof]);
+	 q[l1i+dof], q[l0i+dof],
+	 q[uIndex+dof],
+	 q[r0i+dof], q[r1i+dof], q[r2i+dof]);
     }
 }
 

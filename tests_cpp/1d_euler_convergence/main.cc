@@ -1,6 +1,6 @@
 
 #include "pressio_ode_explicit.hpp"
-#include "euler.hpp"
+#include "euler1d.hpp"
 #include "../observer.hpp"
 
 template<class scalar_type>
@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
-  const auto order   = pda::reconstructionEnum::fifthOrderWeno;
-  const auto probId  = pda::euler1dproblemsEnum::PeriodicSmooth;
-  auto appObj	     = pda::createEuler1dEigen(meshObj, order, probId);
+  const auto order   = pda::ReconstructionType::fifthOrderWeno;
+  const auto probId  = pda::Euler1d::PeriodicSmooth;
+  auto appObj	     = pda::createEuler1dEigen(meshObj, probId, order);
 
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;

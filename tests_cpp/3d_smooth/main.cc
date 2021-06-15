@@ -15,17 +15,12 @@ void writeToFile(const T& obj, const std::string & fileName)
 
 int main(int argc, char *argv[])
 {
-
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
-#ifdef USE_WENO5
-  const auto order   = pda::reconstructionEnum::fifthOrderWeno;
-#else
-  const auto order   = pda::reconstructionEnum::firstOrder;
-  #endif
+  const auto order   = pda::ReconstructionType::firstOrder;
 
-  const auto probId  = pda::euler3dproblemsEnum::PeriodicSmooth;
-  auto appObj      = pda::createEuler3dEigen(meshObj, order, probId);
+  const auto probId  = pda::Euler3d::PeriodicSmooth;
+  auto appObj      = pda::createEuler3dEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;

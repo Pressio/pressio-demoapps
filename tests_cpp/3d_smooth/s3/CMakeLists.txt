@@ -1,14 +1,17 @@
 
-add_executable(smooth3dexeS3 ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
+set(testname 3d_smooth_s3)
+set(exename  ${testname}_exe)
 
 configure_file(../plot.py plot.py COPYONLY)
 configure_file(../compare.py compare.py COPYONLY)
 
-add_test(NAME smooth3d_s3
+add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
+
+add_test(NAME ${testname}
 COMMAND ${CMAKE_COMMAND}
 -DMESHDRIVER=${MESHSRC}/create_full_mesh.py
 -DOUTDIR=${CMAKE_CURRENT_BINARY_DIR}
--DEXENAME=$<TARGET_FILE:smooth3dexeS3>
+-DEXENAME=$<TARGET_FILE:${exename}>
 -DSTENCILVAL=3
 -P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
 )

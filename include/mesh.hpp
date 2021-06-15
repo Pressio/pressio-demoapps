@@ -14,27 +14,27 @@
 #endif
 
 #include "./predicates/all.hpp"
-#include "./resize.hpp"
-#include "./extent.hpp"
-#include "./reconstruction_enums.hpp"
-#include "./impl/mesh/ccu_mesh.hpp"
+#include "./container_fncs/all.hpp"
+#include "./impl_mesh/ccu_mesh.hpp"
 
 namespace pressiodemoapps{
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class scalar_type = double>
-using CellCenteredUniformMeshEigen =
-  pressiodemoapps::impl::CellCenteredUniformMesh<
-  scalar_type,
-  int32_t,
-  Eigen::Matrix<scalar_type, -1, 1>,
-  Eigen::Matrix<int32_t, -1, -1, Eigen::RowMajor>,
-  false
-  >;
-
 auto loadCellCenterUniformMeshEigen(const std::string & meshFilesPath)
 {
-  return CellCenteredUniformMeshEigen<double>(meshFilesPath);
+    using return_type =
+    pressiodemoapps::impl::CellCenteredUniformMesh<
+      scalar_type,
+      // ordinal type
+      int32_t,
+      // coordinate storage type
+      Eigen::Matrix<scalar_type, -1, 1>,
+      // graph type
+      Eigen::Matrix<int32_t, -1, -1, Eigen::RowMajor>
+    >;
+
+  return return_type(meshFilesPath);
 }
 #endif
 
@@ -46,5 +46,5 @@ T loadCellCenterUniformMesh(const std::string & meshFilesPath)
 }
 #endif
 
-}
+}//end namespace pressiodemoapps
 #endif

@@ -4,24 +4,20 @@ file_path = pathlib.Path(__file__).parent.absolute()
 
 import numpy as np
 from numpy import linalg as LA
-from pressiodemoapps.enums import *
-from pressiodemoapps.mesh import *
-from pressiodemoapps.euler import *
+import pressiodemoapps as pda
 
 def test_create_vel():
   meshPath = str(file_path)
-  meshO    = loadCellCenterUniformMesh(meshPath)
-  appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, euler1d.sod)
+  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  appObj   = pda.createProblem(meshO, pda.Euler1d.Sod, pda.ReconstructionType.fifthOrderWeno)
   v = appObj.createVelocity()
   print(v.shape)
   assert(v.shape[0] == 300)
 
 def test_eval_vel():
   meshPath = str(file_path)
-  meshObj  = loadCellCenterUniformMesh(meshPath)
-  x = meshObj.viewX()
-
-  appObj = createEuler1dProblem(meshObj, reconstructWith.fifthOrderWeno, euler1d.sod)
+  meshObj  = pda.loadCellCenterUniformMesh(meshPath)
+  appObj   = pda.createProblem(meshObj, pda.Euler1d.Sod, pda.ReconstructionType.fifthOrderWeno)
 
   yn = appObj.initialCondition()
   v = appObj.createVelocity()
@@ -56,6 +52,7 @@ def test_eval_vel():
   print(error)
   assert( error < 1e-13 )
   #import matplotlib.pyplot as plt
+  #x = meshObj.viewX()
   #plt.plot(x, yn[0:-1:3])
   #plt.show()
 

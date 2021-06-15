@@ -8,15 +8,15 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 #ifdef USE_WENO5
-  const auto order   = pda::reconstructionEnum::fifthOrderWeno;
+  const auto order   = pda::ReconstructionType::fifthOrderWeno;
 #else
-  const auto order   = pda::reconstructionEnum::firstOrder;
+  const auto order   = pda::ReconstructionType::firstOrder;
 #endif
   pressio::log::initialize(pressio::logto::terminal);
   pressio::log::setVerbosity({pressio::log::level::debug});
 
-  const auto probId  = pda::euler1dproblemsEnum::Lax;
-  auto appObj      = pda::createEuler1dEigen(meshObj, order, probId);
+  const auto probId  = pda::Euler1d::Lax;
+  auto appObj      = pda::createEuler1dEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;

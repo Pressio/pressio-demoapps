@@ -4,29 +4,24 @@ file_path = pathlib.Path(__file__).parent.absolute()
 
 import numpy as np
 from numpy import linalg as LA
-from pressiodemoapps.enums import *
-from pressiodemoapps.mesh import *
-from pressiodemoapps.advection import *
-
-def test_create_vel():
-  meshPath = str(file_path)
-  meshO    = loadCellCenterUniformMesh(meshPath)
-  appObj   = createPeriodicLinearAdvection1d(meshO, reconstructWith.fifthOrderWeno)
-  v = appObj.createVelocity()
-  print(v.shape)
+import pressiodemoapps as pda
 
 def analytical(x, t):
   return np.sin(np.pi * (x-t) )
 
-def test_eval_vel():
-  # create mesh obj
+def test_create_vel():
   meshPath = str(file_path)
-  meshObj  = CellCenteredUniformMesh(meshPath)
-  x = meshObj.viewX()
+  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  appObj   = pda.createPeriodicLinearAdvection1d(meshO, pda.ReconstructionType.fifthOrderWeno)
+  v = appObj.createVelocity()
+  print(v.shape)
 
-  # create app object
-  appObj   = createPeriodicLinearAdvection1d(meshObj, reconstructWith.fifthOrderWeno)
+def test_eval_vel():
+  meshPath = str(file_path)
+  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  appObj   = pda.createPeriodicLinearAdvection1d(meshO, pda.ReconstructionType.fifthOrderWeno)
 
+  x = meshO.viewX()
   y0 = analytical(x, 0.)
   yn = y0.copy()
   v = appObj.createVelocity()
@@ -62,6 +57,8 @@ def test_eval_vel():
   assert( np.abs(error - 2.828379264019354e-06) < 1e-13 )
   print(yn)
 
+#----------------------------
 if __name__ == '__main__':
+#----------------------------
   test_create_vel()
   test_eval_vel()

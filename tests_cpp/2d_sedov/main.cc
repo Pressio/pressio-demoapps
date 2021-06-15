@@ -9,13 +9,13 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 #ifdef USE_WENO5
-  const auto order   = pda::reconstructionEnum::fifthOrderWeno;
+  const auto order   = pda::ReconstructionType::fifthOrderWeno;
 #else
-  const auto order   = pda::reconstructionEnum::firstOrder;
+  const auto order   = pda::ReconstructionType::firstOrder;
 #endif
 
-  const auto probId  = pda::euler2dproblemsEnum::SedovFull;
-  auto appObj      = pda::createEuler2dEigen(meshObj, order, probId);
+  const auto probId  = pda::Euler2d::SedovFull;
+  auto appObj      = pda::createEuler2dEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;
@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
   auto ic = appObj.initialCondition();
   ode_state_t state(ic);
 
-  // auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
   FomObserver<ode_state_t> Obs("sedov2d_solution.bin", 5);
 
   const auto dt = 0.0001;

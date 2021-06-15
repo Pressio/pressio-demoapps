@@ -1,0 +1,3 @@
+
+add_subdirectory(s3_nxnynz_equal)
+add_subdirectory(s3_nxnynz_not_equal)

@@ -4,7 +4,8 @@
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 #include "./is_native_pybind_array.hpp"
-#include "./is_subscriptable.hpp"
 #endif
+
+#include "./is_subscriptable.hpp"
 
 #endif

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
-  const auto order   = pda::reconstructionEnum::fifthOrderWeno;
+  const auto order   = pda::ReconstructionType::fifthOrderWeno;
   auto appObj	     = pda::createPeriodicLinearAdvection1dEigen(meshObj, order);
 
   using app_t = decltype(appObj);

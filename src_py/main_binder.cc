@@ -11,7 +11,29 @@
 #include "types.hpp"
 #include "mesh.hpp"
 #include "advection.hpp"
-#include "euler.hpp"
+#include "euler1d.hpp"
+#include "euler2d.hpp"
+
+// helper function to bind API methods
+// since they are the same for any application problem
+namespace pdabindimpl{
+template<class cpp_t, class py_t>
+void bindCommonApiMethods(py_t & appObj)
+{
+  appObj.def("totalDofSampleMesh",  &cpp_t::totalDofSampleMesh);
+  appObj.def("totalDofStencilMesh", &cpp_t::totalDofStencilMesh);
+
+  appObj.def("initialCondition",
+	     &cpp_t::initialCondition,
+	     pybind11::return_value_policy::copy);
+
+  appObj.def("createVelocity",
+	     &cpp_t::createVelocity,
+	     pybind11::return_value_policy::automatic);
+
+  appObj.def("velocity", &cpp_t::velocity);
+}
+};
 
 PYBIND11_MODULE(MODNAME, mParent)
 {
@@ -25,9 +47,13 @@ PYBIND11_MODULE(MODNAME, mParent)
   using ccumesh_t =
     pressiodemoapps::impl::CellCenteredUniformMesh<
       pressiodemoappspy::scalar_t,
+      // ordinal type
       index_t,
+      // coordinate storage type
       pressiodemoappspy::py_cstyle_arr_sc,
+      // graph type
       py_cstyle_arr_int,
+      // true because we are doing bindings
       true
     >;
 
@@ -39,8 +65,8 @@ PYBIND11_MODULE(MODNAME, mParent)
   meshCl.def("stencilSize",	&ccumesh_t::stencilSize);
   meshCl.def("graph",		&ccumesh_t::graph);
   meshCl.def("dx",		&ccumesh_t::dx);
-  meshCl.def("dxInv",		&ccumesh_t::dxInv);
   meshCl.def("dy",		&ccumesh_t::dy);
+  meshCl.def("dxInv",		&ccumesh_t::dxInv);
   meshCl.def("dyInv",		&ccumesh_t::dyInv);
   meshCl.def("viewX",		&ccumesh_t::viewX);
   meshCl.def("viewY",		&ccumesh_t::viewY);
@@ -51,13 +77,26 @@ PYBIND11_MODULE(MODNAME, mParent)
 	      pybind11::return_value_policy::take_ownership);
 
   // ---------------------------------------
-  // bind enums to set reconstruction order
+  // bind enums
   // ---------------------------------------
-  pybind11::enum_<pressiodemoapps::reconstructionEnum>(mParent, "reconstructWith")
-    .value("firstOrder"    ,
-	   pressiodemoapps::reconstructionEnum::firstOrder)
-    .value("fifthOrderWeno",
-	   pressiodemoapps::reconstructionEnum::fifthOrderWeno);
+  pybind11::enum_<pressiodemoapps::ReconstructionType>(mParent, "ReconstructionType")
+    .value("firstOrder",     pressiodemoapps::ReconstructionType::firstOrder)
+    .value("fifthOrderWeno", pressiodemoapps::ReconstructionType::fifthOrderWeno);
+
+  pybind11::enum_<pressiodemoapps::FluxType>(mParent, "FluxType")
+    .value("Rusanov",     pressiodemoapps::FluxType::Rusanov);
+
+  pybind11::enum_<pressiodemoapps::Euler1d>(mParent, "Euler1d")
+    .value("PeriodicSmooth", pressiodemoapps::Euler1d::PeriodicSmooth)
+    .value("Sod",	     pressiodemoapps::Euler1d::Sod)
+    .value("Lax",	     pressiodemoapps::Euler1d::Lax);
+
+  pybind11::enum_<pressiodemoapps::Euler2d>(mParent, "Euler2d")
+    .value("PeriodicSmooth", pressiodemoapps::Euler2d::PeriodicSmooth)
+    .value("SedovFull",	     pressiodemoapps::Euler2d::SedovFull)
+    .value("SedovSymmtry",   pressiodemoapps::Euler2d::SedovSymmetry)
+    .value("Riemann",	     pressiodemoapps::Euler2d::Riemann);
+
 
   // -----------------------
   // linead advection 1d
@@ -70,39 +109,13 @@ PYBIND11_MODULE(MODNAME, mParent)
       pressiodemoappspy::py_cstyle_arr_sc
     >;
 
-  pybind11::class_<linadv1d_t> ad1dCl(mParent, "LinearAdvection1d");
-  ad1dCl.def(pybind11::init<
-	     const ccumesh_t &
-	     >());
+  pybind11::class_<linadv1d_t> adDiff1dProb(mParent, "LinearAdvection1dProblem");
+  // adDiff1dProb.def(pybind11::init<
+  // 		   const ccumesh_t &,
+  // 		   pressiodemoapps::ReconstructionType
+  // 		   >());
 
-  ad1dCl.def(pybind11::init<
-	     const ccumesh_t &,
-	     pressiodemoapps::reconstructionEnum
-	     >());
-
-  ad1dCl.def("totalDofSampleMesh",  &linadv1d_t::totalDofSampleMesh);
-  ad1dCl.def("totalDofStencilMesh", &linadv1d_t::totalDofStencilMesh);
-  ad1dCl.def("createVelocity",
-	     &linadv1d_t::createVelocity,
-	     pybind11::return_value_policy::take_ownership);
-  ad1dCl.def("velocity", &linadv1d_t::velocity);
-
-  mParent.def("createPeriodicLinearAdvection1d",
-	      &pressiodemoapps::createPeriodicLinearAdvection1dForPy<ccumesh_t, linadv1d_t>,
-	      pybind11::return_value_policy::take_ownership);
-
-  // ---------------------------------------
-  // bind problem enums
-  // ---------------------------------------
-  pybind11::enum_<pressiodemoapps::euler1dproblemsEnum>(mParent, "euler1d")
-    .value("periodic", pressiodemoapps::euler1dproblemsEnum::periodic)
-    .value("sod",      pressiodemoapps::euler1dproblemsEnum::sod)
-    .value("lax",      pressiodemoapps::euler1dproblemsEnum::lax);
-
-  pybind11::enum_<pressiodemoapps::euler2dproblemsEnum>(mParent, "euler2d")
-    .value("periodic", pressiodemoapps::euler2dproblemsEnum::periodic)
-    .value("sedov",    pressiodemoapps::euler2dproblemsEnum::sedov)
-    .value("riemann",  pressiodemoapps::euler2dproblemsEnum::riemann);
+  pdabindimpl::bindCommonApiMethods<linadv1d_t>(adDiff1dProb);
 
   // -----------------------
   // Euler 1d
@@ -117,26 +130,8 @@ PYBIND11_MODULE(MODNAME, mParent)
     >;
 
   pybind11::class_<ee1d_t> ee1dCl(mParent, "Euler1dProblem");
-  ee1dCl.def(pybind11::init<
-	     const ccumesh_t &,
-	     const pressiodemoapps::reconstructionEnum,
-	     const pressiodemoapps::euler1dproblemsEnum
-	     >());
-
-  ee1dCl.def("totalDofSampleMesh",  &ee1d_t::totalDofSampleMesh);
-  ee1dCl.def("totalDofStencilMesh", &ee1d_t::totalDofStencilMesh);
+  pdabindimpl::bindCommonApiMethods<ee1d_t>(ee1dCl);
   ee1dCl.def("gamma",		     &ee1d_t::gamma);
-  ee1dCl.def("initialCondition",
-	      &ee1d_t::initialCondition,
-	      pybind11::return_value_policy::copy);
-  ee1dCl.def("createVelocity",
-	      &ee1d_t::createVelocity,
-	      pybind11::return_value_policy::automatic);
-  ee1dCl.def("velocity", &ee1d_t::velocity);
-
-  mParent.def("createEuler1dProblem",
-	      &pressiodemoapps::createEuler1dForPy<ccumesh_t, ee1d_t>,
-	      pybind11::return_value_policy::take_ownership);
 
   // -----------------------
   // Euler 2d
@@ -151,26 +146,35 @@ PYBIND11_MODULE(MODNAME, mParent)
     >;
 
   pybind11::class_<ee2d_t> ee2dCl(mParent, "Euler2dProblem");
-  ee2dCl.def(pybind11::init<
-	     const ccumesh_t &,
-	     const pressiodemoapps::reconstructionEnum,
-	     const pressiodemoapps::euler2dproblemsEnum,
-	     const int
-	     >());
-
-  ee2dCl.def("totalDofSampleMesh",  &ee2d_t::totalDofSampleMesh);
-  ee2dCl.def("totalDofStencilMesh", &ee2d_t::totalDofStencilMesh);
+  pdabindimpl::bindCommonApiMethods<ee2d_t>(ee2dCl);
   ee2dCl.def("gamma",		    &ee2d_t::gamma);
-  ee2dCl.def("initialCondition",
-	      &ee2d_t::initialCondition,
-	      pybind11::return_value_policy::copy);
-  ee2dCl.def("createVelocity",
-	      &ee2d_t::createVelocity,
-	      pybind11::return_value_policy::automatic);
-  ee2dCl.def("velocity", &ee2d_t::velocity);
 
-  mParent.def("createEuler2dProblem",
-	      &pressiodemoapps::createEuler2dForPy<ccumesh_t, ee2d_t>,
+  // -----------------------------------------------
+  // functions to create problems.
+  // add more as the c++ grows
+  // -----------------------------------------------
+  mParent.def("createPeriodicLinearAdvection1d",
+	      &pressiodemoapps::createPeriodicLinearAdvection1dForPy<ccumesh_t, linadv1d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler1dForPyA<ccumesh_t, ee1d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler1dForPyB<ccumesh_t, ee1d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler2dForPyA<ccumesh_t, ee2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler2dForPyB<ccumesh_t, ee2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler2dForPyC<ccumesh_t, ee2d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
 }

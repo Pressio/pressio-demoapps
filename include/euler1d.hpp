@@ -2,28 +2,21 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER1D_INC_HPP_
 
-#include <cmath>
-#include <limits>
-
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include "Eigen/Core"
 #endif
 
 #include "./predicates/all.hpp"
-#include "./resize.hpp"
-#include "./extent.hpp"
-#include "./weno.hpp"
-#include "./reconstruction_enums.hpp"
+#include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./impl/eulerCommon/energy.hpp"
-#include "./impl/eulerCommon/fluxes.hpp"
-#include "./impl/stencil_filler.hpp"
-#include "./impl/reconstructor_from_stencil.hpp"
-#include "./impl/reconstructor_from_state.hpp"
+#include "./reconstruction.hpp"
+#include "flux_enum.hpp"
 
 namespace pressiodemoapps{
-enum class euler1dproblemsEnum{
-  // for periodic, the user must provide a periodic domain and IC
+
+enum class Euler1d{
+  // for periodic, the user must provide a periodic domain and
+  // a default smooth IC is provided
   PeriodicSmooth,
 
   // sod taken from: https://www.mdpi.com/2227-7390/6/10/211/pdf
@@ -36,60 +29,68 @@ enum class euler1dproblemsEnum{
   // initial condition is provided by the app class
   Lax
 };
-}
+}//end namespace pressiodemoapps
 
-#include "./impl/euler1d/ghost_filler.hpp"
-#include "./impl/euler1d/initial_condition.hpp"
-#include "./impl/euler1d/euler1d_app_impl.hpp"
+#include "./impl_apps/euler1d/euler1d_app_impl.hpp"
 
 namespace pressiodemoapps{
 
 namespace impl{
 template<class mesh_t, class T>
-T createEe1dImpl(const mesh_t & meshObj,
-		    pressiodemoapps::reconstructionEnum enIn,
-		    pressiodemoapps::euler1dproblemsEnum probEn)
+T createEuler1dImpl(const mesh_t & meshObj,
+		    ::pressiodemoapps::Euler1d probEnum,
+		    ::pressiodemoapps::ReconstructionType recEnum,
+		    ::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
 {
-  meshObj.checkStencilSupportsOrder(enIn);
+  //meshObj.checkStencilSupportsOrder(enIn);
 
-  if (probEn == pressiodemoapps::euler1dproblemsEnum::PeriodicSmooth){
+  if (probEnum == ::pressiodemoapps::Euler1d::PeriodicSmooth){
     if (!meshObj.isPeriodic()){
       throw std::runtime_error
       ("For periodicSmooth euler1d, mesh must be periodic.");
     }
   }
 
-  return T(meshObj, enIn, probEn);
+  return T(meshObj, probEnum, recEnum, fluxEnum);
 }
-} //end impl
+} //end pressiodemoapps::impl
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-template<class mesh_t, class scalar_t = double>
-using Euler1dEigen =
-  pressiodemoapps::ee::impl::Euler1dAppT<
-  scalar_t, mesh_t,
-  Eigen::Matrix<scalar_t,-1,1>,
-  Eigen::Matrix<scalar_t,-1,1>,
-  Eigen::Matrix<scalar_t,-1,1>
-  >;
-
 template<class mesh_t>
 auto createEuler1dEigen(const mesh_t & meshObj,
-			pressiodemoapps::reconstructionEnum enIn,
-			pressiodemoapps::euler1dproblemsEnum probEn)
+			::pressiodemoapps::Euler1d probEnum,
+			::pressiodemoapps::ReconstructionType recEnum,
+			::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
 {
-  using p_t = Euler1dEigen<mesh_t>;
-  return impl::createEe1dImpl<mesh_t, p_t>(meshObj, enIn, probEn);
+
+  using scalar_t = typename mesh_t::scalar_t;
+  using p_t = ::pressiodemoapps::ee::impl::Euler1dAppT<
+    scalar_t, mesh_t,
+    Eigen::Matrix<scalar_t,-1,1>,
+    Eigen::Matrix<scalar_t,-1,1>,
+    Eigen::Matrix<scalar_t,-1,1>
+    >;
+  return impl::createEuler1dImpl<mesh_t, p_t>(meshObj, probEnum, recEnum, fluxEnum);
 }
 #endif
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
-T createEuler1dForPy(const mesh_t & meshObj,
-			pressiodemoapps::reconstructionEnum enIn,
-			pressiodemoapps::euler1dproblemsEnum probEn)
+T createEuler1dForPyA(const mesh_t & meshObj,
+		     ::pressiodemoapps::Euler1d probEnum,
+		     ::pressiodemoapps::ReconstructionType recEnum,
+		     ::pressiodemoapps::FluxType fluxEnum)
 {
-  return impl::createEe1dImpl<mesh_t, T>(meshObj, enIn, probEn);
+  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
+}
+
+template<class mesh_t, class T>
+T createEuler1dForPyB(const mesh_t & meshObj,
+		     ::pressiodemoapps::Euler1d probEnum,
+		     ::pressiodemoapps::ReconstructionType recEnum)
+{
+  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum,
+					    recEnum, FluxType::Rusanov);
 }
 #endif
 

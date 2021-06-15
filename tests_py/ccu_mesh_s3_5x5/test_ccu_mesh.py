@@ -1,12 +1,12 @@
 
 import numpy as np
-from pressiodemoapps import mesh as mesh
+import pressiodemoapps as pda
 import pathlib, sys
 file_path = pathlib.Path(__file__).parent.absolute()
 
-def test1():
+def test_meshclass1():
   meshPath = str(file_path)
-  meshO = mesh.loadCellCenterUniformMesh(meshPath)
+  meshO = pda.loadCellCenterUniformMesh(meshPath)
 
   assert( meshO.dimensionality() == 2 )
   assert( meshO.stencilMeshSize() == 25 )
@@ -23,17 +23,15 @@ def test1():
   goldX = [0.1, 0.3, 0.5, 0.7, 0.9, 0.1, 0.3, 0.5,\
            0.7, 0.9, 0.1, 0.3, 0.5, 0.7, 0.9, 0.1,\
            0.3, 0.5, 0.7, 0.9, 0.1, 0.3, 0.5, 0.7, 0.9]
-  goldY = [0.1, 0.1, 0.1, 0.1, 0.1,
-           0.3, 0.3, 0.3, 0.3, 0.3,
-           0.5, 0.5, 0.5, 0.5, 0.5,
-           0.7, 0.7, 0.7, 0.7, 0.7,
-           0.9, 0.9, 0.9, 0.9, 0.9]
+  goldY = [0.1, 0.1, 0.1, 0.1, 0.1, 0.3, 0.3, 0.3, \
+           0.3, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.7, \
+           0.7, 0.7, 0.7, 0.7, 0.9, 0.9, 0.9, 0.9, 0.9]
   assert( np.allclose(meshO.viewX(), goldX) )
   assert( np.allclose(meshO.viewY(), goldY) )
 
-def testGraph():
+def test_meshclass2():
   meshPath = str(file_path)
-  meshO = mesh.CellCenteredUniformMesh(meshPath)
+  meshO = pda.CellCenteredUniformMesh(meshPath)
   G = meshO.graph()
   print(G)
 
@@ -67,5 +65,5 @@ def testGraph():
   assert( np.allclose(G, goldG) )
 
 if __name__ == '__main__':
-  test1()
-  testGraph()
+  test_meshclass1()
+  test_meshclass2()
