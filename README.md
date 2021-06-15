@@ -35,61 +35,65 @@ pytest -s # this runs the tests, located in side tests_py
 
 # Synopsis
 
-## 1d Problems: Sod, Lax
+Coming soon.
 
-Mesh generation:
-```py
-python ./meshing_scripts/create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere>
-python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere>
-```
+<!-- ## 1d Problems: Sod, Lax -->
 
-C++ problem object syntax:
-```c++
-namespace pda      = pressiodemoapps;
-const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>);
-const auto probId  = pda::euler1dproblemsEnum::{sod, lax}
-const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
-auto appObj        = pda::createEuler1dEigen(meshObj, order, probId);
-```
+<!-- Mesh generation: -->
+<!-- ```py -->
+<!-- python ./meshing_scripts/create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere> -->
+<!-- python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere> -->
+<!-- ``` -->
 
-Python object syntax:
-```py
-meshO    = loadCellCenterUniformMesh(meshPath)
-probId   = euler1d.{sod, lax}
-appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId)
-```
+<!-- C++ problem object syntax: -->
+<!-- ```c++ -->
+<!-- namespace pda      = pressiodemoapps; -->
+<!-- const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>); -->
+<!-- const auto probId  = pda::euler1dproblemsEnum::{sod, lax} -->
+<!-- const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno}; -->
+<!-- auto appObj        = pda::createEuler1dEigen(meshObj, order, probId); -->
+<!-- ``` -->
 
-## 2d problems: Sedov, Riemann
+<!-- Python object syntax: -->
+<!-- ```py -->
+<!-- meshO    = loadCellCenterUniformMesh(meshPath) -->
+<!-- probId   = euler1d.{sod, lax} -->
+<!-- appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId) -->
+<!-- ``` -->
 
-Mesh generation:
-```py
-python ./meshing_scripts/create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
-python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere>
-```
+<!-- ## 2d problems: Sedov, Riemann -->
 
-C++ problem object syntax:
-```c++
-namespace pda      = pressiodemoapps;
-const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>);
-const auto probId  = pda::euler2dproblemsEnum::{sedov, riemann};
-const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno};
-auto appObj        = pda::createEuler1dEigen(meshObj, order, probId);
-```
+<!-- Mesh generation: -->
+<!-- ```py -->
+<!-- python ./meshing_scripts/create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere> -->
+<!-- python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere> -->
+<!-- ``` -->
 
-Python object syntax:
-```py
-meshO    = loadCellCenterUniformMesh(meshPath)
-probId   = euler2d.{sedov, riemann}
-appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId)
+<!-- C++ problem object syntax: -->
+<!-- ```c++ -->
+<!-- namespace pda      = pressiodemoapps; -->
+<!-- const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>); -->
+<!-- const auto probId  = pda::euler2dproblemsEnum::{sedov, riemann}; -->
+<!-- const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno}; -->
+<!-- auto appObj        = pda::createEuler1dEigen(meshObj, order, probId); -->
+<!-- ``` -->
 
-```
+<!-- Python object syntax: -->
+<!-- ```py -->
+<!-- meshO    = loadCellCenterUniformMesh(meshPath) -->
+<!-- probId   = euler2d.{sedov, riemann} -->
+<!-- appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId) -->
 
-
+<!-- ``` -->
 
 # License and Citation
+
+**If you use this code, we only ask that you reference this github page!**
+
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 The full license is available [here](https://pressio-demosapps.github.io/various/license/).
+
 
 # Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-tutorials).
