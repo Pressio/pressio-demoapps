@@ -15,11 +15,25 @@ from matplotlib.patches import Rectangle
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
-# d is a dictionary with the full mesh graph
-# returns the graph in sparse matrix format
+# #---------------------------------------------------------------------
+# def createRandomListTargetResidualGIDs(nx, ny, numCells, targetPct):
+#   # how many elements of the full mesh the targetPct corresponds to
+#   # need to get the floor of this to get an integer
+#   targetSMSize = targetPct * 1e-2 * numCells
+#   targetSMSize = np.int64(np.floor(targetSMSize))
+#   rGIDs = random.sample(range(numCells), targetSMSize)
+#   return rGIDs
+
+#---------------------------------------------------------------------
+def printDicPretty(d):
+  for key, value in d.items():
+    print(str(key), value)
+
+#---------------------------------------------------------------------
 def convertGraphDicToSparseMatrix(d):
   # vectorize all entries of the graph so that each entry in the new
-  # arrays contains (row_index, col_index, 1) refereing to one entry in the matrix
+  # arrays contains (row_index, col_index, 1)
+  # refereing to one entry in the matrix
 
   # the final +1 is to account for the key itself which represents the diagonal
   row_ind = [k for k, v in d.items() for _ in range(len(v)+1)]
@@ -36,16 +50,31 @@ def convertGraphDicToSparseMatrix(d):
   return spM
 
 
-# spMat is a sparse matrix containing the graph
+#---------------------------------------------------------------------
 def reverseCuthillMckee(spMat, symmetric):
   rc = reverse_cuthill_mckee(spMat, symmetric_mode=symmetric)
   I,J=np.ix_(rc,rc)
   X2 = spMat[I,J]
   return [rc, X2]
 
+#---------------------------------------------------------------------
+def plotCells1d(x, dx, gids, ax, facecol='w', fontSz=7, alpha=1.):
+  cells = []
+  for i in range(0, len(x)):
+    if fontSz!=0:
+      ax.text(x[i], 0, str(np.int64(gids[i])), verticalalignment='center',
+              horizontalalignment='center', fontsize=fontSz)
+    rect = Rectangle((x[i]-dx*0.5, -0.05), dx, 0.1)
+    cells.append(rect)
 
-def plotLabels(x, y, dx, dy, gids, ax, m='o', col='b', ms='0', fontSz=7):
-  ax.plot(x, y, m, markerfacecolor=col, markersize=ms)
+  pc = PatchCollection(cells, facecolor=facecol, edgecolor='k',
+                       linewidths=0.5, alpha=alpha)
+  ax.add_collection(pc)
+  ax.set_aspect(aspect=1)
+
+#---------------------------------------------------------------------
+def plotCells2d(x, y, dx, dy, gids, ax, facecol='w', fontSz=7, alpha=1.):
+  #ax.plot(x, y, m, markerfacecolor=col, markersize=ms)
   cells = []
   for i in range(0, len(x)):
     if fontSz!=0:
@@ -56,11 +85,11 @@ def plotLabels(x, y, dx, dy, gids, ax, m='o', col='b', ms='0', fontSz=7):
     rect = Rectangle((x[i]-dx*0.5, y[i]-dy*0.5), dx, dy)
     cells.append(rect)
 
-  pc = PatchCollection(cells, facecolor='none', edgecolor='k', linewidths=(0.15))
+  pc = PatchCollection(cells, facecolor=facecol, edgecolor='k', linewidths=0.5, alpha=alpha)
   ax.add_collection(pc)
   ax.set_aspect(aspect=1)
 
-
+#---------------------------------------------------------------------
 def cuboid_data2(o, size=(1,1,1)):
   X = [[[0, 1, 0], [0, 0, 0], [1, 0, 0], [1, 1, 0]],
        [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 0, 0]],
@@ -74,6 +103,7 @@ def cuboid_data2(o, size=(1,1,1)):
   X += np.array(o)
   return X
 
+#---------------------------------------------------------------------
 def plotCubeAt2(positions, sizes=None, colors=None, **kwargs):
   if not isinstance(colors,(list,np.ndarray)): colors=["C0"]*len(positions)
   if not isinstance(sizes,(list,np.ndarray)): sizes=[(1,1,1)]*len(positions)
@@ -85,23 +115,11 @@ def plotCubeAt2(positions, sizes=None, colors=None, **kwargs):
   #return Line3DCollection(np.concatenate(g), colors='k', linewidths=0.1, linestyles=':')
   return Poly3DCollection(np.concatenate(g), **kwargs)
 
-def plotLabels3d(x, y, z, dx, dy, dz, gids, ax, facecol='w', ms='0', fontSz=7, alpha=0.1):
+#---------------------------------------------------------------------
+def plotCells3d(x, y, z, dx, dy, dz, ax, facecol='w', fontSz=7, alpha=0.1):
   for i in range(0, len(x)):
     cellOrigin = [(x[i]-dx*0.5, y[i]-dy*0.5, z[i]-dz*0.5)]
     cellSize = [(dx, dy, dz)]
     pc = plotCubeAt2(cellOrigin, cellSize, edgecolor='k', alpha=alpha)
     pc.set_facecolor(facecol)
     ax.add_collection3d(pc)
-
-def printDicPretty(d):
-  for key, value in d.items():
-    print(str(key), value)
-
-
-def createRandomListTargetResidualGIDs(nx, ny, numCells, targetPct):
-  # how many elements of the full mesh the targetPct corresponds to
-  # need to get the floor of this to get an integer
-  targetSMSize = targetPct * 1e-2 * numCells
-  targetSMSize = np.int64(np.floor(targetSMSize))
-  rGIDs = random.sample(range(numCells), targetSMSize)
-  return rGIDs

@@ -37,6 +37,7 @@ endif()
 
 #=====================================================================
 if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
+
   set(PYSRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src_py)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tpls/pybind11)
@@ -48,14 +49,18 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
 
 else()
 
-  add_definitions(-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=${PRESSIODEMOAPPS_ENABLE_TPL_EIGEN})
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
-    ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
-
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()
+    add_subdirectory(tests_mesh)
+  endif()
+
+  if(PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
+    add_definitions(-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=${PRESSIODEMOAPPS_ENABLE_TPL_EIGEN})
+    include_directories(
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
+      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
     add_subdirectory(tests_cpp)
   endif()
+
 endif()

@@ -175,7 +175,7 @@ def main(workDir, debug, dimensionality,\
     #with the permuation indices, update the gids labeling
     x, y = x[rcmPermInd], y[rcmPermInd]
     # if plotting != "none":
-    #  plotLabels(x,y,dx, dy, gids,ax10)
+    #  plotCells(x,y,dx, dy, gids,ax10)
     #  ax11.spy(spMatRCM)
     #  ax10.set_aspect(1.0)
     #  ax10.set_xlim(xL,xR)
@@ -255,15 +255,20 @@ def main(workDir, debug, dimensionality,\
     f.write("\n")
   f.close()
 
-  if plotting != "none" and dimensionality<=2:
-    plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
+  if plotting != "none" and dimensionality==1:
+    plotCells1d(x, dx, gids, axFM, fontSz=plotFontSize)
+    axFM.set_xlim(min(xBd), max(xBd))
+    axFM.set_ylim(-0.025, 0.025)
+    axFM.set_yticks([])
+
+  if plotting != "none" and dimensionality==2:
+    plotCells2d(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
     axFM.set_xlim(min(xBd), max(xBd))
-    if dimensionality!=1:
-      axFM.set_ylim(min(yBd), max(yBd))
+    axFM.set_ylim(min(yBd), max(yBd))
 
   if plotting != "none" and dimensionality==3:
-    plotLabels3d(x, y, z, dx, dy, dz, gids, axFM, fontSz=plotFontSize)
+    plotCells3d(x, y, z, dx, dy, dz, axFM, fontSz=plotFontSize)
     #axFM.set_aspect('equal')
     axFM.set_xlim(min(xBd), max(xBd))
     axFM.set_ylim(min(yBd), max(yBd))
@@ -400,13 +405,3 @@ has that info embedded in.")
        xCoords, yCoords, zCoords,
        args.stencilSize, plotFontSize,
        args.periodic)
-
-
-
-  # coords = args.bounds
-  # assert(numCoordsIn % 2 == 0)
-  # xPoints = args.bounds[0:int(numCoordsIn/2)] if ny!=1 else args.bounds
-  # if nx != 1:
-  #   yPoints = args.bounds[int(numCoordsIn/2):]
-  # checkDomainBoundsCoordinates(xPoints, yPoints)
-  # print(xPoints)

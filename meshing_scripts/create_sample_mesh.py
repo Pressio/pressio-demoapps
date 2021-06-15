@@ -125,6 +125,56 @@ def readFullMeshCoordinates(fullMeshDir,dim):
   return np.array(x), np.array(y), np.array(z)
 
 
+def initFigures(dim):
+  figFM = plt.figure(0)
+  figSM = plt.figure(1)
+  if dim<=2:
+    axFM = figFM.gca()
+    axSM = figSM.gca()
+  elif dim==3:
+    axFM = figFM.gca(projection='3d')
+    axSM = figSM.gca(projection='3d')
+  return figFM, figSM, axFM, axSM
+
+
+def plotReducedMesh(axSM, dim, plotFontSize, \
+                    x, y, z, dx, dy, dz, \
+                    gids_sm, fm_to_sm_map, \
+                    stencilMeshGIDs, sampleMeshGIDs):
+  xStencilMesh    = x[stencilMeshGIDs]
+  xSampleMeshOnly = x[sampleMeshGIDs]
+  residualCellsColor = 'g'
+
+  if dim==1:
+    plotCells1d(xStencilMesh, dx, gids_sm, axSM, fontSz=plotFontSize)
+    plotCells1d(xSampleMeshOnly, dx, gids_sm, axSM, fontSz=0,
+                facecol=residualCellsColor, alpha=0.25)
+    axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    axSM.set_ylim(-0.02, 0.02)
+    axSM.set_yticks([])
+
+  if dim==2:
+    print("gg")
+    yStencilMesh    = y[stencilMeshGIDs]
+    ySampleMeshOnly = y[sampleMeshGIDs]
+    plotCells2d(xStencilMesh, yStencilMesh, dx, dy, gids_sm, axSM, fontSz=plotFontSize)
+    plotCells2d(xSampleMeshOnly, ySampleMeshOnly, dx, dy, gids_sm, axSM, fontSz=0,
+                facecol=residualCellsColor, alpha=0.25)
+    axSM.set_aspect(1.0)
+    axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
+
+  if dim==3:
+    yStencilMesh    = y[stencilMeshGIDs]
+    ySampleMeshOnly = y[sampleMeshGIDs]
+    zStencilMesh    = z[stencilMeshGIDs]
+    zSampleMeshOnly = z[sampleMeshGIDs]
+    plotCells3d(xStencilMesh, yStencilMesh, zStencilMesh, \
+                dx, dy, dz, ax=axSM, fontSz=plotFontSize, facecol='w')
+    plotCells3d(xSampleMeshOnly, ySampleMeshOnly, zSampleMeshOnly, \
+                dx, dy, dz, ax=axSM, fontSz=0, facecol=residualCellsColor, alpha=0.25)
+
+
 #=========================================================================
 def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
 #=========================================================================
@@ -133,23 +183,22 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   G,gids = readFullMeshConnec(fullMeshDir)
 
   if (plotting != "none"):
-    figFM = plt.figure(0)
-    figSM = plt.figure(1)
-    if dim<=2:
-      axFM = figFM.gca()
-      axSM = figSM.gca()
-    elif dim==3:
-      axFM = figFM.gca(projection='3d')
-      axSM = figSM.gca(projection='3d')
+    figFM, figSM, axFM, axSM = initFigures(dim)
 
-  if plotting != "none" and dim<=2:
-    plotLabels(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
+  if plotting != "none" and dim==1:
+    plotCells1d(x, dx, gids, axFM, fontSz=plotFontSize)
+    axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
+    axFM.set_ylim(-0.02, 0.02)
+    axFM.set_yticks([])
+
+  if plotting != "none" and dim==2:
+    plotCells2d(x, y, dx, dy, gids, axFM, fontSz=plotFontSize)
     axFM.set_aspect(1.0)
     axFM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
     axFM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
 
   if plotting != "none" and dim==3:
-    plotLabels3d(x, y, z, dx, dy, dz, gids, axFM, fontSz=plotFontSize)
+    plotCells3d(x, y, z, dx, dy, dz, axFM, fontSz=plotFontSize)
 
   if debug:
     print("natural order full mesh connectivity")
@@ -221,16 +270,10 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     for p in range(numPartitions):
       print(p)
       pgids = np.loadtxt(gidsfiles[p], dtype=int)
-
       b = list(set(stencilMeshGIDs).intersection(pgids))
       for pt in np.sort(np.array(b)):
         fm_to_sm_map[pt] = i
         i+=1
-
-      # for pt in stencilMeshGIDs:
-      #   if pt in pgids:
-      #     fm_to_sm_map[pt] = i
-      #     i+=1
   else:
     fm_to_sm_map = collections.OrderedDict()
     i = 0
@@ -273,26 +316,11 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
     printDicPretty(sampleMeshGraph)
 
   gids_sm = list(sm_to_fm_map.keys())
-  if plotting != "none" and dim<=2:
-    x2, y2 = x[ list(fm_to_sm_map.keys()) ], y[ list(fm_to_sm_map.keys()) ]
-    plotLabels(x2, y2, dx, dy, gids_sm, axSM, 's', 'r', 0, fontSz=plotFontSize)
-    axSM.set_aspect(1.0)
-    axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
-    axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
-
-  if plotting != "none" and dim==3:
-    sampleMeshOnlyGIDs = list(set(stencilMeshGIDs) - set(sampleMeshGIDs))
-
-    # plot stencil mesh cells
-    x2, y2, z2 = x[sampleMeshOnlyGIDs], y[sampleMeshOnlyGIDs], z[sampleMeshOnlyGIDs]
-    plotLabels3d(x2, y2, z2, dx, dy, dz, gids_sm, axSM, fontSz=plotFontSize, facecol='w')
-
-    x3, y3, z3 = x[sampleMeshGIDs], y[sampleMeshGIDs], z[sampleMeshGIDs]
-    plotLabels3d(x3, y3, z3, dx, dy, dz, gids_sm, axSM, fontSz=plotFontSize, facecol='r', alpha=0.3)
-
-    #axSM.set_aspect(1.0)
-    #axSM.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
-    #axSM.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
+  if plotting != "none":
+    plotReducedMesh(axSM, dim, plotFontSize, \
+                    x, y, z, dx, dy, dz, \
+                    gids_sm, fm_to_sm_map,
+                    stencilMeshGIDs, sampleMeshGIDs)
 
   # -----------------------------------------------------
   sampleMeshSize = len(sampleMeshGraph)
@@ -305,17 +333,44 @@ def main(workDir, debug, fullMeshDir, tilingDir, plotting, plotFontSize):
   # -----------------------------------------------------
   # print info file
   f = open(workDir+"/info.dat","w+")
-  f.write("dim %1d\n" % dim)
-  f.write("xMin %.14f\n" % domainBounds[0])
-  f.write("xMax %.14f\n" % domainBounds[1])
-  f.write("yMin %.14f\n" % domainBounds[2])
-  f.write("yMax %.14f\n" % domainBounds[3])
-  f.write("dx %.14f\n" % dx)
-  f.write("dy %.14f\n" % dy)
-  f.write("sampleMeshSize %8d\n"  % sampleMeshSize)
-  f.write("stencilMeshSize %8d\n" % stencilMeshSize)
-  f.write("stencilSize %2d\n" % stencilSize)
-  f.close()
+  if dim==1:
+    f.write("dim %1d\n" % dim)
+    f.write("xMin %.14f\n" % domainBounds[0])
+    f.write("xMax %.14f\n" % domainBounds[1])
+    f.write("dx %.14f\n" % dx)
+    f.write("sampleMeshSize %8d\n"  % sampleMeshSize)
+    f.write("stencilMeshSize %8d\n" % stencilMeshSize)
+    f.write("stencilSize %2d\n" % stencilSize)
+    f.close()
+
+  elif dim==2:
+    f.write("dim %1d\n" % dim)
+    f.write("xMin %.14f\n" % domainBounds[0])
+    f.write("xMax %.14f\n" % domainBounds[1])
+    f.write("yMin %.14f\n" % domainBounds[2])
+    f.write("yMax %.14f\n" % domainBounds[3])
+    f.write("dx %.14f\n" % dx)
+    f.write("dy %.14f\n" % dy)
+    f.write("sampleMeshSize %8d\n"  % sampleMeshSize)
+    f.write("stencilMeshSize %8d\n" % stencilMeshSize)
+    f.write("stencilSize %2d\n" % stencilSize)
+    f.close()
+
+  elif dim==3:
+    f.write("dim %1d\n" % dim)
+    f.write("xMin %.14f\n" % domainBounds[0])
+    f.write("xMax %.14f\n" % domainBounds[1])
+    f.write("yMin %.14f\n" % domainBounds[2])
+    f.write("yMax %.14f\n" % domainBounds[3])
+    f.write("zMin %.14f\n" % domainBounds[4])
+    f.write("zMax %.14f\n" % domainBounds[5])
+    f.write("dx %.14f\n" % dx)
+    f.write("dy %.14f\n" % dy)
+    f.write("dz %.14f\n" % dz)
+    f.write("sampleMeshSize %8d\n"  % sampleMeshSize)
+    f.write("stencilMeshSize %8d\n" % stencilMeshSize)
+    f.write("stencilSize %2d\n" % stencilSize)
+    f.close()
 
   # -----------------------------------------------------
   # print connectivity file
