@@ -1,9 +1,0 @@
-README.md
-setup.py
-pressiodemoapps/__init__.py
-pressiodemoapps.egg-info/PKG-INFO
-pressiodemoapps.egg-info/SOURCES.txt
-pressiodemoapps.egg-info/dependency_links.txt
-pressiodemoapps.egg-info/not-zip-safe
-pressiodemoapps.egg-info/requires.txt
-pressiodemoapps.egg-info/top_level.txt
