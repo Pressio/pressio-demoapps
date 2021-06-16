@@ -149,6 +149,11 @@ Todo.
 <img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsm.png" width="100%">
 
 
+## 3D Example
+
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/3dsm.png" width="100%">
+
+
 # License and Citation
 
 We are working on a publication of this work. <br>
