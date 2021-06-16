@@ -143,6 +143,10 @@ Todo.
 ## 1D Example
 ![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png)
 
+## 2D Example
+
+<img src="https://github.com/fnrizzi/ElasticShearWaves/blob/master/tutorialRunFiles/fom_run/wavefield_4000.png" width="33%">
+<img src="https://github.com/fnrizzi/ElasticShearWaves/blob/master/tutorialRunFiles/fom_run/wavefield_6000.png" width="33%">
 
 
 # License and Citation
