@@ -141,8 +141,7 @@ pytest -s
 Todo.
 
 ## 1D Example
-![Sample mesh example for 1D]()
-
+![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png)
 
 
 
