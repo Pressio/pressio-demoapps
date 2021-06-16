@@ -136,57 +136,16 @@ pytest -s
 ```
 
 
+# Sample Mesh
+
+Todo.
+
+## 1D Example
+![Sample mesh example for 1D]()
 
 
 
-<!-- ## 1d Problems: Sod, Lax -->
 
-<!-- Mesh generation: -->
-<!-- ```py -->
-<!-- python ./meshing_scripts/create_full_mesh_for.py --name sod1d_s<3,7> -n <N> -outDir <somewhere> -->
-<!-- python ./meshing_scripts/create_full_mesh_for.py --name lax1d_s<3,7> -n <N> -outDir <somewhere> -->
-<!-- ``` -->
-
-<!-- C++ problem object syntax: -->
-<!-- ```c++ -->
-<!-- namespace pda      = pressiodemoapps; -->
-<!-- const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>); -->
-<!-- const auto probId  = pda::euler1dproblemsEnum::{sod, lax} -->
-<!-- const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno}; -->
-<!-- auto appObj        = pda::createEuler1dEigen(meshObj, order, probId); -->
-<!-- ``` -->
-
-<!-- Python object syntax: -->
-<!-- ```py -->
-<!-- meshO    = loadCellCenterUniformMesh(meshPath) -->
-<!-- probId   = euler1d.{sod, lax} -->
-<!-- appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId) -->
-<!-- ``` -->
-
-<!-- ## 2d problems: Sedov, Riemann -->
-
-<!-- Mesh generation: -->
-<!-- ```py -->
-<!-- python ./meshing_scripts/create_full_mesh_for.py --name sedov2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere> -->
-<!-- python ./meshing_scripts/create_full_mesh_for.py --name riemann2d_s<3,7> -n <Nx> <Ny> -outDir <somewhere> -->
-<!-- ``` -->
-
-<!-- C++ problem object syntax: -->
-<!-- ```c++ -->
-<!-- namespace pda      = pressiodemoapps; -->
-<!-- const auto meshObj = pda::loadCellCenterUniformMeshEigen(<mesh-path-string>); -->
-<!-- const auto probId  = pda::euler2dproblemsEnum::{sedov, riemann}; -->
-<!-- const auto order   = pda::reconstructionEnum::{firstOrder, fifthOrderWeno}; -->
-<!-- auto appObj        = pda::createEuler1dEigen(meshObj, order, probId); -->
-<!-- ``` -->
-
-<!-- Python object syntax: -->
-<!-- ```py -->
-<!-- meshO    = loadCellCenterUniformMesh(meshPath) -->
-<!-- probId   = euler2d.{sedov, riemann} -->
-<!-- appObj   = createEuler1dProblem(meshO, reconstructWith.fifthOrderWeno, probId) -->
-
-<!-- ``` -->
 
 # License and Citation
 
