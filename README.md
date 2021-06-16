@@ -141,8 +141,13 @@ pytest -s
 Todo.
 
 ## 1D Example
-![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png)
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/1dfull.png" width="100%">
+<!-- ![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png) -->
 
+## 2D Example
+
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dfull.png" width="53%">
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsample.png" width="33%">
 
 
 # License and Citation
