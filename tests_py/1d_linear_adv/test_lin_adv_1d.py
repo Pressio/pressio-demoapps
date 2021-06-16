@@ -12,14 +12,16 @@ def analytical(x, t):
 def test_create_vel():
   meshPath = str(file_path)
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createPeriodicLinearAdvection1d(meshO, pda.ReconstructionType.fifthOrderWeno)
+  probId   = pda.Advection1d.PeriodicLinear
+  appObj   = pda.createProblem(meshO, probId, pda.ReconstructionType.fifthOrderWeno)  
   v = appObj.createVelocity()
   print(v.shape)
 
 def test_eval_vel():
   meshPath = str(file_path)
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createPeriodicLinearAdvection1d(meshO, pda.ReconstructionType.fifthOrderWeno)
+  probId   = pda.Advection1d.PeriodicLinear
+  appObj   = pda.createProblem(meshO, probId, pda.ReconstructionType.fifthOrderWeno)  
 
   x = meshO.viewX()
   y0 = analytical(x, 0.)

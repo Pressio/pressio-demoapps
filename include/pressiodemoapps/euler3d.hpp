@@ -73,7 +73,18 @@ auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::ReconstructionType recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 0);
+  return createProblemEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 1);
+}
+#endif
+
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class T>
+T createEuler3dForPyC(const mesh_t & meshObj,
+		     ::pressiodemoapps::Euler3d probEnum,
+		     ::pressiodemoapps::ReconstructionType recEnum)
+{
+  return impl::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					 FluxType::Rusanov, 1);
 }
 #endif
 

@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_ALL_CONTAINER_FUNCTIONS_HPP_
 #define PRESSIODEMOAPPS_ALL_CONTAINER_FUNCTIONS_HPP_
 
-#include "./container_fncs/resize.hpp"
-#include "./container_fncs/extent.hpp"
+#include "./resize.hpp"
+#include "./extent.hpp"
 
 #endif

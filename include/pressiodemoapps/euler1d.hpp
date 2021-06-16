@@ -58,9 +58,9 @@ T createEuler1dImpl(const mesh_t & meshObj,
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
-			  ::pressiodemoapps::Euler1d probEnum,
-			  ::pressiodemoapps::ReconstructionType recEnum,
-			  ::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
+			::pressiodemoapps::Euler1d probEnum,
+			::pressiodemoapps::ReconstructionType recEnum,
+			::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
@@ -77,17 +77,17 @@ auto createProblemEigen(const mesh_t & meshObj,
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
 T createEuler1dForPyA(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler1d probEnum,
-		     ::pressiodemoapps::ReconstructionType recEnum,
-		     ::pressiodemoapps::FluxType fluxEnum)
+		      ::pressiodemoapps::Euler1d probEnum,
+		      ::pressiodemoapps::ReconstructionType recEnum,
+		      ::pressiodemoapps::FluxType fluxEnum)
 {
   return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
 }
 
 template<class mesh_t, class T>
 T createEuler1dForPyB(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler1d probEnum,
-		     ::pressiodemoapps::ReconstructionType recEnum)
+		      ::pressiodemoapps::Euler1d probEnum,
+		      ::pressiodemoapps::ReconstructionType recEnum)
 {
   return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum,
 					    recEnum, FluxType::Rusanov);

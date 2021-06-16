@@ -18,7 +18,7 @@ template<
   class state_t,
   class velo_t
   >
-class LinearAdvT
+class AdvectionAppT
 {
   static_assert
   (std::is_same<scalar_t, typename mesh_t::scalar_t>::value, "");
@@ -34,14 +34,15 @@ public:
   static constexpr int dimensionality{1};
 
 public:
-  explicit LinearAdvT(const mesh_t & meshObj,
-		      ::pressiodemoapps::ReconstructionType enIn)
-    : m_recEn(enIn), m_meshObj(meshObj)
+  explicit AdvectionAppT(const mesh_t & meshObj,
+		      ::pressiodemoapps::Advection1d probEnum,
+		      ::pressiodemoapps::ReconstructionType recEnum)
+    : m_meshObj(meshObj), m_recEn(recEnum), m_probEn(probEnum)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize();
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize();
 
-    const auto stencilSize = reconstructionTypeToStencilSize(enIn);
+    const auto stencilSize = reconstructionTypeToStencilSize(recEnum);
     ::pressiodemoapps::resize(m_stencilVals, stencilSize);
   }
 
@@ -109,8 +110,10 @@ private:
   }
 
 private:
-  ::pressiodemoapps::ReconstructionType m_recEn;
   const mesh_t & m_meshObj;
+  ::pressiodemoapps::Advection1d m_probEn;
+  ::pressiodemoapps::ReconstructionType m_recEn;
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
   mutable stencil_values_t m_stencilVals;

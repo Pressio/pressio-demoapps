@@ -9,10 +9,11 @@
 #include <pybind11/stl.h>
 
 #include "types.hpp"
-#include "mesh.hpp"
-#include "advection.hpp"
-#include "euler1d.hpp"
-#include "euler2d.hpp"
+#include "pressiodemoapps/mesh.hpp"
+#include "pressiodemoapps/advection.hpp"
+#include "pressiodemoapps/euler1d.hpp"
+#include "pressiodemoapps/euler2d.hpp"
+#include "pressiodemoapps/euler3d.hpp"
 
 // helper function to bind API methods
 // since they are the same for any application problem
@@ -86,6 +87,9 @@ PYBIND11_MODULE(MODNAME, mParent)
   pybind11::enum_<pressiodemoapps::FluxType>(mParent, "FluxType")
     .value("Rusanov",     pressiodemoapps::FluxType::Rusanov);
 
+  pybind11::enum_<pressiodemoapps::Advection1d>(mParent, "Advection1d")
+    .value("PeriodicLinear", pressiodemoapps::Advection1d::PeriodicLinear);
+
   pybind11::enum_<pressiodemoapps::Euler1d>(mParent, "Euler1d")
     .value("PeriodicSmooth", pressiodemoapps::Euler1d::PeriodicSmooth)
     .value("Sod",	     pressiodemoapps::Euler1d::Sod)
@@ -94,28 +98,31 @@ PYBIND11_MODULE(MODNAME, mParent)
   pybind11::enum_<pressiodemoapps::Euler2d>(mParent, "Euler2d")
     .value("PeriodicSmooth", pressiodemoapps::Euler2d::PeriodicSmooth)
     .value("SedovFull",	     pressiodemoapps::Euler2d::SedovFull)
-    .value("SedovSymmtry",   pressiodemoapps::Euler2d::SedovSymmetry)
+    .value("SedovSymmetry",  pressiodemoapps::Euler2d::SedovSymmetry)
     .value("Riemann",	     pressiodemoapps::Euler2d::Riemann);
 
+  pybind11::enum_<pressiodemoapps::Euler3d>(mParent, "Euler3d")
+    .value("PeriodicSmooth", pressiodemoapps::Euler3d::PeriodicSmooth)
+    .value("SedovSymmetry",  pressiodemoapps::Euler3d::SedovSymmetry);
 
   // -----------------------
-  // linead advection 1d
+  // advection 1d
   // -----------------------
-  using linadv1d_t =
-    pressiodemoapps::ad::impl::LinearAdvT<
+  using ad1d_t =
+    pressiodemoapps::ad::impl::AdvectionAppT<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
       pressiodemoappspy::py_cstyle_arr_sc
     >;
 
-  pybind11::class_<linadv1d_t> adDiff1dProb(mParent, "LinearAdvection1dProblem");
-  // adDiff1dProb.def(pybind11::init<
+  pybind11::class_<ad1d_t> adv1dProb(mParent, "Advection1dProblem");
+  // adv1dProb.def(pybind11::init<
   // 		   const ccumesh_t &,
   // 		   pressiodemoapps::ReconstructionType
   // 		   >());
 
-  pdabindimpl::bindCommonApiMethods<linadv1d_t>(adDiff1dProb);
+  pdabindimpl::bindCommonApiMethods<ad1d_t>(adv1dProb);
 
   // -----------------------
   // Euler 1d
@@ -149,12 +156,28 @@ PYBIND11_MODULE(MODNAME, mParent)
   pdabindimpl::bindCommonApiMethods<ee2d_t>(ee2dCl);
   ee2dCl.def("gamma",		    &ee2d_t::gamma);
 
+  // -----------------------
+  // Euler 3d
+  // -----------------------
+  using ee3d_t =
+    pressiodemoapps::ee::impl::Euler3dAppT<
+      pressiodemoappspy::scalar_t,
+    ccumesh_t,
+    pressiodemoappspy::py_cstyle_arr_sc, // state type
+    pressiodemoappspy::py_cstyle_arr_sc, // velo type
+    pressiodemoappspy::py_cstyle_arr_sc  // ghost type
+    >;
+
+  pybind11::class_<ee3d_t> ee3dCl(mParent, "Euler3dProblem");
+  pdabindimpl::bindCommonApiMethods<ee3d_t>(ee3dCl);
+  ee3dCl.def("gamma",		    &ee3d_t::gamma);
+
   // -----------------------------------------------
   // functions to create problems.
   // add more as the c++ grows
   // -----------------------------------------------
-  mParent.def("createPeriodicLinearAdvection1d",
-	      &pressiodemoapps::createPeriodicLinearAdvection1dForPy<ccumesh_t, linadv1d_t>,
+  mParent.def("createProblem",
+	      &pressiodemoapps::createAdv1dForPy<ccumesh_t, ad1d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
   mParent.def("createProblem",
@@ -175,6 +198,10 @@ PYBIND11_MODULE(MODNAME, mParent)
 
   mParent.def("createProblem",
 	      &pressiodemoapps::createEuler2dForPyC<ccumesh_t, ee2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mParent.def("createProblem",
+	      &pressiodemoapps::createEuler3dForPyC<ccumesh_t, ee3d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
 }

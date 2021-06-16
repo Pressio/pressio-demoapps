@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
   const auto order   = pda::ReconstructionType::firstOrder;
 #endif
 
-  auto appObj      = pda::createPeriodicLinearAdvection1dEigen(meshObj, order);
+  const auto probid = pda::Advection1d::PeriodicLinear;
+  auto appObj      = pda::createProblemEigen(meshObj, probid, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;

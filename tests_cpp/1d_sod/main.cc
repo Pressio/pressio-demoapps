@@ -8,9 +8,9 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 #ifdef USE_WENO5
-  const auto order   = pda::ReconstructionType::fifthOrderWeno;
+  constexpr auto order   = pda::ReconstructionType::fifthOrderWeno;
 #else
-  const auto order   = pda::ReconstructionType::firstOrder;
+  constexpr auto order   = pda::ReconstructionType::firstOrder;
 #endif
 
   auto appObj      = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);

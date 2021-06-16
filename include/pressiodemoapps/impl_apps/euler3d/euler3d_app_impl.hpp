@@ -43,6 +43,7 @@ public:
   using normal_vec_t = std::array<scalar_type, dimensionality>;
 
 public:
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   Euler3dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler3d probEn,
 	      ::pressiodemoapps::ReconstructionType recEn,
@@ -61,6 +62,38 @@ public:
     ::pressiodemoapps::resize(m_stencilVals,  numDofPerCell*stencilSize);
     allocateGhosts();
   }
+
+#else
+  // note that when doing bindings, I need to first construct
+  // ghost with {1,1} just so that the numpy array picks up they
+  // are 2dim array otherwise it thinks they are 1d array.
+  // The right allocation for these is then done inside allocateGhosts.
+  Euler3dAppT(const mesh_t & meshObj,
+	      ::pressiodemoapps::Euler3d probEn,
+	      ::pressiodemoapps::ReconstructionType recEn,
+	      ::pressiodemoapps::FluxType fluxEnum,
+	      int icIdentifier)
+    : m_probEn(probEn),
+      m_recEn(recEn),
+      m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
+      m_meshObj(meshObj),
+      m_stencilVals(1),
+      m_ghostLeft({1,1}),
+      m_ghostRight({1,1}),
+      m_ghostBack({1,1}),
+      m_ghostFront({1,1}),
+      m_ghostBottom({1,1}),
+      m_ghostTop({1,1})
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+
+    const auto stencilSize = reconstructionTypeToStencilSize(recEn);
+    ::pressiodemoapps::resize(m_stencilVals,  numDofPerCell*stencilSize);
+    allocateGhosts();
+  }
+#endif
 
   state_type initialCondition() const
   {
@@ -383,10 +416,10 @@ private:
 
   mutable ghost_t m_ghostLeft;
   mutable ghost_t m_ghostRight;
-  mutable ghost_t m_ghostBottom;
-  mutable ghost_t m_ghostTop;
   mutable ghost_t m_ghostBack;
   mutable ghost_t m_ghostFront;
+  mutable ghost_t m_ghostBottom;
+  mutable ghost_t m_ghostTop;
 
   const normal_vec_t normalX_{1, 0, 0};
   const normal_vec_t normalY_{0, 1, 0};
