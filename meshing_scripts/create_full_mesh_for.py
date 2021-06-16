@@ -14,7 +14,7 @@ if __name__== "__main__":
     riemann2d_s3, riemann2d_s7")
 
   parser.add_argument(
-    "--outDir", dest="outDir",
+    "--outDir", "--outdir", dest="outDir",
     help="Full path to where to store all the mesh output files.")
 
   parser.add_argument(
