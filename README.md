@@ -146,8 +146,7 @@ Todo.
 
 ## 2D Example
 
-<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dfull.png" width="53%">
-<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsample.png" width="33%">
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsm.png" width="100%">
 
 
 # License and Citation
