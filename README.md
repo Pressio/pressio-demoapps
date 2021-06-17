@@ -94,7 +94,7 @@ class Problem:
 
 |                     | C++ Enum                | Python Enum            | Supported <br> reconstruction scheme |     Flux scheme  |   |
 |---------------------|-------------------------|------------------------|:----------------------:|:----------------:|---|
-| 1D Linear Advection | Advection1d::PeriodicLinear  | Advection1d.PeriodicLinear                      |        all             |   Rusanov        | [Descrioption](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
+| 1D Linear Advection | Advection1d::PeriodicLinear  | Advection1d.PeriodicLinear                      |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
 | 1D Euler Smooth     | Euler1d::PeriodicSmooth | Euler1d.PeriodicSmooth |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#euler-smooth)  |
 | 1D Sod              | Euler1d::Sod            | Euler1d.Sod            |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#sod)  |
 | 1D Lax              | Euler1d::Lax            | Euler1d.Lax            |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#lax)  |
