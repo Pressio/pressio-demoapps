@@ -133,7 +133,7 @@ pytest -s
 
 # List of Supported Problems
 
-|                     | Enum Identifier         | Reconstruction scheme |     Flux scheme  |   |
+|                     | Enum Identifier         | Reconstruct scheme |     Flux scheme  |   |
 |---------------------|-------------------------|:----------------------:|:----------------:|---|
 | 1D Linear Advection | C++: Advection1d::PeriodicLinear <br> Py &nbsp; : Advection1d.PeriodicLinear  |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
 | 1D Euler Smooth     | C++: Euler1d::PeriodicSmooth <br> Py &nbsp; : Euler1d.PeriodicSmooth|        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#euler-smooth)  |
