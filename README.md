@@ -35,6 +35,7 @@ int main(){
 
 ___
 
+
 # Usability in more detail
 
 To show our idea of usability more concretely, let's say that we are interested in exploring the Euler1d Sod problem.
@@ -165,25 +166,21 @@ python create_full_mesh.py \
 * `create_sample_mesh.py`: script to create the sample mesh, more details on this below -->
 
 
-___
-
 
 # Sample Mesh
 
 Todo.
 
-## 1D Example
-<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/1dfull.png" width="100%">
+### 1D Example
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/1dfull.png" width="75%">
 <!-- ![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png) -->
 
-## 2D Example
+### 2D Example
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsm.png" width="75%">
 
-<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsm.png" width="100%">
 
-
-## 3D Example
-
-<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/3dsm.png" width="100%">
+### 3D Example
+<img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/3dsm.png" width="75%">
 
 
 # License and Citation
