@@ -3,7 +3,11 @@
 This repository contains a suite of 1D, 2D and 3D demo problems of varying complexity (from linear advection, to compressible Euler). <br>
 The main feature of this work is the built-in support for hyper-reduction. This code, in fact, was originally started as part of the Pressio project to create a suite of benchmark problems to test ROMs and hyper-reduction techniques, but it is being developed to be self-contained, so it can be used for different purposes. For example, you can just use it for doing "standard" simulations, or you can just leverage the Python meshing scripts, or leverage the hyper-reduction capability to study function approximations. Its main scope is to provide a testbed of problems that are well-known to be hard for ROMs, explore the impact of the numerical scheme, and test news ideas for hyper-reduction.
 
-Some features of this code are: uses cell-centered finite volumes, targets uniform structured meshes, the (simple) meshing tool is written in Python and it is separate from the main code, supports well-established shock-capturing schemes and flux forms (which can be easily extended), supports hyper-reduction/sample mesh in 1D, 2D and 3D for varying stencil sizes.
+Some features of this code are: 
+- a **cell-centered finite volume** discretization on **uniform structured meshes**
+- a (simple) meshing tool written in Python that is separate from the main code
+- well-established shock-capturing schemes and flux forms (which can be easily extended)
+- hyper-reduction/sample mesh in 1D, 2D and 3D for varying stencil sizes.
 
 The development is grounded on:
 - **simplicity**: we use high-level abstractions and a well-defined API to make this code as simple as possible to use, minimizing the number of steps needed to set up a problem. We follow a *three-step* process: (1) generate the mesh, (2) load the mesh and (3) create a problem instance that has a specific API.
@@ -51,7 +55,7 @@ constexpr auto order = pda::ReconstructionType::fifthOrderWeno;
 auto problem         = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
 // ...
 ```
-This will create an instance of the Sod1d problem and selects the 5-th order WENO for doing the edge reconstruction (more details on the schemes and stencils are given below). All C++ problem instances in *pressio-demoapps* meet the following C++ API:
+This will create an instance of the Sod1d problem and select the 5-th order WENO for doing the edge reconstruction (more details on the schemes and stencils are given below). All C++ problem instances in *pressio-demoapps* meet the following C++ API:
 ```cpp
 class Problem
 {
@@ -107,7 +111,10 @@ Currently supported reconstruction schemes: `ReconstructionType::firstOrder`, an
 
 ## C++ library
 The C++ library is header-only so it does not need to be compiled and installed.
-To use the headers, all you have to do is to include in your compilation line the `pressiodemoapps/include` subdirectory, specify this `-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON` to CMake while building your code, and also include the Eigen library (whose headers you can find inside `pressiodemoapps/tpls`).
+To use the headers, all you have to do is:
+1. include the `pressiodemoapps/include` subdirectory in your compilation line
+2. include the Eigen library (whose headers you can find inside `pressiodemoapps/tpls`).
+3. specify the option `-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON` for CMake while building your code
 Note that you need a C++ compiler with support for C++14.
 
 If you want to build the C++ tests, you need CMake > 3.18.0 and a C++ compiler with C++14 support:
