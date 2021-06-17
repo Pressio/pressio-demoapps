@@ -3,8 +3,8 @@
 This repository contains a suite of 1D, 2D and 3D demo problems of varying complexity (from linear advection, to compressible Euler). <br>
 The main feature of this work is the built-in support for hyper-reduction. This code, in fact, was originally started as part of the Pressio project to create a suite of benchmark problems to test ROMs and hyper-reduction techniques, but it is being developed to be self-contained, so it can be used for different purposes. For example, you can just use it for doing "standard" simulations, or you can just leverage the Python meshing scripts, or leverage the hyper-reduction capability to study function approximations. Its main scope is to provide a testbed of problems that are well-known to be hard for ROMs, explore the impact of the numerical scheme, and test news ideas for hyper-reduction.
 
-Some features of this code are: 
-- a **cell-centered finite volume** discretization on **uniform structured meshes**
+Some features of this code are:
+- a cell-centered finite volume discretization on *uniform structured meshes*
 - a (simple) meshing tool written in Python that is separate from the main code
 - well-established shock-capturing schemes and flux forms (which can be easily extended)
 - hyper-reduction/sample mesh in 1D, 2D and 3D for varying stencil sizes.
@@ -22,16 +22,18 @@ The development is grounded on:
 
 Disclaimer/warning: this will **not** become a full solver. The scope is and will stay limited.
 
-# A representative code snippet
+### The main idea in 4 lines
 ```c++
 #import <pressiodemoapps/euler1d.hpp>
 int main(){
   namespace pda = pressiodemoapps;
-  const auto meshObj   = pda::loadCellCenterUniformMeshEigen("/home/myTest");
+  const auto meshObj   = pda::loadCellCenterUniformMeshEigen("<path-to-mesh-files>");
   constexpr auto order = pda::ReconstructionType::fifthOrderWeno;
   auto problem         = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
 }
 ```
+
+___
 
 # Usability in more detail
 
@@ -90,34 +92,19 @@ class Problem:
   def velocity(state, time, velocity): # computes velocity for given state and time
 ```
 
-# List of Supported Problems
+___
 
-|                     | C++ Enum                | Python Enum            | Supported <br> reconstruction scheme |     Flux scheme  |   |
-|---------------------|-------------------------|------------------------|:----------------------:|:----------------:|---|
-| 1D Linear Advection | Advection1d::PeriodicLinear  | Advection1d.PeriodicLinear                      |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
-| 1D Euler Smooth     | Euler1d::PeriodicSmooth | Euler1d.PeriodicSmooth |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#euler-smooth)  |
-| 1D Sod              | Euler1d::Sod            | Euler1d.Sod            |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#sod)  |
-| 1D Lax              | Euler1d::Lax            | Euler1d.Lax            |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#lax)  |
-| 2d Euler Smooth     | Euler2d::PeriodicSmooth | Euler2d.PeriodicSmooth |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#euler-smooth)  |
-| 2D Sedov (full)     | Euler2d::SedovFull      | Euler2d.SedovFull      |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-1-full-version-no-symmetry-use)  |
-| 2D Sedov (symmetry) | Euler2d::SedovSymmetry  | Euler2d.SedovSymmetry  |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-2-exploit-symmetry-to-simulate-only-one-quadrant)  |
-| 2D Riemann          | Euler2d::Riemann        | Euler2d.Riemann        |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#riemann)  |
-| 3d Euler Smooth     | Euler3d::PeriodicSmooth | Euler3d.PeriodicSmooth |     1st-order          |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#euler-smooth) |
-| 3d Sedov (symmetry) | Euler3d::SedovSymmetry  | Euler3d.SedovSymmetry  |     1st-order          |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#sedov-exploit-symmetry-to-simulate-only-18)  |
-
-Currently supported reconstruction schemes: `ReconstructionType::firstOrder`, and `ReconstructionType::fifthOrderWeno`.
 
 # Installation
 
 ## C++ library
 The C++ library is header-only so it does not need to be compiled and installed.
-To use the headers, all you have to do is:
+To use it, you need a C++14 compiler and you have to:
 1. include the `pressiodemoapps/include` subdirectory in your compilation line
 2. include the Eigen library (whose headers you can find inside `pressiodemoapps/tpls`).
-3. specify the option `-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON` for CMake while building your code
-Note that you need a C++ compiler with support for C++14.
+3. specify the CMake option `-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON` while building your code.
 
-If you want to build the C++ tests, you need CMake > 3.18.0 and a C++ compiler with C++14 support:
+If you want to build the C++ tests, you need CMake > 3.18.0:
 
 ```
 git clone --recursive git@github.com:Pressio/pressio-demoapps.git
@@ -130,7 +117,7 @@ ctest -j4
 ```
 
 ## Python bindings
-Requires CMake > 3.18.0 and a C++ compiler with C++14 support, but should be as easy as:
+Requires CMake > 3.18.0, a C++ compiler with C++14 support, and should be as easy as:
 
 ```
 git clone --recursive git@github.com:Pressio/pressio-demoapps.git
@@ -141,6 +128,44 @@ python setup.py install
 # run the tests to verify things work
 pytest -s
 ```
+
+
+
+# List of Supported Problems
+
+|                     | Enum Identifier         | Reconstruction scheme |     Flux scheme  |   |
+|---------------------|-------------------------|:----------------------:|:----------------:|---|
+| 1D Linear Advection | C++: Advection1d::PeriodicLinear <br> Py &nbsp; : Advection1d.PeriodicLinear  |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
+| 1D Euler Smooth     | C++: Euler1d::PeriodicSmooth <br> Py &nbsp; : Euler1d.PeriodicSmooth|        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#euler-smooth)  |
+| 1D Sod              | C++: Euler1d::Sod <br> Py &nbsp; : Euler1d.Sod           |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#sod)  |
+| 1D Lax              | C++: Euler1d::Lax <br> Py &nbsp; : Euler1d.Lax           |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#lax)  |
+| 2d Euler Smooth     | C++: Euler2d::PeriodicSmooth <br> Py &nbsp; : Euler2d.PeriodicSmooth |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#euler-smooth)  |
+| 2D Sedov (full)     | C++: Euler2d::SedovFull <br> Py &nbsp; : Euler2d.SedovFull      |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-1-full-version-no-symmetry-use)  |
+| 2D Sedov (symmetry) | C++: Euler2d::SedovSymmetry <br> Py &nbsp; : Euler2d.SedovSymmetry  |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-2-exploit-symmetry-to-simulate-only-one-quadrant)  |
+| 2D Riemann          | C++: Euler2d::Riemann <br> Py &nbsp; : Euler2d.Riemann        |        all             |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#riemann)  |
+| 3d Euler Smooth     | C++: Euler3d::PeriodicSmooth <br> Py &nbsp; : Euler3d.PeriodicSmooth |     1st-order          |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#euler-smooth) |
+| 3d Sedov (symmetry) | C++: Euler3d::SedovSymmetry <br> Py &nbsp; :  Euler3d.SedovSymmetry |     1st-order          |   Rusanov        | [Description](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#sedov-exploit-symmetry-to-simulate-only-18)  |
+
+Reconstruction schemes currently available: `ReconstructionType::firstOrder`, and `ReconstructionType::fifthOrderWeno`.
+
+<!--
+# The meshing scripts
+The script to generate the mesh are located in `pressiodemoapps/meshing_scripts`.
+There are three main scripts:
+* `create_full_mesh.py`: script to create the full mesh for an arbitrary domain.
+```py
+# 1D mesh
+python create_full_mesh.py \
+  --outDir <where-to-generate-files> \
+  -n <numCells> \
+  -stencilSize
+``` -->
+
+<!-- * `create_full_mesh_for.py`: script to create the full mesh for a specific problem (see above)
+* `create_sample_mesh.py`: script to create the sample mesh, more details on this below -->
+
+
+___
 
 
 # Sample Mesh

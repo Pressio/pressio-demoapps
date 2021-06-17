@@ -288,7 +288,7 @@ if __name__== "__main__":
 ###############################
   parser = ArgumentParser()
   parser.add_argument(
-    "--outDir", dest="outDir",
+    "--outDir", "--outdir", dest="outDir",
     help="Full path to where to store all the mesh output files.")
 
   parser.add_argument(
@@ -321,7 +321,7 @@ applying reverse Cuthill-Mckee")
 use <print> for printing only, use <none> for no plots")
 
   parser.add_argument(
-    "-s", "--stencilSize",
+    "-s", "--stencilSize", "--stencilsize",
     type=int, dest="stencilSize", default=3,
     help="Stencil size for connectivity: choices are 3,5,7.")
 
