@@ -5,7 +5,7 @@
 #include <random>
 
 std::mt19937 gen(2195884);
-std::uniform_int_distribution<double> distrib(1.1, 2.0);
+std::uniform_real_distribution<double> distrib(1.1, 2.0);
 
 template<class scalar_type, class prim_t>
 void initcond(int i, const scalar_type x, const scalar_type y, prim_t & prim)

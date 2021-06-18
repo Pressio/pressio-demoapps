@@ -3,6 +3,7 @@
 #define PRESSIODEMOAPPS_WENO5_HPP_
 
 #include "array"
+#include "vector"
 #include "./impl_reconstruction/weno5.hpp"
 
 namespace pressiodemoapps{
