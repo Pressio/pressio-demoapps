@@ -10,7 +10,7 @@ class ReconstructorFromStencil
 
 public:
   ReconstructorFromStencil() = delete;
-  ReconstructorFromStencil(::pressiodemoapps::ReconstructionType recEn,
+  ReconstructorFromStencil(::pressiodemoapps::InviscidFluxReconstruction recEn,
 			   const stencil_values & stencilVals,
 			   edge_rec_t & uMinusHalfNeg,
 			   edge_rec_t & uMinusHalfPos,
@@ -30,7 +30,7 @@ public:
   operator()()
   {
     switch(m_recEn){
-    case ::pressiodemoapps::ReconstructionType::firstOrder:
+    case ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder:
       {
 	m_uMinusHalfNeg = m_stencilVals(0);
 	m_uMinusHalfPos = m_stencilVals(1);
@@ -39,7 +39,7 @@ public:
 	break;
       }
 
-    case ::pressiodemoapps::ReconstructionType::fifthOrderWeno:
+    case ::pressiodemoapps::InviscidFluxReconstruction::Weno5:
       {
 	pressiodemoapps::weno5(m_uMinusHalfNeg,
 			       m_uMinusHalfPos,
@@ -58,7 +58,7 @@ public:
   {
 
     switch(m_recEn){
-    case ::pressiodemoapps::ReconstructionType::firstOrder:
+    case ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder:
       {
 	for (int i=0; i<ndpc; ++i){
 	  m_uMinusHalfNeg(i) = m_stencilVals(0+i);
@@ -69,7 +69,7 @@ public:
 	break;
       }
 
-    case ::pressiodemoapps::ReconstructionType::fifthOrderWeno:
+    case ::pressiodemoapps::InviscidFluxReconstruction::Weno5:
       {
 	using scalar_type = typename edge_rec_t::value_type;
 	std::array<scalar_type,7> mys;
@@ -91,7 +91,7 @@ public:
   }
 
 private:
-  ::pressiodemoapps::ReconstructionType m_recEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   const stencil_values & m_stencilVals;
   edge_rec_t & m_uMinusHalfNeg;
   edge_rec_t & m_uMinusHalfPos;

@@ -60,7 +60,7 @@ public:
   // {
   //   if (m_stencilSize == 3)
   //   {
-  //     if (eIn == reconstructionType::fifthOrderWeno){
+  //     if (eIn == reconstructionType::Weno5){
   // 	throw std::runtime_error
   // 	  ("Mesh stencil size not large enough for target reconstruction order.");
   //     }

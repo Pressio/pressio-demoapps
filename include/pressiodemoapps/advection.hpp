@@ -20,11 +20,11 @@ namespace impl{
 template<class mesh_t, class T>
 T createLinAdv1dImpl(const mesh_t & meshObj,
 		     ::pressiodemoapps::Advection1d probEnum,
-		     ReconstructionType recEnum)
+		     InviscidFluxReconstruction recEnum)
 {
   // // reconstruction order is specified, so we need to ensure
   // // the mesh object has stencil size that supports that
-  // // e.g., firstOrder reconstruction can be done for 7-point stencil
+  // // e.g., FirstOrder reconstruction can be done for 7-point stencil
   // // but 5-th order reconstruction cannot be done for 3-pt stencil
   // meshObj.checkStencilSupportsOrder(recEnum);
 
@@ -42,7 +42,7 @@ T createLinAdv1dImpl(const mesh_t & meshObj,
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Advection1d probEnum,
-			::pressiodemoapps::ReconstructionType recEnum)
+			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   using scalar_t = typename mesh_t::scalar_t;
   using return_type = ::pressiodemoapps::ad::impl::AdvectionAppT<
@@ -56,7 +56,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 template<class mesh_t, class T>
 T createAdv1dForPy(const mesh_t & meshObj,
 		   ::pressiodemoapps::Advection1d probEnum,
-		   ::pressiodemoapps::ReconstructionType recEnum)
+		   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return impl::createLinAdv1dImpl<mesh_t, T>(meshObj, probEnum, recEnum);
 }

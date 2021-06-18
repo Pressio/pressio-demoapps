@@ -19,7 +19,7 @@ def test_run():
   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
   appObj   = pda.createProblem(meshObj,
                                pda.Euler3d.SedovSymmetry,
-                               pda.ReconstructionType.firstOrder)
+                               pda.InviscidFluxReconstruction.FirstOrder)
 
   dt = 0.0001
   Nsteps = int(0.025/dt)

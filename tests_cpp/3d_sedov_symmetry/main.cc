@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
-  const auto order   = pda::ReconstructionType::firstOrder;
+  const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   const auto probId  = pda::Euler3d::SedovSymmetry;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);

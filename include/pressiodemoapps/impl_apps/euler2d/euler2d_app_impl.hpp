@@ -46,8 +46,8 @@ public:
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   Euler2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler2d probEn,
-	      ::pressiodemoapps::ReconstructionType recEn,
-	      ::pressiodemoapps::FluxType fluxEnum,
+	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	      int icIdentifier)
     : m_probEn(probEn),
       m_recEn(recEn),
@@ -71,8 +71,8 @@ public:
   // The right allocation for these is then done inside allocateGhosts.
   Euler2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler2d probEn,
-	      ::pressiodemoapps::ReconstructionType recEn,
-	      ::pressiodemoapps::FluxType fluxEnum,
+	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	      int icIdentifier)
     : m_probEn(probEn),
       m_recEn(recEn),
@@ -226,7 +226,7 @@ private:
       Reconstructor.template operator()<numDofPerCell>();
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFourDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
 	  eeRusanovFluxFourDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 	  break;
@@ -237,7 +237,7 @@ private:
       Reconstructor.template operator()<numDofPerCell>();
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFourDof(FD, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
 	  eeRusanovFluxFourDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 	  break;
@@ -297,7 +297,7 @@ private:
       ReconstructorX.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFourDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
 	  eeRusanovFluxFourDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 	  break;
@@ -307,7 +307,7 @@ private:
       ReconstructorY.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFourDof(FD, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
 	  eeRusanovFluxFourDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 	  break;
@@ -404,8 +404,8 @@ private:
   const scalar_type m_gamma{1.4};
 
   ::pressiodemoapps::Euler2d m_probEn;
-  ::pressiodemoapps::ReconstructionType m_recEn;
-  ::pressiodemoapps::FluxType m_fluxEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
+  ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
 
   // which initial condition to use
   int m_icIdentifier = 1;

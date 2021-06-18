@@ -13,7 +13,7 @@ def test_create_vel():
   meshPath = str(file_path)
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createProblem(meshO, probId, pda.ReconstructionType.fifthOrderWeno)  
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)  
   v = appObj.createVelocity()
   print(v.shape)
 
@@ -21,7 +21,7 @@ def test_eval_vel():
   meshPath = str(file_path)
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createProblem(meshO, probId, pda.ReconstructionType.fifthOrderWeno)  
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)  
 
   x = meshO.viewX()
   y0 = analytical(x, 0.)

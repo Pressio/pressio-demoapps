@@ -46,8 +46,8 @@ public:
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   Euler3dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler3d probEn,
-	      ::pressiodemoapps::ReconstructionType recEn,
-	      ::pressiodemoapps::FluxType fluxEnum,
+	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	      int icIdentifier = 1)
     : m_probEn(probEn),
       m_recEn(recEn),
@@ -70,8 +70,8 @@ public:
   // The right allocation for these is then done inside allocateGhosts.
   Euler3dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler3d probEn,
-	      ::pressiodemoapps::ReconstructionType recEn,
-	      ::pressiodemoapps::FluxType fluxEnum,
+	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	      int icIdentifier)
     : m_probEn(probEn),
       m_recEn(recEn),
@@ -215,7 +215,7 @@ private:
       Reconstructor.template operator()<numDofPerCell>();
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
 	  eeRusanovFluxFiveDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 	  break;
@@ -226,7 +226,7 @@ private:
       Reconstructor.template operator()<numDofPerCell>();
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
 	  eeRusanovFluxFiveDof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 	  break;
@@ -237,7 +237,7 @@ private:
       Reconstructor.template operator()<numDofPerCell>();
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
 	  eeRusanovFluxFiveDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
 	  break;
@@ -306,7 +306,7 @@ private:
       ReconstructorX.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
 	  eeRusanovFluxFiveDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 	  break;
@@ -316,7 +316,7 @@ private:
       ReconstructorY.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
 	  eeRusanovFluxFiveDof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 	  break;
@@ -326,7 +326,7 @@ private:
       ReconstructorZ.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)
 	{
-	case ::pressiodemoapps::FluxType::Rusanov:
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  eeRusanovFluxFiveDof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
 	  eeRusanovFluxFiveDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
 	  break;
@@ -403,8 +403,8 @@ private:
   const scalar_type m_gamma{1.4};
 
   ::pressiodemoapps::Euler3d m_probEn;
-  ::pressiodemoapps::ReconstructionType m_recEn;
-  ::pressiodemoapps::FluxType m_fluxEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
+  ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
 
   int m_icIdentifier = 1;
 

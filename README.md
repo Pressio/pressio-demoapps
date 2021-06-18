@@ -28,7 +28,7 @@ Disclaimer/warning: this will **not** become a full solver. The scope is and wil
 int main(){
   namespace pda = pressiodemoapps;
   const auto meshObj   = pda::loadCellCenterUniformMeshEigen("<path-to-mesh-files>");
-  constexpr auto order = pda::ReconstructionType::fifthOrderWeno;
+  constexpr auto order = pda::InviscidFluxReconstruction::Weno5;
   auto problem         = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
 }
 ```
@@ -54,7 +54,7 @@ where the string `sod1d_s7` is composed of two parts: `sod1d` indicates the targ
 // ...
 namespace pda = pressiodemoapps;
 const auto meshObj   = pda::loadCellCenterUniformMeshEigen("/home/myTest");
-constexpr auto order = pda::ReconstructionType::fifthOrderWeno;
+constexpr auto order = pda::InviscidFluxReconstruction::Weno5;
 auto problem         = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
 // ...
 ```
@@ -82,7 +82,7 @@ The Python bindings of pressio-demoapps rely on numpy arrays, and the API is ver
 import pressiodemoapps as pda
 # ...
 meshObj = pda.loadCellCenterUniformMesh("where-you-have-mesh-files")
-order   = pda.ReconstructionType.fifthOrderWeno
+order   = pda.InviscidFluxReconstruction.Weno5;
 appObj  = pda.createProblem(meshObj, pda.Euler1d.Sod, order)
 ```
 All Python problem instances in *pressio-demoapps* meet the following API:
@@ -147,7 +147,7 @@ pytest -s
 | 3d Euler Smooth     | C++: Euler3d::PeriodicSmooth <br> Py &nbsp; : Euler3d.PeriodicSmooth |     1st-order          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#euler-smooth) |
 | 3d Sedov (symmetry) | C++: Euler3d::SedovSymmetry <br> Py &nbsp; :  Euler3d.SedovSymmetry |     1st-order          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#sedov-exploit-symmetry-to-simulate-only-18)  |
 
-Reconstruction schemes currently available: `ReconstructionType::firstOrder`, and `ReconstructionType::fifthOrderWeno`.
+Reconstruction schemes currently available: `InviscidFluxReconstruction::FirstOrder`, and `InviscidFluxReconstruction::Weno5`.
 
 <!--
 # The meshing scripts

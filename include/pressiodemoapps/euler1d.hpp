@@ -39,8 +39,8 @@ namespace impl{
 template<class mesh_t, class T>
 T createEuler1dImpl(const mesh_t & meshObj,
 		    ::pressiodemoapps::Euler1d probEnum,
-		    ::pressiodemoapps::ReconstructionType recEnum,
-		    ::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
+		    ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		    ::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
   //meshObj.checkStencilSupportsOrder(enIn);
 
@@ -59,8 +59,8 @@ T createEuler1dImpl(const mesh_t & meshObj,
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler1d probEnum,
-			::pressiodemoapps::ReconstructionType recEnum,
-			::pressiodemoapps::FluxType fluxEnum = FluxType::Rusanov)
+			::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
@@ -78,8 +78,8 @@ auto createProblemEigen(const mesh_t & meshObj,
 template<class mesh_t, class T>
 T createEuler1dForPyA(const mesh_t & meshObj,
 		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::ReconstructionType recEnum,
-		      ::pressiodemoapps::FluxType fluxEnum)
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
   return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
 }
@@ -87,10 +87,10 @@ T createEuler1dForPyA(const mesh_t & meshObj,
 template<class mesh_t, class T>
 T createEuler1dForPyB(const mesh_t & meshObj,
 		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::ReconstructionType recEnum)
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum,
-					    recEnum, FluxType::Rusanov);
+					    recEnum, InviscidFluxScheme::Rusanov);
 }
 #endif
 

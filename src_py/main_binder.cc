@@ -15,9 +15,8 @@
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/euler3d.hpp"
 
-// helper function to bind API methods
-// since they are the same for any application problem
-namespace pdabindimpl{
+namespace pressiodemoappspy{ namespace impl{
+
 template<class cpp_t, class py_t>
 void bindCommonApiMethods(py_t & appObj)
 {
@@ -34,101 +33,119 @@ void bindCommonApiMethods(py_t & appObj)
 
   appObj.def("velocity", &cpp_t::velocity);
 }
-};
 
-PYBIND11_MODULE(MODNAME, mParent)
+// ---------------------------
+void bindEnums(pybind11::module & mParent)
 {
-  using index_t   = int32_t;
-  using py_cstyle_arr_int = pybind11::array_t<index_t, pybind11::array::c_style>;
-  using py_fstyle_arr_int = pybind11::array_t<index_t, pybind11::array::f_style>;
+  namespace pda = pressiodemoapps;
 
-  // --------------------------------
-  // cell-centered uniform mesh class
-  // --------------------------------
-  using ccumesh_t =
+  pybind11::enum_<pda::InviscidFluxReconstruction>(mParent, "InviscidFluxReconstruction")
+    .value("FirstOrder",     pda::InviscidFluxReconstruction::FirstOrder)
+    .value("Weno5",	     pda::InviscidFluxReconstruction::Weno5);
+
+  pybind11::enum_<pda::InviscidFluxScheme>(mParent, "InviscidFluxScheme")
+    .value("Rusanov",	     pda::InviscidFluxScheme::Rusanov);
+
+  pybind11::enum_<pda::Advection1d>(mParent, "Advection1d")
+    .value("PeriodicLinear", pda::Advection1d::PeriodicLinear);
+
+  pybind11::enum_<pda::Euler1d>(mParent, "Euler1d")
+    .value("PeriodicSmooth", pda::Euler1d::PeriodicSmooth)
+    .value("Sod",	     pda::Euler1d::Sod)
+    .value("Lax",	     pda::Euler1d::Lax);
+
+  pybind11::enum_<pda::Euler2d>(mParent, "Euler2d")
+    .value("PeriodicSmooth", pda::Euler2d::PeriodicSmooth)
+    .value("SedovFull",	     pda::Euler2d::SedovFull)
+    .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
+    .value("Riemann",	     pda::Euler2d::Riemann);
+
+  pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
+    .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)
+    .value("SedovSymmetry",  pda::Euler3d::SedovSymmetry);
+}
+
+// // ---------------------------
+struct CcuMeshBinder
+{
+
+  using mesh_t =
     pressiodemoapps::impl::CellCenteredUniformMesh<
       pressiodemoappspy::scalar_t,
       // ordinal type
-      index_t,
+      pressiodemoappspy::ordinal_t,
       // coordinate storage type
       pressiodemoappspy::py_cstyle_arr_sc,
       // graph type
-      py_cstyle_arr_int,
+      pressiodemoappspy::py_cstyle_arr_int,
       // true because we are doing bindings
       true
     >;
 
-  pybind11::class_<ccumesh_t> meshCl(mParent, "CellCenteredUniformMesh");
-  meshCl.def(pybind11::init<std::string>());
-  meshCl.def("dimensionality",  &ccumesh_t::dimensionality);
-  meshCl.def("stencilMeshSize", &ccumesh_t::stencilMeshSize);
-  meshCl.def("sampleMeshSize",  &ccumesh_t::sampleMeshSize);
-  meshCl.def("stencilSize",	&ccumesh_t::stencilSize);
-  meshCl.def("graph",		&ccumesh_t::graph);
-  meshCl.def("dx",		&ccumesh_t::dx);
-  meshCl.def("dy",		&ccumesh_t::dy);
-  meshCl.def("dxInv",		&ccumesh_t::dxInv);
-  meshCl.def("dyInv",		&ccumesh_t::dyInv);
-  meshCl.def("viewX",		&ccumesh_t::viewX);
-  meshCl.def("viewY",		&ccumesh_t::viewY);
+  void operator()(pybind11::module & mParent)
+  {
+    namespace pda = pressiodemoapps;
+    pybind11::class_<mesh_t> meshClass(mParent, "CellCenteredUniformMesh");
+    meshClass.def(pybind11::init<std::string>());
+    meshClass.def("dimensionality",  &mesh_t::dimensionality);
+    meshClass.def("stencilMeshSize", &mesh_t::stencilMeshSize);
+    meshClass.def("sampleMeshSize",  &mesh_t::sampleMeshSize);
+    meshClass.def("stencilSize",     &mesh_t::stencilSize);
+    meshClass.def("graph",	     &mesh_t::graph);
+    meshClass.def("dx",		     &mesh_t::dx);
+    meshClass.def("dy",		     &mesh_t::dy);
+    meshClass.def("dxInv",	     &mesh_t::dxInv);
+    meshClass.def("dyInv",	     &mesh_t::dyInv);
+    meshClass.def("viewX",	     &mesh_t::viewX);
+    meshClass.def("viewY",	     &mesh_t::viewY);
 
-  // function that constructs the object directly
-  mParent.def("loadCellCenterUniformMesh",
-	      &pressiodemoapps::loadCellCenterUniformMesh<ccumesh_t>,
-	      pybind11::return_value_policy::take_ownership);
+    // function that constructs the object directly
+    mParent.def("loadCellCenterUniformMesh",
+		&pda::loadCellCenterUniformMesh<mesh_t>,
+		pybind11::return_value_policy::take_ownership);
+  }
+};
+}}//end namespace pressiodemoappspy::impl
 
-  // ---------------------------------------
-  // bind enums
-  // ---------------------------------------
-  pybind11::enum_<pressiodemoapps::ReconstructionType>(mParent, "ReconstructionType")
-    .value("firstOrder",     pressiodemoapps::ReconstructionType::firstOrder)
-    .value("fifthOrderWeno", pressiodemoapps::ReconstructionType::fifthOrderWeno);
+//=======================================
+PYBIND11_MODULE(MODNAME, mTopLevel)
+//=======================================
+{
+  namespace pda = pressiodemoapps;
 
-  pybind11::enum_<pressiodemoapps::FluxType>(mParent, "FluxType")
-    .value("Rusanov",     pressiodemoapps::FluxType::Rusanov);
+  // ---------------------------
+  // all enums
+  pressiodemoappspy::impl::bindEnums(mTopLevel);
 
-  pybind11::enum_<pressiodemoapps::Advection1d>(mParent, "Advection1d")
-    .value("PeriodicLinear", pressiodemoapps::Advection1d::PeriodicLinear);
+  // ---------------------------
+  // ccu mesh
+  using mesh_binder_t = pressiodemoappspy::impl::CcuMeshBinder;
+  using ccumesh_t = typename mesh_binder_t::mesh_t;
+  mesh_binder_t ccuMeshB;
+  ccuMeshB(mTopLevel);
 
-  pybind11::enum_<pressiodemoapps::Euler1d>(mParent, "Euler1d")
-    .value("PeriodicSmooth", pressiodemoapps::Euler1d::PeriodicSmooth)
-    .value("Sod",	     pressiodemoapps::Euler1d::Sod)
-    .value("Lax",	     pressiodemoapps::Euler1d::Lax);
-
-  pybind11::enum_<pressiodemoapps::Euler2d>(mParent, "Euler2d")
-    .value("PeriodicSmooth", pressiodemoapps::Euler2d::PeriodicSmooth)
-    .value("SedovFull",	     pressiodemoapps::Euler2d::SedovFull)
-    .value("SedovSymmetry",  pressiodemoapps::Euler2d::SedovSymmetry)
-    .value("Riemann",	     pressiodemoapps::Euler2d::Riemann);
-
-  pybind11::enum_<pressiodemoapps::Euler3d>(mParent, "Euler3d")
-    .value("PeriodicSmooth", pressiodemoapps::Euler3d::PeriodicSmooth)
-    .value("SedovSymmetry",  pressiodemoapps::Euler3d::SedovSymmetry);
-
-  // -----------------------
+  // -----------------------w
   // advection 1d
-  // -----------------------
   using ad1d_t =
-    pressiodemoapps::ad::impl::AdvectionAppT<
+    pda::ad::impl::AdvectionAppT<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
       pressiodemoappspy::py_cstyle_arr_sc
     >;
 
-  pybind11::class_<ad1d_t> adv1dProb(mParent, "Advection1dProblem");
+  pybind11::class_<ad1d_t> adv1dProb(mTopLevel, "Advection1dProblem");
   // adv1dProb.def(pybind11::init<
   // 		   const ccumesh_t &,
-  // 		   pressiodemoapps::ReconstructionType
+  // 		   pda::InviscidFluxReconstruction
   // 		   >());
 
-  pdabindimpl::bindCommonApiMethods<ad1d_t>(adv1dProb);
+  pressiodemoappspy::impl::bindCommonApiMethods<ad1d_t>(adv1dProb);
 
   // -----------------------
   // Euler 1d
-  // -----------------------
   using ee1d_t =
-    pressiodemoapps::ee::impl::Euler1dAppT<
+    pda::ee::impl::Euler1dAppT<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
@@ -136,15 +153,14 @@ PYBIND11_MODULE(MODNAME, mParent)
       pressiodemoappspy::py_cstyle_arr_sc
     >;
 
-  pybind11::class_<ee1d_t> ee1dCl(mParent, "Euler1dProblem");
-  pdabindimpl::bindCommonApiMethods<ee1d_t>(ee1dCl);
-  ee1dCl.def("gamma",		     &ee1d_t::gamma);
+  pybind11::class_<ee1d_t> ee1dClass(mTopLevel, "Euler1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<ee1d_t>(ee1dClass);
+  ee1dClass.def("gamma", &ee1d_t::gamma);
 
   // -----------------------
   // Euler 2d
-  // -----------------------
   using ee2d_t =
-    pressiodemoapps::ee::impl::Euler2dAppT<
+    pda::ee::impl::Euler2dAppT<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
@@ -152,15 +168,14 @@ PYBIND11_MODULE(MODNAME, mParent)
     pressiodemoappspy::py_cstyle_arr_sc  // ghost type
     >;
 
-  pybind11::class_<ee2d_t> ee2dCl(mParent, "Euler2dProblem");
-  pdabindimpl::bindCommonApiMethods<ee2d_t>(ee2dCl);
-  ee2dCl.def("gamma",		    &ee2d_t::gamma);
+  pybind11::class_<ee2d_t> ee2dClass(mTopLevel, "Euler2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<ee2d_t>(ee2dClass);
+  ee2dClass.def("gamma", &ee2d_t::gamma);
 
   // -----------------------
   // Euler 3d
-  // -----------------------
   using ee3d_t =
-    pressiodemoapps::ee::impl::Euler3dAppT<
+    pda::ee::impl::Euler3dAppT<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
@@ -168,40 +183,40 @@ PYBIND11_MODULE(MODNAME, mParent)
     pressiodemoappspy::py_cstyle_arr_sc  // ghost type
     >;
 
-  pybind11::class_<ee3d_t> ee3dCl(mParent, "Euler3dProblem");
-  pdabindimpl::bindCommonApiMethods<ee3d_t>(ee3dCl);
-  ee3dCl.def("gamma",		    &ee3d_t::gamma);
+  pybind11::class_<ee3d_t> ee3dClass(mTopLevel, "Euler3dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<ee3d_t>(ee3dClass);
+  ee3dClass.def("gamma", &ee3d_t::gamma);
 
   // -----------------------------------------------
   // functions to create problems.
   // add more as the c++ grows
   // -----------------------------------------------
-  mParent.def("createProblem",
-	      &pressiodemoapps::createAdv1dForPy<ccumesh_t, ad1d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createAdv1dForPy<ccumesh_t, ad1d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler1dForPyA<ccumesh_t, ee1d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler1dForPyA<ccumesh_t, ee1d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler1dForPyB<ccumesh_t, ee1d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler1dForPyB<ccumesh_t, ee1d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler2dForPyA<ccumesh_t, ee2d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler2dForPyA<ccumesh_t, ee2d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler2dForPyB<ccumesh_t, ee2d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler2dForPyB<ccumesh_t, ee2d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler2dForPyC<ccumesh_t, ee2d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler2dForPyC<ccumesh_t, ee2d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
-  mParent.def("createProblem",
-	      &pressiodemoapps::createEuler3dForPyC<ccumesh_t, ee3d_t>,
+  mTopLevel.def("createProblem",
+	      &pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
 	      pybind11::return_value_policy::take_ownership);
 
 }

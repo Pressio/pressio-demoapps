@@ -4,17 +4,17 @@
 
 namespace pressiodemoapps{
 
-enum class ReconstructionType{
-  firstOrder,
-  fifthOrderWeno
+enum class InviscidFluxReconstruction{
+  FirstOrder,
+  Weno5
 };
 
-int reconstructionTypeToStencilSize(ReconstructionType enIn)
+int reconstructionTypeToStencilSize(InviscidFluxReconstruction enIn)
 {
   switch(enIn)
     {
-    case ReconstructionType::firstOrder:     return 3;
-    case ReconstructionType::fifthOrderWeno: return 7;
+    case InviscidFluxReconstruction::FirstOrder:     return 3;
+    case InviscidFluxReconstruction::Weno5: return 7;
     }
     return 0;
 }

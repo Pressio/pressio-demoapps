@@ -25,14 +25,14 @@ namespace pressiodemoapps{
 namespace impl{
 template<class mesh_t, class T>
 T createEe3dImpl(const mesh_t & meshObj,
-		 ::pressiodemoapps::ReconstructionType recEnum,
+		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		 ::pressiodemoapps::Euler3d probEnum,
-		 ::pressiodemoapps::FluxType fluxEnum,
+		 ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 		 const int icId)
 {
   // // reconstruction order is specified, so we need to ensure
   // // the mesh object has stencil size that supports that
-  // // e.g., firstOrder reconstruction can be done for 7-point stencil
+  // // e.g., FirstOrder reconstruction can be done for 7-point stencil
   // // but 5-th order reconstruction cannot be done for 3-pt stencil
   // meshObj.checkStencilSupportsOrder(recEnum);
 
@@ -52,8 +52,8 @@ T createEe3dImpl(const mesh_t & meshObj,
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
-			::pressiodemoapps::ReconstructionType recEnum,
-			::pressiodemoapps::FluxType fluxEnum,
+			::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			::pressiodemoapps::InviscidFluxScheme fluxEnum,
 			const int icId)
 {
   using scalar_t = typename mesh_t::scalar_t;
@@ -71,9 +71,9 @@ auto createProblemEigen(const mesh_t & meshObj,
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
-			::pressiodemoapps::ReconstructionType recEnum)
+			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum, FluxType::Rusanov, 1);
+  return createProblemEigen(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, 1);
 }
 #endif
 
@@ -81,10 +81,10 @@ auto createProblemEigen(const mesh_t & meshObj,
 template<class mesh_t, class T>
 T createEuler3dForPyC(const mesh_t & meshObj,
 		     ::pressiodemoapps::Euler3d probEnum,
-		     ::pressiodemoapps::ReconstructionType recEnum)
+		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return impl::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 FluxType::Rusanov, 1);
+					 InviscidFluxScheme::Rusanov, 1);
 }
 #endif
 

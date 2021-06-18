@@ -9,9 +9,9 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 #ifdef USE_WENO5
-  const auto order   = pda::ReconstructionType::fifthOrderWeno;
+  const auto order   = pda::InviscidFluxReconstruction::Weno5;
 #else
-  const auto order   = pda::ReconstructionType::firstOrder;
+  const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
   const auto probId  = pda::Euler2d::PeriodicSmooth;

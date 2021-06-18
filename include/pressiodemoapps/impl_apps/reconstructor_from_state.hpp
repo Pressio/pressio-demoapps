@@ -9,7 +9,7 @@ struct _ReconstructorMembers
 {
   _ReconstructorMembers() = delete;
   _ReconstructorMembers(const int axis,
-			::pressiodemoapps::ReconstructionType recEn,
+			::pressiodemoapps::InviscidFluxReconstruction recEn,
 			const state_t & state,
 			const mesh_t & meshObj,
 			edge_rec_t & uMinusHalfNeg,
@@ -27,7 +27,7 @@ struct _ReconstructorMembers
   {}
 
   int m_axis;
-  ::pressiodemoapps::ReconstructionType m_recEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   const state_t & m_state;
   const mesh_t & m_meshObj;
   edge_rec_t & m_uMinusHalfNeg;
@@ -69,7 +69,7 @@ public:
     */
 
     switch(m_memb.m_recEn){
-    case ReconstructionType::firstOrder:
+    case InviscidFluxReconstruction::FirstOrder:
       {
 	const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
 	const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
@@ -85,7 +85,7 @@ public:
 	break;
       }
 
-    case ReconstructionType::fifthOrderWeno:
+    case InviscidFluxReconstruction::Weno5:
       {
 	const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
 	const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
@@ -148,7 +148,7 @@ public:
     */
 
     switch(m_memb.m_recEn){
-    case ReconstructionType::firstOrder:
+    case InviscidFluxReconstruction::FirstOrder:
       {
 	auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
 	auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
@@ -164,7 +164,7 @@ public:
 	break;
       }
 
-    case ReconstructionType::fifthOrderWeno:
+    case InviscidFluxReconstruction::Weno5:
       {
 	throw std::runtime_error("missing impl");
 	break;

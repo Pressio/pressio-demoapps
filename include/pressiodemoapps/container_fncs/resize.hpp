@@ -2,6 +2,8 @@
 #ifndef PRESSIODEMOAPPS_RESIZE_FUNC_HPP_
 #define PRESSIODEMOAPPS_RESIZE_FUNC_HPP_
 
+#include <vector>
+
 namespace pressiodemoapps{
 
 template<class value_type, class sizetype>

@@ -44,8 +44,8 @@ public:
 public:
   Euler1dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Euler1d probEnum,
-	      ::pressiodemoapps::ReconstructionType recEnum,
-	      ::pressiodemoapps::FluxType fluxEnum)
+	      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
     : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum), m_fluxEn(fluxEnum)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
@@ -134,7 +134,7 @@ private:
 	Reconstructor.template operator()<numDofPerCell>();
 	switch(m_fluxEn)
 	  {
-	  case ::pressiodemoapps::FluxType::Rusanov:
+	  case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	    eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
 	    eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
 	    break;
@@ -177,8 +177,8 @@ private:
 
   const mesh_t & m_meshObj;
   ::pressiodemoapps::Euler1d m_probEn;
-  ::pressiodemoapps::ReconstructionType m_recEn;
-  ::pressiodemoapps::FluxType m_fluxEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
+  ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
 
   // note that dof refers to the degress of freedom,
   // which is NOT same as grid points. for this problem,

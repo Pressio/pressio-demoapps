@@ -4,7 +4,7 @@
 
 namespace pressiodemoapps{
 
-enum class FluxType{
+enum class InviscidFluxScheme{
   Rusanov
 };
 

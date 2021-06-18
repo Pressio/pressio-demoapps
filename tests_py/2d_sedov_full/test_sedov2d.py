@@ -45,7 +45,7 @@ def test_eval_vel():
   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
   appObj   = pda.createProblem(meshObj,
                                pda.Euler2d.SedovFull,
-                               pda.ReconstructionType.fifthOrderWeno)
+                               pda.InviscidFluxReconstruction.Weno5)
   yn = appObj.initialCondition()
 
   dt = 0.0001
