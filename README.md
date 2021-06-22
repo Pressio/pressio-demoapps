@@ -169,19 +169,25 @@ python create_full_mesh.py \
 
 # Sample Mesh
 
-Todo.
+The sample mesh is a disjoint collection of cells at which the velocity or residual vector are computed. This collection of cells is determined by a hyper-reduction approaches such as the discrete empirical interpolation method ([DEIM](https://doi.org/10.1137/090766498)), or Gauss-Newton with approximate tensors ([GNAT](https://doi.org/10.1016/j.jcp.2013.02.028)). The sample mesh is a crucial part of hyper-reduction implementations, allowing one to create ROMs with a computational cost which *does not* scale with the size of the full model's state vector. 
+
+The sample mesh is used in conjunction with what we refer to as the **stencil mesh**, which contains all cells needed to compute the velocity or residual vector on the sample mesh. Several examples of sample and stencil meshes are shown below, along with the indexing scheme used in this repository. 
 
 ### 1D Example
 <img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/1dfull.png" width="75%">
 <!-- ![Sample mesh example for 1D](https://github.com/Pressio/pressio-demoapps/blob/develop/figures/full.png) -->
 
+The first example shows a one-dimensional sample mesh and the corresponding stencil mesh for a first order cell-centered finite volume scheme. The sample mesh cells are shown in green, while the stencil mesh cells are not colored. All cells are labeled with their ID number; note that the sample/stencil mesh cell IDs **do not** match the full mesh IDs, so one must keep track of the mapping between the IDs.  
+
 ### 2D Example
 <img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/2dsm.png" width="75%">
 
+The second example shows a two dimensional sample mesh and a stencil mesh for a first order cell-centered finite volume scheme. The coloring scheme is the same as in the first example. 
 
 ### 3D Example
 <img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/3dsm.png" width="75%">
 
+The third example shows a three dimensional sample mesh and a stencil mesh for a first order cell-centered finite volume scheme. The coloring scheme is the same as in the previous examples. Cell IDs are omitted for clarity. 
 
 # License and Citation
 
