@@ -5,7 +5,7 @@ The main feature of this work is the built-in support for hyper-reduction. This 
 
 Some features of this code are:
 - a cell-centered finite volume discretization on *uniform structured meshes*
-- a (simple) meshing tool written in Python that is separate from the main code
+- a (simple) meshing tool written in Python that also handles sample meshes
 - well-established shock-capturing schemes and flux forms (which can be easily extended)
 - hyper-reduction/sample mesh in 1D, 2D and 3D for varying stencil sizes.
 
