@@ -108,8 +108,6 @@ class NatOrdMeshRow2d:
       self.G_[iPt] = tmpList
 
   def _buildGraphStencil5(self, pBc):
-    # neighbors are listed as left, front, right, back degree 1
-    # neighbors are listed as left, front, right, back degree 2
     '''
     left0 front0 right0 back0 left1 front1 right1 back1
       0     1      2      3     4    5       6      7
@@ -123,47 +121,47 @@ class NatOrdMeshRow2d:
 
       # left
       if gi==0:
-        tmpList[0]=iPt+self.Nx_-1
-        tmpList[4]=iPt+self.Nx_-2
+        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
       elif gi==1:
-        tmpList[0]=iPt-1
-        tmpList[4]=iPt+self.Nx_-2
+        tmpList[0]=self.gigjToGlobalID(0, gj)
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
       elif gi>1:
-        tmpList[0]=iPt-1
-        tmpList[4]=iPt-2
+        tmpList[0]=self.gigjToGlobalID(gi-1, gj)
+        tmpList[4]=self.gigjToGlobalID(gi-2, gj)
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=iPt-self.Nx_*(self.Ny_-1)
-        tmpList[5]=tmpList[1]+self.Nx_
+        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else -1
       if gj==self.Ny_-2:
-        tmpList[1]=iPt+self.Nx_
-        tmpList[5]=iPt-self.Nx_*(self.Ny_-2)
+        tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
+        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else -1
       if gj<self.Ny_-2:
-        tmpList[1]=iPt+self.Nx_
-        tmpList[5]=iPt+self.Nx_*2
+        tmpList[1]=self.gigjToGlobalID(gi, gj+1)
+        tmpList[5]=self.gigjToGlobalID(gi, gj+2)
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=iPt-self.Nx_+1
-        tmpList[6]=tmpList[2]+1
+        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else -1
+        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else -1
       if gi==self.Nx_-2:
-        tmpList[2]=iPt+1
-        tmpList[6]=iPt-self.Nx_+2
+        tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
+        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else -1
       if gi<self.Nx_-2:
-        tmpList[2]=iPt+1
-        tmpList[6]=iPt+2
+        tmpList[2]=self.gigjToGlobalID(gi+1, gj)
+        tmpList[6]=self.gigjToGlobalID(gi+2, gj)
 
       # back
       if gj==0:
-        tmpList[3]=iPt+self.Nx_*(self.Ny_-1)
-        tmpList[7]=tmpList[3]-self.Nx_
+        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
       if gj==1:
-        tmpList[3]=iPt-self.Nx_
-        tmpList[7]=iPt+self.Nx_*(self.Ny_-1)-self.Nx_
+        tmpList[3]=self.gigjToGlobalID(gi, 0)
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
       if gj>1:
-        tmpList[3]=iPt-self.Nx_
-        tmpList[7]=iPt-self.Nx_*2
+        tmpList[3]=self.gigjToGlobalID(gi,  gj-1)
+        tmpList[7]=self.gigjToGlobalID(gi,  gj-2)
 
       # store currrent neighboring list
       self.G_[iPt] = tmpList

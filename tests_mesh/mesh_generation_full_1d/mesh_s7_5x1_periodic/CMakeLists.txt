@@ -5,12 +5,12 @@ configure_file(connectivity_gold.dat connectivity_gold.dat COPYONLY)
 configure_file(coordinates_gold.dat  coordinates_gold.dat  COPYONLY)
 configure_file(info_gold.dat	     info_gold.dat	   COPYONLY)
 
-add_test(NAME full_mesh_5x1_s3_periodic
+add_test(NAME full_mesh_5x1_s7_periodic
 COMMAND ${CMAKE_COMMAND}
 -DMESHDRIVER=${MESHSRC}/create_full_mesh.py
 -DOUTDIR=${CMAKE_CURRENT_BINARY_DIR}
 -Dnx=5
--Dss=3
+-Dss=7
 -DPER=true
--P ${CMAKE_CURRENT_SOURCE_DIR}/../test1d.cmake
+-P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
 )
