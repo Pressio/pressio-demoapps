@@ -1,17 +1,5 @@
 
-import matplotlib.pyplot as plt
-import sys, os, time
 import numpy as np
-from numpy import linspace, meshgrid
-from matplotlib import cm
-import collections
-from argparse import ArgumentParser
-import random
-import scipy.sparse as sp
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import reverse_cuthill_mckee
-
-from mesh_utils import printDicPretty
 
 def removeStepCells(meshObj, xBd, yBd):
 

@@ -3,7 +3,7 @@ include(FindUnixCommands)
 #------------------
 # compute full mesh
 #------------------
-set(CMD "python ${FMESHDRIVER} -n 50 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds -1.0 1.0 --periodic true -p print 4")
+set(CMD "python ${FMESHDRIVER} -n 50 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds -1.0 1.0 --periodic true")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")
@@ -45,7 +45,7 @@ execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 #------------------
 # generate sample mesh
 #------------------
-set(CMD "python ${SMESHDRIVER} -wdir ${OUTDIR} -fullMeshDir ${OUTDIR}/full -p print 4")
+set(CMD "python ${SMESHDRIVER} --outDir ${OUTDIR} --fullMeshDir ${OUTDIR}/full")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")

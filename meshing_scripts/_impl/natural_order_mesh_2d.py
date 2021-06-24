@@ -1,17 +1,8 @@
 
-import matplotlib.pyplot as plt
-import sys, os, time
 import numpy as np
-from numpy import linspace, meshgrid
-from matplotlib import cm
-import collections
-from argparse import ArgumentParser
-import random
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import reverse_cuthill_mckee
-
-from mesh_utils import *
 
 # natural row ordering
 #
@@ -21,7 +12,7 @@ from mesh_utils import *
 #  0  1  2  3  4
 #
 
-class NatOrdMeshRow:
+class NatOrdMeshRow2d:
   def __init__(self, Nx, Ny, dx, dy, \
                xL, xR, yL, yR,
                stencilSize, enablePeriodicBc):

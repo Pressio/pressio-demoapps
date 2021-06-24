@@ -1,32 +1,20 @@
 
-import matplotlib.pyplot as plt
-import sys, os, time
-import numpy as np
-from numpy import linspace, meshgrid
-from matplotlib import cm
-import collections
+import sys, os, time, pathlib, collections
 from argparse import ArgumentParser
-import random
+import numpy as np
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import reverse_cuthill_mckee
-from mpl_toolkits.mplot3d import Axes3D
 
-from one_dim_mesh import OneDimMesh
-from natural_order_mesh import NatOrdMeshRow
-from natural_order_mesh_3d import NatOrdMesh3d
-from mesh_utils import *
-from remove_cells_step import *
+from _impl.one_dim_mesh import OneDimMesh
+from _impl.natural_order_mesh_2d import NatOrdMeshRow2d
+from _impl.natural_order_mesh_3d import NatOrdMesh3d
+from _impl.remove_cells_step import *
 
-# ------------------------------------------------
-def checkDomainBoundsCoordinates(xValues, yValues):
-  # x coordiantes must be in increasing order
-  for i in range(1, len(xValues)):
-    assert(xValues[i] > xValues[i-1])
-
-  # y coordiantes must be in increasing order
-  for i in range(1, len(yValues)):
-    assert(yValues[i] > yValues[i-1])
+#------------------------------------------------
+def printDicPretty(d):
+  for key, value in d.items():
+    print(str(key), value)
 
 # ------------------------------------------------
 def str2bool(v):
@@ -41,10 +29,9 @@ def str2bool(v):
 
 # ------------------------------------------------
 def main(workDir, debug, dimensionality,\
-         Nx, Ny, Nz, \
-         plotting, orderingType, \
+         Nx, Ny, Nz, orderingType, \
          xBd, yBd, zBd, stencilSize, \
-         plotFontSize, enablePeriodicBc, darkMode):
+         enablePeriodicBc):
 
   # figure out if domain is a plain rectangle or has a step in it
   plainDomain = True
@@ -63,15 +50,6 @@ def main(workDir, debug, dimensionality,\
     if dimensionality==3:
       print ("Bounds for z = ", zBd[0], zBd[1], " with dz = ", dz)
 
-  if (plotting != "none"):
-    figFM = plt.figure(0)
-    if dimensionality<=2:
-      axFM = figFM.gca()
-    else:
-      axFM = figFM.gca(projection='3d')
-      #axFM = figFM.add_subplot(projection='3d')
-      #axFM = Axes3D(figFM)
-
   # ---------------------------------------------
   x = None
   y = None
@@ -86,10 +64,10 @@ def main(workDir, debug, dimensionality,\
     G = meshObj.getGraph()
 
   elif dimensionality==2 and plainDomain:
-    meshObj = NatOrdMeshRow(Nx,Ny, dx,dy,\
-                            xBd[0], xBd[1], \
-                            yBd[0], yBd[1], \
-                            stencilSize, enablePeriodicBc)
+    meshObj = NatOrdMeshRow2d(Nx,Ny, dx,dy,\
+                              xBd[0], xBd[1], \
+                              yBd[0], yBd[1], \
+                              stencilSize, enablePeriodicBc)
 
     # get mesh coordinates, gids and graph
     [x, y] = meshObj.getCoordinates()
@@ -102,17 +80,16 @@ def main(workDir, debug, dimensionality,\
     L = [maxX-minX, maxY-minY]
     dx,dy = L[0]/Nx, L[1]/Ny
 
-    meshObj = NatOrdMeshRow(Nx, Ny, dx, dy,\
-                            minX, maxX, \
-                            minY, maxY, \
-                            stencilSize, False)
+    meshObj = NatOrdMeshRow2d(Nx, Ny, dx, dy,\
+                              minX, maxX, minY, maxY, \
+                              stencilSize, False)
 
     x,y,G,gids = removeStepCells(meshObj, xBd, yBd)
 
   elif dimensionality==2 and plainDomain:
-    meshObj = NatOrdMeshRow(Nx,Ny, dx,dy,\
-                            xBd[0], xBd[1], yBd[0], yBd[1], \
-                            stencilSize, enablePeriodicBc)
+    meshObj = NatOrdMeshRow2d(Nx,Ny, dx,dy,\
+                              xBd[0], xBd[1], yBd[0], yBd[1], \
+                              stencilSize, enablePeriodicBc)
 
     # get mesh coordinates, gids and graph
     [x, y] = meshObj.getCoordinates()
@@ -174,12 +151,6 @@ def main(workDir, debug, dimensionality,\
     spMat = spMatRCM
     #with the permuation indices, update the gids labeling
     x, y = x[rcmPermInd], y[rcmPermInd]
-    # if plotting != "none":
-    #  plotCells(x,y,dx, dy, gids,ax10)
-    #  ax11.spy(spMatRCM)
-    #  ax10.set_aspect(1.0)
-    #  ax10.set_xlim(xL,xR)
-    #  ax10.set_ylim(yL,yR)
 
   # -----------------------------------------------------
   meshSize = len(G)
@@ -255,52 +226,30 @@ def main(workDir, debug, dimensionality,\
     f.write("\n")
   f.close()
 
-  if plotting != "none" and dimensionality==1:
-    cellsColor  = 'w' if not darkMode else 'none'
-    plotCells1d(x, dx, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
-    axFM.set_xlim(min(xBd), max(xBd))
-    axFM.set_ylim(-0.025, 0.025)
-    axFM.set_yticks([])
-
-  if plotting != "none" and dimensionality==2:
-    cellsColor  = 'w' if not darkMode else 'none'
-    plotCells2d(x, y, dx, dy, gids, axFM, darkMode, facecol=cellsColor, fontSz=plotFontSize)
-    axFM.set_aspect(1.0)
-    axFM.set_xlim(min(xBd), max(xBd))
-    axFM.set_ylim(min(yBd), max(yBd))
-
-  if plotting != "none" and dimensionality==3:
-    plotCells3d(x, y, z, dx, dy, dz, axFM, darkMode, 'w', fontSz=plotFontSize)
-    axFM.set_xlim(min(xBd), max(xBd))
-    axFM.set_ylim(min(yBd), max(yBd))
-    axFM.set_zlim(min(zBd), max(zBd))
-
-  if plotting == "show":
-    plt.show()
-  elif plotting =="print":
-    if darkMode==1:
-      plt.savefig(workDir+'/full.png', dpi=250, format='png', transparent=True)
-    else:
-      plt.savefig(workDir+'/full.png', dpi=250, format='png')
-
 ###############################
 if __name__== "__main__":
 ###############################
   parser = ArgumentParser()
   parser.add_argument(
-    "--outDir", "--outdir", dest="outDir",
+    "--outDir", "--outdir",
+    dest="outDir",
     help="Full path to where to store all the mesh output files.")
 
   parser.add_argument(
     "-n", "--numCells",
-    nargs="*", type=int, dest="numCells",
+    nargs="*",
+    type=int,
+    dest="numCells",
     help="Num of cells along x and y. \
 If you only pass one value, I assume 1d.\
-If you pass two values, I assume 2d.")
+If you pass two values, I assume 2d. \
+If you pass three values, I assume 3d.")
 
   parser.add_argument(
     "-b", "--bounds",
-    nargs="*", dest="bounds", type=float,
+    nargs="*",
+    type=float,
+    dest="bounds",
     help="Domain bounds along x and y. \
 First, you pass all values of x, then pass all values of y.")
 
@@ -308,17 +257,9 @@ First, you pass all values of x, then pass all values of y.")
     "-o", "--ordering",
     dest="orderingType",
     default="naturalRow",
-    help="What cell ordering you want: use <naturalRow> for \
-row natural ordering of the mesh cells, use <naturalRowRcm> for \
-applying reverse Cuthill-Mckee")
-
-  parser.add_argument(
-    "-p", "--plotting",
-    nargs="*",
-    dest="plottingInfo",
-    default="none",
-    help="What type of plotting you want: use <show> for showing plots \
-use <print> for printing only, use <none> for no plots")
+    help="Desired cell ordering: use <naturalRow> for \
+row natural ordering of the mesh cells, \
+use <naturalRowRcm> to apply the reverse Cuthill-Mckee")
 
   parser.add_argument(
     "-s", "--stencilSize", "--stencilsize",
@@ -327,19 +268,23 @@ use <print> for printing only, use <none> for no plots")
 
   parser.add_argument(
     "--periodic",
-    dest="periodic", type=str2bool, default=True,
+    dest="periodic",
+    type=str2bool,
+    default=True,
     help="True/False to enable/disable periodic BC so that mesh connectivity\
 has that info embedded in.")
 
   parser.add_argument(
     "-d", "--debug",
-    dest="debug", type=str2bool, default=False,
+    dest="debug",
+    type=str2bool,
+    default=False,
     help="True/False to eanble debug mode.")
 
   args = parser.parse_args()
 
   # -------------------------------------------------------
-  # check that args make sense
+  # check args
   assert( len(args.numCells) in [1,2,3] )
   assert( args.stencilSize in [3, 5, 7] )
   assert( args.orderingType in ["naturalRow", "naturalRowRcm"] )
@@ -393,19 +338,8 @@ has that info embedded in.")
     zCoords = [args.bounds[4], args.bounds[5]]
     dim = 3
 
-  # other things
-  plotFontSize = 0
-  darkMode = 0
-  if len(args.plottingInfo) == 2:
-    plotFontSize = int(args.plottingInfo[1])
-  if len(args.plottingInfo) == 3:
-    plotFontSize = int(args.plottingInfo[1])
-    darkMode = int(args.plottingInfo[2])
-
   main(args.outDir, args.debug, dim,
        nx, ny, nz,
-       args.plottingInfo[0],
        args.orderingType,
        xCoords, yCoords, zCoords,
-       args.stencilSize, plotFontSize,
-       args.periodic, darkMode)
+       args.stencilSize, args.periodic)

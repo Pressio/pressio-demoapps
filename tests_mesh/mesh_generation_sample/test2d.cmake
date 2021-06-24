@@ -10,7 +10,7 @@ else()
 endif()
 
 # generate sample mesh
-set(CMD "python ${SMESHDRIVER} -wdir ${OUTDIR} -fullMeshDir ${OUTDIR}/full -p print 7")
+set(CMD "python ${SMESHDRIVER} --outDir ${OUTDIR} --fullMeshDir ${OUTDIR}/full")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")

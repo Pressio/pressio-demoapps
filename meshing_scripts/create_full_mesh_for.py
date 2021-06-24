@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 valid = ["linadv1d_s3", \
          "linadv1d_s7", \
+         #
          "euler1dsmooth_s3", \
          "euler1dsmooth_s7", \
          "sod1d_s3", \
@@ -34,17 +35,22 @@ if __name__== "__main__":
     help="choices:" + str(valid))
 
   parser.add_argument(
-    "--outDir", "--outdir", dest="outDir",
+    "--outDir", "--outdir",
+    dest="outDir",
     help="Full path to where to store all the mesh output files.")
 
   parser.add_argument(
     "-n", "--numCells",
-    nargs="*", type=int, dest="numCells",
+    nargs="*",
+    type=int,
+    dest="numCells",
     help="Num of cells along x and y. \
     If you only pass one value, I assume 1d.\
     If you pass two values, I assume 2d.")
 
   args = parser.parse_args()
+  # -----------------------------
+
   pName = args.problemName
   print(pName)
 
@@ -108,7 +114,6 @@ if __name__== "__main__":
             "--stencilSize", str(s),
             "--bounds", str(-0.6), str(0.6), str(-0.6), str(0.6),
             "--periodic", "false")
-            # "-p", "print", str(0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov2dsym" in pName):
@@ -119,7 +124,6 @@ if __name__== "__main__":
             "--stencilSize", str(s),
             "--bounds", str(0.0), str(1.2), str(0.0), str(1.2),
             "--periodic", "false")
-            #"-p", "print", str(4))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("riemann2d" in pName):
@@ -130,7 +134,6 @@ if __name__== "__main__":
             "--stencilSize", str(s),
             "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
             "--periodic", "false")
-            # "-p", "print", str(0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler3dsmooth" in pName):
