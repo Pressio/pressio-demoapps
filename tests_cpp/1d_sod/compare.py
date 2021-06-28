@@ -1,6 +1,8 @@
 
 import numpy as np
 import sys, os
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 if __name__== "__main__":
   nx=100
@@ -14,6 +16,15 @@ if __name__== "__main__":
   goldD = np.loadtxt("gold.txt")
   # for i in range(fomTotDofs):
   #   print(np.abs(D[i]-goldD[i]))
+
+  # rho = D[0::3]
+  # coo = np.loadtxt("coordinates.dat", dtype=float)
+  # x_fom = coo[:,1]
+  # fig = plt.figure(1)
+  # ax = plt.gca()
+  # plt.plot(x_fom, rho, '-')
+  # # ax.set_xlim([-1, 1])
+  # plt.show()
 
   assert(np.allclose(D.shape, goldD.shape))
   assert(np.isnan(D).all() == False)

@@ -25,6 +25,22 @@ if __name__== "__main__":
   v   = D[:,2]/rho
   p   = computePressure(rho, u, v, D[:,3])
 
+  # np.savetxt("p.txt", p)
+  # import matplotlib.pyplot as plt
+  # coords = np.loadtxt('coordinates.dat', dtype=float)
+  # x_fom, y_fom = coords[:,1], coords[:,2]
+  # x_fom = np.reshape(x_fom, (ny,nx))
+  # y_fom = np.reshape(y_fom, (ny,nx))
+  # rho1 = np.reshape(p, (nx,ny))
+  # fig = plt.figure(1)
+  # ax = plt.gca()
+  # h = plt.contourf(x_fom, y_fom, rho1)
+  # ax.set_aspect(aspect=1.)
+  # plt.colorbar()
+  # # ax.set_xlim([-1., 1.])
+  # # ax.set_ylim([-1., 1.])
+  # plt.show()
+
   goldD = np.loadtxt("p_gold.txt")
   assert(np.allclose(p.shape, goldD.shape))
   assert(np.isnan(p).all() == False)

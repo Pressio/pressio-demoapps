@@ -74,7 +74,7 @@ bool api2()
 int main(int argc, char *argv[])
 {
   const auto s1 = api1();
-  const auto s2 = api1();
+  const auto s2 = api2();
   if(s1 and s2){
     std::puts("PASS");
   }

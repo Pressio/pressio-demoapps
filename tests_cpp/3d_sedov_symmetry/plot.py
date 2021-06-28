@@ -44,7 +44,7 @@ if __name__== "__main__":
   print("fomTest: nt = ", nt)
   data = np.reshape(data, (nt, fomTotDofs))
 
-  # X, Y, Z = np.mgrid[0:0.5:25j, 0:0.5:25j, 0:0.5:25j]
+  # X, Y, Z = np.mgrid[0:0.5:20j, 0:0.5:20j, 0:0.5:20j]
   # targetSol= data[-1, :] 
   # rho0 = targetSol[0::5]
   # u0   = targetSol[1::5]
@@ -66,6 +66,7 @@ if __name__== "__main__":
   # fig.show()
 
   for i in range(nt-1,nt):
+    print(i)
     fig = plt.figure()
     ax = plt.axes(projection ="3d")
     currState = data[i,:]
@@ -77,19 +78,16 @@ if __name__== "__main__":
     p   = computePressure(rho, u, v, w, currState[:,4])
     print(np.min(p), np.max(p))
 
-    ax.scatter3D(x, y, z, c=p, marker='o', s=5)
-    ax.set_xlim([0., 0.4])
-    ax.set_ylim([0., 0.4])
-    ax.set_zlim([0., 0.4])
+    ax.scatter3D(x, y, z, c=p, marker='o', s=25)
+    # ax.set_xlim([0., 0.4])
+    # ax.set_ylim([0., 0.4])
+    # ax.set_zlim([0., 0.4])
     # plt.pause(0.001) 
     plt.show()
 
 
-
-
 # X, Y, Z = np.mgrid[-1:1:30j, -1:1:30j, -1:1:30j]
 # values =    np.sin(np.pi*X) * np.cos(np.pi*Z) * np.sin(np.pi*Y)
-
 # fig = go.Figure(data=go.Volume(
 #     x=X.flatten(),
 #     y=Y.flatten(),

@@ -124,11 +124,11 @@ class NatOrdMeshRow2d:
         tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
         tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
       elif gi==1:
-        tmpList[0]=self.gigjToGlobalID(0, gj)
+        tmpList[0]=self.gigjToGlobalID(0,          gj)
         tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
       elif gi>1:
-        tmpList[0]=self.gigjToGlobalID(gi-1, gj)
-        tmpList[4]=self.gigjToGlobalID(gi-2, gj)
+        tmpList[0]=self.gigjToGlobalID(gi-1,       gj)
+        tmpList[4]=self.gigjToGlobalID(gi-2,       gj)
 
       # front
       if gj==self.Ny_-1:
@@ -147,7 +147,7 @@ class NatOrdMeshRow2d:
         tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else -1
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else -1
+        tmpList[6]=self.gigjToGlobalID(0,          gj) if pBc else -1
       if gi<self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(gi+1, gj)
         tmpList[6]=self.gigjToGlobalID(gi+2, gj)

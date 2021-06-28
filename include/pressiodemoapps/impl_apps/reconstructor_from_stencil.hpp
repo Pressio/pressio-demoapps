@@ -39,6 +39,16 @@ public:
 	break;
       }
 
+    case ::pressiodemoapps::InviscidFluxReconstruction::Weno3:
+      {
+	pressiodemoapps::weno3(m_uMinusHalfNeg,
+			       m_uMinusHalfPos,
+			       m_uPlusHalfNeg,
+			       m_uPlusHalfPos,
+			       m_stencilVals);
+	break;
+      }
+
     case ::pressiodemoapps::InviscidFluxReconstruction::Weno5:
       {
 	pressiodemoapps::weno5(m_uMinusHalfNeg,
@@ -57,37 +67,57 @@ public:
   operator()()
   {
 
-    switch(m_recEn){
-    case ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder:
+    switch(m_recEn)
       {
-	for (int i=0; i<ndpc; ++i){
-	  m_uMinusHalfNeg(i) = m_stencilVals(0+i);
-	  m_uMinusHalfPos(i) = m_stencilVals(ndpc+i);
-	  m_uPlusHalfNeg(i)  = m_stencilVals(ndpc+i);
-	  m_uPlusHalfPos(i)  = m_stencilVals(2*ndpc+i);
-	}
-	break;
-      }
-
-    case ::pressiodemoapps::InviscidFluxReconstruction::Weno5:
-      {
-	using scalar_type = typename edge_rec_t::value_type;
-	std::array<scalar_type,7> mys;
-	for (int dof=0; dof<ndpc; ++dof)
+      case ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder:
 	{
-	  int start = dof;
-	  for (int k=0; k<7; ++k){
-	    mys[k] = m_stencilVals(start + ndpc*k);
+	  for (int i=0; i<ndpc; ++i){
+	    m_uMinusHalfNeg(i) = m_stencilVals(0+i);
+	    m_uMinusHalfPos(i) = m_stencilVals(ndpc+i);
+	    m_uPlusHalfNeg(i)  = m_stencilVals(ndpc+i);
+	    m_uPlusHalfPos(i)  = m_stencilVals(2*ndpc+i);
 	  }
-	  pressiodemoapps::weno5(m_uMinusHalfNeg(dof),
-				 m_uMinusHalfPos(dof),
-				 m_uPlusHalfNeg(dof),
-				 m_uPlusHalfPos(dof),
-				 mys);
+	  break;
 	}
-	break;
+
+      case ::pressiodemoapps::InviscidFluxReconstruction::Weno3:
+	{
+	  using scalar_type = typename edge_rec_t::value_type;
+	  std::array<scalar_type,5> mys;
+	  for (int dof=0; dof<ndpc; ++dof)
+	    {
+	      int start = dof;
+	      for (int k=0; k<5; ++k){
+		mys[k] = m_stencilVals(start + ndpc*k);
+	      }
+	      pressiodemoapps::weno3(m_uMinusHalfNeg(dof),
+				     m_uMinusHalfPos(dof),
+				     m_uPlusHalfNeg(dof),
+				     m_uPlusHalfPos(dof),
+				     mys);
+	    }
+	  break;
+	}
+
+      case ::pressiodemoapps::InviscidFluxReconstruction::Weno5:
+	{
+	  using scalar_type = typename edge_rec_t::value_type;
+	  std::array<scalar_type,7> mys;
+	  for (int dof=0; dof<ndpc; ++dof)
+	    {
+	      int start = dof;
+	      for (int k=0; k<7; ++k){
+		mys[k] = m_stencilVals(start + ndpc*k);
+	      }
+	      pressiodemoapps::weno5(m_uMinusHalfNeg(dof),
+				     m_uMinusHalfPos(dof),
+				     m_uPlusHalfNeg(dof),
+				     m_uPlusHalfPos(dof),
+				     mys);
+	    }
+	  break;
+	}
       }
-    }
   }
 
 private:

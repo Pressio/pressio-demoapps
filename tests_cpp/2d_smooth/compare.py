@@ -42,6 +42,8 @@ if __name__== "__main__":
 
   if(st==3):
     assert(math.isclose(err, 0.19629187623144784))
+  if(st==5):
+    assert(math.isclose(err, 0.09177511987157294))
   elif(st==7):
     assert(math.isclose(err, 0.0007232573399452713))
 

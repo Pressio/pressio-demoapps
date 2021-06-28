@@ -17,8 +17,12 @@ int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+#ifdef USE_WENO3
+  const auto order   = pda::InviscidFluxReconstruction::Weno3;
+#else
   const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
-
+#endif
+  
   const auto probId  = pda::Euler3d::PeriodicSmooth;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);

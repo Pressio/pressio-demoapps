@@ -15,7 +15,7 @@ else()
   message("run succeeded!")
 endif()
 
-set(CMD "python compare.py ${STENCILVAL}")
+set(CMD "python compare.py")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "comparison failed")

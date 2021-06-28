@@ -39,8 +39,9 @@ public:
     // we assume:
     // smPt=0 is at left bd
     // smPt=sampleMeshSize-1 is at right bd
-    const auto cellGIDL   = graph(0, 0);
-    const auto cellGIDLe0 = graph(0, 2);
+    const auto cellGIDL    = graph(0, 0);
+    const auto cellGIDLe0  = graph(0, 2);
+    const auto uLe0i	   = cellGIDLe0*3;
     const auto myXL = x(cellGIDL);
     if (graph(0,1) != -1){
       throw std::runtime_error("Point not on boundary, something wrong");
@@ -48,36 +49,48 @@ public:
 
     const auto cellGIDR   = graph(sampleMeshSize-1, 0);
     const auto cellGIDRw0 = graph(sampleMeshSize-1, 1);
+    const auto uRw0i	  = cellGIDRw0*3;
     const auto myXR = x(cellGIDR);
     if (graph(sampleMeshSize-1, 2) != -1){
       throw std::runtime_error("Point not on boundary, something wrong");
     }
 
-    m_ghostLeft(0) = m_state(cellGIDL*3);
-    m_ghostLeft(1) = m_state(cellGIDL*3+1);
-    m_ghostLeft(2) = m_state(cellGIDL*3+2);
+    // this is the 0-degree ghost cell
+    m_ghostLeft(0)  = m_state(cellGIDL*3);
+    m_ghostLeft(1)  = m_state(cellGIDL*3+1);
+    m_ghostLeft(2)  = m_state(cellGIDL*3+2);
 
     m_ghostRight(0) = m_state(cellGIDR*3);
     m_ghostRight(1) = m_state(cellGIDR*3+1);
     m_ghostRight(2) = m_state(cellGIDR*3+2);
 
+    if (m_stencilSize==5)
+      {
+	m_ghostLeft(3) = m_state(uLe0i);
+	m_ghostLeft(4) = m_state(uLe0i+1);
+	m_ghostLeft(5) = m_state(uLe0i+2);
+
+	m_ghostRight(3) = m_state(uRw0i);
+	m_ghostRight(4) = m_state(uRw0i+1);
+	m_ghostRight(5) = m_state(uRw0i+2);
+      }
+
     if (m_stencilSize==7)
       {
 	const auto cellGIDLe1 = graph(0, 4);
-	const auto cellGIDLe2 = graph(0, 6);
 	const auto cellGIDRw1 = graph(sampleMeshSize-1, 3);
+	const auto cellGIDLe2 = graph(0, 6);
 	const auto cellGIDRw2 = graph(sampleMeshSize-1, 5);
-
 	m_ghostLeft(6) = m_state(cellGIDLe1*3);
 	m_ghostLeft(7) = m_state(cellGIDLe1*3+1);
 	m_ghostLeft(8) = m_state(cellGIDLe1*3+2);
-	m_ghostLeft(3) = m_state(cellGIDLe0*3);
-	m_ghostLeft(4) = m_state(cellGIDLe0*3+1);
-	m_ghostLeft(5) = m_state(cellGIDLe0*3+2);
+	m_ghostLeft(3) = m_state(uLe0i);
+	m_ghostLeft(4) = m_state(uLe0i+1);
+	m_ghostLeft(5) = m_state(uLe0i+2);
 
-	m_ghostRight(3) = m_state(cellGIDRw0*3);
-	m_ghostRight(4) = m_state(cellGIDRw0*3+1);
-	m_ghostRight(5) = m_state(cellGIDRw0*3+2);
+	m_ghostRight(3) = m_state(uRw0i);
+	m_ghostRight(4) = m_state(uRw0i+1);
+	m_ghostRight(5) = m_state(uRw0i+2);
 	m_ghostRight(6) = m_state(cellGIDRw1*3);
 	m_ghostRight(7) = m_state(cellGIDRw1*3+1);
 	m_ghostRight(8) = m_state(cellGIDRw1*3+2);

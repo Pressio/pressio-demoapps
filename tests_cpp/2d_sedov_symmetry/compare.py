@@ -18,6 +18,7 @@ if __name__== "__main__":
   D = np.reshape(D, (nt, fomTotDofs))
   D = D[-1, :]
 
+  # np.savetxt("state.txt", D)
   # D = np.reshape(D, (nx*ny, 4))
   # rho = D[:,0]
   # u   = D[:,1]/rho

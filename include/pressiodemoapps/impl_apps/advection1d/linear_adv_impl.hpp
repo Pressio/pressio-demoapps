@@ -84,12 +84,13 @@ private:
     scalar_type uPlusHalfNeg {0};
     scalar_type uPlusHalfPos {0};
 
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, void>;
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencil<
       scalar_type, stencil_values_t>;
 
-    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFiller(stencilSize, U, m_meshObj, m_stencilVals);
     rec_fnct_t Reconstructor(m_recEn, m_stencilVals,
 			     uMinusHalfNeg, uMinusHalfPos,

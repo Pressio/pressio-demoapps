@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 #ifdef USE_WENO5
   constexpr auto order   = pda::InviscidFluxReconstruction::Weno5;
+#elif defined USE_WENO3
+  constexpr auto order   = pda::InviscidFluxReconstruction::Weno3;
 #else
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif

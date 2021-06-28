@@ -68,50 +68,73 @@ public:
       where [] are optionally present, depending on the stencil chosen.
     */
 
-    switch(m_memb.m_recEn){
-    case InviscidFluxReconstruction::FirstOrder:
+    switch(m_memb.m_recEn)
       {
-	const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
-	const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
-	const auto l0i = l0*ndpc;
-	const auto r0i = r0*ndpc;
+      case InviscidFluxReconstruction::FirstOrder:
+	{
+	  const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
+	  const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+	  const auto l0i = l0*ndpc;
+	  const auto r0i = r0*ndpc;
 
-	for (int i=0; i<ndpc; ++i){
-	  m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	  m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	  m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	  m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
+	  for (int i=0; i<ndpc; ++i){
+	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
+	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
+	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
+	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
+	  }
+	  break;
 	}
-	break;
-      }
 
-    case InviscidFluxReconstruction::Weno5:
-      {
-	const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
-	const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
-	const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
-	const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
-	const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
-	const auto l0i = l0*ndpc;
-	const auto r0i = r0*ndpc;
-	const auto l1i = l1*ndpc;
-	const auto r1i = r1*ndpc;
-	const auto l2i = l2*ndpc;
-	const auto r2i = r2*ndpc;
+      case InviscidFluxReconstruction::Weno3:
+	{
+	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+	  const auto l0i = l0*ndpc;
+	  const auto r0i = r0*ndpc;
+	  const auto l1i = l1*ndpc;
+	  const auto r1i = r1*ndpc;
 
-	pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-			       m_memb.m_uMinusHalfPos,
-			       m_memb.m_uPlusHalfNeg,
-			       m_memb.m_uPlusHalfPos,
-			       m_memb.m_state,
-			       l2i, l1i, l0i,
-			       r0i, r1i, r2i,
-			       uIndex,
-			       ndpc);
-	break;
+	  pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_state,
+				 l1i, l0i, r0i, r1i,
+				 uIndex,
+				 ndpc);
+	  break;
+	}
+
+      case InviscidFluxReconstruction::Weno5:
+	{
+	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+	  const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+	  const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
+	  const auto l0i = l0*ndpc;
+	  const auto r0i = r0*ndpc;
+	  const auto l1i = l1*ndpc;
+	  const auto r1i = r1*ndpc;
+	  const auto l2i = l2*ndpc;
+	  const auto r2i = r2*ndpc;
+
+	  pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_state,
+				 l2i, l1i, l0i,
+				 r0i, r1i, r2i,
+				 uIndex,
+				 ndpc);
+	  break;
+	}
       }
-    }
   }
 
 private:
@@ -147,29 +170,53 @@ public:
       where [] are optionally present, depending on the stencil chosen.
     */
 
-    switch(m_memb.m_recEn){
-    case InviscidFluxReconstruction::FirstOrder:
+    switch(m_memb.m_recEn)
       {
-	auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
-	auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
-	const auto l0i = l0*ndpc;
-	const auto r0i = r0*ndpc;
+      case InviscidFluxReconstruction::FirstOrder:
+	{
+	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
+	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
+	  const auto l0i = l0*ndpc;
+	  const auto r0i = r0*ndpc;
 
-	for (int i=0; i<ndpc; ++i){
-	  m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	  m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	  m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	  m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
+	  for (int i=0; i<ndpc; ++i){
+	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
+	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
+	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
+	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
+	  }
+	  break;
 	}
-	break;
+
+      case InviscidFluxReconstruction::Weno3:
+	{
+	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
+	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
+	  auto l1 = (axis == 1) ? graph(smPt, 7) : (axis==2) ? graph(smPt, 10) : graph(smPt, 11);
+	  auto r1 = (axis == 1) ? graph(smPt, 9) : (axis==2) ? graph(smPt, 8) : graph(smPt, 12);
+
+	  const auto l0i = l0*ndpc;
+	  const auto r0i = r0*ndpc;
+	  const auto l1i = l1*ndpc;
+	  const auto r1i = r1*ndpc;
+	pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+			       m_memb.m_uMinusHalfPos,
+			       m_memb.m_uPlusHalfNeg,
+			       m_memb.m_uPlusHalfPos,
+			       m_memb.m_state,
+			       l1i, l0i, r0i, r1i,
+			       uIndex,
+			       ndpc);
+	  break;
+	}
+
+      case InviscidFluxReconstruction::Weno5:
+	{
+	  throw std::runtime_error("missing impl");
+	  break;
+	}
       }
 
-    case InviscidFluxReconstruction::Weno5:
-      {
-	throw std::runtime_error("missing impl");
-	break;
-      }
-    }
   }
 
 private:

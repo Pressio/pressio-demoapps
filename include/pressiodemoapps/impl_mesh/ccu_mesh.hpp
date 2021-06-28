@@ -141,6 +141,9 @@ private:
 					m_stencilSize,
 					m_stencilMeshSize,
 					m_sampleMeshSize);
+    if(m_dim==3 and m_stencilSize==7){
+      throw std::runtime_error("3D mesh with 7pt stencil not yet supported.");
+    }
 
     pressiodemoapps::resize(m_x, m_stencilMeshSize);
     pressiodemoapps::resize(m_y, m_stencilMeshSize);
@@ -170,9 +173,9 @@ private:
       {
 
 	const auto b1 = hasBdLeft2d(it);
-	const auto b2 = hasBdTop(it);
+	const auto b2 = hasBdFront2d(it);
 	const auto b3 = hasBdRight2d(it);
-	const auto b4 = hasBdBottom(it);
+	const auto b4 = hasBdBack2d(it);
 	if (b1 or b2 or b3 or b4){
 	  m_rowsForCellsBd.push_back(it);
 	}
@@ -190,10 +193,6 @@ private:
 	const auto b5 = hasBdBottom3d(it);
 	const auto b6 = hasBdTop3d(it);
 
-	if(m_stencilSize==7){
-	  throw std::runtime_error("3D with 7pt stencil not supported yet.");
-	}
-
 	if (b1 or b2 or b3 or b4 or b5 or b6){
 	  m_rowsForCellsBd.push_back(it);
 	}
@@ -209,38 +208,17 @@ private:
 
   }
 
+  // 1d
   bool hasBdLeft1d(const index_t rowInd) const{
     if (m_graph(rowInd, 1)==-1) {
       return true;
     }
 
-    if (m_stencilSize==7){
+    if (m_stencilSize>=5){
       if (m_graph(rowInd, 3)==-1) return true;
-      if (m_graph(rowInd, 5)==-1) return true;
     }
-    return false;
-  }
-
-  bool hasBdLeft2d(const index_t rowInd) const{
-    if (m_graph(rowInd, 1)==-1) {
-      return true;
-    }
-
     if (m_stencilSize==7){
       if (m_graph(rowInd, 5)==-1) return true;
-      if (m_graph(rowInd, 9)==-1) return true;
-    }
-    return false;
-  }
-
-  bool hasBdTop(const index_t rowInd) const{
-    if (m_graph(rowInd, 2)==-1) {
-      return true;
-    }
-
-    if (m_stencilSize==7){
-      if (m_graph(rowInd, 6)==-1) return true;
-      if (m_graph(rowInd, 10)==-1) return true;
     }
     return false;
   }
@@ -250,9 +228,41 @@ private:
       return true;
     }
 
-    if (m_stencilSize==7){
+    if (m_stencilSize>=5){
       if (m_graph(rowInd, 4)==-1) return true;
+    }
+    if (m_stencilSize==7){
       if (m_graph(rowInd, 6)==-1) return true;
+    }
+    return false;
+  }
+
+
+  // 2d
+  bool hasBdLeft2d(const index_t rowInd) const{
+    if (m_graph(rowInd, 1)==-1) {
+      return true;
+    }
+
+    if (m_stencilSize>=5){
+      if (m_graph(rowInd, 5)==-1) return true;
+    }
+    if (m_stencilSize==7){
+      if (m_graph(rowInd, 9)==-1) return true;
+    }
+    return false;
+  }
+
+  bool hasBdFront2d(const index_t rowInd) const{
+    if (m_graph(rowInd, 2)==-1) {
+      return true;
+    }
+
+    if (m_stencilSize>=5){
+      if (m_graph(rowInd, 6)==-1) return true;
+    }
+    if (m_stencilSize==7){
+      if (m_graph(rowInd, 10)==-1) return true;
     }
     return false;
   }
@@ -262,52 +272,81 @@ private:
       return true;
     }
 
-    if (m_stencilSize==7){
+    if (m_stencilSize>=5){
       if (m_graph(rowInd, 7)==-1) return true;
+    }
+    if (m_stencilSize==7){
       if (m_graph(rowInd, 11)==-1) return true;
     }
     return false;
   }
 
-  bool hasBdBottom(const index_t rowInd) const{
+  bool hasBdBack2d(const index_t rowInd) const{
     if (m_graph(rowInd, 4)==-1) {
       return true;
     }
 
-    if (m_stencilSize==7){
+    if (m_stencilSize>=5){
       if (m_graph(rowInd, 8)==-1) return true;
+    }
+    if (m_stencilSize==7){
       if (m_graph(rowInd, 12)==-1) return true;
     }
     return false;
   }
 
+  // 3d
   bool hasBdLeft3d(const index_t rowInd) const{
     if (m_graph(rowInd, 1)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 7)==-1) return true;
+    }
     return false;
   }
 
   bool hasBdFront3d(const index_t rowInd) const{
     if (m_graph(rowInd, 2)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 8)==-1) return true;
+    }
     return false;
   }
 
   bool hasBdRight3d(const index_t rowInd) const{
     if (m_graph(rowInd, 3)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 9)==-1) return true;
+    }
     return false;
   }
 
   bool hasBdBack3d(const index_t rowInd) const{
     if (m_graph(rowInd, 4)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 10)==-1) return true;
+    }
     return false;
   }
 
   bool hasBdBottom3d(const index_t rowInd) const{
     if (m_graph(rowInd, 5)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 11)==-1) return true;
+    }
     return false;
   }
 
   bool hasBdTop3d(const index_t rowInd) const{
     if (m_graph(rowInd, 6)==-1) return true;
+
+    if (m_stencilSize==5){
+      if (m_graph(rowInd, 12)==-1) return true;
+    }
     return false;
   }
 

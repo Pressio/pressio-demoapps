@@ -64,12 +64,12 @@ if __name__== "__main__":
   #     ))
   # fig.show()
 
-  for i in range(0,nt):#nt,50):
+  for i in range(nt-1, nt):#nt,50):
     fig = plt.figure()
     ax = plt.axes(projection ="3d")
     fomS = fomTestD[i,:]
     fomS = np.reshape(fomS, (numCells, 5))
     rho = fomS[:,0]
 
-    ax.scatter3D(x, y, z, c=rho, marker='o', s=20)
+    ax.scatter3D(x, y, z, c=rho, marker='o', s=50)
     plt.show()

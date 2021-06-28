@@ -13,5 +13,5 @@ COMMAND ${CMAKE_COMMAND}
 -Dny=7
 -Dss=5
 -DPER=true
--P ${CMAKE_CURRENT_SOURCE_DIR}/../test2d.cmake
+-P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
 )

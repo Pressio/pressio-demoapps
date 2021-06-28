@@ -18,7 +18,6 @@ def extractN(ns):
   return int(strings.group().split()[1])
 
 if __name__== "__main__":
-  st = int(sys.argv[1])
   nx = extractN('nx')
   ny = extractN('ny')
   nz = extractN('nz')

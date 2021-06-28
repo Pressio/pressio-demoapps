@@ -65,8 +65,8 @@ class NatOrdMesh3d:
   def buildGraph(self, enablePeriodicBc):
     if self.numNeighbors_ == 2:
       self._buildGraphStencil3(enablePeriodicBc)
-    # elif self.numNeighbors_ == 6:
-    #   self._buildGraphStencil7(enablePeriodicBc)
+    elif self.numNeighbors_ == 4:
+      self._buildGraphStencil5(enablePeriodicBc)
 
   def _buildGraphStencil3(self, pBc):
     for iPt in range(self.numCells_):
@@ -121,6 +121,97 @@ class NatOrdMesh3d:
         tmpList[5]=self.gigjgkToGlobalID(gi, gj, 0) if pBc else -1
       if gk<self.Nz_-1:
         tmpList[5]=self.gigjgkToGlobalID(gi, gj, gk+1)
+
+      # store currrent neighboring list
+      self.G_[iPt] = tmpList
+
+
+  def _buildGraphStencil5(self, pBc):
+    for iPt in range(self.numCells_):
+      [gi, gj, gk] = self.globalIDToGiGjGk(iPt)
+      tmpList = np.zeros(12, dtype=np.int64)
+
+      '''
+      (z)  (y)
+      k   j
+      |  /
+      | /
+      |/
+      ----- i (x)
+
+      left,right: along i (x)
+      back,front: along j (y)
+      bottom,top: along k (z)
+
+      l0 f0 r0 ba0 bot0 top0 l1 f1 r1 ba1 bot1 top1
+      0   1  2  3   4    5    6  7  8  9   10   11
+      '''
+
+      # left neighbor
+      if gi==0:
+        tmpList[0]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBc else -1
+        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-2, gj,  gk) if pBc else -1
+      if gi==1:
+        tmpList[0]=self.gigjgkToGlobalID(0,          gj,  gk)
+        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBc else -1
+      if gi>1:
+        tmpList[0]=self.gigjgkToGlobalID(gi-1,       gj,  gk)
+        tmpList[6]=self.gigjgkToGlobalID(gi-2,       gj,  gk)
+
+      # front
+      if gj==self.Ny_-1:
+        tmpList[1]=self.gigjgkToGlobalID(gi,          0,  gk) if pBc else -1
+        tmpList[7]=self.gigjgkToGlobalID(gi,          1,  gk) if pBc else -1
+      if gj==self.Ny_-2:
+        tmpList[1]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk)
+        tmpList[7]=self.gigjgkToGlobalID(gi,          0,  gk) if pBc else -1
+      if gj<self.Ny_-2:
+        tmpList[1]=self.gigjgkToGlobalID(gi,       gj+1,  gk)
+        tmpList[7]=self.gigjgkToGlobalID(gi,       gj+2,  gk)
+
+      # right
+      if gi==self.Nx_-1:
+        tmpList[2]=self.gigjgkToGlobalID(0,          gj,  gk) if pBc else -1
+        tmpList[8]=self.gigjgkToGlobalID(1,          gj,  gk) if pBc else -1
+      if gi==self.Nx_-2:
+        tmpList[2]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk)
+        tmpList[8]=self.gigjgkToGlobalID(0,          gj,  gk) if pBc else -1
+      if gi<self.Nx_-2:
+        tmpList[2]=self.gigjgkToGlobalID(gi+1,       gj,  gk)
+        tmpList[8]=self.gigjgkToGlobalID(gi+2,       gj,  gk)
+
+      # back
+      if gj==0:
+        tmpList[3]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBc else -1
+        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-2,  gk) if pBc else -1
+      if gj==1:
+        tmpList[3]=self.gigjgkToGlobalID(gi,          0,  gk)
+        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBc else -1
+      if gj>1:
+        tmpList[3]=self.gigjgkToGlobalID(gi,       gj-1,  gk)
+        tmpList[9]=self.gigjgkToGlobalID(gi,       gj-2,  gk)
+
+      # bottom
+      if gk==0:
+        tmpList[4] =self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBc else -1
+        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-2) if pBc else -1
+      if gk==1:
+        tmpList[4] =self.gigjgkToGlobalID(gi,        gj, 0,        )
+        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBc else -1
+      if gk>1:
+        tmpList[4] =self.gigjgkToGlobalID(gi,        gj, gk-1)
+        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, gk-2)
+
+      # top
+      if gk==self.Nz_-1:
+        tmpList[5] =self.gigjgkToGlobalID(gi,        gj, 0) if pBc else -1
+        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 1) if pBc else -1
+      if gk==self.Nz_-2:
+        tmpList[5] =self.gigjgkToGlobalID(gi,        gj, self.Nz_-1)
+        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 0         ) if pBc else -1
+      if gk<self.Nz_-2:
+        tmpList[5] =self.gigjgkToGlobalID(gi,        gj, gk+1)
+        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, gk+2)
 
       # store currrent neighboring list
       self.G_[iPt] = tmpList

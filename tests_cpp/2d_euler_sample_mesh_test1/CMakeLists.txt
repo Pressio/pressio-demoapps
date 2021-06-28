@@ -1,3 +1,4 @@
 
-add_subdirectory(s3)
-add_subdirectory(s7)
+add_subdirectory(firstorder)
+add_subdirectory(weno3)
+add_subdirectory(weno5)

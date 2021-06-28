@@ -61,9 +61,12 @@ void sedov3dInitialCondition(state_type & state,
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto ind = i*numDofPerCell;
-      const auto xsq = x(i)*x(i);
-      const auto ysq = y(i)*y(i);
-      const auto zsq = z(i)*z(i);
+      const auto distX = x(i);
+      const auto distY = y(i);
+      const auto distZ = z(i);
+      const auto xsq = distX*distX;
+      const auto ysq = distY*distY;
+      const auto zsq = distZ*distZ;
       const auto myR = std::sqrt(xsq+ysq+zsq);
 
       if (myR <= sRad)

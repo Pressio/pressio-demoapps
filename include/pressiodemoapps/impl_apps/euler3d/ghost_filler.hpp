@@ -102,6 +102,101 @@ public:
     }
   }
 
+  template<int stencilSize, class index_t>
+  typename std::enable_if<stencilSize == 5>::type
+  operator()(index_t smPt, int gRow)
+  {
+
+    constexpr int numDofPerCell = 5;
+    const auto & graph = m_meshObj.graph();
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*numDofPerCell;
+
+    const auto left0   = graph(smPt, 1);
+    const auto front0  = graph(smPt, 2);
+    const auto right0  = graph(smPt, 3);
+    const auto back0   = graph(smPt, 4);
+    const auto bot0    = graph(smPt, 5);
+    const auto top0    = graph(smPt, 6);
+    const auto left1   = graph(smPt, 7);
+    const auto front1  = graph(smPt, 8);
+    const auto right1  = graph(smPt, 9);
+    const auto back1   = graph(smPt, 10);
+    const auto bot1    = graph(smPt, 11);
+    const auto top1    = graph(smPt, 12);
+
+    const auto left0i  = left0*numDofPerCell;
+    const auto front0i = front0*numDofPerCell;
+    const auto right0i = right0*numDofPerCell;
+    const auto back0i  = back0*numDofPerCell;
+    const auto bot0i   = bot0*numDofPerCell;
+    const auto top0i   = top0*numDofPerCell;
+
+    this->template operator()<3, index_t>(smPt, gRow);
+
+    // degree 1
+    if (left1 == -1)
+    {
+      m_ghostLeft(gRow, 5) =  m_state(right0i);
+      m_ghostLeft(gRow, 6) =  -m_state(right0i+1);
+      m_ghostLeft(gRow, 7) =  m_state(right0i+2);
+      m_ghostLeft(gRow, 8) =  m_state(right0i+3);
+      m_ghostLeft(gRow, 9) =  m_state(right0i+4);
+    }
+
+    if (front1 == -1)
+    {
+      m_ghostFront(gRow, 5) = m_state(back0i);
+      m_ghostFront(gRow, 6) = m_state(back0i+1);
+      m_ghostFront(gRow, 7) = m_state(back0i+2);
+      m_ghostFront(gRow, 8) = m_state(back0i+3);
+      m_ghostFront(gRow, 9) = m_state(back0i+4);
+    }
+
+    if (right1 == -1)
+    {
+      m_ghostRight(gRow, 5) = m_state(left0i);
+      m_ghostRight(gRow, 6) = m_state(left0i+1);
+      m_ghostRight(gRow, 7) = m_state(left0i+2);
+      m_ghostRight(gRow, 8) = m_state(left0i+3);
+      m_ghostRight(gRow, 9) = m_state(left0i+4);
+    }
+
+    if (back1 == -1)
+    {
+      m_ghostBack(gRow, 5) =  m_state(front0i);
+      m_ghostBack(gRow, 6) =  m_state(front0i+1);
+      m_ghostBack(gRow, 7) =  -m_state(front0i+2);
+      m_ghostBack(gRow, 8) =  m_state(front0i+3);
+      m_ghostBack(gRow, 9) =  m_state(front0i+4);
+    }
+
+    if (top1 == -1)
+    {
+      m_ghostTop(gRow, 5) = m_state(bot0i);
+      m_ghostTop(gRow, 6) = m_state(bot0i+1);
+      m_ghostTop(gRow, 7) = m_state(bot0i+2);
+      m_ghostTop(gRow, 8) = m_state(bot0i+3);
+      m_ghostTop(gRow, 9) = m_state(bot0i+4);
+    }
+
+    if (bot1 == -1)
+    {
+      m_ghostBottom(gRow, 5) =  m_state(top0i);
+      m_ghostBottom(gRow, 6) =  m_state(top0i+1);
+      m_ghostBottom(gRow, 7) =  m_state(top0i+2);
+      m_ghostBottom(gRow, 8) =  -m_state(top0i+3);
+      m_ghostBottom(gRow, 9) =  m_state(top0i+4);
+    }
+  }
+
+  template<int stencilSize, class index_t>
+  typename std::enable_if<stencilSize==7>::type
+  operator()(index_t smPt, int gRow)
+  {
+    throw std::runtime_error("For 3d, only 1st order is currently working");
+  }
+
 private:
   const int m_stencilSize;
   const state_t & m_state;

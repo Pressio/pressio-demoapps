@@ -18,7 +18,13 @@ int main(int argc, char *argv[])
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+
+#ifdef USE_WENO5
   const auto order   = pda::InviscidFluxReconstruction::Weno5;
+#elif defined USE_WENO3
+  const auto order   = pda::InviscidFluxReconstruction::Weno3;
+#endif
+
   const auto probId  = pda::Euler1d::PeriodicSmooth;
   auto appObj	     = pda::createProblemEigen(meshObj, probId, order);
 
@@ -33,7 +39,11 @@ int main(int argc, char *argv[])
   ode_state_t state(appObj.initialCondition());
 
   auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-  FomObserver<ode_state_t> Obs("1d_euler_convergence_solution.bin", 1);
+#ifdef USE_WENO5
+  FomObserver<ode_state_t> Obs("1d_euler_convergence_weno5_solution.bin", 1);
+#elif defined USE_WENO3
+  FomObserver<ode_state_t> Obs("1d_euler_convergence_weno3_solution.bin", 1);
+#endif
 
   const auto dt = 0.001;
   const auto Nsteps = 2./dt;

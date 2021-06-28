@@ -1,3 +1,5 @@
 
-add_subdirectory(s3_nxnynz_equal)
-add_subdirectory(s3_nxnynz_not_equal)
+add_subdirectory(firstorder_nxnynz_equal)
+add_subdirectory(firstorder_nxnynz_not_equal)
+add_subdirectory(weno3_nxnynz_equal)
+add_subdirectory(weno3_nxnynz_not_equal)

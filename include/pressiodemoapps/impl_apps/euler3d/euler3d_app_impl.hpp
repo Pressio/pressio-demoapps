@@ -355,6 +355,11 @@ private:
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<3>(rowsBd[it], it);
 	}
+      }
+      else if (stencilSize==5){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<5>(rowsBd[it], it);
+	}
       }else{
 	throw std::runtime_error("missing impl");
       }
