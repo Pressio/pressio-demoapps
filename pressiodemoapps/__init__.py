@@ -15,7 +15,7 @@ except ImportError:
   raise ImportError("Unable to import mesh classes from _pressiodemoappsimpl")
 
 try:
-  from ._pressiodemoappsimpl import InviscidFluxReconstruction, FluxType, \
+  from ._pressiodemoappsimpl import InviscidFluxReconstruction, InviscidFluxScheme, \
     Advection1d, Euler1d, Euler2d, Euler3d
 except ImportError:
   raise ImportError("Unable to import enums from _pressiodemoappsimpl")
