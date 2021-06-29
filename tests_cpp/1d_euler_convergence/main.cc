@@ -1,7 +1,7 @@
 
 #include "pressio_ode_explicit.hpp"
-#include "euler1d.hpp"
 #include "../observer.hpp"
+#include "euler1d.hpp"
 
 template<class scalar_type>
 void analytical(const scalar_type x,

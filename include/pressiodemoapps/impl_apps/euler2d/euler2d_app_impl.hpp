@@ -8,9 +8,12 @@
 
 #include "../eulerCommon/energy.hpp"
 #include "../eulerCommon/fluxes.hpp"
+#include "../eulerCommon/rankine_hugoniot.hpp"
 #include "./initial_condition.hpp"
 #include "../ghost_filler_neumann.hpp"
 #include "./ghost_filler_sedov2d_sym.hpp"
+#include "./ghost_filler_normal_shock_2d.hpp"
+#include "./ghost_filler_double_mach_reflection_2d.hpp"
 #include "../stencil_filler.hpp"
 #include "../reconstructor_from_stencil.hpp"
 #include "../reconstructor_from_state.hpp"
@@ -96,45 +99,7 @@ public:
 
   state_type initialCondition() const
   {
-    state_type IC(m_numDofStencilMesh);
-
-    switch(m_probEn)
-      {
-      case ::pressiodemoapps::Euler2d::PeriodicSmooth:{
-	sin2dEulerIC<numDofPerCell>(IC, m_meshObj, m_gamma);
-	return IC;
-      }
-
-      case ::pressiodemoapps::Euler2d::SedovFull:{
-	sedov2dIC<numDofPerCell>(IC, m_meshObj, m_gamma);
-	return IC;
-      }
-
-      case ::pressiodemoapps::Euler2d::SedovSymmetry:{
-	sedov2dsymmetryIC<numDofPerCell>(IC, m_meshObj, m_gamma);
-	return IC;
-      }
-
-      case ::pressiodemoapps::Euler2d::Riemann:{
-	if( m_icIdentifier == 1){
-	  riemann2dIC1<numDofPerCell>(IC, m_meshObj, m_gamma);
-	  return IC;
-	}
-	else if (m_icIdentifier == 2){
-	  riemann2dIC2<numDofPerCell>(IC, m_meshObj, m_gamma);
-	  return IC;
-	}
-	else{
-	  throw std::runtime_error("invalid IC");
-	}
-      }
-
-      case ::pressiodemoapps::Euler2d::testingonlyneumann:{
-	return IC;
-      }
-      };
-
-    return IC;
+    return initialConditionImpl();
   }
 
   scalar_type gamma()           const{ return m_gamma; }
@@ -148,7 +113,7 @@ public:
   }
 
   void velocity(const state_type & state,
-		const scalar_type timeValue,
+		const scalar_type currentTime,
 		velocity_type & V) const
   {
     flux_t FL(numDofPerCell);
@@ -160,18 +125,71 @@ public:
     edge_rec_t uPlusHalfNeg (numDofPerCell);
     edge_rec_t uPlusHalfPos (numDofPerCell);
 
-    fillGhosts(state);
-    velocityCellsNearBdImpl(state, timeValue, V, FL, FR, FD, FU,
+    fillGhosts(state, currentTime);
+    velocityCellsNearBdImpl(state, currentTime, V, FL, FR, FD, FU,
 			    uMinusHalfNeg, uMinusHalfPos,
 			    uPlusHalfNeg,  uPlusHalfPos);
-    velocityInnerCellsImpl(state, timeValue, V, FL, FR, FD, FU,
+    velocityInnerCellsImpl(state, currentTime, V, FL, FR, FD, FU,
 			   uMinusHalfNeg, uMinusHalfPos,
 			   uPlusHalfNeg,  uPlusHalfPos);
   }
 
 private:
+  state_type initialConditionImpl() const
+  {
+    state_type initialState(m_numDofStencilMesh);
+
+    switch(m_probEn)
+      {
+      case ::pressiodemoapps::Euler2d::PeriodicSmooth:{
+	sin2dEulerIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
+      case ::pressiodemoapps::Euler2d::SedovFull:{
+	sedov2dIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
+      case ::pressiodemoapps::Euler2d::SedovSymmetry:{
+	sedov2dsymmetryIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
+      case ::pressiodemoapps::Euler2d::Riemann:{
+	if( m_icIdentifier == 1){
+	  riemann2dIC1(initialState, m_meshObj, m_gamma);
+	  return initialState;
+	}
+	else if (m_icIdentifier == 2){
+	  riemann2dIC2(initialState, m_meshObj, m_gamma);
+	  return initialState;
+	}
+	else{
+	  throw std::runtime_error("invalid IC");
+	}
+      }
+
+      case ::pressiodemoapps::Euler2d::NormalShock:{
+	normalShock2dIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
+      case ::pressiodemoapps::Euler2d::DoubleMachReflection:{
+	doubleMachReflection2dIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
+      case ::pressiodemoapps::Euler2d::testingonlyneumann:{
+	return initialState;
+      }
+      };
+
+    return initialState;
+  }
+
   void velocityCellsNearBdImpl(const state_type & U,
-			       const scalar_type timeIn,
+			       const scalar_type currentTime,
 			       velocity_type & V,
 			       flux_t & FL,
 			       flux_t & FR,
@@ -249,7 +267,7 @@ private:
   }
 
   void velocityInnerCellsImpl(const state_type & U,
-			      const scalar_type timeIn,
+			      const scalar_type currentTime,
 			      velocity_type & V,
 			      flux_t & FL,
 			      flux_t & FR,
@@ -319,7 +337,7 @@ private:
 
   }
 
-  void fillGhosts(const state_type & U) const
+  void fillGhosts(const state_type & U, const scalar_type currentTime) const
   {
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     if (m_probEn == ::pressiodemoapps::Euler2d::SedovFull or
@@ -337,14 +355,20 @@ private:
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<3>(rowsBd[it], it);
 	}
-      }else{
+      }
+      else if(stencilSize==5){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<5>(rowsBd[it], it);
+	}
+      }
+      else{
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<7>(rowsBd[it], it);
 	}
       }
     }
 
-    if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
+    else if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Sedov2dSymmetryGhostFiller<
 	state_type, mesh_t, ghost_t>;
@@ -357,11 +381,72 @@ private:
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<3>(rowsBd[it], it);
 	}
-      }else{
+      }
+      else if(stencilSize==5){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<5>(rowsBd[it], it);
+	}
+      }
+      else{
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<7>(rowsBd[it], it);
 	}
       }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::NormalShock)
+    {
+      using ghost_filler_t =
+	::pressiodemoapps::impl::NormalShock2dGhostFiller<
+	state_type, mesh_t, ghost_t>;
+      ghost_filler_t ghF(stencilSize, U,
+			 currentTime, m_gamma, m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      if (stencilSize==3){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<3>(rowsBd[it], it);
+	}
+      }
+      else if(stencilSize==5){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<5>(rowsBd[it], it);
+	}
+      }
+      else{
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<7>(rowsBd[it], it);
+	}
+      }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::DoubleMachReflection)
+    {
+      using ghost_filler_t =
+	::pressiodemoapps::impl::DoubleMachReflection2dGhostFiller<
+	state_type, mesh_t, ghost_t>;
+      ghost_filler_t ghF(stencilSize, U,
+			 currentTime, m_gamma, m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      if (stencilSize==3){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<3>(rowsBd[it], it);
+	}
+      }
+      else if(stencilSize==5){
+	for (int it=0; it<rowsBd.size(); ++it){
+	  ghF.template operator()<5>(rowsBd[it], it);
+	}
+      }
+    }
+
+    else{
+      // no op
     }
 
   }
@@ -425,6 +510,12 @@ private:
   const std::array<scalar_type, 2> normalY_{0, 1};
 
 };
+
+template<class scalar_t, class mesh_t, class state_t, class velo_t, class ghost_t>
+constexpr int Euler2dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::dimensionality;
+
+template<class scalar_t, class mesh_t, class state_t, class velo_t, class ghost_t>
+constexpr typename mesh_t::index_t Euler2dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::numDofPerCell;
 
 }}}//end namespace
 #endif

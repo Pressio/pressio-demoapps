@@ -432,5 +432,12 @@ private:
 
 };
 
+template<class scalar_t, class mesh_t, class state_t, class velo_t, class ghost_t>
+constexpr int Euler3dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::dimensionality;
+
+template<class scalar_t, class mesh_t, class state_t, class velo_t, class ghost_t>
+constexpr typename mesh_t::index_t Euler3dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::numDofPerCell;
+
+
 }}}//end namespace
 #endif

@@ -30,8 +30,8 @@ public:
   using velocity_type	 = state_t;
   using stencil_values_t = state_t;
 
-  static constexpr int numDofPerCell{1};
   static constexpr int dimensionality{1};
+  static constexpr int numDofPerCell{1};
 
 public:
   explicit AdvectionAppT(const mesh_t & meshObj,
@@ -119,6 +119,13 @@ private:
   index_t m_numDofSampleMesh  = {};
   mutable stencil_values_t m_stencilVals;
 };
+
+template<class scalar_t, class mesh_t, class state_t, class velo_t>
+constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::dimensionality;
+
+template<class scalar_t, class mesh_t, class state_t, class velo_t>
+constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::numDofPerCell;
+
 
 }}}//end namespace
 #endif

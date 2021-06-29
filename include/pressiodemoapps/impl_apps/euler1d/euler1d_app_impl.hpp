@@ -8,6 +8,7 @@
 
 #include "../eulerCommon/energy.hpp"
 #include "../eulerCommon/fluxes.hpp"
+#include "../eulerCommon/rankine_hugoniot.hpp"
 #include "./initial_condition.hpp"
 #include "./ghost_filler.hpp"
 #include "../stencil_filler.hpp"
@@ -38,7 +39,6 @@ public:
   using flux_t		 = state_type;
   using edge_rec_t	 = state_type;
 
-  static constexpr int dimensionality{1};
   static constexpr index_t numDofPerCell{3};
 
 public:
@@ -94,9 +94,11 @@ public:
 
 private:
   void velocityImpl(const state_type & U,
-		    const scalar_type t,
+		    const scalar_type timeValue,
 		    velocity_type & V) const
   {
+    constexpr int dimensionality{1};
+
     flux_t FL(numDofPerCell);
     flux_t FR(numDofPerCell);
     edge_rec_t uMinusHalfNeg(numDofPerCell);
@@ -191,6 +193,16 @@ private:
   mutable ghost_t m_ghostLeft;
   mutable ghost_t m_ghostRight;
 };
+
+
+template<
+  class scalar_t,
+  class mesh_t,
+  class state_t,
+  class velo_t,
+  class ghost_t
+  >
+constexpr typename mesh_t::index_t Euler1dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::numDofPerCell;
 
 }}}//end namespace
 #endif

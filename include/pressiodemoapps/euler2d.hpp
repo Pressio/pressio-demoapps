@@ -18,6 +18,8 @@ enum class Euler2d{
   SedovFull,
   SedovSymmetry,
   Riemann,
+  NormalShock,
+  DoubleMachReflection,
   testingonlyneumann
 };
 }//end namespace pressiodemoapps
@@ -39,6 +41,14 @@ T createEe2dImpl(const mesh_t & meshObj,
   // // e.g., FirstOrder reconstruction can be done for 7-point stencil
   // // but 5-th order reconstruction cannot be done for 3-pt stencil
   // meshObj.checkStencilSupportsOrder(recEnum);
+
+  if (probEnum == ::pressiodemoapps::Euler2d::DoubleMachReflection and
+      recEnum == ::pressiodemoapps::InviscidFluxReconstruction::Weno5)
+  {
+    throw std::runtime_error
+      ("Double mach reflection does NOT currently suppot Weno5.");
+  }
+
 
   if (probEnum == ::pressiodemoapps::Euler2d::PeriodicSmooth)
   {
