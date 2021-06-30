@@ -136,7 +136,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-0.6), str(0.6), str(-0.6), str(0.6),
+            "--bounds", str(-1.2), str(1.2), str(-1.2), str(1.2),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
