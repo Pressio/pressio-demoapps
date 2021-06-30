@@ -4,26 +4,50 @@ import numpy as np
 from argparse import ArgumentParser
 
 valid = ["linadv1d_s3", \
+         "linadv1d_s5", \
          "linadv1d_s7", \
          #
          "euler1dsmooth_s3", \
+         "euler1dsmooth_s5", \
          "euler1dsmooth_s7", \
-         "sod1d_s3", \
-         "sod1d_s7", \
-         "lax1d_s3", \
-         "lax1d_s7", \
          #
+         "sod1d_s3", \
+         "sod1d_s5", \
+         "sod1d_s7", \
+         #
+         "lax1d_s3", \
+         "lax1d_s5", \
+         "lax1d_s7", \
+         # 
+         ##############
+         ##### 2d #####
+         ##############
          "euler2dsmooth_s3", \
+         "euler2dsmooth_s5", \
          "euler2dsmooth_s7", \
+         #
          "sedov2d_s3", \
+         "sedov2d_s5", \
          "sedov2d_s7", \
+         #
          "sedov2dsym_s3", \
+         "sedov2dsym_s5", \
          "sedov2dsym_s7", \
+         #
          "riemann2d_s3", \
+         "riemann2d_s5", \
          "riemann2d_s7", \
          #
+         "doublemach2d_s3", \
+         "doublemach2d_s5", \
+         ##############
+         ##### 3d #####
+         ##############
          "euler3dsmooth_s3", \
-         "sedov3dsym_s3"]
+         "euler3dsmooth_s5", \
+         #
+         "sedov3dsym_s3",
+         "sedov3dsym_s5"]
 
 #-------------------------------
 if __name__== "__main__":
@@ -133,6 +157,16 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
+            "--periodic", "false")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("doublemach2d" in pName):
+    s = int(pName[-1])
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(0.0), str(4.0), str(0.0), str(1.0),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 

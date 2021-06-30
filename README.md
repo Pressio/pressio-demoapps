@@ -1,13 +1,13 @@
 # pressio-demoapps
 
 This repository contains a suite of 1D, 2D and 3D demo problems of varying complexity (from linear advection, to compressible Euler). <br>
-The main feature of this work is the built-in support for hyper-reduction. This code, in fact, was originally started as part of the Pressio project to create a suite of benchmark problems to test ROMs and hyper-reduction techniques, but it is being developed to be self-contained, so it can be used for different purposes. For example, you can just use it for doing "standard" simulations, or you can just leverage the Python meshing scripts, or leverage the hyper-reduction capability to study function approximations. Its main scope is to provide a testbed of problems that are well-known to be hard for ROMs, explore the impact of the numerical scheme, and test news ideas for hyper-reduction.
+The main feature of this work is the built-in support for a sample mesh (which is necessary for hyper-reduction, more details below). This code, in fact, was originally started as part of the Pressio project to create a suite of benchmark problems to test ROMs and hyper-reduction techniques, but it is being developed to be self-contained, so it can be used for different purposes. For example, you can just use it for doing "standard" simulations, or you can just use the Python meshing scripts, or leverage the sample mesh capability to study function approximations. The main objective is to provide a testbed of problems that are known to be hard for ROMs, explore the impact of the numerical scheme, and test new sample mesh and hyper-reduction techniques.
 
 Some features of this code are:
 - a cell-centered finite volume discretization on *uniform structured meshes*
 - a (simple) meshing tool written in Python that also handles sample meshes
 - well-established shock-capturing schemes and flux forms (which can be easily extended)
-- hyper-reduction/sample mesh in 1D, 2D and 3D for varying stencil sizes.
+- sample mesh in 1D, 2D and 3D for varying stencil sizes.
 
 The development is grounded on:
 - **simplicity**: we use high-level abstractions and a well-defined API to make this code as simple as possible to use, minimizing the number of steps needed to set up a problem. We follow a *three-step* process: (1) generate the mesh, (2) load the mesh and (3) create a problem instance that has a specific API.
@@ -18,7 +18,7 @@ The development is grounded on:
 
 - **quality assurance**: we maintain a test suite for both the C++ code and Python bindings to ensure stability and reliability;
 
-- **extensibility**: one can easily add new problems, other numerical schemes (e.g. fluxes, reconstruction methods) and different data types.
+- **extensibility**: easily add new problems, other numerical schemes (e.g. fluxes, reconstruction methods) and different data types.
 
 Disclaimer/warning: this will **not** become a full solver. The scope is and will stay limited.
 
@@ -38,17 +38,29 @@ ___
 
 # Usability in more detail
 
-To show our idea of usability more concretely, let's say that we are interested in exploring the Euler1d Sod problem.
+To demonstrate our idea of usability more concretely, let's say that we are interested in exploring the Euler1d Sod problem. <br>
+As mentioned above, we envision a three-step process: generate the mesh,
+instantiate the problem object, and solve.
 
-**(Step 1)** To create the mesh, we use the meshing scripts as follows:
+## Step 1: Generating the Mesh
+
+We provide a meshing scripts that works as follows:
 ```py
 python ./meshing_scripts/create_full_mesh_for.py --problem sod1d_s7 --outdir ${HOME}/myTest -n 100
 ```
-where the string `sod1d_s7` is composed of two parts: `sod1d` indicates the target problem, and `s7` indicates the stencil size to use, in this case we want a 7-point stencil (the supported choices are discussed later); `${HOME}/myTest` is where all the mesh files are generated, and `-n=100` specifies how many cells we want. This mesh generation step is independent of the language you want to use, and now we show what steps 2 and 3 look like in C++ and Python.
+where the string `sod1d_s7` is composed of two parts: `sod1d` indicates the target problem, and `s7` indicates the stencil size to use, in this case we want a 7-point stencil (the supported choices are discussed later); `${HOME}/myTest` is where all the mesh files are generated, and `-n=100` specifies how many cells we want.
+The advantage of this script is that any information about the problem domain
+and other details are encoded in the script, so it only exposes the minimal set of parameters
+(e.g. number of cells) to set.
+<!-- This mesh generation step is independent of the language you want to use, and now we show what steps 2 and 3 look like in C++ and Python. -->
 
-## C++ Synopsis
 
-**(Step 2,3)** Load the mesh and create the problem (here we use Eigen data types which are currently suppoted):
+## Step 2: Creating a problem instance
+
+This second step uses the mesh generated above and creates an instance of the Sod1d problem.<br>
+We now show what this step 2 looks like in C++ and Python.
+
+**C++ Synopsis**
 ```c++
 #import <pressiodemoapps/euler1d.hpp>
 // ...
@@ -58,7 +70,26 @@ constexpr auto order = pda::InviscidFluxReconstruction::Weno5;
 auto problem         = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
 // ...
 ```
-This will create an instance of the Sod1d problem and select the 5-th order WENO for doing the edge reconstruction (more details on the schemes and stencils are given below). All C++ problem instances in *pressio-demoapps* meet the following C++ API:
+This creates an instance of the Sod1d problem using Eigen data types, and selects the 5-th order WENO for the inviscid flux edge reconstruction (more details on the schemes and stencils are given below). Note that here we explicitly ask for an instance of the problem that is based
+on Eigen data types. Eigen is currently the main backend supported, but other ones,
+e.g., Kokkos, will be added later.
+
+**Python Synopsis**
+```py
+import pressiodemoapps as pda
+# ...
+meshObj = pda.loadCellCenterUniformMesh("where-you-have-mesh-files")
+order   = pda.InviscidFluxReconstruction.Weno5;
+problem = pda.createProblem(meshObj, pda.Euler1d.Sod, order)
+```
+In Python, this creates a problem based on `numpy`.
+We remark that we aimed for the Python code to be readable as similarly as possible to the C++.
+
+
+## Step 3: Solving the problem
+To use a problem instance, you need to know that all *pressio-demoapps* problem instances meet
+a specific API.<br>
+If you are using C++, this API is:
 ```cpp
 class Problem
 {
@@ -72,26 +103,39 @@ public:
   void velocity(const state_type & state, scalar_type time, velocity_type & velocity);
 }
 ```
-The `initialCondition` returns a state vector initialized for the target problem.
-This API allows you to have full control on how to solve the problem. For example, you can use custom time integrators. More details on how to use this will be discussed later.
-
-## Python Synopsis
-
-The Python bindings of pressio-demoapps rely on numpy arrays, and the API is very similar:
-```py
-import pressiodemoapps as pda
-# ...
-meshObj = pda.loadCellCenterUniformMesh("where-you-have-mesh-files")
-order   = pda.InviscidFluxReconstruction.Weno5;
-appObj  = pda.createProblem(meshObj, pda.Euler1d.Sod, order)
-```
-All Python problem instances in *pressio-demoapps* meet the following API:
+In Python, the API is:
 ```py
 class Problem:
   def initialCondition(self):          # returns initial conditon
   def createVelocity():                # returns an empty velocity vector
   def velocity(state, time, velocity): # computes velocity for given state and time
 ```
+
+The API is simple, and exposes three main methods (the computation of the Jacobian is in progress):
+- `initialCondition`: returns a state object that is *correctly* initialized for the target problem you want;
+- `createVelocity`: returns an empty velocity object;
+- `velocity`: computes that system's velocity for a given state and time.
+
+This API allows you to have full control on how to solve the problem. For example, you can use custom time integrators. More details on how to use this will be discussed later.
+
+### Do you have ready-to-use functions to solve the problem? We do.
+We provide ready-to-use functions that you can use to solve the problem.
+
+**C++ Synopsis**
+
+TODO.
+
+**Python Synopsis**
+```py
+import pressiodemoapps as pda
+...
+problem = # instance of a problem created as in step 2
+state   = problem.initialCondition()
+pda.advanceSSP3(problem, state, timeStepSize, numSteps)
+```
+This will use the SSP3 time integrator to solve the problem,
+and you need to pass the time step size and number of steps.
+At the end, the `state` object will contain the solution at the final time.
 
 ___
 
@@ -144,13 +188,14 @@ pytest -s
 | 2D Sedov (full)     | C++: Euler2d::SedovFull <br> Py &nbsp; : Euler2d.SedovFull      |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-1-full-version-no-symmetry-use)  |
 | 2D Sedov (symmetry) | C++: Euler2d::SedovSymmetry <br> Py &nbsp; : Euler2d.SedovSymmetry  |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-2-exploit-symmetry-to-simulate-only-one-quadrant)  |
 | 2D Riemann          | C++: Euler2d::Riemann <br> Py &nbsp; : Euler2d.Riemann        |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#riemann)  |
-| 3d Euler Smooth     | C++: Euler3d::PeriodicSmooth <br> Py &nbsp; : Euler3d.PeriodicSmooth |     1st-order, Weno3          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#euler-smooth) |
-| 3d Sedov (symmetry) | C++: Euler3d::SedovSymmetry <br> Py &nbsp; :  Euler3d.SedovSymmetry |     1st-order, Weno3          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#sedov-exploit-symmetry-to-simulate-only-18)  |
+| 2D Double Mach Reflection  | C++: Euler2d::DoubleMachReflection <br> Py &nbsp; : Euler2d.DoubleMachReflection   |   firstOrder, Weno3  |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#double-mach-reflection)  |
+| 3d Euler Smooth     | C++: Euler3d::PeriodicSmooth <br> Py &nbsp; : Euler3d.PeriodicSmooth |     FirstOrder, Weno3          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#euler-smooth) |
+| 3d Sedov (symmetry) | C++: Euler3d::SedovSymmetry <br> Py &nbsp; :  Euler3d.SedovSymmetry |     firstOrder, Weno3          |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/3D-Problems-Description#sedov-exploit-symmetry-to-simulate-only-18)  |
 
 Reconstruction schemes currently available:
-- `InviscidFluxReconstruction::FirstOrder`
-- `InviscidFluxReconstruction::Weno3` [the original implementation of Jiang and Shu](https://www.sciencedirect.com/science/article/pii/S0021999196901308)
-- `InviscidFluxReconstruction::Weno5` [the original implementation of Jiang and Shu](https://www.sciencedirect.com/science/article/pii/S0021999196901308)
+- `InviscidFluxReconstruction::FirstOrder`: needs at least a 3pt stencil
+- `InviscidFluxReconstruction::Weno3` [from Jiang and Shu](https://www.sciencedirect.com/science/article/pii/S0021999196901308): needs at least a 5pt stencil
+- `InviscidFluxReconstruction::Weno5` [from Jiang and Shu](https://www.sciencedirect.com/science/article/pii/S0021999196901308): needs at least a 7pt stencil
 
 <!--
 # The meshing scripts
