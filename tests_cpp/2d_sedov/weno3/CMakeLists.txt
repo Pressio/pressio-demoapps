@@ -2,6 +2,7 @@
 set(testname 2d_sedov_weno3)
 set(exename  ${testname}_exe)
 
+configure_file(../plot.py plot.py COPYONLY)
 configure_file(../compare.py compare.py COPYONLY)
 configure_file(p_gold.txt p_gold.txt COPYONLY)
 
