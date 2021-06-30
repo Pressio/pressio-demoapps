@@ -34,3 +34,70 @@ try:
   from ._pressiodemoappsimpl import createProblem
 except ImportError:
   raise ImportError("Unable to import createProblem from _pressiodemoappsimpl")
+
+
+# Runge-Kutta4 integrator
+def advanceRK4(appObj, state, dt, Nsteps, \
+               startTime = 0.0, \
+               showProgress=False):
+
+  v = appObj.createVelocity()
+  tmpState = state.copy()
+  half = 0.5
+  two  = 2.
+  oneOverSix = 1./6.
+
+  time = startTime
+  for step in range(1, Nsteps+1):
+    if showProgress:
+      if step % 50 == 0:
+        print("step = ", step)
+
+    appObj.velocity(state, time, v)
+    k1 = dt * v
+
+    tmpState = state+half*k1
+    appObj.velocity(tmpState, time+half*dt, v)
+    k2 = dt * v
+
+    tmpState = state+half*k2
+    appObj.velocity(tmpState, time+half*dt, v)
+    k3 = dt * v
+
+    tmpState = state+k3
+    appObj.velocity(tmpState, time, v)
+    k4 = dt * v
+
+    state[:] = state + (k1+two*k2+two*k3+k4)*oneOverSix
+    time += dt
+
+
+# SSP3 integrator
+def advanceSSP3(appObj, state, dt, Nsteps,\
+                startTime = 0.0, \
+                showProgress=False):
+
+  v = appObj.createVelocity()
+  tmpState1 = state.copy()
+  tmpState2 = state.copy()
+
+  oneOverThree  = 1./3.
+  oneOverFour   = 1./4.
+  threeOverFour = 3./4.
+  two = 2.
+
+  time = startTime
+  for step in range(1, Nsteps+1):
+    if showProgress:
+      if step % 50 == 0: print("step = ", step)
+
+    appObj.velocity(state, time, v)
+    tmpState1[:] = state + dt * v
+
+    appObj.velocity(tmpState1, time, v)
+    tmpState2[:] = threeOverFour*state + oneOverFour*tmpState1 + oneOverFour*dt*v
+
+    appObj.velocity(tmpState2, time, v)
+    state[:] = oneOverThree*(state + two*tmpState2 + two*dt*v)
+
+    time += dt

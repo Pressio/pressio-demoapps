@@ -22,11 +22,12 @@ T createLinAdv1dImpl(const mesh_t & meshObj,
 		     ::pressiodemoapps::Advection1d probEnum,
 		     InviscidFluxReconstruction recEnum)
 {
-  // // reconstruction order is specified, so we need to ensure
-  // // the mesh object has stencil size that supports that
-  // // e.g., FirstOrder reconstruction can be done for 7-point stencil
-  // // but 5-th order reconstruction cannot be done for 3-pt stencil
-  // meshObj.checkStencilSupportsOrder(recEnum);
+  const auto stencilSize = meshObj.stencilSize();
+  const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
+  if (!check1){
+    throw std::runtime_error
+      ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
+  }
 
   // the mesh should be periodic
   if (!meshObj.isPeriodic()){

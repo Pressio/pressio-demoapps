@@ -304,7 +304,7 @@ void normalShock2dIC(state_type & state,
   for (int i=0; i<x.size(); ++i)
     {
       const auto ind = i*numDofPerCell;
-      if (x[i] < xShock)
+      if (x(i) < xShock)
 	{
 	  state(ind)   = primPostShock[0];
 	  state(ind+1) = primPostShock[0]*primPostShock[1];
@@ -365,9 +365,9 @@ void doubleMachReflection2dIC(state_type & state,
   for (int i=0; i<x.size(); ++i)
     {
       const auto ind = i*numDofPerCell;
-      const auto xShock = xShockBottom + shockSlope * y[i];
+      const auto xShock = xShockBottom + shockSlope * y(i);
 
-      if (x[i] < xShock)
+      if (x(i) < xShock)
 	{
 	  state(ind)   = primPostShock[0];
 	  state(ind+1) = primPostShock[0]*primPostShock[1];

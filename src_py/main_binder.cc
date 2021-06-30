@@ -41,6 +41,7 @@ void bindEnums(pybind11::module & mParent)
 
   pybind11::enum_<pda::InviscidFluxReconstruction>(mParent, "InviscidFluxReconstruction")
     .value("FirstOrder",     pda::InviscidFluxReconstruction::FirstOrder)
+    .value("Weno3",	     pda::InviscidFluxReconstruction::Weno3)
     .value("Weno5",	     pda::InviscidFluxReconstruction::Weno5);
 
   pybind11::enum_<pda::InviscidFluxScheme>(mParent, "InviscidFluxScheme")
@@ -58,7 +59,9 @@ void bindEnums(pybind11::module & mParent)
     .value("PeriodicSmooth", pda::Euler2d::PeriodicSmooth)
     .value("SedovFull",	     pda::Euler2d::SedovFull)
     .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
-    .value("Riemann",	     pda::Euler2d::Riemann);
+    .value("Riemann",	     pda::Euler2d::Riemann)
+    .value("NormalShock",    pda::Euler2d::NormalShock)
+    .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
 
   pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
     .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)

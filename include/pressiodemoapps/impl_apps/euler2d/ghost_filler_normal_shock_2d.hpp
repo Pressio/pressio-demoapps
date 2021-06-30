@@ -55,10 +55,10 @@ public:
 
     if (left0 == -1)
     {
-      m_ghostLeft(gRow, 0) = m_state[uIndex+0];
-      m_ghostLeft(gRow, 1) = m_state[uIndex+1];
-      m_ghostLeft(gRow, 2) = m_state[uIndex+2];
-      m_ghostLeft(gRow, 3) = m_state[uIndex+3];
+      m_ghostLeft(gRow, 0) = m_state(uIndex+0);
+      m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+      m_ghostLeft(gRow, 2) = m_state(uIndex+2);
+      m_ghostLeft(gRow, 3) = m_state(uIndex+3);
     }
 
     if (front0 == -1){

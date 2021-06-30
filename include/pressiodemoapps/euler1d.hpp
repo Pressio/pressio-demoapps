@@ -42,7 +42,12 @@ T createEuler1dImpl(const mesh_t & meshObj,
 		    ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		    ::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
-  //meshObj.checkStencilSupportsOrder(enIn);
+  const auto stencilSize = meshObj.stencilSize();
+  const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
+  if (!check1){
+    throw std::runtime_error
+      ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
+  }
 
   if (probEnum == ::pressiodemoapps::Euler1d::PeriodicSmooth){
     if (!meshObj.isPeriodic()){

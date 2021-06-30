@@ -21,6 +21,18 @@ int reconstructionTypeToStencilSize(InviscidFluxReconstruction enIn)
     return 0;
 }
 
+bool stencilSizeCompatibleWithInviscidFluxReconstruction
+(InviscidFluxReconstruction enIn, int stencilSize)
+{
+  switch(enIn)
+    {
+    case InviscidFluxReconstruction::FirstOrder: return stencilSize >= 3;
+    case InviscidFluxReconstruction::Weno3:	 return stencilSize >= 5;
+    case InviscidFluxReconstruction::Weno5:	 return stencilSize >= 7;
+    }
+    return false;
+}
+
 #include "./weno.hpp"
 
 }//end namespace pressiodemoapps

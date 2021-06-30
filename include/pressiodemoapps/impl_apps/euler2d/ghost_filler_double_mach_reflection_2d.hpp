@@ -95,10 +95,10 @@ public:
 
     if (left0 == -1)
     {
-      m_ghostLeft(gRow, 0) = m_state[uIndex+0];
-      m_ghostLeft(gRow, 1) = m_state[uIndex+1];
-      m_ghostLeft(gRow, 2) = m_state[uIndex+2];
-      m_ghostLeft(gRow, 3) = m_state[uIndex+3];
+      m_ghostLeft(gRow, 0) = m_state(uIndex+0);
+      m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+      m_ghostLeft(gRow, 2) = m_state(uIndex+2);
+      m_ghostLeft(gRow, 3) = m_state(uIndex+3);
     }
 
     if (front0 == -1){
@@ -118,25 +118,25 @@ public:
 
     if (right0 == -1)
     {
-      m_ghostRight(gRow, 0) = m_state[uIndex];
-      m_ghostRight(gRow, 1) = m_state[uIndex+1];
-      m_ghostRight(gRow, 2) = m_state[uIndex+2];
-      m_ghostRight(gRow, 3) = m_state[uIndex+3];
+      m_ghostRight(gRow, 0) = m_state(uIndex);
+      m_ghostRight(gRow, 1) = m_state(uIndex+1);
+      m_ghostRight(gRow, 2) = m_state(uIndex+2);
+      m_ghostRight(gRow, 3) = m_state(uIndex+3);
     }
 
     if (back0 == -1)
     {
       if (myX < m_wedgePosition){
-	m_ghostBack(gRow, 0) = m_state[uIndex+0];
-	m_ghostBack(gRow, 1) = m_state[uIndex+1];
-	m_ghostBack(gRow, 2) = m_state[uIndex+2];
-	m_ghostBack(gRow, 3) = m_state[uIndex+3];
+	m_ghostBack(gRow, 0) = m_state(uIndex+0);
+	m_ghostBack(gRow, 1) = m_state(uIndex+1);
+	m_ghostBack(gRow, 2) = m_state(uIndex+2);
+	m_ghostBack(gRow, 3) = m_state(uIndex+3);
       }
       else{
-	m_ghostBack(gRow, 0) = m_state[uIndex+0];
-	m_ghostBack(gRow, 1) = m_state[uIndex+1];
-	m_ghostBack(gRow, 2) = -m_state[uIndex+2];
-	m_ghostBack(gRow, 3) = m_state[uIndex+3];
+	m_ghostBack(gRow, 0) = m_state(uIndex+0);
+	m_ghostBack(gRow, 1) = m_state(uIndex+1);
+	m_ghostBack(gRow, 2) = -m_state(uIndex+2);
+	m_ghostBack(gRow, 3) = m_state(uIndex+3);
       }
     }
   }
@@ -173,10 +173,10 @@ public:
 
     if (left1 == -1){
       const auto ind = right0*numDofPerCell;
-      m_ghostLeft(gRow, 4) = m_state[ind];
-      m_ghostLeft(gRow, 5) = m_state[ind+1];
-      m_ghostLeft(gRow, 6) = m_state[ind+2];
-      m_ghostLeft(gRow, 7) = m_state[ind+3];
+      m_ghostLeft(gRow, 4) = m_state(ind);
+      m_ghostLeft(gRow, 5) = m_state(ind+1);
+      m_ghostLeft(gRow, 6) = m_state(ind+2);
+      m_ghostLeft(gRow, 7) = m_state(ind+3);
     }
 
     if (front1 == -1){
@@ -196,26 +196,26 @@ public:
 
     if (right1 == -1){
       const auto ind = left0*numDofPerCell;
-      m_ghostRight(gRow, 4) = m_state[ind];
-      m_ghostRight(gRow, 5) = m_state[ind+1];
-      m_ghostRight(gRow, 6) = m_state[ind+2];
-      m_ghostRight(gRow, 7) = m_state[ind+3];
+      m_ghostRight(gRow, 4) = m_state(ind);
+      m_ghostRight(gRow, 5) = m_state(ind+1);
+      m_ghostRight(gRow, 6) = m_state(ind+2);
+      m_ghostRight(gRow, 7) = m_state(ind+3);
     }
 
     if (back1 == -1){
       const auto ind = front0*numDofPerCell;
       if (myX < m_wedgePosition){
-	m_ghostBack(gRow, 4) = m_state[ind+0];
-	m_ghostBack(gRow, 5) = m_state[ind+1];
-	m_ghostBack(gRow, 6) = m_state[ind+2];
-	m_ghostBack(gRow, 7) = m_state[ind+3];
+	m_ghostBack(gRow, 4) = m_state(ind+0);
+	m_ghostBack(gRow, 5) = m_state(ind+1);
+	m_ghostBack(gRow, 6) = m_state(ind+2);
+	m_ghostBack(gRow, 7) = m_state(ind+3);
       }
 
       else{
-	m_ghostBack(gRow, 4) = m_state[ind+0];
-	m_ghostBack(gRow, 5) = m_state[ind+1];
-	m_ghostBack(gRow, 6) = -m_state[ind+2];
-	m_ghostBack(gRow, 7) = m_state[ind+3];
+	m_ghostBack(gRow, 4) = m_state(ind+0);
+	m_ghostBack(gRow, 5) = m_state(ind+1);
+	m_ghostBack(gRow, 6) = -m_state(ind+2);
+	m_ghostBack(gRow, 7) = m_state(ind+3);
       }
     }
   }
@@ -252,10 +252,10 @@ public:
 
     if (left2 == -1){
       const auto ind = right1*numDofPerCell;
-      m_ghostLeft(gRow, 8)  = m_state[ind];
-      m_ghostLeft(gRow, 9)  = m_state[ind+1];
-      m_ghostLeft(gRow, 10) = m_state[ind+2];
-      m_ghostLeft(gRow, 11) = m_state[ind+3];
+      m_ghostLeft(gRow, 8)  = m_state(ind);
+      m_ghostLeft(gRow, 9)  = m_state(ind+1);
+      m_ghostLeft(gRow, 10) = m_state(ind+2);
+      m_ghostLeft(gRow, 11) = m_state(ind+3);
     }
 
     if (front2 == -1){
@@ -275,25 +275,25 @@ public:
 
     if (right2 == -1){
       const auto ind = left1*numDofPerCell;
-      m_ghostRight(gRow, 8)  = m_state[ind];
-      m_ghostRight(gRow, 9)  = m_state[ind+1];
-      m_ghostRight(gRow, 10) = m_state[ind+2];
-      m_ghostRight(gRow, 11) = m_state[ind+3];
+      m_ghostRight(gRow, 8)  = m_state(ind);
+      m_ghostRight(gRow, 9)  = m_state(ind+1);
+      m_ghostRight(gRow, 10) = m_state(ind+2);
+      m_ghostRight(gRow, 11) = m_state(ind+3);
     }
 
     if (back2 == -1){
       const auto ind = front1*numDofPerCell;
       if (myX < m_wedgePosition){
-	m_ghostBack(gRow, 8)  = m_state[ind+0];
-	m_ghostBack(gRow, 9)  = m_state[ind+1];
-	m_ghostBack(gRow, 10) = m_state[ind+2];
-	m_ghostBack(gRow, 11) = m_state[ind+3];
+	m_ghostBack(gRow, 8)  = m_state(ind+0);
+	m_ghostBack(gRow, 9)  = m_state(ind+1);
+	m_ghostBack(gRow, 10) = m_state(ind+2);
+	m_ghostBack(gRow, 11) = m_state(ind+3);
       }
       else{
-	m_ghostBack(gRow, 8) = m_state[ind+0];
-	m_ghostBack(gRow, 9) = m_state[ind+1];
-	m_ghostBack(gRow, 10) = -m_state[ind+2];
-	m_ghostBack(gRow, 11) = m_state[ind+3];
+	m_ghostBack(gRow, 8) = m_state(ind+0);
+	m_ghostBack(gRow, 9) = m_state(ind+1);
+	m_ghostBack(gRow, 10) = -m_state(ind+2);
+	m_ghostBack(gRow, 11) = m_state(ind+3);
       }
     }
   }

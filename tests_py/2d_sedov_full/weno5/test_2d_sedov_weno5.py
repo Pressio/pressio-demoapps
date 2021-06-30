@@ -39,38 +39,16 @@ def makePlot(meshPath, yn):
   ax.set_ylim([-0.5, .5])
   plt.show()
 
-
-def test_eval_vel():
+def test_run():
   meshPath = str(file_path)
   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
   appObj   = pda.createProblem(meshObj,
                                pda.Euler2d.SedovFull,
                                pda.InviscidFluxReconstruction.Weno5)
   yn = appObj.initialCondition()
-
   dt = 0.0001
   Nsteps = int(0.05/dt)
-  timec = 0.0
-  v = appObj.createVelocity()
-  y1 = yn.copy()
-  y2 = yn.copy()
-  start = time.time()
-  for step in range(1, Nsteps+1):
-    if step % 100 == 0: print("step = ", step)
-    appObj.velocity(yn, timec, v)
-    y1[:] = yn + dt * v
-
-    appObj.velocity(y1, timec, v)
-    y2[:] = (3./4.)*yn + 0.25*y1 + 0.25*dt*v
-
-    appObj.velocity(y2, timec, v)
-    yn[:] = (1./3.)*(yn + 2.*y2 + 2.*dt*v)
-
-    timec = step * dt
-
-  end = time.time()
-  print(end - start)
-
+  pda.advanceSSP3(appObj, yn, dt, Nsteps, showProgress=True)
   # makePlot(meshPath, yn)
 
   nx=50
@@ -80,12 +58,14 @@ def test_eval_vel():
   u   = fomS[:,1]/rho
   v   = fomS[:,2]/rho
   p   = computePressure(rho, u, v, fomS[:,3])
-  gold = np.loadtxt(str(file_path)+"/p_gold.txt")
-  error = LA.norm(p-gold)
-  print(error)
-  assert( error < 1e-13 )
+
+  goldD = np.loadtxt(str(file_path)+"/p_gold.txt")
+  assert(np.allclose(p.shape, goldD.shape))
+  assert(np.isnan(p).all() == False)
+  assert(np.isnan(goldD).all() == False)
+  assert(np.allclose(p, goldD,rtol=1e-10, atol=1e-12))
 
 # ---------------------------
 if __name__ == '__main__':
 # ---------------------------
-  test_eval_vel()
+  test_run()
