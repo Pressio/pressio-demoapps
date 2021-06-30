@@ -33,8 +33,7 @@ int main(){
 }
 ```
 
-___
-
+<br>
 
 # Usability in more detail
 
@@ -137,7 +136,8 @@ This will use the SSP3 time integrator to solve the problem,
 and you need to pass the time step size and number of steps.
 At the end, the `state` object will contain the solution at the final time.
 
-___
+
+<br>
 
 
 # Installation
@@ -153,7 +153,6 @@ If you want to build the C++ tests, you need CMake > 3.18.0:
 
 ```
 git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-
 export CXX=<path-to-your-CXX-compiler> #must support C++14
 cd pressio-demoapps && mkdir build && cd build
 cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON ..
