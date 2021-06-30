@@ -3,6 +3,7 @@ set(testname 2d_smooth_weno3)
 set(exename  ${testname}_exe)
 
 configure_file(../compare.py compare.py COPYONLY)
+configure_file(../plot.py plot.py COPYONLY)
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
 target_compile_definitions(${exename} PUBLIC -DUSE_WENO3)
 

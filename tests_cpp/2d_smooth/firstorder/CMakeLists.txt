@@ -2,6 +2,7 @@
 set(testname 2d_smooth_firstorder)
 set(exename  ${testname}_exe)
 
+configure_file(../plot.py plot.py COPYONLY)
 configure_file(../compare.py compare.py COPYONLY)
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
 
