@@ -43,7 +43,7 @@ instantiate the problem object, and solve.
 
 ## Step 1: Generating the Mesh
 
-We provide a meshing scripts that works as follows:
+We provide a meshing script that works as follows:
 ```py
 python ./meshing_scripts/create_full_mesh_for.py --problem sod1d_s7 --outdir ${HOME}/myTest -n 100
 ```
