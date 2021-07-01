@@ -50,8 +50,12 @@ def main(workDir, debug, plotMode, plotFontSize, darkMode):
     plotCells1d(x, dx, \
                 stencilMeshIndices, ax, darkMode, \
                 facecol=cellsColor, fontSz=plotFontSize)
-    ax.set_xlim(domainBounds[0]-dx*0.5, domainBounds[1]+dx*0.5)
-    ax.set_ylim(-0.02, 0.02)
+    if stencilMeshSize != samplesMeshSize:
+      plotCells1d(x, dx, \
+                  gids, ax, darkMode, \
+                  facecol='y', fontSz=plotFontSize)
+    ax.set_xlim(domainBounds[0], domainBounds[1])
+    ax.set_ylim(-0.012, 0.012)
     ax.set_yticks([])
 
   if dim==2:
@@ -59,26 +63,29 @@ def main(workDir, debug, plotMode, plotFontSize, darkMode):
     plotCells2d(x, y, dx, dy, \
                 stencilMeshIndices, ax, darkMode, \
                 facecol=cellsColor, fontSz=plotFontSize)
+
+    if stencilMeshSize != samplesMeshSize:
+      plotCells2d(x, y, dx, dy, \
+                  gids, ax, darkMode, \
+                  facecol='y', fontSz=plotFontSize)
     ax.set_aspect(1.0)
-    ax.set_xlim(np.min(x)-dx*0.5, np.max(x)+dx*0.5)
-    ax.set_ylim(np.min(y)-dy*0.5, np.max(y)+dy*0.5)
+    ax.set_xlim(domainBounds[0], domainBounds[1])
+    ax.set_ylim(domainBounds[2], domainBounds[3])
 
   if dim==3:
-    plotCells3d(x, y, z, dx, dy, dz, ax, darkMode, \
+    plotCells3d(x, y, z, dx, dy, dz, \
+                stencilMeshIndices, ax, darkMode, \
                 facecol='w', fontSz=plotFontSize)
 
-  if debug:
-    print("natural order full mesh connectivity")
-    printDicPretty(G)
-    print("\n")
+    if stencilMeshSize != samplesMeshSize:
+      plotCells3d(x, y, z, dx, dy, dz, \
+                  gids, ax, darkMode, \
+                  facecol='y', fontSz=plotFontSize, \
+                  alpha=0.5)
 
-  # gids_sm = list(sm_to_fm_map.keys())
-  # # if plotting != "none":
-  # #   plotReducedMesh(axSM, dim, plotFontSize, \
-  # #                   x, y, z, dx, dy, dz, \
-  # #                   gids_sm, fm_to_sm_map,
-  # #                   stencilMeshGIDs, sampleMeshGIDs,\
-  # #                   darkMode)
+    ax.set_xlim(domainBounds[0], domainBounds[1])
+    ax.set_ylim(domainBounds[2], domainBounds[3])
+    ax.set_zlim(domainBounds[4], domainBounds[5])
 
   if plotMode == "show":
     plt.show()

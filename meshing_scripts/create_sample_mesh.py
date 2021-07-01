@@ -207,6 +207,8 @@ def main(workDir, debug, fullMeshDir, tilingDir):
     f.write("%8d " % k)
     f.write("%.14f " % x[v])
     f.write("%.14f " % y[v])
+    if dim==3:
+      f.write("%.14f " % z[v])
     f.write("\n")
   f.close()
 
