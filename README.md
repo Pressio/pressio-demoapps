@@ -45,6 +45,7 @@ instantiate the problem object, and solve.
 
 We provide a meshing script that works as follows:
 ```py
+# assuming we are inside the pressio-demoapps dir
 python ./meshing_scripts/create_full_mesh_for.py --problem sod1d_s7 --outdir ${HOME}/myTest -n 100
 ```
 where the string `sod1d_s7` is composed of two parts: `sod1d` indicates the target problem, and `s7` indicates the stencil size to use, in this case we want a 7-point stencil (the supported choices are discussed later); `${HOME}/myTest` is where all the mesh files are generated, and `-n=100` specifies how many cells we want.
