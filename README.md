@@ -37,7 +37,7 @@ int main(){
 
 # Usability in more detail
 
-To demonstrate our idea of usability more concretely, let's say that we are interested in exploring the Euler1d Sod problem. <br>
+Let's say that we are interested in exploring the Euler1d Sod problem. <br>
 As mentioned above, we envision a three-step process: generate the mesh,
 instantiate the problem object, and solve.
 
