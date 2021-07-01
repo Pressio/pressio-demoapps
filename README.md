@@ -223,14 +223,10 @@ The sample mesh is critical to make projection-based ROMs of nonlinear systems p
 Its at the core of hyper-reduction methods, since it allows one to create ROMs with a computational cost which *does not* scale with the size of the full model's state vector.
 
 The sample mesh is used in conjunction with what we refer to as the **stencil mesh**, which contains all cells needed to compute the velocity or residual vector on the sample mesh. Note that, in general, the sample mesh is a subset of the stencil mesh, because to compute the velocity or residual at a given cell, one also needs the cell-centered values at that target cell. Several examples of sample and stencil meshes are shown below.
-// , along with the indexing scheme used in this repository.
 
 ### 1D Example
-The figures below show a full mesh 1D mesh for a first order cell-centered finite volume scheme,
-along with a representative sample mesh (yellow-filled cells) and the corresponding stencil mesh.
-// All cells are labeled with their ID number which is shown for visualization purposes.
-// Note that the sample/stencil mesh cell IDs **do not** match the full mesh IDs, because the sample mesh has its own enumeration scheme.
-// so one must keep track of the mapping between the IDs.  
+The figures below show a full 1D mesh for a first order cell-centered finite volume scheme, and right below 
+a representative sample mesh (yellow-filled cells) and the stencil mesh.
 
 <img src="https://github.com/Pressio/pressio-demoapps/blob/develop/figures/readme_1dmesh.png" width="75%">
 
