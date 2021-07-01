@@ -78,7 +78,7 @@ e.g., Kokkos, will be added later.
 ```py
 import pressiodemoapps as pda
 # ...
-meshObj = pda.loadCellCenterUniformMesh("where-you-have-mesh-files")
+meshObj = pda.loadCellCenterUniformMesh("/home/myTest")
 order   = pda.InviscidFluxReconstruction.Weno5;
 problem = pda.createProblem(meshObj, pda.Euler1d.Sod, order)
 ```
