@@ -39,13 +39,13 @@ if __name__== "__main__":
   x_fom = np.reshape(x_fom, (ny,nx))
   y_fom = np.reshape(y_fom, (ny,nx))
 
-  fomTestD = np.fromfile("doubleMach2d_solution.bin")
+  fomTestD = np.fromfile("fom_dmr_solution.bin")
   nt = int(np.size(fomTestD)/fomTotDofs)
   print("fomTest: nt = ", nt)
   fomTestD = np.reshape(fomTestD, (nt, fomTotDofs))
 
   fig = plt.figure(1)
-  for i in range(nt-1, nt):
+  for i in range(nt-1, nt):#nt-1, nt):
     fomS = fomTestD[i,:]
     fomS = np.reshape(fomS, (nx*ny, 4))
     rho = fomS[:,0]
@@ -59,7 +59,7 @@ if __name__== "__main__":
 
     plt.clf()
     ax = plt.gca()
-    h = plt.contourf(x_fom, y_fom, rho1, 40)
+    h = plt.contourf(x_fom, y_fom, rho1)
     ax.set_aspect(aspect=1.)
     plt.colorbar()
     # plt.pause(0.001)
