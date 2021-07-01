@@ -140,7 +140,6 @@ At the end, the `state` object will contain the solution at the final time.
 
 <br>
 
-
 # Installation
 
 ## C++ library
@@ -174,6 +173,7 @@ python setup.py install
 pytest -s
 ```
 
+<br>
 
 
 # List of Supported Problems
@@ -214,6 +214,7 @@ python create_full_mesh.py \
 * `create_sample_mesh.py`: script to create the sample mesh, more details on this below -->
 
 
+<br>
 
 # Sample Mesh
 
