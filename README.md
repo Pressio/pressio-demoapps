@@ -227,7 +227,7 @@ The sample mesh is used in conjunction with what we refer to as the **stencil me
 
 ### 1D Example
 The figures below show a full mesh 1D mesh for a first order cell-centered finite volume scheme,
-along with a representative sample mesh (green-filled cells) and the corresponding stencil mesh.
+along with a representative sample mesh (yellow-filled cells) and the corresponding stencil mesh.
 // All cells are labeled with their ID number which is shown for visualization purposes.
 // Note that the sample/stencil mesh cell IDs **do not** match the full mesh IDs, because the sample mesh has its own enumeration scheme.
 // so one must keep track of the mapping between the IDs.  
