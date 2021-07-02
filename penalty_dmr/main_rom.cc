@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
   {
     CLI::App app{"2D Double Mach reflection - ROM"};
-    scalar_t dt	       = 0.0005;
+    scalar_t dt	       = 0.0001;
     int sampleEvery    = 50;
     scalar_t finalTime = 0.25;
     int numModes       = 5;
