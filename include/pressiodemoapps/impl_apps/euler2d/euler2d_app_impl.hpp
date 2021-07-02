@@ -41,6 +41,8 @@ public:
   using stencil_values_t = state_type;
   using flux_t		 = state_type;
   using edge_rec_t	 = state_type;
+  using penalty_vector_t = velocity_type;
+  using penalty_jacobian_t = Eigen::SparseMatrix<scalar_t>;
 
   static constexpr int dimensionality{2};
   static constexpr index_t numDofPerCell{4};
@@ -65,6 +67,8 @@ public:
     const auto stencilSize = ::pressiodemoapps::reconstructionTypeToStencilSize(recEn);
     ::pressiodemoapps::resize(m_stencilVals,  numDofPerCell*stencilSize);
     allocateGhosts();
+
+    tripletList.resize(m_meshObj.sampleMeshSize()*numDofPerCell);
   }
 
 #else
@@ -105,6 +109,7 @@ public:
   scalar_type gamma()           const{ return m_gamma; }
   index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
   index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
+  auto totalResidualCells() const{ return m_meshObj.sampleMeshSize(); }
 
   velocity_type createVelocity() const
   {
@@ -132,6 +137,79 @@ public:
     velocityInnerCellsImpl(state, currentTime, V, FL, FR, FD, FU,
 			   uMinusHalfNeg, uMinusHalfPos,
 			   uPlusHalfNeg,  uPlusHalfPos);
+  }
+
+  auto createPenalty() const
+  {
+    penalty_vector_t g(m_meshObj.sampleMeshSize());
+    g.setConstant(0.0);
+    return g;
+  }
+
+  scalar_type internalEnergy(const state_type & state, index_t startIndex) const
+  {
+    constexpr auto one  = static_cast<scalar_type>(1);
+    constexpr auto two  = static_cast<scalar_type>(2);
+    constexpr auto half = one/two;
+    const auto rhoInv = one/state(startIndex);
+    const auto & rhoU = state(startIndex+1);
+    const auto & rhoV = state(startIndex+2);
+    const auto & E    = state(startIndex+3);
+    return E - half*( rhoU*rhoU + rhoV*rhoV )*rhoInv;
+  }
+
+  void penalty(const state_type & state,
+	       const scalar_type currentTime,
+	       penalty_vector_t & g) const
+  {
+    const auto & graph = m_meshObj.graph();
+    for (int i=0; i<g.size(); ++i)
+      {
+	const auto cellGID = graph(i, 0);
+	const auto uIndex  = cellGID*numDofPerCell;
+	const auto e = internalEnergy(state, uIndex);
+	g(i) = (e<0.) ? -e : 0.;
+      }
+  }
+
+  auto createPenaltyJacobian() const
+  {
+    penalty_jacobian_t gJac(m_meshObj.sampleMeshSize(), m_numDofStencilMesh);
+    return gJac;
+  }
+
+  void penaltyJacobian(const state_type & state,
+		       const scalar_type currentTime,
+		       penalty_jacobian_t & gJac) const
+  {
+    constexpr auto one  = static_cast<scalar_type>(1);
+    constexpr auto two  = static_cast<scalar_type>(2);
+    constexpr auto half = one/two;
+
+    tripletList.clear();
+    for (int cell=0; cell<gJac.rows(); ++cell)
+      {
+	const auto & graph = m_meshObj.graph();
+	const auto cellGID = graph(cell, 0);
+	const auto uIndex  = cellGID*numDofPerCell;
+	const index_t firstNonZeroColumn = cellGID*numDofPerCell;
+
+	const auto e = internalEnergy(state, uIndex);
+	if (e<0.)
+	  {
+	    const auto & rho  = state(uIndex);
+	    const auto & rhoInv  = one/rho;
+	    const auto & rhoSqInv  = rhoInv*rhoInv;
+	    const auto & rhoU = state(uIndex+1);
+	    const auto & rhoV = state(uIndex+2);
+
+	    tripletList.push_back( Eigen::Triplet<scalar_type>(cell, firstNonZeroColumn,   -half*(rhoU*rhoU+rhoV*rhoV)*rhoSqInv) );
+	    tripletList.push_back( Eigen::Triplet<scalar_type>(cell, firstNonZeroColumn+1, rhoU*rhoInv) );
+	    tripletList.push_back( Eigen::Triplet<scalar_type>(cell, firstNonZeroColumn+2, rhoV*rhoInv) );
+	    tripletList.push_back( Eigen::Triplet<scalar_type>(cell, firstNonZeroColumn+3, -one) );
+	  }
+      }
+    gJac.setFromTriplets(tripletList.begin(), tripletList.end());
   }
 
 private:
@@ -509,6 +587,7 @@ private:
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
 
+  mutable std::vector<Eigen::Triplet<scalar_type>> tripletList = {};
 };
 
 template<class scalar_t, class mesh_t, class state_t, class velo_t, class ghost_t>

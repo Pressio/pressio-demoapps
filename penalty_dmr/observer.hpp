@@ -33,4 +33,7 @@ private:
   int sampleFreq_ = {};
 };
 
+template<class T>
+using RomObserver = FomObserver<T>;
+
 #endif

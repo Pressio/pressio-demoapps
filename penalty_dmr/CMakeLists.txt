@@ -7,3 +7,6 @@ configure_file(svd.py svd.py COPYONLY)
 
 set(fomExeName dmrFomExe)
 add_executable(${fomExeName} ${CMAKE_CURRENT_SOURCE_DIR}/main_fom.cc)
+
+set(romExeName dmrRomExe)
+add_executable(${romExeName} ${CMAKE_CURRENT_SOURCE_DIR}/main_rom.cc)
