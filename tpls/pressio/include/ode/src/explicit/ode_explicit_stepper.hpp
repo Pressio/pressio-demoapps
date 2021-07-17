@@ -73,6 +73,18 @@ auto createForwardEulerStepper(const state_type & state,
 };
 
 template<typename state_type, typename system_type, typename ...Args>
+auto createSSPRungeKutta3Stepper(const state_type & state,
+			      const system_type & system,
+			      Args && ...args)
+  -> ExplicitStepper<explicitmethods::SSPRungeKutta3, state_type,
+		     system_type, Args...>
+{
+  using type = ExplicitStepper
+    <explicitmethods::SSPRungeKutta3, state_type, system_type, Args...>;
+  return type(state, system, std::forward<Args>(args)...);
+};
+
+template<typename state_type, typename system_type, typename ...Args>
 auto createRungeKutta4Stepper(const state_type & state,
 			      const system_type & system,
 			      Args && ...args)

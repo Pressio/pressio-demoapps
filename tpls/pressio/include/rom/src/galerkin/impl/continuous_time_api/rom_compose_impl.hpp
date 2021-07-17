@@ -92,6 +92,7 @@ template <typename tag>
 struct supported_explicit_stepper_tag{
   static_assert
   (std::is_same<tag, ::pressio::ode::explicitmethods::Euler>::value or
+   std::is_same<tag, ::pressio::ode::explicitmethods::SSPRungeKutta3>::value or
    std::is_same<tag, ::pressio::ode::explicitmethods::RungeKutta4>::value or
    std::is_same<tag, ::pressio::ode::explicitmethods::AdamsBashforth2>::value,
    "The explicit stepper tag you are passing to create the galerkin problem \

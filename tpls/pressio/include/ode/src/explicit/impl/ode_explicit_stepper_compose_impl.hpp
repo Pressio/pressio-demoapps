@@ -50,6 +50,7 @@
 #define ODE_EXPLICIT_IMPL_ODE_EXPLICIT_STEPPER_COMPOSE_IMPL_HPP_
 
 #include "ode_explicit_euler_stepper_impl.hpp"
+#include "ode_explicit_ssp_runge_kutta3_stepper_impl.hpp"
 #include "ode_explicit_runge_kutta4_stepper_impl.hpp"
 #include "ode_explicit_adams_bashforth2_stepper_impl.hpp"
 
@@ -106,6 +107,14 @@ struct ImplSelector<::pressio::ode::explicitmethods::Euler>
 {
   template<bool is_standard_policy, typename ...Args>
   using type = ::pressio::ode::explicitmethods::impl::ExplicitEulerStepper
+    <Args..., is_standard_policy>;
+};
+
+template<>
+struct ImplSelector<::pressio::ode::explicitmethods::SSPRungeKutta3>
+{
+  template<bool is_standard_policy, typename ...Args>
+  using type = ::pressio::ode::explicitmethods::impl::ExplicitSSPRungeKutta3Stepper
     <Args..., is_standard_policy>;
 };
 

@@ -55,6 +55,7 @@ namespace pressio{ namespace ode{
 namespace explicitmethods{
 struct Undefined{};
 struct Euler{};
+struct SSPRungeKutta3{};
 struct RungeKutta4{};
 struct AdamsBashforth2{};
 }//end namespace explicitmethods
@@ -82,6 +83,9 @@ struct is_explicit_stepper_tag : std::false_type{};
 
 template <>
 struct is_explicit_stepper_tag<explicitmethods::Euler> : std::true_type{};
+
+template <>
+struct is_explicit_stepper_tag<explicitmethods::SSPRungeKutta3> : std::true_type{};
 
 template <>
 struct is_explicit_stepper_tag<explicitmethods::RungeKutta4> : std::true_type{};
