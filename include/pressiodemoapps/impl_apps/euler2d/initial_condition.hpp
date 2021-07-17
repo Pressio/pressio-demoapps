@@ -216,7 +216,6 @@ void riemann2dIC1(state_type & state,
 
 }
 
-
 /*
   IC2:
   http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf
@@ -224,7 +223,8 @@ void riemann2dIC1(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC2(state_type & state,
 		  const mesh_t & meshObj,
-		  const scalar_type gamma)
+		  const scalar_type gamma,
+		  scalar_type pressureTopRight = 1.5)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
@@ -244,7 +244,7 @@ void riemann2dIC2(state_type & state,
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       if (x(i) >= x0 and y(i) >= y0){
-	prim = {1.5, zero, zero, 1.5};
+	prim = {1.5, zero, zero, pressureTopRight};
       }
       else if (x(i) < x0 and y(i) >= y0){
 	prim = {0.5323, 1.206, zero, 0.3};

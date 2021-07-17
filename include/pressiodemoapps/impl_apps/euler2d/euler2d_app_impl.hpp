@@ -97,9 +97,10 @@ public:
   }
 #endif
 
-  state_type initialCondition() const
+  template<typename ...Args>
+  state_type initialCondition(Args && ...args) const
   {
-    return initialConditionImpl();
+    return initialConditionImpl(std::forward<Args>(args)...);
   }
 
   scalar_type gamma()           const{ return m_gamma; }
@@ -135,7 +136,8 @@ public:
   }
 
 private:
-  state_type initialConditionImpl() const
+  template<typename ...Args>
+  state_type initialConditionImpl(Args && ...args) const
   {
     state_type initialState(m_numDofStencilMesh);
 
@@ -162,7 +164,7 @@ private:
 	  return initialState;
 	}
 	else if (m_icIdentifier == 2){
-	  riemann2dIC2(initialState, m_meshObj, m_gamma);
+	  riemann2dIC2(initialState, m_meshObj, m_gamma, std::forward<Args>(args)...);
 	  return initialState;
 	}
 	else{
