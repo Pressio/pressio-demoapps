@@ -39,6 +39,7 @@ except ImportError:
 # Runge-Kutta4 integrator
 def advanceRK4(appObj, state, dt, Nsteps, \
                startTime = 0.0, \
+               observer = None, \
                showProgress=False):
 
   v = appObj.createVelocity()
@@ -50,10 +51,11 @@ def advanceRK4(appObj, state, dt, Nsteps, \
   time = startTime
   for step in range(1, Nsteps+1):
     if showProgress:
-      if step % 50 == 0:
-        print("step = ", step)
+      if step % 50 == 0: print("step = ", step, "/", Nsteps)
 
     appObj.velocity(state, time, v)
+    if observer!= None:
+      observer(step-1, state, v)
     k1 = dt * v
 
     tmpState = state+half*k1
@@ -75,6 +77,7 @@ def advanceRK4(appObj, state, dt, Nsteps, \
 # SSP3 integrator
 def advanceSSP3(appObj, state, dt, Nsteps,\
                 startTime = 0.0, \
+                observer = None, \
                 showProgress=False):
 
   v = appObj.createVelocity()
@@ -89,9 +92,11 @@ def advanceSSP3(appObj, state, dt, Nsteps,\
   time = startTime
   for step in range(1, Nsteps+1):
     if showProgress:
-      if step % 50 == 0: print("step = ", step)
+      if step % 50 == 0: print("step = ", step, "/", Nsteps)
 
     appObj.velocity(state, time, v)
+    if observer!= None:
+      observer(step-1, state, v)
     tmpState1[:] = state + dt * v
 
     appObj.velocity(tmpState1, time, v)
