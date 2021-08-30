@@ -31,24 +31,10 @@ int main(int argc, char *argv[])
   const auto Nsteps = 7.5/dt;
   auto time = 0.0;
   FomObserver<ode_state_t> Obs("swe_gaussianPulse2d_solution.bin", 1);
-  app_state_t state1(stateSize);
-  app_state_t state2(stateSize);
-  app_state_t veloTmp(stateSize);
-  Obs(0, time, state);
-  for (int step=1; step<=Nsteps; ++step)
-  {
-    appObj.velocity(*state.data(), time, veloTmp);
-    state1 = *state.data() + dt*veloTmp;
 
-    appObj.velocity(state1, time, veloTmp);
-    state2 = (3./4.)*(*state.data()) + 0.25*state1 + 0.25*dt*veloTmp;
 
-    appObj.velocity(state2, time, veloTmp);
-    *state.data() = (1./3.)*((*state.data()) + 2.*state2 + 2.*dt*veloTmp);
+  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
 
-    time = static_cast<double>(step) * dt;
-    Obs(step, time, state);
-  }
-
+  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
   return 0;
 }

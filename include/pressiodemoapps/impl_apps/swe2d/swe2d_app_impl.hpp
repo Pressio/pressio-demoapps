@@ -49,7 +49,6 @@ public:
     : m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
-//      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj)
   {
 
@@ -69,12 +68,10 @@ public:
   Swe2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Swe2d probEn,
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
-	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	      int icIdentifier)
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
     : m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
-//      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj),
       m_stencilVals(1),
       m_ghostLeft({1,1}),
@@ -97,6 +94,7 @@ public:
   }
 
   scalar_type gravity()           const{ return m_gravity; }
+  scalar_type coriolis()           const{ return m_coriolis; }
   index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
   index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 

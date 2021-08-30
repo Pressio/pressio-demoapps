@@ -1,6 +1,6 @@
 
-#ifndef PRESSIODEMOAPPS_EULER2D_INC_HPP_
-#define PRESSIODEMOAPPS_EULER2D_INC_HPP_
+#ifndef PRESSIODEMOAPPS_SWE2D_INC_HPP_
+#define PRESSIODEMOAPPS_SWE2D_INC_HPP_
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include "Eigen/Core"
@@ -71,6 +71,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 
 #endif
 
+
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
 T createSwe2dForPyA(const mesh_t & meshObj,
@@ -81,6 +82,7 @@ T createSwe2dForPyA(const mesh_t & meshObj,
   return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
 					 fluxEnum);
 }
+
 
 template<class mesh_t, class T>
 T createSwe2dForPyB(const mesh_t & meshObj,
@@ -97,10 +99,12 @@ T createSwe2dForPyC(const mesh_t & meshObj,
 		     ::pressiodemoapps::Swe2d probEnum,
 		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return impl::createSwee2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov, 1);
+  return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					 InviscidFluxScheme::Rusanov);
 }
+
 #endif
+
 
 }
 #endif

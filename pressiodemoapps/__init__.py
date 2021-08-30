@@ -16,7 +16,7 @@ except ImportError:
 
 try:
   from ._pressiodemoappsimpl import InviscidFluxReconstruction, InviscidFluxScheme, \
-    Advection1d, Euler1d, Euler2d, Euler3d
+    Advection1d, Euler1d, Euler2d, Euler3d, Swe2d
 except ImportError:
   raise ImportError("Unable to import enums from _pressiodemoappsimpl")
 
@@ -29,6 +29,10 @@ try:
   from ._pressiodemoappsimpl import Euler1dProblem, Euler2dProblem, Euler3dProblem
 except ImportError:
   raise ImportError("Unable to import Euler classes from _pressiodemoappsimpl")
+
+  from ._pressiodemoappsimpl import Swe2dProblem 
+except ImportError:
+  raise ImportError("Unable to import SWE classes from _pressiodemoappsimpl")
 
 try:
   from ._pressiodemoappsimpl import createProblem
