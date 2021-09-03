@@ -11,7 +11,6 @@ void GaussianPulse(state_type & state,
 {
   constexpr int numDofPerCell = 3;
   constexpr auto one  = static_cast<scalar_type>(1);
-  constexpr auto five = static_cast<scalar_type>(5);
 
   const auto dx  = meshObj.dx();
   const auto dy  = meshObj.dy();
