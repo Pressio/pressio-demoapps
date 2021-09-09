@@ -13,8 +13,6 @@ void sin2dEulerIC(state_type & state,
   constexpr auto one  = static_cast<scalar_type>(1);
   constexpr auto five = static_cast<scalar_type>(5);
 
-  const auto dx  = meshObj.dx();
-  const auto dy  = meshObj.dy();
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
@@ -118,7 +116,7 @@ void sedov2dsymmetryIC(state_type & state,
   constexpr int numDofPerCell = 4;
   constexpr auto zero  = static_cast<scalar_type>(0);
   constexpr auto one   = static_cast<scalar_type>(1);
-  constexpr auto three = static_cast<scalar_type>(3);
+  // constexpr auto three = static_cast<scalar_type>(3);
 
   const auto dx  = meshObj.dx();
   const auto dy  = meshObj.dy();
@@ -181,8 +179,8 @@ void riemann2dIC1(state_type & state,
   constexpr auto one = static_cast<scalar_type>(1);
   constexpr auto two = static_cast<scalar_type>(2);
 
-  const auto dx  = meshObj.dx();
-  const auto dy  = meshObj.dy();
+  // const auto dx  = meshObj.dx();
+  // const auto dy  = meshObj.dy();
   const auto & x= meshObj.viewX();
   const auto & y= meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
@@ -229,10 +227,10 @@ void riemann2dIC2(state_type & state,
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one = static_cast<scalar_type>(1);
-  constexpr auto two = static_cast<scalar_type>(2);
+  // constexpr auto two = static_cast<scalar_type>(2);
 
-  const auto dx  = meshObj.dx();
-  const auto dy  = meshObj.dy();
+  // const auto dx  = meshObj.dx();
+  // const auto dy  = meshObj.dy();
   const auto x0 = static_cast<scalar_type>(0.8);
   const auto y0 = static_cast<scalar_type>(0.8);
   const auto gammaMinusOne = gamma - one;
@@ -282,7 +280,7 @@ void normalShock2dIC(state_type & state,
   constexpr auto xShock = one/six;
 
   const auto & x  = meshObj.viewX();
-  const auto & y  = meshObj.viewY();
+  // const auto & y  = meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
   const auto gammaMinusOneInv = one/gammaMinusOne;
 

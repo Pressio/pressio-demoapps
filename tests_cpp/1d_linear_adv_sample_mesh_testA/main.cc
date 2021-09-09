@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
   auto appObj      = pda::createProblemEigen(meshObj, probid, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
-  using scalar_t = typename app_t::scalar_type;
 
   auto ic = appObj.initialCondition();
   app_state_t state(ic);

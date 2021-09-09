@@ -40,6 +40,10 @@ valid = ["linadv1d_s3", \
          #
          "doublemach2d_s3", \
          "doublemach2d_s5", \
+         #
+         "swe2dSlipWall_s3",\
+         "swe2dSlipWall_s5",\
+         "swe2dSlipWall_s7",\
          ##############
          ##### 3d #####
          ##############
@@ -167,6 +171,15 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(0.0), str(4.0), str(0.0), str(1.0),
+            "--periodic", "false")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+  elif ("swe2dSlipWall" in pName):
+    s = int(pName[-1])
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(-5), str(5), str(-5), str(5),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 

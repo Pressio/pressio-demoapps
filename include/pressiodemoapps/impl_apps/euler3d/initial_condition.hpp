@@ -10,11 +10,6 @@ void euler3dsmoothInitialCondition(state_type & state,
 				   const scalar_type gamma)
 {
   constexpr int numDofPerCell = 5;
-
-  const auto dx  = meshObj.dx();
-  const auto dy  = meshObj.dy();
-  const auto dz  = meshObj.dz();
-
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
   const auto &z= meshObj.viewZ();

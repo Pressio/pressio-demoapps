@@ -38,10 +38,10 @@ public:
   {
     constexpr int numDofPerCell = 4;
 
-    constexpr scalar_type zero{0};
-    constexpr scalar_type one{1};
-    constexpr scalar_type two{2};
-    constexpr auto half = one/two;
+    // constexpr scalar_type zero{0};
+    // constexpr scalar_type one{1};
+    // constexpr scalar_type two{2};
+    // constexpr auto half = one/two;
 
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 0) >= 5);
@@ -94,8 +94,8 @@ public:
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 0) >= 9);
 
-    const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
+    // const auto cellGID = graph(smPt, 0);
+    // const auto uIndex  = cellGID*numDofPerCell;
 
     this->template operator()<3, index_t>(smPt, gRow);
     const auto left0 = graph(smPt, 1);
@@ -148,8 +148,8 @@ public:
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 0) >= 13);
 
-    const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
+    // const auto cellGID = graph(smPt, 0);
+    // const auto uIndex  = cellGID*numDofPerCell;
 
     this->template operator()<5, index_t>(smPt, gRow);
     const auto left1  = graph(smPt, 5);
