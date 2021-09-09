@@ -47,10 +47,10 @@ public:
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
         int icIdentifier)
-    : m_probEn(probEn),
+    : m_icIdentifier(icIdentifier),
+      m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
-      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj)
   {
 
@@ -72,10 +72,10 @@ public:
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
         int icIdentifier)
-    : m_probEn(probEn),
+    : m_icIdentifier(icIdentifier),
+      m_probEn(probEn),
       m_recEn(recEn),
-      m_fluxEn(fluxEnum),
-      m_icIdentifier(icIdentifier),
+      m_fluxEn(fluxEnum),      
       m_meshObj(meshObj),
       m_stencilVals(1),
       m_ghostLeft({1,1}),
@@ -191,13 +191,13 @@ private:
       V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2)) + m_coriolis*U(vIndex+1)/U(vIndex) ;
     };
 
-    const auto & graph = m_meshObj.graph();
+    // const auto & graph = m_meshObj.graph();
     const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<specialRows.size(); ++it)
     {
       const auto smPt    = specialRows[it];
-      const auto cellGID = graph(smPt, 0);
-      const auto uIndex  = cellGID*numDofPerCell;
+      // const auto cellGID = graph(smPt, 0);
+      // const auto uIndex  = cellGID*numDofPerCell;
 
       // X
       StencilFillerX(smPt, it);
@@ -262,13 +262,13 @@ private:
 			      uPlusHalfNeg,  uPlusHalfPos);
 
     // deal with cells away from boundaries
-    const auto & graph = m_meshObj.graph();
+    // const auto & graph = m_meshObj.graph();
     const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
     for (int it=0; it<rowsIn.size(); ++it)
     {
       const auto smPt = rowsIn[it];
-      const auto cellGID = graph(smPt, 0);
-      const auto uIndex = cellGID*numDofPerCell;
+      // const auto cellGID = graph(smPt, 0);
+      // const auto uIndex = cellGID*numDofPerCell;
 
       // X
       ReconstructorX.template operator()<numDofPerCell>(smPt);

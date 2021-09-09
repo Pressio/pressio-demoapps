@@ -203,12 +203,12 @@ private:
       V(vIndex+4) = dxInv*(FL(4) - FR(4)) + dyInv*(FB(4) - FF(4)) + dzInv*(FD(4) - FU(4));
     };
 
-    const auto & graph = m_meshObj.graph();
+    // const auto & graph = m_meshObj.graph();
     const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<specialRows.size(); ++it)
     {
       const auto smPt    = specialRows[it];
-      const auto cellGID = graph(smPt, 0);
+      // const auto cellGID = graph(smPt, 0);
 
       // X
       StencilFillerX(smPt, it);
@@ -295,13 +295,10 @@ private:
 			      uPlusHalfNeg,  uPlusHalfPos);
 
     // deal with cells away from boundaries
-    const auto & graph = m_meshObj.graph();
     const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
     for (int it=0; it<rowsIn.size(); ++it)
     {
       const auto smPt = rowsIn[it];
-      const auto cellGID = graph(smPt, 0);
-
       // X
       ReconstructorX.template operator()<numDofPerCell>(smPt);
       switch(m_fluxEn)

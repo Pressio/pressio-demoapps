@@ -37,7 +37,7 @@ public:
   explicit AdvectionAppT(const mesh_t & meshObj,
 		      ::pressiodemoapps::Advection1d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-    : m_meshObj(meshObj), m_recEn(recEnum), m_probEn(probEnum)
+    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize();
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize();

@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;
-  using scalar_t = typename app_t::scalar_type;
 
   const auto stateSize = appObj.totalDofStencilMesh();
   auto ic = appObj.initialCondition();

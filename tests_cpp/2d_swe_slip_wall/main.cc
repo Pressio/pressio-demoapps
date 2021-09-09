@@ -21,9 +21,7 @@ int main(int argc, char *argv[])
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
   using ode_state_t = pressio::containers::Vector<app_state_t>;
-  using scalar_t = typename app_t::scalar_type;
 
-  const auto stateSize = appObj.totalDofStencilMesh();
   auto ic = appObj.initialCondition();
   ode_state_t state(ic);
 
@@ -35,6 +33,6 @@ int main(int argc, char *argv[])
 
   auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
 
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advanceNSteps(stepperObj, state, time, dt, Nsteps, Obs);
   return 0;
 }
