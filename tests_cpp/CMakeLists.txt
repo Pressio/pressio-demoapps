@@ -24,6 +24,8 @@ add_subdirectory(2d_sedov_symmetry)
 add_subdirectory(2d_euler_sample_mesh_test1)
 add_subdirectory(2d_normal_shock)
 add_subdirectory(2d_double_mach_reflection)
+add_subdirectory(2d_swe_slip_wall)
+add_subdirectory(2d_swe_sample_mesh_test1)
 
 ### 3d problems ###
 add_subdirectory(3d_smooth)

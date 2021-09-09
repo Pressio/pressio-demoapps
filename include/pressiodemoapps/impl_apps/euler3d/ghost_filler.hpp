@@ -109,8 +109,6 @@ public:
 
     constexpr int numDofPerCell = 5;
     const auto & graph = m_meshObj.graph();
-    const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
 
     const auto left0   = graph(smPt, 1);
     const auto front0  = graph(smPt, 2);

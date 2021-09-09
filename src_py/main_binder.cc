@@ -12,6 +12,7 @@
 #include "pressiodemoapps/mesh.hpp"
 #include "pressiodemoapps/advection.hpp"
 #include "pressiodemoapps/euler1d.hpp"
+#include "pressiodemoapps/swe2d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/euler3d.hpp"
 
@@ -62,6 +63,9 @@ void bindEnums(pybind11::module & mParent)
     .value("Riemann",	     pda::Euler2d::Riemann)
     .value("NormalShock",    pda::Euler2d::NormalShock)
     .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
+
+  pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
+    .value("SlipWall", pda::Swe2d::SlipWall);
 
   pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
     .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)
@@ -176,6 +180,23 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   ee2dClass.def("gamma", &ee2d_t::gamma);
 
   // -----------------------
+  // Swe 2d
+  using swe2d_t =
+    pda::swe::impl::Swe2dAppT<
+      pressiodemoappspy::scalar_t,
+    ccumesh_t,
+    pressiodemoappspy::py_cstyle_arr_sc, // state type
+    pressiodemoappspy::py_cstyle_arr_sc, // velo type
+    pressiodemoappspy::py_cstyle_arr_sc  // ghost type
+    >;
+
+  pybind11::class_<swe2d_t> swe2dClass(mTopLevel, "Swe2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<swe2d_t>(swe2dClass);
+  swe2dClass.def("coriolis", &swe2d_t::coriolis);
+  swe2dClass.def("gravity", &swe2d_t::gravity);
+
+  // -----------------------
+
   // Euler 3d
   using ee3d_t =
     pda::ee::impl::Euler3dAppT<
@@ -221,6 +242,19 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   mTopLevel.def("createProblem",
 	      &pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
 	      pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+	      &pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+	      &pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+	      &pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
+	      pybind11::return_value_policy::take_ownership);
+
 
 }
 #endif

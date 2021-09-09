@@ -88,8 +88,8 @@ public:
   {
     constexpr int numDofPerCell = 4;
     const auto & graph = m_meshObj.graph();
-    const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
+    // const auto cellGID = graph(smPt, 0);
+    // const auto uIndex  = cellGID*numDofPerCell;
 
     this->template operator()<3, index_t>(smPt, gRow);
     const auto left0  = graph(smPt, 1);
@@ -141,8 +141,8 @@ public:
   {
     constexpr int numDofPerCell = 4;
     const auto & graph = m_meshObj.graph();
-    const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
+    // const auto cellGID = graph(smPt, 0);
+    // const auto uIndex  = cellGID*numDofPerCell;
 
     this->template operator()<3, index_t>(smPt, gRow);
     const auto left0  = graph(smPt, 1);
