@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  const auto probId  = pda::Swe2d::GaussianPulse;
+  const auto probId  = pda::Swe2d::SlipWall;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   const auto dt = 0.005;
   const auto Nsteps = 7.5/dt;
   auto time = 0.0;
-  FomObserver<ode_state_t> Obs("swe_gaussianPulse2d_solution.bin", 1);
+  FomObserver<ode_state_t> Obs("swe_slipWall2d_solution.bin", 1);
 
 
   auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);

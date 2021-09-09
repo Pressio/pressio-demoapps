@@ -45,10 +45,12 @@ public:
   Swe2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Swe2d probEn,
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
-	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+        int icIdentifier)
     : m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj)
   {
 
@@ -68,10 +70,12 @@ public:
   Swe2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Swe2d probEn,
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
-	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+        int icIdentifier)
     : m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
       m_meshObj(meshObj),
       m_stencilVals(1),
       m_ghostLeft({1,1}),
@@ -133,12 +137,15 @@ private:
 
     switch(m_probEn)
       {
-      case ::pressiodemoapps::Swe2d::GaussianPulse:{
-	GaussianPulse(initialState, m_meshObj, m_initialPulseMagnitude);
-	return initialState;
-      }
+      case ::pressiodemoapps::Swe2d::SlipWall:{
+   	    if( m_icIdentifier == 1){
+	        GaussianPulse(initialState, m_meshObj, m_initialPulseMagnitude);
+        } 
+        else{
+  	      throw std::runtime_error("invalid IC");
+        }
+        }
       };
-
     return initialState;
   }
 
@@ -292,7 +299,7 @@ private:
   void fillGhosts(const state_type & U, const scalar_type currentTime) const
   {
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
-    if (m_probEn == ::pressiodemoapps::Swe2d::GaussianPulse)
+    if (m_probEn == ::pressiodemoapps::Swe2d::SlipWall)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::InviscidWallFiller<
 	state_type, mesh_t, ghost_t>;
@@ -359,9 +366,10 @@ private:
   }
 
 private:
+  const int m_icIdentifier;
   const scalar_type m_gravity{9.8};
   const scalar_type m_coriolis{-3.0};
-
+ 
   const scalar_type m_initialPulseMagnitude{0.125};
 
   ::pressiodemoapps::Swe2d m_probEn;

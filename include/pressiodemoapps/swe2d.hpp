@@ -14,7 +14,7 @@
 
 namespace pressiodemoapps{
 enum class Swe2d{
-  GaussianPulse,
+  SlipWall,
 };
 }//end namespace pressiodemoapps
 
@@ -26,7 +26,8 @@ template<class mesh_t, class T>
 T createSwe2dImpl(const mesh_t & meshObj,
 		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		 ::pressiodemoapps::Swe2d probEnum,
-		 ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+		 ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+     const int icId)
 {
 
   const auto stencilSize = meshObj.stencilSize();
@@ -36,7 +37,7 @@ T createSwe2dImpl(const mesh_t & meshObj,
       ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
   }
 
-  return T(meshObj, probEnum, recEnum, fluxEnum);
+  return T(meshObj, probEnum, recEnum, fluxEnum,icId);
 }
 } //end pressiodemoapps::impl
 
@@ -45,7 +46,8 @@ template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Swe2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
-			::pressiodemoapps::InviscidFluxScheme fluxEnum)
+			::pressiodemoapps::InviscidFluxScheme fluxEnum,
+      int initCondIdentifier)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
@@ -57,7 +59,7 @@ auto createProblemEigen(const mesh_t & meshObj,
     >;
 
   return impl::createSwe2dImpl<mesh_t, p_t>(meshObj, recEnum, probEnum,
-					   fluxEnum);
+					   fluxEnum,initCondIdentifier);
 }
 
 template<class mesh_t>
@@ -66,7 +68,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return createProblemEigen(meshObj, probEnum, recEnum,
-			    InviscidFluxScheme::Rusanov);
+			    InviscidFluxScheme::Rusanov,1);
 }
 
 #endif
@@ -77,20 +79,22 @@ template<class mesh_t, class T>
 T createSwe2dForPyA(const mesh_t & meshObj,
 		     ::pressiodemoapps::Swe2d probEnum,
 		     ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		     ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+		     ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+         const int initCondIdentifier = 1)
 {
   return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 fluxEnum);
+					 fluxEnum,initCondIdentifier);
 }
 
 
 template<class mesh_t, class T>
 T createSwe2dForPyB(const mesh_t & meshObj,
 		     ::pressiodemoapps::Swe2d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+		     ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+         const int icId = 1)
 {
   return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov);
+					 InviscidFluxScheme::Rusanov,icId);
 }
 
 
@@ -100,7 +104,7 @@ T createSwe2dForPyC(const mesh_t & meshObj,
 		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov);
+					 InviscidFluxScheme::Rusanov,1);
 }
 
 #endif

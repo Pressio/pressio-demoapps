@@ -31,7 +31,7 @@ if __name__== "__main__":
   y_fom = np.reshape(y_fom, (ny,nx))
 
   
-  fomTestD = np.fromfile("swe_gaussianPulse2d_solution.bin")
+  fomTestD = np.fromfile("swe_slipWall2d_solution.bin")
   nt = int(np.size(fomTestD)/fomTotDofs)
   print("fomTest: nt = ", nt)
   fomTestD = np.reshape(fomTestD, (nt, fomTotDofs))

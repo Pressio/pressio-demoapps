@@ -1,5 +1,5 @@
 
-set(testname 2d_swe_gaussian_pulse_firstorder)
+set(testname 2d_swe_slip_wall_firstorder)
 set(exename  ${testname}_exe)
 
 configure_file(../compare.py compare.py COPYONLY)

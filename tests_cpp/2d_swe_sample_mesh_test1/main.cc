@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
   const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  const auto probId  = pda::Swe2d::GaussianPulse;
+  const auto probId  = pda::Swe2d::SlipWall;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using app_state_t = typename app_t::state_type;

@@ -65,7 +65,7 @@ void bindEnums(pybind11::module & mParent)
     .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
 
   pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
-    .value("GaussianPulse", pda::Swe2d::GaussianPulse);
+    .value("SlipWall", pda::Swe2d::SlipWall);
 
   pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
     .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)

@@ -7,7 +7,7 @@ if __name__== "__main__":
   ny=65
   fomTotDofs = nx*ny*3
 
-  D = np.fromfile("swe_gaussianPulse2d_solution.bin")
+  D = np.fromfile("swe_slipWall2d_solution.bin")
   nt = int(np.size(D)/fomTotDofs)
   D = np.reshape(D, (nt, fomTotDofs))
   D = D[-1, :]

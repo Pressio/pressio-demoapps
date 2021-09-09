@@ -33,7 +33,7 @@ def test_run():
   meshPath = str(file_path)
   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
   appObj   = pda.createProblem(meshObj,
-                               pda.Swe2d.GaussianPulse,
+                               pda.Swe2d.SlipWall,
                                pda.InviscidFluxReconstruction.Weno3)
   yn = appObj.initialCondition()
   dt = 0.005
