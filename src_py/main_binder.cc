@@ -58,6 +58,7 @@ void bindEnums(pybind11::module & mParent)
 
   pybind11::enum_<pda::Euler2d>(mParent, "Euler2d")
     .value("PeriodicSmooth", pda::Euler2d::PeriodicSmooth)
+    .value("KelvinHelmholtz", pda::Euler2d::KelvinHelmholtz)
     .value("SedovFull",	     pda::Euler2d::SedovFull)
     .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
     .value("Riemann",	     pda::Euler2d::Riemann)

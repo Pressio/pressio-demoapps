@@ -18,6 +18,7 @@ add_subdirectory(1d_lax)
 
 # ### 2d problems ###
 add_subdirectory(2d_smooth)
+add_subdirectory(2d_kelvin_helmholtz)
 add_subdirectory(2d_riemann)
 add_subdirectory(2d_sedov)
 add_subdirectory(2d_sedov_symmetry)

@@ -15,6 +15,7 @@
 namespace pressiodemoapps{
 enum class Euler2d{
   PeriodicSmooth,
+  KelvinHelmholtz,
   SedovFull,
   SedovSymmetry,
   Riemann,
@@ -58,6 +59,15 @@ T createEe2dImpl(const mesh_t & meshObj,
       ("For euler2d::PeriodicSmooth, mesh must be periodic.");
     }
   }
+
+  if (probEnum == ::pressiodemoapps::Euler2d::KelvinHelmholtz)
+  {
+    if (!meshObj.isPeriodic()){
+      throw std::runtime_error
+      ("For euler2d::KelvinHelmholtz, mesh must be periodic.");
+    }
+  }
+
 
   return T(meshObj, probEnum, recEnum, fluxEnum, icId);
 }
