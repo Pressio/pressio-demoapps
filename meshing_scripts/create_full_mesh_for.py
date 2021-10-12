@@ -26,6 +26,10 @@ valid = ["linadv1d_s3", \
          "euler2dsmooth_s5", \
          "euler2dsmooth_s7", \
          #
+         "euler2dKelvinHelmholtz_s3", \
+         "euler2dKelvinHelmholtz_s5", \
+         "euler2dKelvinHelmholtz_s7", \
+         #
          "sedov2d_s3", \
          "sedov2d_s5", \
          "sedov2d_s7", \
@@ -131,6 +135,16 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.), str(1.0), str(-1.0), str(1.0),
+            "--periodic", "true")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("euler2dKelvinHelmholtz" in pName):
+    s = int(pName[-1])
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(-5.0), str(5.0), str(-5.0), str(5.0),
             "--periodic", "true")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 

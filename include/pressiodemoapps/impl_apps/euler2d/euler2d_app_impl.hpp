@@ -146,6 +146,11 @@ private:
 	return initialState;
       }
 
+      case ::pressiodemoapps::Euler2d::KelvinHelmholtz:{
+	KelvinHelmholtzIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
       case ::pressiodemoapps::Euler2d::SedovFull:{
 	sedov2dIC(initialState, m_meshObj, m_gamma);
 	return initialState;

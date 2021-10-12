@@ -36,6 +36,45 @@ void sin2dEulerIC(state_type & state,
 }
 
 
+template<class state_type, class mesh_t, class scalar_type>
+void KelvinHelmholtzIC(state_type & state,
+      const mesh_t & meshObj,
+      const scalar_type gamma)
+{ 
+  constexpr int numDofPerCell = 4;
+  constexpr auto one  = static_cast<scalar_type>(1);
+  
+  const auto &x= meshObj.viewX();
+  const auto &y= meshObj.viewY();
+  const auto gammaMinusOne = gamma - one;
+  const auto gammaMinusOneInv = one/gammaMinusOne;
+  
+  for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
+    { 
+      const auto ind = i*numDofPerCell;
+      scalar_type freq = 4.;
+      scalar_type mag = 0.025;
+      scalar_type pert = mag*std::cos(2.*3.14159265/10.*freq*x(i));
+      if (y(i) > -2 + pert && y(i) < 2 + pert){
+        state(ind) = 2.;
+        state(ind+1) = state(ind)*0.5;
+        state(ind+2) = 0.; 
+        state(ind+3) = 2.5 / (gammaMinusOne) + 0.5/state(ind)*(state(ind+1)*state(ind+1) + state(ind+2)*state(ind+2) );
+        //ainf = sqrt(gamma p / rho) = 1.3228756555322954
+        //Minf = 0.3779644730092272
+      }                      
+      else{
+        state(ind) = 1.;
+        state(ind+1) = -state(ind)*0.5;
+        state(ind+2) = 0.;
+        state(ind+3) = 2.5 / (gammaMinusOne) + 0.5/state(ind)*(state(ind+1)*state(ind+1) + state(ind+2)*state(ind+2) );
+        //ainf = np.sqrt(gamma * p / rho) = 1.8708286933869707
+        //Minf = 0.2672612419124244 
+      }
+    }
+}
+
+
 /*
   probid = 1: Sedov,
   https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics
