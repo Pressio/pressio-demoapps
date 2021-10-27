@@ -26,7 +26,7 @@ template<
   >
 class DiffReac1dAppT
 {
-  static_assert(std::is_same<scalar_t, typename mesh_t::scalar_t>::value);
+  static_assert(std::is_same<scalar_t, typename mesh_t::scalar_t>::value, "");
 
 public:
   using index_t		 = typename mesh_t::index_t;

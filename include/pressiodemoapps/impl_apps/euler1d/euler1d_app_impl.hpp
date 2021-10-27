@@ -8,6 +8,7 @@
 
 #include "../eulerCommon/energy.hpp"
 #include "../eulerCommon/fluxes.hpp"
+#include "../eulerCommon/jacobians.hpp"
 #include "../eulerCommon/rankine_hugoniot.hpp"
 #include "./initial_condition.hpp"
 #include "./ghost_filler.hpp"

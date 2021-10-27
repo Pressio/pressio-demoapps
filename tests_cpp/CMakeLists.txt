@@ -7,6 +7,7 @@ add_subdirectory(ccuMeshObjSpecialCellsLists)
 add_subdirectory(weno3)
 add_subdirectory(weno5)
 add_subdirectory(rankine_hugoniot)
+add_subdirectory(euler_jacobians)
 
 # ### 1d problems ###
 add_subdirectory(1d_diffusion_reaction_explicit)
