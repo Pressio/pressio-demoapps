@@ -15,7 +15,7 @@ template<
 class StencilFiller;
 
 //------------------------------
-// dim=1, 1 dof/cell
+// dim=1, 1 dof/cell, no ghost
 //------------------------------
 template<class stencil_values_t, class state_t, class mesh_t>
 class StencilFiller<
@@ -91,6 +91,66 @@ private:
   const mesh_t & m_meshObj;
   stencil_values_t & m_stencilVals;
 };
+
+
+//------------------------------
+// dim=1, 1 dofs/cell, with ghost
+//------------------------------
+template<class stencil_values_t, class state_t, class mesh_t, class ghost_t>
+class StencilFiller<
+  1, 1, stencil_values_t, state_t, mesh_t, ghost_t
+  >
+{
+
+public:
+  StencilFiller() = delete;
+  StencilFiller(const int stencilSize,
+		const state_t & stateIn,
+		const mesh_t & meshIn,
+		const ghost_t & ghostLeft,
+		const ghost_t & ghostRight,
+		stencil_values_t & stencilVals)
+    : m_stencilSize(stencilSize),
+      m_state(stateIn),
+      m_meshObj(meshIn),
+      m_ghostLeft(ghostLeft),
+      m_ghostRight(ghostRight),
+      m_stencilVals(stencilVals)
+  {}
+
+  template<class index_t>
+  void operator()(const index_t smPt)
+  {
+    constexpr int numDofPerCell = 1;
+
+    const auto & graph = m_meshObj.graph();
+    const auto uIndex  = graph(smPt, 0)*numDofPerCell;
+    const auto w0      = graph(smPt, 1);
+    const auto e0      = graph(smPt, 2);
+    const auto w0i     = w0*numDofPerCell;
+    const auto e0i     = e0*numDofPerCell;
+
+    switch(m_stencilSize)
+      {
+      case 3:
+	{
+	  m_stencilVals(0) = (w0==-1) ? m_ghostLeft(0)  : m_state(w0i);
+	  m_stencilVals(1) = m_state(uIndex);
+	  m_stencilVals(2) = (e0==-1) ? m_ghostRight(0) : m_state(e0i);
+	  break;
+	}
+      }
+  }
+
+private:
+  const int m_stencilSize;
+  const state_t & m_state;
+  const mesh_t & m_meshObj;
+  const ghost_t & m_ghostLeft;
+  const ghost_t & m_ghostRight;
+  stencil_values_t & m_stencilVals;
+};
+
 
 //------------------------------
 // dim=1, 3 dofs/cell

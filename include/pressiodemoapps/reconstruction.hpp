@@ -4,6 +4,7 @@
 
 namespace pressiodemoapps{
 
+// inviscid
 enum class InviscidFluxReconstruction{
   FirstOrder,
   Weno3,
@@ -31,6 +32,30 @@ bool stencilSizeCompatibleWithInviscidFluxReconstruction
     case InviscidFluxReconstruction::Weno5:	 return stencilSize >= 7;
     }
     return false;
+}
+
+// viscous
+enum class ViscousFluxReconstruction{
+  FirstOrder
+};
+
+int reconstructionTypeToStencilSize(ViscousFluxReconstruction enIn)
+{
+  switch(enIn)
+    {
+    case ViscousFluxReconstruction::FirstOrder: return 3;
+    }
+    return 0;
+}
+
+bool stencilSizeCompatibleWithViscousFluxReconstruction
+(ViscousFluxReconstruction enIn, int stencilSize)
+{
+  switch(enIn)
+    {
+    case ViscousFluxReconstruction::FirstOrder: return stencilSize >= 3;
+    }
+  return false;
 }
 
 #include "./weno.hpp"

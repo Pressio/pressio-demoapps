@@ -8,5 +8,9 @@ enum class InviscidFluxScheme{
   Rusanov
 };
 
+enum class ViscousFluxScheme{
+  Central
+};
+
 }//end namespace pressiodemoapps
 #endif

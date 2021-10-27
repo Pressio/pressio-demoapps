@@ -9,6 +9,8 @@ add_subdirectory(weno5)
 add_subdirectory(rankine_hugoniot)
 
 # ### 1d problems ###
+add_subdirectory(1d_diffusion_reaction_explicit)
+add_subdirectory(1d_diffusion_reaction_implicit)
 add_subdirectory(1d_linear_adv_convergence)
 add_subdirectory(1d_linear_adv_sample_mesh_testA)
 add_subdirectory(1d_linear_adv_sample_mesh_testB)

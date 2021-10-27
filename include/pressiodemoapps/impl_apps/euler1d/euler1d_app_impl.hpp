@@ -194,15 +194,8 @@ private:
   mutable ghost_t m_ghostRight;
 };
 
-
-template<
-  class scalar_t,
-  class mesh_t,
-  class state_t,
-  class velo_t,
-  class ghost_t
-  >
-constexpr typename mesh_t::index_t Euler1dAppT<scalar_t, mesh_t, state_t, velo_t, ghost_t>::numDofPerCell;
+template<class T1, class T2, class T3, class T4, class T5>
+constexpr typename T2::index_t Euler1dAppT<T1,T2,T3,T4,T5>::numDofPerCell;
 
 }}}//end namespace
 #endif
