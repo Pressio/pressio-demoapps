@@ -180,10 +180,10 @@ pytest -s
 
 |                           | Enum Identifier         | Inviscid <br> Reconstruct scheme |  Inviscid <br> Flux scheme  |   |
 |---------------------------|-------------------------|:----------------------:|:----------------:|---|
-| 1D Linear Advection       | C++: Advection1d::PeriodicLinear <br> Py &nbsp; : Advection1d.PeriodicLinear  |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#linear-advection)  |
-| 1D Euler Smooth           | C++: Euler1d::PeriodicSmooth <br> Py &nbsp; : Euler1d.PeriodicSmooth|        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#euler-smooth)  |
-| 1D Sod                    | C++: Euler1d::Sod <br> Py &nbsp; : Euler1d.Sod           |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#sod)  |
-| 1D Lax                    | C++: Euler1d::Lax <br> Py &nbsp; : Euler1d.Lax           |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-descriptions#lax)  |
+| 1D Linear Advection       | C++: Advection1d::PeriodicLinear <br> Py &nbsp; : Advection1d.PeriodicLinear  |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-description#linear-advection)  |
+| 1D Euler Smooth           | C++: Euler1d::PeriodicSmooth <br> Py &nbsp; : Euler1d.PeriodicSmooth|        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-description#euler-smooth)  |
+| 1D Sod                    | C++: Euler1d::Sod <br> Py &nbsp; : Euler1d.Sod           |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-description#sod)  |
+| 1D Lax                    | C++: Euler1d::Lax <br> Py &nbsp; : Euler1d.Lax           |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/1D-Problems-description#lax)  |
 | 2D Euler Smooth           | C++: Euler2d::PeriodicSmooth <br> Py &nbsp; : Euler2d.PeriodicSmooth |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#euler-smooth)  |
 | 2D Euler Kelvin Helmholtz | C++: Euler2d::KelvinHelmholtz <br> Py &nbsp; : Euler2d.KelvinHelmholtz |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#kelvin-helmholtz)  |
 | 2D Sedov (full)           | C++: Euler2d::SedovFull <br> Py &nbsp; : Euler2d.SedovFull      |        all             |   Rusanov        | [Details](https://github.com/Pressio/pressio-demoapps/wiki/2D-Problems-Description#sedov-version-1-full-version-no-symmetry-use)  |
