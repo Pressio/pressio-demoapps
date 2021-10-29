@@ -10,7 +10,8 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./flux_enum.hpp"
+#include "./euler_compute_energy.hpp"
 
 namespace pressiodemoapps{
 enum class Euler3d{

@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     state(ind)   = prim[0];
     state(ind+1) = prim[0]*prim[1];
     state(ind+2) = prim[0]*prim[2];
-    state(ind+3) = pressiodemoapps::ee::computeEnergyFromPrimitive(gamma, prim);
+    state(ind+3) = pressiodemoapps::eulerEquationsComputeEnergyFromPrimitive(gamma, prim);
   }
 
   auto time = 0.0;

@@ -53,14 +53,14 @@ public:
     m_preShockState[0] = m_preShockPrim[0];
     m_preShockState[1] = m_preShockPrim[0]*m_preShockPrim[1];
     m_preShockState[2] = m_preShockPrim[0]*m_preShockPrim[2];
-    m_preShockState[3] = computeEnergyFromPrimitive2(m_gammaMinusOneInv,
+    m_preShockState[3] = eulerEquationsComputeEnergyFromPrimitive2(m_gammaMinusOneInv,
 						     m_preShockPrim);
 
     m_postShockState[0] = m_postShockPrim[0];
     m_postShockState[1] = m_postShockPrim[0]*m_postShockPrim[1];
     m_postShockState[2] = m_postShockPrim[0]*m_postShockPrim[2];
-    m_postShockState[3] = computeEnergyFromPrimitive2(m_gammaMinusOneInv,
-						      m_postShockPrim);
+    m_postShockState[3] = eulerEquationsComputeEnergyFromPrimitive2(m_gammaMinusOneInv,
+								    m_postShockPrim);
   }
 
   scalar_type distanceFromShock(scalar_type xIn, scalar_type yIn)

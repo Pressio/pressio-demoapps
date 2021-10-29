@@ -30,7 +30,7 @@ void sin2dEulerIC(state_type & state,
       state(ind)   = prim[0];
       state(ind+1) = prim[0]*prim[1];
       state(ind+2) = prim[0]*prim[2];
-      state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+      state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
 
 }
@@ -40,17 +40,17 @@ template<class state_type, class mesh_t, class scalar_type>
 void KelvinHelmholtzIC(state_type & state,
       const mesh_t & meshObj,
       const scalar_type gamma)
-{ 
+{
   constexpr int numDofPerCell = 4;
   constexpr auto one  = static_cast<scalar_type>(1);
-  
+
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
   const auto gammaMinusOneInv = one/gammaMinusOne;
-  
+
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
-    { 
+    {
       const auto ind = i*numDofPerCell;
       scalar_type freq = 4.;
       scalar_type mag = 0.025;
@@ -58,18 +58,18 @@ void KelvinHelmholtzIC(state_type & state,
       if (y(i) > -2 + pert && y(i) < 2 + pert){
         state(ind) = 2.;
         state(ind+1) = state(ind)*0.5;
-        state(ind+2) = 0.; 
+        state(ind+2) = 0.;
         state(ind+3) = 2.5 / (gammaMinusOne) + 0.5/state(ind)*(state(ind+1)*state(ind+1) + state(ind+2)*state(ind+2) );
         //ainf = sqrt(gamma p / rho) = 1.3228756555322954
         //Minf = 0.3779644730092272
-      }                      
+      }
       else{
         state(ind) = 1.;
         state(ind+1) = -state(ind)*0.5;
         state(ind+2) = 0.;
         state(ind+3) = 2.5 / (gammaMinusOne) + 0.5/state(ind)*(state(ind+1)*state(ind+1) + state(ind+2)*state(ind+2) );
         //ainf = np.sqrt(gamma * p / rho) = 1.8708286933869707
-        //Minf = 0.2672612419124244 
+        //Minf = 0.2672612419124244
       }
     }
 }
@@ -117,7 +117,7 @@ void sedov2dIC(state_type & state,
 	  state(ind)   = prim[0];
 	  state(ind+1) = prim[0]*prim[1];
 	  state(ind+2) = prim[0]*prim[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
 
       else
@@ -130,7 +130,7 @@ void sedov2dIC(state_type & state,
 	  state(ind)   = prim[0];
 	  state(ind+1) = prim[0]*prim[1];
 	  state(ind+2) = prim[0]*prim[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
     }
 
@@ -184,7 +184,7 @@ void sedov2dsymmetryIC(state_type & state,
 	  state(ind)   = prim[0];
 	  state(ind+1) = prim[0]*prim[1];
 	  state(ind+2) = prim[0]*prim[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
 
       else
@@ -197,7 +197,7 @@ void sedov2dsymmetryIC(state_type & state,
 	  state(ind)   = prim[0];
 	  state(ind+1) = prim[0]*prim[1];
 	  state(ind+2) = prim[0]*prim[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
     }
 
@@ -248,7 +248,7 @@ void riemann2dIC1(state_type & state,
       state(ind)   = prim[0];
       state(ind+1) = prim[0]*prim[1];
       state(ind+2) = prim[0]*prim[2];
-      state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+      state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
 
 }
@@ -297,7 +297,7 @@ void riemann2dIC2(state_type & state,
       state(ind)   = prim[0];
       state(ind+1) = prim[0]*prim[1];
       state(ind+2) = prim[0]*prim[2];
-      state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+      state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
 }
 
@@ -346,14 +346,14 @@ void normalShock2dIC(state_type & state,
 	  state(ind)   = primPostShock[0];
 	  state(ind+1) = primPostShock[0]*primPostShock[1];
 	  state(ind+2) = primPostShock[0]*primPostShock[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
 	}
 
       else {
         state(ind)   = primPreShock[0];
         state(ind+1) = primPreShock[0]*primPreShock[1];
         state(ind+2) = primPreShock[0]*primPreShock[2];
-        state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, primPreShock);
+        state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPreShock);
       }
 
     }
@@ -409,14 +409,14 @@ void doubleMachReflection2dIC(state_type & state,
 	  state(ind)   = primPostShock[0];
 	  state(ind+1) = primPostShock[0]*primPostShock[1];
 	  state(ind+2) = primPostShock[0]*primPostShock[2];
-	  state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
+	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
 	}
 
       else {
         state(ind)   = primPreShock[0];
         state(ind+1) = primPreShock[0]*primPreShock[1];
         state(ind+2) = primPreShock[0]*primPreShock[2];
-        state(ind+3) = computeEnergyFromPrimitive2(gammaMinusOneInv, primPreShock);
+        state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPreShock);
       }
 
     }

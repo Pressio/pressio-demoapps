@@ -88,7 +88,7 @@ private:
 
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, void>;
-    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencil<
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilOneDofPerCell<
       scalar_type, stencil_values_t>;
 
     sfiller_t StencilFiller(stencilSize, U, m_meshObj, m_stencilVals);
@@ -101,7 +101,7 @@ private:
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
     {
       StencilFiller(smPt);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
       linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
 
@@ -120,12 +120,10 @@ private:
   mutable stencil_values_t m_stencilVals;
 };
 
-template<class scalar_t, class mesh_t, class state_t, class velo_t>
-constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::dimensionality;
-
-template<class scalar_t, class mesh_t, class state_t, class velo_t>
-constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::numDofPerCell;
-
+// template<class scalar_t, class mesh_t, class state_t, class velo_t>
+// constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::dimensionality;
+// template<class scalar_t, class mesh_t, class state_t, class velo_t>
+// constexpr int AdvectionAppT<scalar_t, mesh_t, state_t, velo_t>::numDofPerCell;
 
 }}}//end namespace
 #endif

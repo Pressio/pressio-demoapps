@@ -36,7 +36,9 @@ public:
   using velocity_type	 = state_t;
   using jacobian_type	 = jacobian_t;
   using ghost_type	 = ghost_t;
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   typedef Eigen::Triplet<scalar_type> Tr;
+#endif
 
   static constexpr int dimensionality{1};
   static constexpr int numDofPerCell{1};
@@ -92,7 +94,7 @@ public:
 		     DefaultSourceF<scalar_t>(), 0.01, 0.01)
   {}
 
-  index_t totalDofSampleMesh() const{ return m_numDofSampleMesh; }
+  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
   index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 
   state_type initialCondition() const
@@ -254,7 +256,9 @@ private:
   mutable ghost_t m_ghostLeft;
   mutable ghost_t m_ghostRight;
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   mutable std::vector<Tr> m_tripletList;
+#endif
 };
 
 template<class T1, class T2, class T3, class T4, class T5, class T6>

@@ -2,12 +2,12 @@
 #ifndef PRESSIODEMOAPPS_EE_ENERGY_HPP_
 #define PRESSIODEMOAPPS_EE_ENERGY_HPP_
 
-namespace pressiodemoapps{ namespace ee{
+namespace pressiodemoapps{
 
 /* 1d euler, 3 conserved variables */
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
-				       const std::array<scalar_type, 3> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
+						      const std::array<scalar_type, 3> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
   const auto two = static_cast<scalar_type>(2);
@@ -18,19 +18,19 @@ scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
 }
 
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive(const scalar_type & gamma,
-				       const std::array<scalar_type, 3> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive(const scalar_type & gamma,
+						     const std::array<scalar_type, 3> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
 
   const auto gammaMinusOneInv = one/(gamma - one);
-  return computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+  return eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 }
 
 /* 2d euler, 4 conserved variables */
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
-				       const std::array<scalar_type, 4> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
+						      const std::array<scalar_type, 4> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
   const auto two = static_cast<scalar_type>(2);
@@ -42,19 +42,19 @@ scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
 }
 
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive(const scalar_type & gamma,
-				       const std::array<scalar_type, 4> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive(const scalar_type & gamma,
+						     const std::array<scalar_type, 4> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
 
   const auto gammaMinusOneInv = one/(gamma - one);
-  return computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+  return eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 }
 
 /* 3d euler, 5 conserved variables */
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
-				       const std::array<scalar_type, 5> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
+						      const std::array<scalar_type, 5> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
   const auto two = static_cast<scalar_type>(2);
@@ -67,14 +67,14 @@ scalar_type computeEnergyFromPrimitive2(const scalar_type & gammaMinusOneInv,
 }
 
 template<class scalar_type>
-scalar_type computeEnergyFromPrimitive(const scalar_type & gamma,
-				       const std::array<scalar_type, 5> & prim)
+scalar_type eulerEquationsComputeEnergyFromPrimitive(const scalar_type & gamma,
+						     const std::array<scalar_type, 5> & prim)
 {
   const auto one = static_cast<scalar_type>(1);
 
   const auto gammaMinusOneInv = one/(gamma - one);
-  return computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+  return eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 }
 
-}}
+}
 #endif

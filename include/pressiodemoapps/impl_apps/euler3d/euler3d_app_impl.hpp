@@ -6,7 +6,6 @@
 // this is inside impl namespace for a reason, and will need to be
 // improved later on but we have a starting point.
 
-#include "../eulerCommon/energy.hpp"
 #include "../eulerCommon/fluxes.hpp"
 #include "../eulerCommon/jacobians.hpp"
 #include "./initial_condition.hpp"
@@ -173,7 +172,7 @@ private:
 
     using sfiller_t = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
-    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencil<
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilFiveDofPerCell<
       edge_rec_t, stencil_values_t>;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
@@ -213,7 +212,7 @@ private:
 
       // X
       StencilFillerX(smPt, it);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
@@ -224,7 +223,7 @@ private:
 
       // Y
       StencilFillerY(smPt, it);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
@@ -235,7 +234,7 @@ private:
 
       // Z
       StencilFillerZ(smPt, it);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:

@@ -6,7 +6,6 @@
 // this is inside impl namespace for a reason, and will need to be
 // improved later on but we have a starting point.
 
-#include "../eulerCommon/energy.hpp"
 #include "../eulerCommon/fluxes.hpp"
 #include "../eulerCommon/jacobians.hpp"
 #include "../eulerCommon/rankine_hugoniot.hpp"
@@ -212,8 +211,8 @@ private:
 
     using sfiller_t = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
-    using rec_fnct_t =
-      ::pressiodemoapps::impl::ReconstructorFromStencil<edge_rec_t, stencil_values_t>;
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilFourDofPerCell
+      <edge_rec_t, stencil_values_t>;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
@@ -247,7 +246,7 @@ private:
 
       // X
       StencilFillerX(smPt, it);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
@@ -258,7 +257,7 @@ private:
 
       // Y
       StencilFillerY(smPt, it);
-      Reconstructor.template operator()<numDofPerCell>();
+      Reconstructor();
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:

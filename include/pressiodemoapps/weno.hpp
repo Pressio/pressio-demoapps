@@ -18,13 +18,26 @@ weno3(sc_t & uLeftNeg,
       sc_t & uLeftPos,
       sc_t & uRightNeg,
       sc_t & uRightPos,
+      const sc_t & qm2,
+      const sc_t & qm1,
+      const sc_t & qq,
+      const sc_t & qp1,
+      const sc_t & qp2)
+{
+  pressiodemoapps::impl::weno3(uLeftNeg, uLeftPos, qm2, qm1, qq, qp1);
+  pressiodemoapps::impl::weno3(uRightNeg, uRightPos, qm1, qq, qp1, qp2);
+}
+
+template<typename sc_t>
+typename std::enable_if<std::is_floating_point<sc_t>::value>::type
+weno3(sc_t & uLeftNeg,
+      sc_t & uLeftPos,
+      sc_t & uRightNeg,
+      sc_t & uRightPos,
       const std::array<sc_t, 5> & q)
 {
-  pressiodemoapps::impl::weno3
-    (uLeftNeg, uLeftPos, q[0], q[1], q[2], q[3]);
-
-  pressiodemoapps::impl::weno3
-    (uRightNeg, uRightPos, q[1], q[2], q[3], q[4]);
+  pressiodemoapps::weno3(uLeftNeg, uLeftPos, uRightNeg, uRightPos,
+			 q[0], q[1], q[2], q[3], q[4]);
 }
 
 template<typename sc_t, typename state_t>
@@ -38,11 +51,8 @@ weno3(sc_t & uLeftNeg,
       sc_t & uRightPos,
       const state_t & q)
 {
-  pressiodemoapps::impl::weno3
-    (uLeftNeg, uLeftPos, q(0), q(1), q(2), q(3));
-
-  pressiodemoapps::impl::weno3
-    (uRightNeg, uRightPos, q(1), q(2), q(3), q(4));
+  pressiodemoapps::weno3(uLeftNeg, uLeftPos, uRightNeg, uRightPos,
+			 q(0), q(1), q(2), q(3), q(4));
 }
 
 template<typename edge_t, typename state_t, typename index_t>
@@ -110,13 +120,28 @@ weno5(sc_t & uLeftNeg,
       sc_t & uLeftPos,
       sc_t & uRightNeg,
       sc_t & uRightPos,
+      const sc_t & qm3,
+      const sc_t & qm2,
+      const sc_t & qm1,
+      const sc_t & qq,
+      const sc_t & qp1,
+      const sc_t & qp2,
+      const sc_t & qp3)
+{
+  pressiodemoapps::impl::weno5(uLeftNeg, uLeftPos, qm3, qm2, qm1, qq, qp1, qp2);
+  pressiodemoapps::impl::weno5(uRightNeg, uRightPos, qm2, qm1, qq, qp1, qp2, qp3);
+}
+
+template<typename sc_t>
+typename std::enable_if<std::is_floating_point<sc_t>::value>::type
+weno5(sc_t & uLeftNeg,
+      sc_t & uLeftPos,
+      sc_t & uRightNeg,
+      sc_t & uRightPos,
       const std::array<sc_t, 7> & q)
 {
-  pressiodemoapps::impl::weno5
-    (uLeftNeg, uLeftPos, q[0], q[1], q[2], q[3], q[4], q[5]);
-
-  pressiodemoapps::impl::weno5
-    (uRightNeg, uRightPos, q[1], q[2], q[3], q[4], q[5], q[6]);
+  pressiodemoapps::weno5(uLeftNeg, uLeftPos, uRightNeg, uRightPos,
+			 q[0], q[1], q[2], q[3], q[4], q[5], q[6]);
 }
 
 template<typename sc_t, typename state_t>
@@ -130,13 +155,8 @@ weno5(sc_t & uLeftNeg,
       sc_t & uRightPos,
       const state_t & q)
 {
-  pressiodemoapps::impl::weno5
-    (uLeftNeg, uLeftPos,
-     q(0), q(1), q(2), q(3), q(4), q(5));
-
-  pressiodemoapps::impl::weno5
-    (uRightNeg, uRightPos,
-     q(1), q(2), q(3), q(4), q(5), q(6));
+  pressiodemoapps::weno5(uLeftNeg, uLeftPos, uRightNeg, uRightPos,
+			 q(0), q(1), q(2), q(3), q(4), q(5), q(6));
 }
 
 template<typename edge_t, typename state_t, typename index_t>

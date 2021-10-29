@@ -30,7 +30,7 @@ void euler3dsmoothInitialCondition(state_type & state,
       state(ind+1) = prim[0]*prim[1];
       state(ind+2) = prim[0]*prim[2];
       state(ind+3) = prim[0]*prim[3];
-      state(ind+4) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+      state(ind+4) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
 }
 
@@ -86,9 +86,8 @@ void sedov3dInitialCondition(state_type & state,
       state(ind+1) = prim[0]*prim[1];
       state(ind+2) = prim[0]*prim[2];
       state(ind+3) = prim[0]*prim[3];
-      state(ind+4) = computeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+      state(ind+4) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
-
 }
 
 }}//end namespace
