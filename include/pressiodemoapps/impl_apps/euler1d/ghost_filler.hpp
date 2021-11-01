@@ -32,7 +32,6 @@ public:
 
   void operator()()
   {
-    // const auto & x  = m_meshObj.viewX();
     const auto sampleMeshSize = m_meshObj.sampleMeshSize();
     const auto & graph = m_meshObj.graph();
 
@@ -79,8 +78,6 @@ public:
       {
 	const auto cellGIDLe1 = graph(0, 4);
 	const auto cellGIDRw1 = graph(sampleMeshSize-1, 3);
-	// const auto cellGIDLe2 = graph(0, 6);
-	// const auto cellGIDRw2 = graph(sampleMeshSize-1, 5);
 	m_ghostLeft(6) = m_state(cellGIDLe1*3);
 	m_ghostLeft(7) = m_state(cellGIDLe1*3+1);
 	m_ghostLeft(8) = m_state(cellGIDLe1*3+2);

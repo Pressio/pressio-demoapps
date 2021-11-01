@@ -45,14 +45,14 @@ public:
   static constexpr int dimensionality{1};
   static constexpr index_t numDofPerCell{3};
 
-  // stencil filler functor type
-  using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-    dimensionality, numDofPerCell, stencil_vals_container_type,
-    state_type, MeshType, ghost_vals_container_type>;
+  // // stencil filler functor type
+  // using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
+  //   dimensionality, numDofPerCell, stencil_vals_container_type,
+  //   state_type, MeshType, ghost_vals_container_type>;
 
-  // reconstructor functor type
-  using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
-    edge_rec_t, stencil_vals_container_type>;
+  // // reconstructor functor type
+  // using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
+  //   edge_rec_t, stencil_vals_container_type>;
 
 public:
   Euler1dAppRhsOnly(const MeshType & meshObj,
@@ -100,26 +100,33 @@ public:
   }
 
   void velocity(const state_type & state,
-		const scalar_type timeValue,
+		const scalar_type currentTime,
 		velocity_type & V) const
   {
-    velocityOnlyImpl(state, timeValue, V);
-  }
-
-private:
-  void velocityOnlyImpl(const state_type & U,
-			const scalar_type timeValue,
-			velocity_type & V) const
-  {
-
     flux_t FL(numDofPerCell);
     flux_t FR(numDofPerCell);
     edge_rec_t uMinusHalfNeg(numDofPerCell);
     edge_rec_t uMinusHalfPos(numDofPerCell);
     edge_rec_t uPlusHalfNeg (numDofPerCell);
     edge_rec_t uPlusHalfPos (numDofPerCell);
-    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
 
+    fillGhostsIfNeeded(state, currentTime);
+    velocityCellsNearBdImpl(state, currentTime,
+			    V, FL, FR,
+			    uMinusHalfNeg, uMinusHalfPos,
+			    uPlusHalfNeg,  uPlusHalfPos);
+
+    velocityInnerCellsImpl(state, currentTime,
+			   V, FL, FR,
+			   uMinusHalfNeg, uMinusHalfPos,
+			   uPlusHalfNeg,  uPlusHalfPos);
+  }
+
+private:
+  void fillGhostsIfNeeded(const state_type & U,
+			  scalar_type /*currTime*/) const
+  {
+    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
     // only need ghosts for specific problems
     if (m_probEn == ::pressiodemoapps::Euler1d::Sod or
 	m_probEn == ::pressiodemoapps::Euler1d::Lax)
@@ -129,13 +136,78 @@ private:
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
       ghF();
     }
+  }
+
+  void velocityInnerCellsImpl(const state_type & U,
+			      const scalar_type currentTime,
+			      velocity_type & V,
+			      flux_t & FL,
+			      flux_t & FR,
+			      edge_rec_t & uMinusHalfNeg,
+			      edge_rec_t & uMinusHalfPos,
+			      edge_rec_t & uPlusHalfNeg,
+			      edge_rec_t & uPlusHalfPos) const
+  {
+    /*
+      for inner cells, we do not need to worry aboit boundaries,
+      so we can index the state directly to to reconstruction
+      and therefore we do not need to fill a temporary stencil array values
+    */
+
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
+      dimensionality, edge_rec_t, state_type, MeshType>;
+
+    rec_fnct_t Reconstructor(m_recEn, U, m_meshObj,
+			     uMinusHalfNeg, uMinusHalfPos,
+			     uPlusHalfNeg,  uPlusHalfPos);
+
+    // deal with cells away from boundaries
+    const auto dxInv = m_meshObj.dxInv();
+    const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
+    for (int it=0; it<rowsIn.size(); ++it)
+    {
+      const auto smPt = rowsIn[it];
+
+      Reconstructor.template operator()<numDofPerCell>(smPt);
+      switch(m_fluxEn)
+      {
+      case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	  ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+	  ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+	  break;
+      }
+
+      const auto vIndex = smPt*numDofPerCell;
+      V(vIndex)   = dxInv*(FL(0) - FR(0));
+      V(vIndex+1) = dxInv*(FL(1) - FR(1));
+      V(vIndex+2) = dxInv*(FL(2) - FR(2));
+    }
+  }
+
+  void velocityCellsNearBdImpl(const state_type & U,
+			       const scalar_type currentTime,
+			       velocity_type & V,
+			       flux_t & FL,
+			       flux_t & FR,
+			       edge_rec_t & uMinusHalfNeg,
+			       edge_rec_t & uMinusHalfPos,
+			       edge_rec_t & uPlusHalfNeg,
+			       edge_rec_t & uPlusHalfPos) const
+  {
+    /*
+      for cells that are near boundaries, we need use the stencil
+      values to handle properly the ghost cells.
+      Once we fill the stencil values needed, we can do
+      reconstruction and fluxes.
+     */
 
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell,
-      stencil_vals_container_type, state_type, MeshType, ghost_vals_container_type>;
+      dimensionality, numDofPerCell, stencil_vals_container_type,
+      state_type, MeshType, ghost_vals_container_type>;
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
       edge_rec_t, stencil_vals_container_type>;
 
+    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFiller(stencilSizeNeeded, U, m_meshObj,
 			    m_ghostLeft, m_ghostRight, m_stencilVals);
     rec_fnct_t Reconstructor(m_recEn, m_stencilVals,
@@ -143,24 +215,26 @@ private:
 			     uPlusHalfNeg,  uPlusHalfPos);
 
     const auto dxInv = m_meshObj.dxInv();
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
-      {
-	StencilFiller(smPt);
-	Reconstructor();
-	switch(m_fluxEn)
-	  {
-	  case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	    ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-	    ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
-	    break;
-	  }
+    const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
+    for (std::size_t it=0; it<specialRows.size(); ++it)
+    {
+      const auto smPt = specialRows[it];
 
-	const auto vIndex = smPt*numDofPerCell;
-	V(vIndex)   = dxInv*(FL(0) - FR(0));
-	V(vIndex+1) = dxInv*(FL(1) - FR(1));
-	V(vIndex+2) = dxInv*(FL(2) - FR(2));
+      StencilFiller(smPt);
+      Reconstructor();
+      switch(m_fluxEn)
+      {
+      case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	  ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+	  ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+	  break;
       }
+
+      const auto vIndex = smPt*numDofPerCell;
+      V(vIndex)   = dxInv*(FL(0) - FR(0));
+      V(vIndex+1) = dxInv*(FL(1) - FR(1));
+      V(vIndex+2) = dxInv*(FL(2) - FR(2));
+    }
   }
 
 private:
@@ -236,7 +310,6 @@ protected:
 
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-
 template<class ScalarType, class MeshType>
 using EigenEuler1dAppRhsOnly = Euler1dAppRhsOnly<ScalarType, MeshType,
 						 Eigen::Matrix<ScalarType,-1,1>,
@@ -283,15 +356,38 @@ public:
   }
 
   void velocity(const state_type & state,
-		const scalar_type timeValue,
+		const scalar_type currentTime,
 		velocity_type & V) const
   {
-    if (base_t::m_recEn == ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder){
-      velocityAndJacobianFirstOrderImpl(state, timeValue, V);
-    }
-    else{
-      throw std::runtime_error("Euler1dApp: Jacobian only supported for first order");
-    }
+    base_t::fillGhostsIfNeeded(state, currentTime);
+
+    // jac at left face wrt to left,right recontructes states
+    flux_jac_type JLneg, JLpos;
+    // jac at right face wrt to left,right recontructes states
+    flux_jac_type JRneg, JRpos;
+
+    flux_t FL(numDofPerCell);
+    flux_t FR(numDofPerCell);
+    edge_rec_t uMinusHalfNeg(numDofPerCell);
+    edge_rec_t uMinusHalfPos(numDofPerCell);
+    edge_rec_t uPlusHalfNeg (numDofPerCell);
+    edge_rec_t uPlusHalfPos (numDofPerCell);
+
+    // handle all inner cells
+    velocityAndJacInnerCellsImpl(state, currentTime,
+				 V, FL, FR, JLneg, JLpos, JRneg, JRpos,
+				 uMinusHalfNeg, uMinusHalfPos,
+				 uPlusHalfNeg,  uPlusHalfPos);
+
+    // handle all near-BD cells
+    velocityAndJacCellsNearBdImpl(state, currentTime,
+				  V, FL, FR, JLneg, JLpos, JRneg, JRpos,
+				  uMinusHalfNeg, uMinusHalfPos,
+				  uPlusHalfNeg,  uPlusHalfPos);
+
+    // handle all BD cells
+    // functor to compute the cell Jacobian for 1st,weno3 (this is what
+    // we have done with Patrick on phone)
   }
 
   void jacobian(const state_type & state,
@@ -304,128 +400,88 @@ public:
 
 private:
 
-  template<class RowIndexType, class FaceJacType>
-  void addFirstOrderJacobianBlockElementsNoSpecialTreatment(RowIndexType rowIndex,
-							    index_t c_im1,
-							    index_t c_i,
-							    index_t c_ip1,
-							    FaceJacType JLneg,
-							    FaceJacType JLpos,
-							    FaceJacType JRneg,
-							    FaceJacType JRpos) const
+  void velocityAndJacInnerCellsImpl(const state_type & U,
+				    const scalar_type currentTime,
+				    velocity_type & V,
+				    flux_t & FL,
+				    flux_t & FR,
+				    flux_jac_type & JLneg,
+				    flux_jac_type & JLpos,
+				    flux_jac_type & JRneg,
+				    flux_jac_type & JRpos,
+				    edge_rec_t & uMinusHalfNeg,
+				    edge_rec_t & uMinusHalfPos,
+				    edge_rec_t & uPlusHalfNeg,
+				    edge_rec_t & uPlusHalfPos) const
   {
-    m_tripletList.push_back( Tr(rowIndex,  c_im1,   JLneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_im1+1, JLneg(0,1)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_im1+2, JLneg(0,2)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i,     JLpos(0,0)-JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+1,   JLpos(0,1)-JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+2,   JLpos(0,2)-JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1,   -JRpos(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1+1, -JRpos(0,1)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1+2, -JRpos(0,2)) );
 
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1,   JLneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1+1, JLneg(1,1)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1+2, JLneg(1,2)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i,   JLpos(1,0)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+1, JLpos(1,1)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+2, JLpos(1,2)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1,   -JRpos(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1+1, -JRpos(1,1)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1+2, -JRpos(1,2)) );
-
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1,   JLneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1+1, JLneg(2,1)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1+2, JLneg(2,2)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i,   JLpos(2,0)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+1, JLpos(2,1)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+2, JLpos(2,2)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1,   -JRpos(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1+1, -JRpos(2,1)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1+2, -JRpos(2,2)) );
   }
 
-  template<class RowIndexType, class FaceJacType>
-  void addFirstOrderJacobianBlockElementsForCellNearLeftBdWithNeumannBC(RowIndexType rowIndex,
-									index_t c_i,
-									index_t c_ip1,
-									FaceJacType JLneg,
-									FaceJacType JLpos,
-									FaceJacType JRneg,
-									FaceJacType JRpos) const
+  void velocityAndJacNearBDCellsImpl(const state_type & U,
+				     const scalar_type currentTime,
+				     velocity_type & V,
+				     flux_t & FL,
+				     flux_t & FR,
+				     flux_jac_type & JLneg,
+				     flux_jac_type & JLpos,
+				     flux_jac_type & JRneg,
+				     flux_jac_type & JRpos,
+				     edge_rec_t & uMinusHalfNeg,
+				     edge_rec_t & uMinusHalfPos,
+				     edge_rec_t & uPlusHalfNeg,
+				     edge_rec_t & uPlusHalfPos) const
   {
 
-    m_tripletList.push_back( Tr(rowIndex,  c_i,     JLneg(0,0) + JLpos(0,0) - JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+1,   JLneg(0,1) + JLpos(0,1) - JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+2,   JLneg(0,2) + JLpos(0,2) - JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1,   -JRpos(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1+1, -JRpos(0,1)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_ip1+2, -JRpos(0,2)) );
+    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
+      dimensionality, numDofPerCell, stencil_vals_container_type,
+      state_type, MeshType, ghost_vals_container_type>;
+    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
+      edge_rec_t, stencil_vals_container_type>;
 
-    m_tripletList.push_back( Tr(rowIndex+1, c_i,   JLneg(1,0) + JLpos(1,0)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+1, JLneg(1,1) + JLpos(1,1)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+2, JLneg(1,2) + JLpos(1,2)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1,   -JRpos(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1+1, -JRpos(1,1)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_ip1+2, -JRpos(1,2)) );
+    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
+    sfiller_t FillStencilValuesFunctor(stencilSizeNeeded, U, m_meshObj,
+				       m_ghostLeft, m_ghostRight,
+				       m_stencilVals);
+    rec_fnct_t FaceValuesReconstructFunctor(base_t::m_recEn, m_stencilVals,
+					    uMinusHalfNeg, uMinusHalfPos,
+					    uPlusHalfNeg,  uPlusHalfPos);
 
-    m_tripletList.push_back( Tr(rowIndex+2, c_i,   JLneg(2,0) + JLpos(2,0)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+1, JLneg(2,1) + JLpos(2,1)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+2, JLneg(2,2) + JLpos(2,2)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1,   -JRpos(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1+1, -JRpos(2,1)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_ip1+2, -JRpos(2,2)) );
-  }
+    using jac_fnct_t = FirstOrderNearBDCellJacobianThreeDofFunctor<
+      dimensionality, scalar_type, jacobian_type, MeshType>;
 
-  template<class RowIndexType, class FaceJacType>
-  void addFirstOrderJacobianBlockElementsForCellNearRightBdWithNeumannBC(RowIndexType rowIndex,
-									index_t c_im1,
-									index_t c_i,
-									FaceJacType JLneg,
-									FaceJacType JLpos,
-									FaceJacType JRneg,
-									FaceJacType JRpos) const
-  {
+    jac_fnct_t CellJacobianFunctor(m_meshObj, jacobian, JLneg, JLpos, LRneg, JRpos);
 
-    m_tripletList.push_back( Tr(rowIndex,  c_im1,   JLneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_im1+1, JLneg(0,1)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_im1+2, JLneg(0,2)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i,     -JRpos(0,0) + JLpos(0,0)-JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+1,   -JRpos(0,1) + JLpos(0,1)-JRneg(0,0)) );
-    m_tripletList.push_back( Tr(rowIndex,  c_i+2,   -JRpos(0,2) + JLpos(0,2)-JRneg(0,0)) );
-
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1,   JLneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1+1, JLneg(1,1)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_im1+2, JLneg(1,2)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i,   -JRpos(1,0) + JLpos(1,0)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+1, -JRpos(1,1) + JLpos(1,1)-JRneg(1,0)) );
-    m_tripletList.push_back( Tr(rowIndex+1, c_i+2, -JRpos(1,2) + JLpos(1,2)-JRneg(1,0)) );
-
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1,   JLneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1+1, JLneg(2,1)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_im1+2, JLneg(2,2)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i,   -JRpos(2,0) + JLpos(2,0)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+1, -JRpos(2,1) + JLpos(2,1)-JRneg(2,0)) );
-    m_tripletList.push_back( Tr(rowIndex+2, c_i+2, -JRpos(2,2) + JLpos(2,2)-JRneg(2,0)) );
-  }
-
-  void fillGhostsIfNeeded(const state_type & U) const
-  {
-    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(base_t::m_recEn);
-
-    if (base_t::m_probEn == ::pressiodemoapps::Euler1d::Sod or
-	base_t::m_probEn == ::pressiodemoapps::Euler1d::Lax)
+    const auto dxInv = m_meshObj.dxInv();
+    const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
+    for (std::size_t it=0; it<specialRows.size(); ++it)
     {
-      using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
-	numDofPerCell, state_type, MeshType, ghost_vals_container_type>;
-      ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
-      ghF();
+      const auto smPt = specialRows[it];
+
+      StencilFiller(smPt);
+      Reconstructor();
+      switch(m_fluxEn)
+      {
+      case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+	ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+
+	ee::impl::eeRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+	ee::impl::eeRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNeg,  uPlusHalfPos, m_gamma);
+	break;
+      }
+
+      CellJacobianFunctor(smPt);
+
+      const auto vIndex = smPt*numDofPerCell;
+      V(vIndex)   = dxInv*(FL(0) - FR(0));
+      V(vIndex+1) = dxInv*(FL(1) - FR(1));
+      V(vIndex+2) = dxInv*(FL(2) - FR(2));
     }
   }
 
-  void velocityAndJacobianFirstOrderImpl(const state_type & U,
-					 const scalar_type timeValue,
-					 velocity_type & V) const
+  void velocityAndJacobianFirstOrderImplInnnerCells(const state_type & U,
+						    const scalar_type timeValue,
+						    velocity_type & V) const
   {
     // // ----------
     // // 1. prepare
@@ -444,11 +500,6 @@ private:
     // edge_rec_t uPlusHalfNeg (numDofPerCell);
     // edge_rec_t uPlusHalfPos (numDofPerCell);
 
-    // // -----------------
-    // // 2. fill ghosts
-    // // -----------------
-    // fillGhostsIfNeeded(U);
-
     // // -------------------
     // // 4. create functors
     // // -------------------
@@ -458,6 +509,8 @@ private:
     // typename base_t::rec_fnct_t FaceValuesReconstructFunctor(base_t::m_recEn, m_stencilVals,
     // 							     uMinusHalfNeg, uMinusHalfPos,
     // 							     uPlusHalfNeg,  uPlusHalfPos);
+
+    // EigenJacobianThreeDofPerCellFunctor<> CellJacobianFunctor(jacobian);
 
     // // auto svals2 = u_stencilVals;
     // // edge_rec_t uMinusHalfNegFD(numDofPerCell);
@@ -477,13 +530,15 @@ private:
     // const auto & graph = m_meshObj.graph();
     // for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
     //   {
+    // 	const auto vIndexDensityDof = smPt*numDofPerCell;
+
     // 	// the stencil filler populates m_stencilVals with state values
     // 	// for the stencil needed at the current sample mesh point
     // 	FillStencilValuesFunctor(smPt);
 
     // 	// now that the stencil is ready, do reconstruction which will
     // 	// compute uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
-    // 	FaceValuesReconstructFunctor.template operator()<numDofPerCell>();
+    // 	FaceValuesReconstructFunctor();
 
     // 	// once reconstruction is done, compute fluxes
     // 	switch(base_t::m_fluxEn)
@@ -497,182 +552,61 @@ private:
     // 	  break;
     // 	}
 
+    // 	CellJacobianFunctor(smPt);
+
+    // 	// store into velocity/rhs
+    // 	V(vIndexDensityDof)   = dxInv*(FL(0) - FR(0));
+    // 	V(vIndexDensityDof+1) = dxInv*(FL(1) - FR(1));
+    // 	V(vIndexDensityDof+2) = dxInv*(FL(2) - FR(2));
+
+
     // 	// u_stencilVals = [ u_i-2 (density, mom, e),
     // 	//		     u_i-1 (density, mom, e),
     // 	//		     u_i   (density, mom, e),
     // 	//		     u_i+1 (density, mom, e),
     // 	//		     u_i+2 (density, mom, e)]
 
-    // 	Matrix<double,-1,-1> q(3, u_stencilVals.size());
-    // 	// q(:, 0) is d_uLneg/d_ui-2
-    // 	// q(:, 1) is d_uLneg/d_ui-1
-    // 	// q(:, 2) is d_uLneg/d_ui
-    // 	// q(:, 3) is d_uLpos/d_ui-1
-    // 	// q(:, 4) is d_uLpos/d_ui
-    // 	// q(:, 5) is d_uLpos/d_ui+1
 
-    // 	// q(:, 6)  is d_uRneg/d_ui-1
-    // 	// q(:, 7)  is d_uRneg/d_ui
-    // 	// q(:, 8)  is d_uRneg/d_ui+1
-    // 	// q(:, 9)  is d_uRpos/d_ui
-    // 	// q(:, 10) is d_uRpos/d_ui+1
-    // 	// q(:, 11) is d_uRpos/d_ui+2
+    // 	// // the graph gives me the cell IDs wrt to stencil mesh
+    // 	// const auto cellGIDStencilMesh      = graph(smPt, 0);
+    // 	// const auto leftCellGIDStencilMesh  = graph(smPt, 1);
+    // 	// const auto rightCellGIDStencilMesh = graph(smPt, 2);
 
-    // 	const auto vIndexDensityDof = smPt*numDofPerCell;
-    // 	const auto w0 = graph(smPt, 1);
-    // 	const auto e0 = graph(smPt, 2);
-    // 	const auto w1 = graph(smPt, 3);
-    // 	const auto e1 = graph(smPt, 4);
+    // 	// if (base_t::m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth)
+    // 	// {
+    // 	//   addFirstOrderJacobianBlockElementsNoSpecialTreatment(vIndexDensityDof,
+    // 	// 						       leftCellGIDStencilMesh*numDofPerCell,
+    // 	// 						       cellGIDStencilMesh*numDofPerCell,
+    // 	// 						       rightCellGIDStencilMesh*numDofPerCell,
+    // 	// 						       JLneg, JLpos, JRneg, JRpos);
+    // 	// }
+    // 	// else if (base_t::m_probEn == ::pressiodemoapps::Euler1d::Sod or
+    // 	// 	 base_t::m_probEn == ::pressiodemoapps::Euler1d::Lax)
+    // 	// {
+    // 	//   // if we are in inner cells, no special treatment required
+    // 	//   if (leftCellGIDStencilMesh != -1 && rightCellGIDStencilMesh != -1){
+    // 	//     addFirstOrderJacobianBlockElementsNoSpecialTreatment(vIndexDensityDof,
+    // 	// 							 leftCellGIDStencilMesh*numDofPerCell,
+    // 	// 							 cellGIDStencilMesh*numDofPerCell,
+    // 	// 							 rightCellGIDStencilMesh*numDofPerCell,
+    // 	// 							 JLneg, JLpos, JRneg, JRpos);
+    // 	//   }
 
-    // 	const auto num_pertur = u_stencilVals.size()/numDofPerCell;
-    // 	for (int j=0; j<num_perturb; ++j)
-    // 	{
-    // 	  svals2 = m_stencilVals;
-    // 	  // if j=0, perturb first numDofPerCell of stencilVals2
-    // 	  // if j=1, perturb second numDofPerCell of stencilVals2
-    // 	  // ...
+    // 	//   if (leftCellGIDStencilMesh == -1)
+    // 	//   {
+    // 	//     addFirstOrderJacobianBlockElementsForCellNearLeftBdWithNeumannBC(vIndexDensityDof,
+    // 	// 								     cellGIDStencilMesh*numDofPerCell,
+    // 	// 								     rightCellGIDStencilMesh*numDofPerCell,
+    // 	// 								     JLneg, JLpos, JRneg, JRpos);
+    // 	//   }
 
-    // 	  // assuming that we have svals2 that contains the perturb values
-    // 	  // we need to run the reconstruction
-    // 	  Reconstructor2.template operator()<numDofPerCell>();
-    // 	  // here, it means that, these are overwritten:
-    // 	  // uMinusHalfNegFD
-    // 	  // uMinusHalfPosFD
-    // 	  // uPlusHalfNegFD
-    // 	  // uPlusHalfPosFD
-
-    // 	  if (j==0){
-    // 	    q(0,0) = (uMinusHalfNegFD(0)-uMinusHalfNeg(0))/eps;
-    // 	    q(1,0) = (uMinusHalfNegFD(1)-uMinusHalfNeg(1))/eps;
-    // 	    q(2,0) = (uMinusHalfNegFD(2)-uMinusHalfNeg(2))/eps;
-
-    // 	    auto M = JLneg * q.col(0).asDiagonalMatrix();
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w1*numDofPerCell,   M(0,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w1*numDofPerCell+1, M(0,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w1*numDofPerCell+2, M(0,2)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w1*numDofPerCell,   M(1,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w1*numDofPerCell+1, M(1,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w1*numDofPerCell+2, M(1,2)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w1*numDofPerCell,   M(2,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w1*numDofPerCell+1, M(2,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w1*numDofPerCell+2, M(2,2)) );
-    // 	  }
-
-    // 	  if (j==1){
-    // 	    q(0,1) = (uMinusHalfNegFD(0)-uMinusHalfNeg(0))/eps;
-    // 	    q(1,1) = (uMinusHalfNegFD(1)-uMinusHalfNeg(1))/eps;
-    // 	    q(2,1) = (uMinusHalfNegFD(2)-uMinusHalfNeg(2))/eps;
-    // 	    auto M1 = JLneg * q.col(1).asDiagonalMatrix();
-
-    // 	    q(0,3) = (uMinusHalfPosFD(0)-uMinusHalfPos(0))/eps;
-    // 	    q(1,3) = (uMinusHalfPosFD(1)-uMinusHalfPos(1))/eps;
-    // 	    q(2,3) = (uMinusHalfPosFD(2)-uMinusHalfPos(2))/eps;
-    // 	    auto M2 = JLpos * q.col(3).asDiagonalMatrix();
-
-    // 	    q(0,6) = (uPlusHalfNegFD(0)-uPlusHalfNeg(0))/eps;
-    // 	    q(1,6) = (uPlusHalfNegFD(1)-uPlusHalfNeg(1))/eps;
-    // 	    q(2,6) = (uPlusHalfNegFD(2)-uPlusHalfNeg(2))/eps;
-    // 	    auto M3 = JRneg * q.col(6).asDiagonalMatrix();
-
-    // 	    auto M = M1+M2+M3;
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w0*numDofPerCell,   M(0,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w0*numDofPerCell+1, M(0,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof,   w0*numDofPerCell+2, M(0,2)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w0*numDofPerCell,   M(1,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w0*numDofPerCell+1, M(1,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+1, w0*numDofPerCell+2, M(1,2)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w0*numDofPerCell,   M(2,0)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w0*numDofPerCell+1, M(2,1)) );
-    // 	    m_tripletList.push_back( Tr(vIndexDensityDof+2, w0*numDofPerCell+2, M(2,2)) );
-    // 	  }
-
-    // 	  if (j==2){
-    // 	    q(0,2) = (uMinusHalfNegFD(0)-uMinusHalfNeg(0))/eps;
-    // 	    q(1,2) = (uMinusHalfNegFD(1)-uMinusHalfNeg(1))/eps;
-    // 	    q(2,2) = (uMinusHalfNegFD(2)-uMinusHalfNeg(2))/eps;
-
-    // 	    q(0,4) = (uMinusHalfPosFD(0)-uMinusHalfPos(0))/eps;
-    // 	    q(1,4) = (uMinusHalfPosFD(1)-uMinusHalfPos(1))/eps;
-    // 	    q(2,4) = (uMinusHalfPosFD(2)-uMinusHalfPos(2))/eps;
-
-    // 	    q(0,7) = (uPlusHalfNegFD(0)-uPlusHalfNeg(0))/eps;
-    // 	    q(1,7) = (uPlusHalfNegFD(1)-uPlusHalfNeg(1))/eps;
-    // 	    q(2,7) = (uPlusHalfNegFD(2)-uPlusHalfNeg(2))/eps;
-
-    // 	    q(0,9) = (uPlusHalfPosFD(0)-uPlusHalfPos(0))/eps;
-    // 	    q(1,9) = (uPlusHalfPosFD(1)-uPlusHalfPos(1))/eps;
-    // 	    q(2,9) = (uPlusHalfPosFD(2)-uPlusHalfPos(2))/eps;
-    // 	  }
-
-    // 	  if (j==3){
-    // 	    q(0,5) = (uMinusHalfPosFD(0)-uMinusHalfPos(0))/eps;
-    // 	    q(1,5) = (uMinusHalfPosFD(1)-uMinusHalfPos(1))/eps;
-    // 	    q(2,5) = (uMinusHalfPosFD(2)-uMinusHalfPos(2))/eps;
-
-    // 	    q(0,8) = (uPlusHalfNegFD(0)-uPlusHalfNeg(0))/eps;
-    // 	    q(1,8) = (uPlusHalfNegFD(1)-uPlusHalfNeg(1))/eps;
-    // 	    q(2,8) = (uPlusHalfNegFD(2)-uPlusHalfNeg(2))/eps;
-
-    // 	    q(0,10) = (uPlusHalfPosFD(0)-uPlusHalfPos(0))/eps;
-    // 	    q(1,10) = (uPlusHalfPosFD(1)-uPlusHalfPos(1))/eps;
-    // 	    q(2,10) = (uPlusHalfPosFD(2)-uPlusHalfPos(2))/eps;
-    // 	  }
-
-    // 	  if (j==4){
-    // 	    q(0,11) = (uPlusHalfPosFD(0)-uPlusHalfPos(0))/eps;
-    // 	    q(1,11) = (uPlusHalfPosFD(1)-uPlusHalfPos(1))/eps;
-    // 	    q(2,11) = (uPlusHalfPosFD(2)-uPlusHalfPos(2))/eps;
-    // 	  }
-    // 	}
-
-    // 	// store into velocity/rhs
-    // 	const auto vIndexDensityDof = smPt*numDofPerCell;
-    // 	V(vIndexDensityDof)   = dxInv*(FL(0) - FR(0));
-    // 	V(vIndexDensityDof+1) = dxInv*(FL(1) - FR(1));
-    // 	V(vIndexDensityDof+2) = dxInv*(FL(2) - FR(2));
-
-    // 	// the graph gives me the cell IDs wrt to stencil mesh
-    // 	const auto cellGIDStencilMesh      = graph(smPt, 0);
-    // 	const auto leftCellGIDStencilMesh  = graph(smPt, 1);
-    // 	const auto rightCellGIDStencilMesh = graph(smPt, 2);
-
-    // 	if (base_t::m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth)
-    // 	{
-    // 	  addFirstOrderJacobianBlockElementsNoSpecialTreatment(vIndexDensityDof,
-    // 							       leftCellGIDStencilMesh*numDofPerCell,
-    // 							       cellGIDStencilMesh*numDofPerCell,
-    // 							       rightCellGIDStencilMesh*numDofPerCell,
-    // 							       JLneg, JLpos, JRneg, JRpos);
-    // 	}
-    // 	else if (base_t::m_probEn == ::pressiodemoapps::Euler1d::Sod or
-    // 		 base_t::m_probEn == ::pressiodemoapps::Euler1d::Lax)
-    // 	{
-    // 	  // if we are in inner cells, no special treatment required
-    // 	  if (leftCellGIDStencilMesh != -1 && rightCellGIDStencilMesh != -1){
-    // 	    addFirstOrderJacobianBlockElementsNoSpecialTreatment(vIndexDensityDof,
-    // 								 leftCellGIDStencilMesh*numDofPerCell,
-    // 								 cellGIDStencilMesh*numDofPerCell,
-    // 								 rightCellGIDStencilMesh*numDofPerCell,
-    // 								 JLneg, JLpos, JRneg, JRpos);
-    // 	  }
-
-    // 	  if (leftCellGIDStencilMesh == -1)
-    // 	  {
-    // 	    addFirstOrderJacobianBlockElementsForCellNearLeftBdWithNeumannBC(vIndexDensityDof,
-    // 									     cellGIDStencilMesh*numDofPerCell,
-    // 									     rightCellGIDStencilMesh*numDofPerCell,
-    // 									     JLneg, JLpos, JRneg, JRpos);
-    // 	  }
-
-    // 	  if (rightCellGIDStencilMesh == -1)
-    // 	  {
-    // 	    addFirstOrderJacobianBlockElementsForCellNearRightBdWithNeumannBC(vIndexDensityDof,
-    // 									      rightCellGIDStencilMesh*numDofPerCell,
-    // 									      cellGIDStencilMesh*numDofPerCell,
-    // 									      JLneg, JLpos, JRneg, JRpos);
-    // 	  }
-
-    // 	}
+    // 	//   if (rightCellGIDStencilMesh == -1)
+    // 	//   {
+    // 	//     addFirstOrderJacobianBlockElementsForCellNearRightBdWithNeumannBC(vIndexDensityDof,
+    // 	// 								      rightCellGIDStencilMesh*numDofPerCell,
+    // 	// 								      cellGIDStencilMesh*numDofPerCell,
+    // 	// 								      JLneg, JLpos, JRneg, JRpos);
+    // 	//   }
     //   }
 
     // m_jacobian.setFromTriplets(m_tripletList.begin(), m_tripletList.end());

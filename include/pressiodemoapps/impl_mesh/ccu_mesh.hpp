@@ -43,7 +43,7 @@ public:
 
 #else
   // note that when doing bindings, I need to first construct
-  // with {1,1} just so that the numpy array picks up they
+  // with {1,1} just so that the numpy array picks up these
   // are 2dim array otherwise it thinks they are 1d array.
   template<
     bool _is_binding = is_binding,
@@ -56,34 +56,8 @@ public:
   }
 #endif
 
-  // void checkStencilSupportsOrder(pressiodemoapps::reconstructionType eIn) const
-  // {
-  //   if (m_stencilSize == 3)
-  //   {
-  //     if (eIn == reconstructionType::Weno5){
-  // 	throw std::runtime_error
-  // 	  ("Mesh stencil size not large enough for target reconstruction order.");
-  //     }
-  //   }
-  // }
-
-  bool isPeriodic() const{
-    const auto gSize = (m_stencilSize-1)*m_dim;
-
-    // mesh connectivity is periodic if all neighboring GIDs are positive
-    for (index_t i=0; i<m_sampleMeshSize; ++i){
-      for (index_t j=0; j<gSize+1; ++j){
-	if (m_graph(i, j) < 0){
-	  return false;
-	}
-      }
-    }
-    return true;
-  }
-
   int dimensionality() const{ return m_dim; }
   index_t stencilMeshSize() const{ return m_stencilMeshSize; }
-
   index_t sampleMeshSize() const{ return m_sampleMeshSize; }
   const int stencilSize() const { return m_stencilSize; }
 
@@ -96,7 +70,6 @@ public:
   const scalar_type dx() const{ return m_cellDeltas[0]; }
   const scalar_type dy() const{ return m_cellDeltas[1]; }
   const scalar_type dz() const{ return m_cellDeltas[2]; }
-
   const scalar_type dxInv() const{ return m_cellDeltasInv[0]; }
   const scalar_type dyInv() const{ return m_cellDeltasInv[1]; }
   const scalar_type dzInv() const{ return m_cellDeltasInv[2]; }
@@ -105,24 +78,46 @@ public:
   const y_t & viewY() const{ return m_y; }
   const z_t & viewZ() const{ return m_z; }
 
+  // number of cells that do NOT get close to any boundary
+  // i.e. those for which the farthest stencil cell is still within the BD
   auto numCellsInner() const{ return m_rowsForCellsInner.size(); }
-  auto numCellsBd() const   { return m_rowsForCellsBd.size(); }
 
+  // the rows of the graph that pertain "inner" cells
   const indices_v_t & graphRowsOfCellsAwayFromBd() const{
     return m_rowsForCellsInner;
   }
 
+  // all the other cells, i.e. those that are close enough to a BD
+  auto numCellsBd() const   { return m_rowsForCellsBd.size(); }
+
+  // the rows of the graph that pertain "non-inner" cells
   const indices_v_t & graphRowsOfCellsNearBd() const{
     return m_rowsForCellsBd;
+  }
+
+  // mesh connectivity is periodic if for each mesh cell,
+  // all neighbors global GIDs are non-negative.
+  bool isPeriodic() const{
+    // Note that we need to check along ALL directions.
+    const auto n = (m_stencilSize-1)*m_dim;
+
+    for (index_t i=0; i<m_sampleMeshSize; ++i){
+      for (index_t j=0; j<n+1; ++j){
+	if (m_graph(i, j) < 0){
+	  return false;
+	}
+      }
+    }
+    return true;
   }
 
 private:
   auto boundsImpl(int i) const
   {
-    const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
     using numlimits = std::numeric_limits<scalar_type>;
     auto res = std::make_tuple(numlimits::max(), numlimits::min());
 
+    const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
     for (int i=0; i<m_stencilMeshSize; ++i){
       auto & v1 = res.get<0>(res);
       auto & v2 = res.get<1>(res);
@@ -130,7 +125,6 @@ private:
       v2 = std::max(v2, a(i));
     }
     return res;
-
   }
 
   void allocateAndSetup(const std::string & meshDir)
@@ -150,9 +144,13 @@ private:
     pressiodemoapps::resize(m_z, m_stencilMeshSize);
     pressiodemoapps::impl::readMeshCoordinates(meshDir, m_dim, m_x, m_y, m_z);
 
-    const auto graphNumCols = (m_stencilSize-1)*m_dim;
-    pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols+1);
-    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols+1);
+    // compute the number of of neighbors
+    const auto numNeighbors = (m_stencilSize-1)*m_dim;
+    // the graph # of cols is num of neighbors + 1 becuase
+    // the graph col(0) contains the global ID of the cell itself
+    const auto graphNumCols = numNeighbors + 1;
+    pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols);
+    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols);
 
     // figure out how many cells are near the boundaries
     for (index_t it=0; it<m_sampleMeshSize; ++it)
@@ -161,6 +159,8 @@ private:
       {
 	const auto b1 = hasBdLeft1d(it);
 	const auto b2 = hasBdRight1d(it);
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
 	if (b1 or b2){
 	  m_rowsForCellsBd.push_back(it);
 	}
@@ -171,11 +171,13 @@ private:
 
       else if (m_dim==2)
       {
-
 	const auto b1 = hasBdLeft2d(it);
 	const auto b2 = hasBdFront2d(it);
 	const auto b3 = hasBdRight2d(it);
 	const auto b4 = hasBdBack2d(it);
+
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
 	if (b1 or b2 or b3 or b4){
 	  m_rowsForCellsBd.push_back(it);
 	}
@@ -193,6 +195,8 @@ private:
 	const auto b5 = hasBdBottom3d(it);
 	const auto b6 = hasBdTop3d(it);
 
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
 	if (b1 or b2 or b3 or b4 or b5 or b6){
 	  m_rowsForCellsBd.push_back(it);
 	}
@@ -203,16 +207,12 @@ private:
       else{
 	throw std::runtime_error("Invalid dimension");
       }
-
     }
-
   }
 
   // 1d
   bool hasBdLeft1d(const index_t rowInd) const{
-    if (m_graph(rowInd, 1)==-1) {
-      return true;
-    }
+    if (m_graph(rowInd, 1)==-1) return true;
 
     if (m_stencilSize>=5){
       if (m_graph(rowInd, 3)==-1) return true;
@@ -224,9 +224,7 @@ private:
   }
 
   bool hasBdRight1d(const index_t rowInd) const{
-    if (m_graph(rowInd, 2)==-1) {
-      return true;
-    }
+    if (m_graph(rowInd, 2)==-1) return true;
 
     if (m_stencilSize>=5){
       if (m_graph(rowInd, 4)==-1) return true;
@@ -236,7 +234,6 @@ private:
     }
     return false;
   }
-
 
   // 2d
   bool hasBdLeft2d(const index_t rowInd) const{
@@ -362,17 +359,10 @@ private:
   z_t m_z = {};
 
   /*
-    graph: contains a list such that
+    graph:
 
-    first col   : contains GIDs of cells where we want velocity
-    col 1,2,3,4 : contains GIDs of neighboring cells needed for stencil
-    the order of the neighbors is: west, north, east, south
-    if needed:
-       col 4,5,6,7 : GIDs of degree2 neighboring cells needed for stencil
-       the order of the neighbors is: west, north, east, south
-
-       col 8,9,10,11: GIDs of degree3 neighboring cells needed for stencil
-       the order of the neighbors is: west, north, east, south
+    first col : contains GIDs of cells where we want velocity
+    col 1,... : contains GIDs of neighboring cells needed for stencil
   */
   graph_t m_graph = {};
 
