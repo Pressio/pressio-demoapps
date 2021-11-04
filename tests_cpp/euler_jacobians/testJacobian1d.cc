@@ -1,8 +1,8 @@
+
 #include <iostream>
-#include <stdio.h>    
-#include <cmath>    
+#include <stdio.h>
+#include <cmath>
 #include "pressiodemoapps/euler1d.hpp"
-// #include <Eigen/Dense>
 
 int main(){
 
@@ -18,7 +18,7 @@ int main(){
   Eigen::Matrix<scalar_t,1,-1> UL(3);
   UL(0) = rhoL;
   UL(1) = rhoL*uL;
-  UL(2) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL;  
+  UL(2) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL;
 
   scalar_t rhoR = 0.125;
   scalar_t uR = -0.8;
@@ -26,7 +26,7 @@ int main(){
   Eigen::Matrix<scalar_t,1,-1> UR(3);
   UR(0) = rhoR;
   UR(1) = rhoR*uR;
-  UR(2) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR;  
+  UR(2) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR;
 
 
   Eigen::Matrix<scalar_t,1,-1> flux(3);
@@ -36,7 +36,6 @@ int main(){
   Eigen::Matrix<scalar_t,-1,-1> JR(3,3);
   Eigen::Matrix<scalar_t,-1,-1> JL_FD(3,3);
   Eigen::Matrix<scalar_t,-1,-1> JR_FD(3,3);
-
 
   pressiodemoapps::ee::impl::eeRusanovFluxJacobianThreeDof(JL,JR,UL,UR,gamma);
   pressiodemoapps::ee::impl::eeRusanovFluxThreeDof(fluxBase,UL,UR,gamma);

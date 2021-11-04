@@ -4,8 +4,8 @@
 
 #include "array"
 #include "vector"
-#include "./impl_reconstruction/weno3.hpp"
-#include "./impl_reconstruction/weno5.hpp"
+#include "./impl/weno3.hpp"
+#include "./impl/weno5.hpp"
 
 namespace pressiodemoapps{
 

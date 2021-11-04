@@ -5,8 +5,7 @@
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./flux_enum.hpp"
-#include "./reconstruction.hpp"
+#include "./schemes_info.hpp"
 
 namespace pressiodemoapps{
 enum class DiffusionReaction1d{
@@ -25,7 +24,7 @@ enum class DiffusionReaction1d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/diffusionReaction1d/diff_reac_1d_impl.hpp"
+#include "./impl/diffusion_reaction_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
 // namespace impldiffreac{

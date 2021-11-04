@@ -2,6 +2,10 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/pressiodemoapps)
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
+if (PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
+add_subdirectory(eigen_crs_matrix)
+endif()
+
 add_subdirectory(ccuMeshObj)
 add_subdirectory(ccuMeshObjSpecialCellsLists)
 add_subdirectory(weno3)
@@ -9,17 +13,18 @@ add_subdirectory(weno5)
 add_subdirectory(rankine_hugoniot)
 add_subdirectory(euler_jacobians)
 
-# ### 1d problems ###
+### 1d problems ###
 add_subdirectory(1d_diffusion_reaction_explicit)
 add_subdirectory(1d_diffusion_reaction_implicit)
 add_subdirectory(1d_linear_adv_convergence)
 add_subdirectory(1d_linear_adv_sample_mesh_testA)
 add_subdirectory(1d_linear_adv_sample_mesh_testB)
 add_subdirectory(1d_euler_convergence)
-add_subdirectory(1d_sod)
+add_subdirectory(1d_sod_explicit)
+add_subdirectory(1d_sod_implicit)
 add_subdirectory(1d_lax)
 
-# ### 2d problems ###
+### 2d problems ###
 add_subdirectory(2d_smooth)
 add_subdirectory(2d_kelvin_helmholtz)
 add_subdirectory(2d_riemann)

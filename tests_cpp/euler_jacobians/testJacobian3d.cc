@@ -1,12 +1,12 @@
+
 #include <iostream>
-#include <stdio.h>    
-#include <cmath>    
+#include <stdio.h>
+#include <cmath>
 #include "pressiodemoapps/euler3d.hpp"
-// #include <Eigen>
 
 int main(){
   auto passedString = "PASS";
-  double tol = 1e-4; 
+  double tol = 1e-4;
   double eps = 1e-6;
   using scalar_t = double;
   scalar_t gamma = 1.4;
@@ -20,7 +20,7 @@ int main(){
   UL(1) = rhoL*uL;
   UL(2) = rhoL*vL;
   UL(3) = rhoL*wL;
-  UL(4) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL + 0.5*rhoL*vL*vL + 0.5*rhoL*wL*wL;  
+  UL(4) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL + 0.5*rhoL*vL*vL + 0.5*rhoL*wL*wL;
 
   scalar_t rhoR = 0.125;
   scalar_t uR = -0.8;
@@ -32,12 +32,12 @@ int main(){
   UR(1) = rhoR*uR;
   UR(2) = rhoR*vR;
   UR(3) = rhoR*wR;
-  UR(4) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR + 0.5*rhoR*vR*vR + 0.5*rhoR*wR*wR;  
+  UR(4) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR + 0.5*rhoR*vR*vR + 0.5*rhoR*wR*wR;
 
   scalar_t normals[3];
-  normals[0] = 1; 
-  normals[1] = 0; 
-  normals[2] = 0; 
+  normals[0] = 1;
+  normals[1] = 0;
+  normals[2] = 0;
 
   Eigen::Matrix<scalar_t,1,-1> flux(5);
   Eigen::Matrix<scalar_t,1,-1> fluxBase(5);
@@ -67,9 +67,9 @@ int main(){
     UR(i) -= eps;
   }
 
-  normals[0] = 0; 
-  normals[1] = 1; 
-  normals[2] = 0; 
+  normals[0] = 0;
+  normals[1] = 1;
+  normals[2] = 0;
 
   pressiodemoapps::ee::impl::eeRusanovFluxJacobianFiveDof(JL,JR,UL,UR,normals,gamma);
   pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(fluxBase,UL,UR,normals,gamma);
@@ -91,9 +91,9 @@ int main(){
     UR(i) -= eps;
   }
 
-  normals[0] = 0; 
-  normals[1] = 0; 
-  normals[2] = 1; 
+  normals[0] = 0;
+  normals[1] = 0;
+  normals[2] = 1;
 
   pressiodemoapps::ee::impl::eeRusanovFluxJacobianFiveDof(JL,JR,UL,UR,normals,gamma);
   pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(fluxBase,UL,UR,normals,gamma);
@@ -117,5 +117,5 @@ int main(){
 
 
   std::cout << passedString << std::endl;
-  
+
 }

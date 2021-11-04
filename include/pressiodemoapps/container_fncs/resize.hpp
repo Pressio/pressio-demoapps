@@ -3,6 +3,10 @@
 #define PRESSIODEMOAPPS_RESIZE_FUNC_HPP_
 
 #include <vector>
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+#endif
 
 namespace pressiodemoapps{
 

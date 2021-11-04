@@ -1,12 +1,12 @@
+
 #include <iostream>
-#include <stdio.h>    
-#include <cmath>    
+#include <stdio.h>
+#include <cmath>
 #include "pressiodemoapps/euler2d.hpp"
-// #include <Eigen>
 
 int main(){
   auto passedString = "PASS";
-  double tol = 1e-4; 
+  double tol = 1e-4;
   double eps = 1e-6;
   using scalar_t = double;
   scalar_t gamma = 1.4;
@@ -19,7 +19,7 @@ int main(){
   UL(0) = rhoL;
   UL(1) = rhoL*uL;
   UL(2) = rhoL*vL;
-  UL(3) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL + 0.5*rhoL*vL*vL;  
+  UL(3) = pL / (gamma - 1.) + 0.5*rhoL*uL*uL + 0.5*rhoL*vL*vL;
 
   scalar_t rhoR = 0.125;
   scalar_t uR = -0.8;
@@ -29,10 +29,10 @@ int main(){
   UR(0) = rhoR;
   UR(1) = rhoR*uR;
   UR(2) = rhoR*vR;
-  UR(3) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR + 0.5*rhoR*vR*vR;  
+  UR(3) = pR / (gamma - 1.) + 0.5*rhoR*uR*uR + 0.5*rhoR*vR*vR;
   scalar_t normals[2];
-  normals[0] = 1; 
-  normals[1] = 0; 
+  normals[0] = 1;
+  normals[1] = 0;
   Eigen::Matrix<scalar_t,1,-1> flux(4);
   Eigen::Matrix<scalar_t,1,-1> fluxBase(4);
   Eigen::Matrix<scalar_t,-1,-1> JL(4,4);
@@ -59,8 +59,8 @@ int main(){
     UR(i) -= eps;
   }
 
-  normals[0] = 0; 
-  normals[1] = 1; 
+  normals[0] = 0;
+  normals[1] = 1;
   pressiodemoapps::ee::impl::eeRusanovFluxJacobianFourDof(JL,JR,UL,UR,normals,gamma);
   pressiodemoapps::ee::impl::eeRusanovFluxFourDof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 4; i++){
@@ -83,5 +83,5 @@ int main(){
 
 
   std::cout << passedString << std::endl;
-  
+
 }
