@@ -65,7 +65,6 @@ T createEe2dImpl(const mesh_t & meshObj,
     }
   }
 
-
   return T(meshObj, probEnum, recEnum, fluxEnum, icId);
 }
 } //end pressiodemoapps::impl
@@ -80,13 +79,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::ee::impl::Euler2dAppT<
-    scalar_t, mesh_t,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,-1, Eigen::RowMajor>
-    >;
-
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dAppWithJacobian<scalar_t, mesh_t>;
   return impl::createEe2dImpl<mesh_t, p_t>(meshObj, recEnum, probEnum,
 					   fluxEnum, initCondIdentifier);
 }

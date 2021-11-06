@@ -111,105 +111,6 @@ public:
     return true;
   }
 
-private:
-  auto boundsImpl(int i) const
-  {
-    using numlimits = std::numeric_limits<scalar_type>;
-    auto res = std::make_tuple(numlimits::max(), numlimits::min());
-
-    const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
-    for (int i=0; i<m_stencilMeshSize; ++i){
-      auto & v1 = res.get<0>(res);
-      auto & v2 = res.get<1>(res);
-      v1 = std::min(v1, a(i));
-      v2 = std::max(v2, a(i));
-    }
-    return res;
-  }
-
-  void allocateAndSetup(const std::string & meshDir)
-  {
-    pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
-					m_cellDeltas,
-					m_cellDeltasInv,
-					m_stencilSize,
-					m_stencilMeshSize,
-					m_sampleMeshSize);
-    if(m_dim==3 and m_stencilSize==7){
-      throw std::runtime_error("3D mesh with 7pt stencil not yet supported.");
-    }
-
-    pressiodemoapps::resize(m_x, m_stencilMeshSize);
-    pressiodemoapps::resize(m_y, m_stencilMeshSize);
-    pressiodemoapps::resize(m_z, m_stencilMeshSize);
-    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_dim, m_x, m_y, m_z);
-
-    // compute the number of of neighbors
-    const auto numNeighbors = (m_stencilSize-1)*m_dim;
-    // the graph # of cols is num of neighbors + 1 becuase
-    // the graph col(0) contains the global ID of the cell itself
-    const auto graphNumCols = numNeighbors + 1;
-    pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols);
-    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols);
-
-    // figure out how many cells are near the boundaries
-    for (index_t it=0; it<m_sampleMeshSize; ++it)
-    {
-      if (m_dim==1)
-      {
-	const auto b1 = hasBdLeft1d(it);
-	const auto b2 = hasBdRight1d(it);
-	// if either is true, this cell is near the BD, so
-	// add its graph row to corresponding list
-	if (b1 or b2){
-	  m_rowsForCellsBd.push_back(it);
-	}
-	else{
-	  m_rowsForCellsInner.push_back(it);
-	}
-      }
-
-      else if (m_dim==2)
-      {
-	const auto b1 = hasBdLeft2d(it);
-	const auto b2 = hasBdFront2d(it);
-	const auto b3 = hasBdRight2d(it);
-	const auto b4 = hasBdBack2d(it);
-
-	// if either is true, this cell is near the BD, so
-	// add its graph row to corresponding list
-	if (b1 or b2 or b3 or b4){
-	  m_rowsForCellsBd.push_back(it);
-	}
-	else{
-	  m_rowsForCellsInner.push_back(it);
-	}
-      }
-
-      else if (m_dim==3)
-      {
-	const auto b1 = hasBdLeft3d(it);
-	const auto b2 = hasBdFront3d(it);
-	const auto b3 = hasBdRight3d(it);
-	const auto b4 = hasBdBack3d(it);
-	const auto b5 = hasBdBottom3d(it);
-	const auto b6 = hasBdTop3d(it);
-
-	// if either is true, this cell is near the BD, so
-	// add its graph row to corresponding list
-	if (b1 or b2 or b3 or b4 or b5 or b6){
-	  m_rowsForCellsBd.push_back(it);
-	}
-	else{
-	  m_rowsForCellsInner.push_back(it);
-	}
-      }
-      else{
-	throw std::runtime_error("Invalid dimension");
-      }
-    }
-  }
-
   // 1d
   bool hasBdLeft1d(const index_t rowInd) const{
     if (m_graph(rowInd, 1)==-1) return true;
@@ -345,6 +246,106 @@ private:
       if (m_graph(rowInd, 12)==-1) return true;
     }
     return false;
+  }
+
+
+private:
+  auto boundsImpl(int i) const
+  {
+    using numlimits = std::numeric_limits<scalar_type>;
+    auto res = std::make_tuple(numlimits::max(), numlimits::min());
+
+    const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
+    for (int i=0; i<m_stencilMeshSize; ++i){
+      auto & v1 = res.get<0>(res);
+      auto & v2 = res.get<1>(res);
+      v1 = std::min(v1, a(i));
+      v2 = std::max(v2, a(i));
+    }
+    return res;
+  }
+
+  void allocateAndSetup(const std::string & meshDir)
+  {
+    pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
+					m_cellDeltas,
+					m_cellDeltasInv,
+					m_stencilSize,
+					m_stencilMeshSize,
+					m_sampleMeshSize);
+    if(m_dim==3 and m_stencilSize==7){
+      throw std::runtime_error("3D mesh with 7pt stencil not yet supported.");
+    }
+
+    pressiodemoapps::resize(m_x, m_stencilMeshSize);
+    pressiodemoapps::resize(m_y, m_stencilMeshSize);
+    pressiodemoapps::resize(m_z, m_stencilMeshSize);
+    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_dim, m_x, m_y, m_z);
+
+    // compute the number of of neighbors
+    const auto numNeighbors = (m_stencilSize-1)*m_dim;
+    // the graph # of cols is num of neighbors + 1 becuase
+    // the graph col(0) contains the global ID of the cell itself
+    const auto graphNumCols = numNeighbors + 1;
+    pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols);
+    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols);
+
+    // figure out how many cells are near the boundaries
+    for (index_t it=0; it<m_sampleMeshSize; ++it)
+    {
+      if (m_dim==1)
+      {
+	const auto b1 = hasBdLeft1d(it);
+	const auto b2 = hasBdRight1d(it);
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
+	if (b1 or b2){
+	  m_rowsForCellsBd.push_back(it);
+	}
+	else{
+	  m_rowsForCellsInner.push_back(it);
+	}
+      }
+
+      else if (m_dim==2)
+      {
+	const auto b1 = hasBdLeft2d(it);
+	const auto b2 = hasBdFront2d(it);
+	const auto b3 = hasBdRight2d(it);
+	const auto b4 = hasBdBack2d(it);
+
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
+	if (b1 or b2 or b3 or b4){
+	  m_rowsForCellsBd.push_back(it);
+	}
+	else{
+	  m_rowsForCellsInner.push_back(it);
+	}
+      }
+
+      else if (m_dim==3)
+      {
+	const auto b1 = hasBdLeft3d(it);
+	const auto b2 = hasBdFront3d(it);
+	const auto b3 = hasBdRight3d(it);
+	const auto b4 = hasBdBack3d(it);
+	const auto b5 = hasBdBottom3d(it);
+	const auto b6 = hasBdTop3d(it);
+
+	// if either is true, this cell is near the BD, so
+	// add its graph row to corresponding list
+	if (b1 or b2 or b3 or b4 or b5 or b6){
+	  m_rowsForCellsBd.push_back(it);
+	}
+	else{
+	  m_rowsForCellsInner.push_back(it);
+	}
+      }
+      else{
+	throw std::runtime_error("Invalid dimension");
+      }
+    }
   }
 
 private:

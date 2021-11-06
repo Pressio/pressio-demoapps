@@ -32,9 +32,7 @@ void sin2dEulerIC(state_type & state,
       state(ind+2) = prim[0]*prim[2];
       state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
     }
-
 }
-
 
 template<class state_type, class mesh_t, class scalar_type>
 void KelvinHelmholtzIC(state_type & state,
@@ -133,7 +131,6 @@ void sedov2dIC(state_type & state,
 	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
     }
-
 }
 
 /*
@@ -155,7 +152,6 @@ void sedov2dsymmetryIC(state_type & state,
   constexpr int numDofPerCell = 4;
   constexpr auto zero  = static_cast<scalar_type>(0);
   constexpr auto one   = static_cast<scalar_type>(1);
-  // constexpr auto three = static_cast<scalar_type>(3);
 
   const auto dx  = meshObj.dx();
   const auto dy  = meshObj.dy();
@@ -200,7 +196,6 @@ void sedov2dsymmetryIC(state_type & state,
 	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
 	}
     }
-
 }
 
 /*
@@ -218,8 +213,6 @@ void riemann2dIC1(state_type & state,
   constexpr auto one = static_cast<scalar_type>(1);
   constexpr auto two = static_cast<scalar_type>(2);
 
-  // const auto dx  = meshObj.dx();
-  // const auto dy  = meshObj.dy();
   const auto & x= meshObj.viewX();
   const auto & y= meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
@@ -266,10 +259,7 @@ void riemann2dIC2(state_type & state,
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one = static_cast<scalar_type>(1);
-  // constexpr auto two = static_cast<scalar_type>(2);
 
-  // const auto dx  = meshObj.dx();
-  // const auto dy  = meshObj.dy();
   const auto x0 = static_cast<scalar_type>(0.8);
   const auto y0 = static_cast<scalar_type>(0.8);
   const auto gammaMinusOne = gamma - one;
@@ -319,7 +309,6 @@ void normalShock2dIC(state_type & state,
   constexpr auto xShock = one/six;
 
   const auto & x  = meshObj.viewX();
-  // const auto & y  = meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
   const auto gammaMinusOneInv = one/gammaMinusOne;
 
@@ -341,21 +330,18 @@ void normalShock2dIC(state_type & state,
   for (int i=0; i<x.size(); ++i)
     {
       const auto ind = i*numDofPerCell;
-      if (x(i) < xShock)
-	{
-	  state(ind)   = primPostShock[0];
-	  state(ind+1) = primPostShock[0]*primPostShock[1];
-	  state(ind+2) = primPostShock[0]*primPostShock[2];
-	  state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
-	}
-
+      if (x(i) < xShock){
+	state(ind)   = primPostShock[0];
+	state(ind+1) = primPostShock[0]*primPostShock[1];
+	state(ind+2) = primPostShock[0]*primPostShock[2];
+	state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPostShock);
+      }
       else {
         state(ind)   = primPreShock[0];
         state(ind+1) = primPreShock[0]*primPreShock[1];
         state(ind+2) = primPreShock[0]*primPreShock[2];
         state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, primPreShock);
       }
-
     }
 }
 

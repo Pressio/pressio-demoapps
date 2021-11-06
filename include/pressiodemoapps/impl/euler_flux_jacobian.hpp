@@ -96,13 +96,12 @@ void eeRusanovFluxJacobianThreeDof(T & JL, T & JR,
   }
 }
 
-
 template<class T, typename T2, typename sc_t, typename normal_t>
 void eeRusanovFluxJacobianFourDof(T & JL, T & JR,
-         const T2 & qL,
-         const T2 & qR,
-        const normal_t & n,
-         const sc_t gamma)
+				  const T2 & qL,
+				  const T2 & qR,
+				  const normal_t & n,
+				  const sc_t gamma)
 {
   constexpr auto one  = static_cast<sc_t>(1);
   constexpr auto two  = static_cast<sc_t>(2);

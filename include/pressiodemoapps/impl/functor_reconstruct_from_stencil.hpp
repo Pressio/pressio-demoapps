@@ -65,7 +65,6 @@ private:
   ValueType & m_uMinusHalfPos;
   ValueType & m_uPlusHalfNeg;
   ValueType & m_uPlusHalfPos;
-
 };
 
 
@@ -76,11 +75,11 @@ class ReconstructorFromStencilThreeDofPerCell
 public:
   ReconstructorFromStencilThreeDofPerCell() = delete;
   ReconstructorFromStencilThreeDofPerCell(::pressiodemoapps::InviscidFluxReconstruction recEn,
-					const StencilValuesType & stencilVals,
-					ValueType & uMinusHalfNeg,
-					ValueType & uMinusHalfPos,
-					ValueType & uPlusHalfNeg,
-					ValueType & uPlusHalfPos)
+					  const StencilValuesType & stencilVals,
+					  ValueType & uMinusHalfNeg,
+					  ValueType & uMinusHalfPos,
+					  ValueType & uPlusHalfNeg,
+					  ValueType & uPlusHalfPos)
     : m_recEn(recEn),
       m_stencilVals(stencilVals),
       m_uMinusHalfNeg(uMinusHalfNeg),
@@ -211,11 +210,11 @@ class ReconstructorFromStencilFourDofPerCell
 public:
   ReconstructorFromStencilFourDofPerCell() = delete;
   ReconstructorFromStencilFourDofPerCell(::pressiodemoapps::InviscidFluxReconstruction recEn,
-					const StencilValuesType & stencilVals,
-					ValueType & uMinusHalfNeg,
-					ValueType & uMinusHalfPos,
-					ValueType & uPlusHalfNeg,
-					ValueType & uPlusHalfPos)
+					 const StencilValuesType & stencilVals,
+					 ValueType & uMinusHalfNeg,
+					 ValueType & uMinusHalfPos,
+					 ValueType & uPlusHalfNeg,
+					 ValueType & uPlusHalfPos)
     : m_recEn(recEn),
       m_stencilVals(stencilVals),
       m_uMinusHalfNeg(uMinusHalfNeg),
@@ -374,11 +373,11 @@ class ReconstructorFromStencilFiveDofPerCell
 public:
   ReconstructorFromStencilFiveDofPerCell() = delete;
   ReconstructorFromStencilFiveDofPerCell(::pressiodemoapps::InviscidFluxReconstruction recEn,
-					const StencilValuesType & stencilVals,
-					ValueType & uMinusHalfNeg,
-					ValueType & uMinusHalfPos,
-					ValueType & uPlusHalfNeg,
-					ValueType & uPlusHalfPos)
+					 const StencilValuesType & stencilVals,
+					 ValueType & uMinusHalfNeg,
+					 ValueType & uMinusHalfPos,
+					 ValueType & uPlusHalfNeg,
+					 ValueType & uPlusHalfPos)
     : m_recEn(recEn),
       m_stencilVals(stencilVals),
       m_uMinusHalfNeg(uMinusHalfNeg),

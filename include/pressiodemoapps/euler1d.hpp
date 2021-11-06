@@ -78,7 +78,6 @@ auto createProblemEigen(const mesh_t & meshObj,
 
   using scalar_t = typename mesh_t::scalar_t;
   using p_t = ::pressiodemoapps::impl::EigenEuler1dAppWithJacobian<scalar_t, mesh_t>;
-  //  using p_t = ::pressiodemoapps::impl::EigenEuler1dAppRhsOnly<scalar_t, mesh_t>;
   return impl::createEuler1dImpl<mesh_t, p_t>(meshObj, probEnum, recEnum, fluxEnum);
 }
 #endif
