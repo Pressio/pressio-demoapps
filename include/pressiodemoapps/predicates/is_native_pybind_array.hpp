@@ -2,6 +2,8 @@
 #ifndef PRESSIODEMOAPPS_NATIVE_PYBIND_ARRAY_HPP_
 #define PRESSIODEMOAPPS_NATIVE_PYBIND_ARRAY_HPP_
 
+#include <type_traits>
+
 namespace pressiodemoapps{ namespace predicates {
 
 #include <type_traits>

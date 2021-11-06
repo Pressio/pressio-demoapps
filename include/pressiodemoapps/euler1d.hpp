@@ -2,15 +2,10 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER1D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "./flux_enum.hpp"
+#include "./schemes_info.hpp"
 #include "./euler_compute_energy.hpp"
 
 namespace pressiodemoapps{
@@ -22,11 +17,11 @@ enum class Euler1d{
 }//end namespace pressiodemoapps
 
 // this is here because it needs to see the enum above
-#include "./impl_apps/euler1d/euler1d_app_impl.hpp"
+#include "./impl/euler_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-
 namespace impl{
+
 template<class mesh_t, class T>
 T createEuler1dImpl(const mesh_t & meshObj,
 		    ::pressiodemoapps::Euler1d probEnum,
@@ -69,6 +64,7 @@ T createEuler1dForPyB(const mesh_t & meshObj,
 					    InviscidFluxScheme::Rusanov);
 }
 #endif
+
 } //end pressiodemoapps::impl
 
 
@@ -81,8 +77,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  //using p_t = ::pressiodemoapps::impl::Euler1dAppRhsOnly/*EigenEuler1dAppTWithJacobian*/<scalar_t, mesh_t>;
-  using p_t = ::pressiodemoapps::impl::EigenEuler1dAppRhsOnly<scalar_t, mesh_t>;
+  using p_t = ::pressiodemoapps::impl::EigenEuler1dAppWithJacobian<scalar_t, mesh_t>;
   return impl::createEuler1dImpl<mesh_t, p_t>(meshObj, probEnum, recEnum, fluxEnum);
 }
 #endif

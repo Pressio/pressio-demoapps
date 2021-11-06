@@ -135,7 +135,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------w
   // advection 1d
   using ad1d_t =
-    pda::ad::impl::AdvectionAppT<
+    pda::impladv::AdvectionAppT<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
@@ -153,7 +153,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Euler 1d
   using ee1d_t =
-    pda::ee::impl::Euler1dAppT<
+    pda::impl::Euler1dAppRhsOnly<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
@@ -168,7 +168,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Euler 2d
   using ee2d_t =
-    pda::ee::impl::Euler2dAppT<
+    pda::ee::impl::Euler2dAppRhsOnly<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
@@ -183,7 +183,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Swe 2d
   using swe2d_t =
-    pda::swe::impl::Swe2dAppT<
+    pda::implswe::Swe2dAppT<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type

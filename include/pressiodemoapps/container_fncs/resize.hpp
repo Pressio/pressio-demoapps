@@ -3,39 +3,58 @@
 #define PRESSIODEMOAPPS_RESIZE_FUNC_HPP_
 
 #include <vector>
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+#endif
 
 namespace pressiodemoapps{
 
 template<class value_type, class sizetype>
-void resize(std::vector<value_type> & objIn,
+void resize(std::vector<value_type> & a,
 	    sizetype newSize)
 {
-  objIn.resize(newSize);
+  a.resize(newSize);
 }
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class value_type, class sizetype>
-void resize(Eigen::Matrix<value_type, -1, 1> & objIn,
+void resize(Eigen::Matrix<value_type, -1, 1> & a,
 	    sizetype newSize)
 {
-  objIn.resize(newSize);
+  a.resize(newSize);
 }
 
 template<class value_type, class sizetype>
-void resize(Eigen::Matrix<value_type, -1, -1, Eigen::RowMajor> & objIn,
+void resize(Eigen::Matrix<value_type, -1, -1, Eigen::RowMajor> & M,
 	    sizetype rows,
 	    sizetype cols)
 {
-  objIn.resize(rows, cols);
+  M.resize(rows, cols);
 }
 
-
 template<class value_type, class sizetype>
-void resize(Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor> & objIn,
+void resize(Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor> & M,
 	    sizetype rows,
 	    sizetype cols)
 {
-  objIn.resize(rows, cols);
+  M.resize(rows, cols);
+}
+
+template<class value_type, class IntType, class sizetype>
+void resize(Eigen::SparseMatrix<value_type, Eigen::RowMajor, IntType> M,
+	    sizetype rows,
+	    sizetype cols)
+{
+  M.resize(rows, cols);
+}
+
+template<class value_type, class IntType, class sizetype>
+void resize(Eigen::SparseMatrix<value_type, Eigen::ColMajor, IntType> M,
+	    sizetype rows,
+	    sizetype cols)
+{
+  M.resize(rows, cols);
 }
 #endif
 
@@ -44,27 +63,27 @@ template<class T, class sizetype>
 typename std::enable_if<
   pressiodemoapps::predicates::is_array_pybind<T>::value
   >::type
-resize(T & objIn, sizetype newSize)
+resize(T & o, sizetype newSize)
 {
-  if (objIn.ndim() != 1 ){
+  if (o.ndim() != 1 ){
     throw std::runtime_error
       ("Resize overload for ndim=1 called on pybind array with ndim!=1");
   }
 
-  objIn.resize({newSize}, false);
+  o.resize({newSize}, false);
 }
 
 template<class T, class sizetype>
 typename std::enable_if<
   pressiodemoapps::predicates::is_array_pybind<T>::value
   >::type
-resize(T & objIn, sizetype rows, sizetype cols)
+resize(T & o, sizetype rows, sizetype cols)
 {
-  if (objIn.ndim() != 2 ){
+  if (o.ndim() != 2 ){
     throw std::runtime_error
       ("Resize overload for ndim=2 called on pybind array with ndim!=2");
   }
-  objIn.resize({rows, cols}, false);
+  o.resize({rows, cols}, false);
 }
 #endif
 

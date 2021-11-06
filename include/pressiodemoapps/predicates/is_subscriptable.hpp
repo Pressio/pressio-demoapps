@@ -2,6 +2,8 @@
 #ifndef PRESSIODAPPS_HAS_SUBSCRIPT_OPERATOR_HPP_
 #define PRESSIODAPPS_HAS_SUBSCRIPT_OPERATOR_HPP_
 
+#include <type_traits>
+
 namespace pressiodemoapps{ namespace predicates {
 
 template <typename T, typename arg_t, typename enable = void>
