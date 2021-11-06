@@ -168,7 +168,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Euler 2d
   using ee2d_t =
-    pda::ee::impl::Euler2dAppT<
+    pda::ee::impl::Euler2dAppRhsOnly<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
