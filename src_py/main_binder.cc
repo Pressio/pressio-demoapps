@@ -135,7 +135,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------w
   // advection 1d
   using ad1d_t =
-    pda::ad::impl::AdvectionAppT<
+    pda::impladv::AdvectionAppT<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
@@ -153,7 +153,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Euler 1d
   using ee1d_t =
-    pda::ee::impl::Euler1dAppT<
+    pda::impl::Euler1dAppRhsOnly<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,
@@ -168,7 +168,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Euler 2d
   using ee2d_t =
-    pda::ee::impl::Euler2dAppT<
+    pda::ee::impl::Euler2dAppRhsOnly<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
@@ -183,7 +183,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // Swe 2d
   using swe2d_t =
-    pda::swe::impl::Swe2dAppT<
+    pda::implswe::Swe2dAppT<
       pressiodemoappspy::scalar_t,
     ccumesh_t,
     pressiodemoappspy::py_cstyle_arr_sc, // state type
@@ -217,45 +217,43 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // add more as the c++ grows
   // -----------------------------------------------
   mTopLevel.def("createProblem",
-	      &pda::createAdv1dForPy<ccumesh_t, ad1d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createAdv1dForPy<ccumesh_t, ad1d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler1dForPyA<ccumesh_t, ee1d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::impl::createEuler1dForPyA<ccumesh_t, ee1d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler1dForPyB<ccumesh_t, ee1d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::impl::createEuler1dForPyB<ccumesh_t, ee1d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler2dForPyA<ccumesh_t, ee2d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createEuler2dForPyA<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler2dForPyB<ccumesh_t, ee2d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createEuler2dForPyB<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler2dForPyC<ccumesh_t, ee2d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createEuler2dForPyC<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
-	      pybind11::return_value_policy::take_ownership);
+		&pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("createProblem",
-	      &pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
-	      pybind11::return_value_policy::take_ownership);
-
-
+		&pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
 }
 #endif

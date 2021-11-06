@@ -5,7 +5,7 @@
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
+#include "./schemes_info.hpp"
 
 namespace pressiodemoapps{
 enum class Advection1d{
@@ -13,7 +13,7 @@ enum class Advection1d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/advection1d/linear_adv_impl.hpp"
+#include "./impl/advection_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
 namespace impl{
@@ -46,7 +46,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   using scalar_t = typename mesh_t::scalar_t;
-  using return_type = ::pressiodemoapps::ad::impl::AdvectionAppT<
+  using return_type = ::pressiodemoapps::impladv::AdvectionAppT<
     scalar_t, mesh_t, Eigen::Matrix<scalar_t,-1,1>, Eigen::Matrix<scalar_t,-1,1>
     >;
   return impl::createLinAdv1dImpl<mesh_t, return_type>(meshObj, probEnum, recEnum);

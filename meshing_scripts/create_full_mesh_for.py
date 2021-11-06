@@ -18,7 +18,7 @@ valid = ["linadv1d_s3", \
          "lax1d_s3", \
          "lax1d_s5", \
          "lax1d_s7", \
-         # 
+         #
          ##############
          ##### 2d #####
          ##############
@@ -199,8 +199,8 @@ if __name__== "__main__":
 
   elif ("euler3dsmooth" in pName):
     s = int(pName[-1])
-    if (s!=3):
-      print("3D currently only supports 1st order, use _s3")
+    if (s!=3 or s!=5):
+      print("3D currently only supports 1st order or Weno3, use _s3 or _s5")
       sys.exit(1)
     args = ("python", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]), str(args.numCells[2]),
@@ -212,8 +212,8 @@ if __name__== "__main__":
 
   elif ("sedov3dsym" in pName):
     s = int(pName[-1])
-    if (s!=3):
-      print("3D currently only supports 1st order, use _s3")
+    if (s!=3 or s!=5):
+      print("3D currently only supports 1st order or Weno3, use _s3 or _s5")
       sys.exit(1)
     args = ("python", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]), str(args.numCells[2]),

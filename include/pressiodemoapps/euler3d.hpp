@@ -2,15 +2,11 @@
 #ifndef PRESSIODEMOAPPS_EULER3D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER3D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./schemes_info.hpp"
+#include "./euler_compute_energy.hpp"
 
 namespace pressiodemoapps{
 enum class Euler3d{
@@ -19,7 +15,7 @@ enum class Euler3d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/euler3d/euler3d_app_impl.hpp"
+#include "./impl/euler_3d_prob_class.hpp"
 
 namespace pressiodemoapps{
 namespace impl{

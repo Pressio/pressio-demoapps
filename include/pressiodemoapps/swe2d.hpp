@@ -2,15 +2,10 @@
 #ifndef PRESSIODEMOAPPS_SWE2D_INC_HPP_
 #define PRESSIODEMOAPPS_SWE2D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./schemes_info.hpp"
 
 namespace pressiodemoapps{
 enum class Swe2d{
@@ -18,7 +13,7 @@ enum class Swe2d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/swe2d/swe2d_app_impl.hpp"
+#include "./impl/swe_2d_prob_class.hpp"
 
 namespace pressiodemoapps{
 namespace impl{
@@ -51,7 +46,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::swe::impl::Swe2dAppT<
+  using p_t = ::pressiodemoapps::implswe::Swe2dAppT<
     scalar_t, mesh_t,
     Eigen::Matrix<scalar_t,-1,1>,
     Eigen::Matrix<scalar_t,-1,1>,
@@ -70,7 +65,6 @@ auto createProblemEigen(const mesh_t & meshObj,
   return createProblemEigen(meshObj, probEnum, recEnum,
 			    InviscidFluxScheme::Rusanov,1);
 }
-
 #endif
 
 

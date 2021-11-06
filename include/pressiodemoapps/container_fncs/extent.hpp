@@ -2,6 +2,11 @@
 #ifndef PRESSIODEMOAPPS_EXTENT_FUNC_HPP_
 #define PRESSIODEMOAPPS_EXTENT_FUNC_HPP_
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+#endif
+
 namespace pressiodemoapps{
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
