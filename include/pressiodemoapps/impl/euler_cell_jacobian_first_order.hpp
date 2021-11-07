@@ -87,7 +87,6 @@ public:
   }
 };
 
-
 template<
   int dim, int numDofPerCell,
   class ScalarType,
@@ -168,16 +167,32 @@ public:
     auto rowIndex  = smPt*numDofPerCell;
     auto col_i     = graph(smPt, 0)*numDofPerCell;
 
-    // this always exists because it refers to this cell's dofs
     for (int k=0; k<numDofPerCell; ++k){
       for (int j=0; j<numDofPerCell; ++j){
 	m_J.coeffRef(rowIndex+k, col_i+j) += (m_JLpos(k,j) - m_JRneg(k,j))*m_hInv;
       }
     }
 
+    if (l0 != -1){
+      auto col_im1 = l0*numDofPerCell;
+      for (int k=0; k<numDofPerCell; ++k){
+	for (int j=0; j<numDofPerCell; ++j){
+	  m_J.coeffRef(rowIndex+k, col_im1+j) += m_JLneg(k,j)*m_hInv;
+	}
+      }
+    }
+
+    if (r0 != -1){
+      auto col_ip1 = r0*numDofPerCell;
+      for (int k=0; k<numDofPerCell; ++k){
+	for (int j=0; j<numDofPerCell; ++j){
+	  m_J.coeffRef(rowIndex+k, col_ip1+j) += -m_JRpos(k,j)*m_hInv;
+	}
+      }
+    }
+
     if (bc_type != 2)
     {
-      // handle Jac wrt neighbors
       if (l0 == -1){
 	for (int k=0; k<numDofPerCell; ++k){
 	  for (int j=0; j<numDofPerCell; ++j){
@@ -186,28 +201,10 @@ public:
 	}
       }
 
-      if (l0 != -1){
-	auto col_im1 = l0*numDofPerCell;
-	for (int k=0; k<numDofPerCell; ++k){
-	  for (int j=0; j<numDofPerCell; ++j){
-	    m_J.coeffRef(rowIndex+k, col_im1+j) += m_JLneg(k,j)*m_hInv;
-	  }
-	}
-      }
-
       if (r0 == -1){
 	for (int k=0; k<numDofPerCell; ++k){
 	  for (int j=0; j<numDofPerCell; ++j){
 	    m_J.coeffRef(rowIndex+k, col_i+j) += (factors[j]*-m_JRpos(k,j))*m_hInv;
-	  }
-	}
-      }
-
-      if (r0 != -1){
-	auto col_ip1 = r0*numDofPerCell;
-	for (int k=0; k<numDofPerCell; ++k){
-	  for (int j=0; j<numDofPerCell; ++j){
-	    m_J.coeffRef(rowIndex+k, col_ip1+j) += -m_JRpos(k,j)*m_hInv;
 	  }
 	}
       }

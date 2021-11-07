@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
   ode_state_t state = appObj.initialCondition();
 
-  using ode_tag = pressio::ode::implicitmethods::Euler;
+  using ode_tag = pressio::ode::implicitmethods::CrankNicolson;
   using stepper_t = pressio::ode::ImplicitStepper<
     ode_tag, ode_state_t, ode_res_t, ode_jac_t, app_t>;
   stepper_t stepperObj(state, appObj);
@@ -45,10 +45,10 @@ int main(int argc, char *argv[])
     pressio::solvers::nonlinear::createNewtonRaphson(stepperObj, state, linSolverObj);
   NonLinSolver.setTolerance(1e-5);
 
-  FomObserver<ode_state_t> Obs("doubleMach2d_solution.bin", 50);
+  FomObserver<ode_state_t> Obs("doubleMach2d_solution.bin", 10);
 
-  const auto dt = 0.0005;
-  const auto Nsteps = 100;//0.25/dt;
+  const auto dt = 0.0025;
+  const auto Nsteps = 100;
   pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
 
   return 0;

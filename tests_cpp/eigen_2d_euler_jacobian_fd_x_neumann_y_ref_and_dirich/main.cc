@@ -40,21 +40,12 @@ int main(int argc, char *argv[])
   std::array<scalar_t, 4> prim;
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
-      const auto pert = 0.01*std::sin(16.*M_PI*x(i))*std::sin(8.*M_PI*y(i));
+      const auto pert = 0.001*std::sin(16.*M_PI*x(i))*std::sin(8.*M_PI*y(i));
 
-      if (x(i) <= 1.0){
-	prim[0] = 1;
-	prim[1] = 0.1;
-	prim[2] = 0.;
-	prim[3] = 1;
-      }
-
-      else{
-	prim[0] = static_cast<scalar_t>(0.125);
-	prim[1] = 0.1;
-	prim[2] = 0.;
-	prim[3] = static_cast<scalar_t>(0.1);
-      }
+      prim[0] = 1;
+      prim[1] = 0.2;
+      prim[2] = 0.2;
+      prim[3] = 0.1;
 
       prim[0] += pert;
       prim[1] += pert;
@@ -94,34 +85,35 @@ int main(int argc, char *argv[])
   for (int i=0; i<Ja.size(); ++i)
   {
     const auto diff = std::abs(Ja(i)- Ja_fd(i));
-    std::cout << i << " "
-	      << Ja(i) << " "
-	      << Ja_fd(i) << " "
-	      << diff << " "
-	      << std::endl;
+    printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
+	   i, Ja(i), Ja_fd(i), diff);
 
-    if ((i+1) % 4 ==0){
-      std::cout << "\n";
-    }
-
-    if (diff > 1e-4){
+    if (diff > 1e-2){
       std::puts("FAILED");
-      //return 0;
+      return 0;
     }
+
+    if ((i+1) % 4 ==0) std::cout << "\n";
   }
 
-  // // second order
-  // auto state3 = state-eps*a;
-  // app_rhs_t velo3(velo.size());
-  // appObj.velocity(state3, 0., velo3);
-  // auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
-  // for (int i=0; i<Ja.size(); ++i){
-  //   const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
-  //   if (diff > 1e-6){
-  //     std::puts("FAILED");
-  //     return 0;
-  //   }
-  // }
+  // second order
+  auto state3 = state-eps*a;
+  app_rhs_t velo3(velo.size());
+  appObj.velocity(state3, 0., velo3);
+  auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
+  for (int i=0; i<Ja.size(); ++i){
+    const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
+
+    printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
+	   i, Ja(i), Ja_fd(i), diff);
+
+    if (diff > 1e-3){
+      std::puts("FAILED");
+      return 0;
+    }
+
+    if ((i+1) % 4 ==0) std::cout << "\n";
+  }
 
   std::puts("PASS");
   return 0;

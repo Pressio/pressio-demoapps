@@ -15,7 +15,7 @@ add_subdirectory(eigen_1d_linear_adv_jacobian_fd)
 add_subdirectory(eigen_1d_euler_jacobian_fd)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
-#add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
+add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
 
 ### 1d problems ###
 add_subdirectory(eigen_1d_linear_adv_convergence)
@@ -40,8 +40,7 @@ add_subdirectory(eigen_2d_euler_sedov_symmetry_explicit)
 add_subdirectory(eigen_2d_euler_sedov_symmetry_implicit)
 add_subdirectory(eigen_2d_euler_sample_mesh_test1)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_explicit)
-# this currently works anyway, but Jacobian is wrong
-#add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
+add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
 add_subdirectory(eigen_2d_kelvin_helmholtz)
 add_subdirectory(eigen_2d_swe_slip_wall)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
