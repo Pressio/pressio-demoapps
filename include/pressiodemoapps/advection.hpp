@@ -46,10 +46,8 @@ auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   using scalar_t = typename mesh_t::scalar_t;
-  using return_type = ::pressiodemoapps::impladv::AdvectionAppT<
-    scalar_t, mesh_t, Eigen::Matrix<scalar_t,-1,1>, Eigen::Matrix<scalar_t,-1,1>
-    >;
-  return impl::createLinAdv1dImpl<mesh_t, return_type>(meshObj, probEnum, recEnum);
+  using p_type = ::pressiodemoapps::impladv::EigenAdvection1dAppWithJacobian<scalar_t, mesh_t>;
+  return impl::createLinAdv1dImpl<mesh_t, p_type>(meshObj, probEnum, recEnum);
 }
 #endif
 

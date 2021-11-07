@@ -76,7 +76,6 @@ void bindEnums(pybind11::module & mParent)
 // // ---------------------------
 struct CcuMeshBinder
 {
-
   using mesh_t =
     pressiodemoapps::impl::CellCenteredUniformMesh<
       pressiodemoappspy::scalar_t,
@@ -135,7 +134,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------w
   // advection 1d
   using ad1d_t =
-    pda::impladv::AdvectionAppT<
+    pda::impladv::Advection1dAppRhsOnly<
       pressiodemoappspy::scalar_t,
       ccumesh_t,
       pressiodemoappspy::py_cstyle_arr_sc,

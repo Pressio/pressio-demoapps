@@ -302,15 +302,9 @@ using EigenEuler1dAppRhsOnly = Euler1dAppRhsOnly<ScalarType, MeshType,
 
 template<class ScalarType, class MeshType>
 class EigenEuler1dAppWithJacobian
-  : public Euler1dAppRhsOnly<ScalarType, MeshType,
-			      Eigen::Matrix<ScalarType,-1,1>,
-			      Eigen::Matrix<ScalarType,-1,1>,
-			      Eigen::Matrix<ScalarType,-1,1>>
+  : public EigenEuler1dAppRhsOnly<ScalarType, MeshType>
 {
-  using base_t = Euler1dAppRhsOnly<ScalarType, MeshType,
-				    Eigen::Matrix<ScalarType,-1,1>,
-				    Eigen::Matrix<ScalarType,-1,1>,
-				    Eigen::Matrix<ScalarType,-1,1>>;
+  using base_t = EigenEuler1dAppRhsOnly<ScalarType, MeshType>;
 
 public:
   using typename base_t::index_t;
