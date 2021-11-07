@@ -15,7 +15,7 @@
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "euler_cell_jacobian_first_order.hpp"
+#include "cell_jacobian_first_order.hpp"
 
 namespace pressiodemoapps{ namespace ee{ namespace impl{
 

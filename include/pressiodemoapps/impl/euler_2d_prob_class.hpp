@@ -17,7 +17,7 @@
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "euler_cell_jacobian_first_order.hpp"
+#include "cell_jacobian_first_order.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include "Eigen/Sparse"
@@ -777,7 +777,7 @@ private:
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilFourDofPerCell
       <edge_rec_t, stencil_vals_container_type>;
 
-    using jac_fnct_t = ee::impl::FirstOrderCellJacobianFunctor<
+    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderBdCellJacobianFunctor<
       base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
 
     // stencil filler and reconstructor for face fluxes
@@ -913,7 +913,7 @@ private:
     using reconstructor_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
       base_t::dimensionality, edge_rec_t, state_type, MeshType>;
 
-    using jac_fnct_t = ee::impl::FirstOrderInnerCellJacobianFunctor<
+    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
       base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
 
     // reconstruct functor for face fluxes

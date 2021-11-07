@@ -8,7 +8,7 @@
 
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "advection_cell_jacobian_first_order.hpp"
+#include "cell_jacobian_first_order.hpp"
 
 namespace pressiodemoapps{ namespace impladv{
 
@@ -289,7 +289,7 @@ private:
 				 uMinusHalfNegForJ, uMinusHalfPosForJ,
 				 uPlusHalfNegForJ,  uPlusHalfPosForJ);
 
-    using jac_fnct_t = impladv::FirstOrderInnerCellJacobianFunctor<
+    using jac_fnct_t = impl::FirstOrderInnerCellJacobianFunctor<
       base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
     jac_fnct_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);
 
