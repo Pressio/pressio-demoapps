@@ -1,5 +1,5 @@
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/pressiodemoapps)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/pressiodemoapps)
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
 add_subdirectory(rankine_hugoniot)
@@ -7,7 +7,7 @@ add_subdirectory(weno3)
 add_subdirectory(weno5)
 
 if(PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
-add_subdirectory(eigen_crs_matrix)
+# add_subdirectory(eigen_crs_matrix)
 add_subdirectory(eigen_mesh_ccu_class)
 add_subdirectory(eigen_mesh_ccu_special_cells_list)
 add_subdirectory(eigen_euler_rusanov_flux_jacobians)

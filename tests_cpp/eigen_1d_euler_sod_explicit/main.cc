@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "euler1d.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/euler1d.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
@@ -21,18 +22,15 @@ int main(int argc, char *argv[])
   appObj.disableJacobian();
 
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
+  state_t state = appObj.initialCondition();
 
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
-  ode_state_t state = appObj.initialCondition();
-
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-  FomObserver<ode_state_t> Obs("sod1d_solution.bin", 1);
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  FomObserver<state_t> Obs("sod1d_solution.bin", 1);
 
   const auto dt = 0.001;
   const auto Nsteps = 100;
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

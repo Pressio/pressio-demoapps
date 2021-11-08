@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "euler1d.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/euler1d.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
@@ -19,42 +20,20 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Euler1d::Lax;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
-  // by default, velocoity and Jac are fused, but we
-  // only want velocity here
+  // by default, velocoity and Jac are fused, only want velocity
   appObj.disableJacobian();
+  const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
+  state_t state(appObj.initialCondition());
 
-  const auto stateSize = appObj.totalDofStencilMesh();
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
-  ode_state_t state(appObj.initialCondition());
-
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-  FomObserver<ode_state_t> Obs("1d_lax_solution.bin", 1);
+  auto stepperObj = pressio::ode::create_ssprk3_stepper(state, appObj);
+  FomObserver<state_t> Obs("1d_lax_solution.bin", 1);
 
   const auto dt = 0.0001;
   const auto Nsteps = int(1.3/dt);
-  auto time = 0.0;
-  app_state_t state1(stateSize);
-  app_state_t state2(stateSize);
-  app_state_t veloTmp(stateSize);
-  Obs(0, time, state);
-  for (int step=1; step<=Nsteps; ++step)
-  {
-    appObj.velocity(*state.data(), time, veloTmp);
-    state1 = *state.data() + dt*veloTmp;
-
-    appObj.velocity(state1, time, veloTmp);
-    state2 = (3./4.)*(*state.data()) + 0.25*state1 + 0.25*dt*veloTmp;
-
-    appObj.velocity(state2, time, veloTmp);
-    *state.data() = (1./3.)*((*state.data()) + 2.*state2 + 2.*dt*veloTmp);
-
-    time = static_cast<double>(step) * dt;
-    Obs(step, time, state);
-  }
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

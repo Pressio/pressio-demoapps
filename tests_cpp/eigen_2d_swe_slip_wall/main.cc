@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "swe2d.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/swe2d.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
@@ -19,20 +20,15 @@ int main(int argc, char *argv[])
   const auto probId  = pda::Swe2d::SlipWall;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
 
-  auto ic = appObj.initialCondition();
-  ode_state_t state(ic);
+  state_t state = appObj.initialCondition();
 
   const auto dt = 0.005;
   const auto Nsteps = 7.5/dt;
-  auto time = 0.0;
-  FomObserver<ode_state_t> Obs("swe_slipWall2d_solution.bin", 1);
+  FomObserver<state_t> Obs("swe_slipWall2d_solution.bin", 1);
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0.0, dt, Nsteps, Obs);
 
-
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-
-  pressio::ode::advanceNSteps(stepperObj, state, time, dt, Nsteps, Obs);
   return 0;
 }

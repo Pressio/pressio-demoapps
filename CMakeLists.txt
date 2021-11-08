@@ -49,24 +49,24 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
 
 else()
 
-  find_package(OpenMP)
-  if(OpenMP_CXX_FOUND)
-    add_compile_definitions(PRESSIODEMOAPPS_ENABLE_OPENMP)
-    link_libraries(OpenMP::OpenMP_CXX)
+  # find_package(OpenMP)
+  # if(OpenMP_CXX_FOUND)
+  #   add_compile_definitions(PRESSIODEMOAPPS_ENABLE_OPENMP)
+  #   link_libraries(OpenMP::OpenMP_CXX)
+  # endif()
+
+  if(PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
+    add_definitions(-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=${PRESSIODEMOAPPS_ENABLE_TPL_EIGEN})
   endif()
 
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()
-    add_subdirectory(tests_mesh)
-  endif()
-
-  if(PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
-    add_definitions(-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=${PRESSIODEMOAPPS_ENABLE_TPL_EIGEN})
     include_directories(
       ${CMAKE_CURRENT_SOURCE_DIR}/include
       ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
       ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
+    add_subdirectory(tests_mesh)
+    add_subdirectory(tests_cpp)
   endif()
 
-  add_subdirectory(tests_cpp)
 endif()
