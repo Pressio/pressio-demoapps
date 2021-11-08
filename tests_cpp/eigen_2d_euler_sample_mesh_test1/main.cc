@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "euler2d.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
 #include <random>
 
@@ -42,12 +43,12 @@ int main(int argc, char *argv[])
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   appObj.disableJacobian();
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
+  using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;
 
   const auto gamma = appObj.gamma();
   const auto stateSize = appObj.totalDofStencilMesh();
-  app_state_t state(stateSize);
+  state_t state(stateSize);
   std::array<scalar_t, 4> prim;
   const auto &x = meshObj.viewX();
   const auto &y = meshObj.viewY();

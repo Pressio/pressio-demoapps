@@ -1,7 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "swe2d.hpp"
-#include "../observer.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/swe2d.hpp"
 #include <random>
 
 std::mt19937 gen(2195884);
@@ -40,11 +40,11 @@ int main(int argc, char *argv[])
   const auto probId  = pda::Swe2d::SlipWall;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
+  using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;
 
   const auto stateSize = appObj.totalDofStencilMesh();
-  app_state_t state(stateSize);
+  state_t state(stateSize);
   std::array<scalar_t, 3> prim;
   const auto &x = meshObj.viewX();
   const auto &y = meshObj.viewY();
@@ -61,10 +61,6 @@ int main(int argc, char *argv[])
   appObj.velocity(state, time, velo);
   writeToFile(velo,  "velo.txt");
   writeToFile(state, "state.txt");
-
-  // for (int i=0; i<velo.size(); ++i){
-  //   std::cout << i << " " << i % 4 << " " << std::setprecision(14) << velo(i) << "\n";
-  // }
 
   return 0;
 }

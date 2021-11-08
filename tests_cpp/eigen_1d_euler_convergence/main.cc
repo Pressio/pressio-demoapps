@@ -1,7 +1,8 @@
 
-#include "pressio_ode_explicit.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/euler1d.hpp"
 #include "../observer.hpp"
-#include "euler1d.hpp"
 
 template<class scalar_type>
 void analytical(const scalar_type x,
@@ -27,27 +28,23 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Euler1d::PeriodicSmooth;
   auto appObj	     = pda::createProblemEigen(meshObj, probId, order);
-  // by default, velocoity and Jac are fused, but we
-  // only want velocity here
+  // by default, velocoity and Jac are fused, we only want velocity here
   appObj.disableJacobian();
 
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
+  state_t state(appObj.initialCondition());
 
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
-  ode_state_t state(appObj.initialCondition());
-
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
 #ifdef USE_WENO5
-  FomObserver<ode_state_t> Obs("eigen_1d_euler_convergence_weno5_solution.bin", 1);
+  FomObserver<state_t> Obs("eigen_1d_euler_convergence_weno5_solution.bin", 1);
 #elif defined USE_WENO3
-  FomObserver<ode_state_t> Obs("eigen_1d_euler_convergence_weno3_solution.bin", 1);
+  FomObserver<state_t> Obs("eigen_1d_euler_convergence_weno3_solution.bin", 1);
 #endif
 
   const auto dt = 0.001;
   const auto Nsteps = 2./dt;
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

@@ -1,7 +1,7 @@
 
 #include <array>
 #include <iomanip>
-#include "euler1d.hpp"
+#include "pressiodemoapps/euler1d.hpp"
 
 int main(int argc, char *argv[])
 {

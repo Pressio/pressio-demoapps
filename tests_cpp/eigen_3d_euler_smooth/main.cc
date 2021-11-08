@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "euler3d.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/euler3d.hpp"
 #include "../observer.hpp"
 
 template<class T>
@@ -26,18 +27,15 @@ int main(int argc, char *argv[])
   const auto probId  = pda::Euler3d::PeriodicSmooth;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
 
-  ode_state_t state(appObj.initialCondition());
-  // writeToFile(state,  "ic.txt");
-
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
+  state_t state(appObj.initialCondition());
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
 
   const auto dt = 0.001;
   const auto Nsteps = 2./dt;
-  FomObserver<ode_state_t> Obs("solution.bin", 100);
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  FomObserver<state_t> Obs("solution.bin", 100);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

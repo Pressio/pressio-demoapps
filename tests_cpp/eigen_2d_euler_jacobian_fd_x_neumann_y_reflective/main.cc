@@ -1,6 +1,5 @@
 
-#include "pressio_containers.hpp"
-#include "euler2d.hpp"
+#include "pressiodemoapps/euler2d.hpp"
 #include <iomanip>
 #include <array>
 
@@ -31,10 +30,6 @@ int main(int argc, char *argv[])
   using app_state_t	= typename app_t::state_type;
   using app_rhs_t	= typename app_t::velocity_type;
   using app_jacob_t	= typename app_t::jacobian_type;
-
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
-  using ode_res_t   = pressio::containers::Vector<app_rhs_t>;
-  using ode_jac_t   = pressio::containers::SparseMatrix<app_jacob_t>;
 
   app_state_t state = appObj.initialCondition();
   state.setZero();

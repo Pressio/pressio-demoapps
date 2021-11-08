@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "advection.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/advection.hpp"
 #include "../observer.hpp"
 
 template<class T>
@@ -26,10 +27,10 @@ int main(int argc, char *argv[])
   const auto probid = pda::Advection1d::PeriodicLinear;
   auto appObj      = pda::createProblemEigen(meshObj, probid, order);
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
+  using state_t = typename app_t::state_type;
 
   auto ic = appObj.initialCondition();
-  app_state_t state(ic);
+  state_t state(ic);
 
   auto time = 0.0;
   auto velo = appObj.createVelocity();

@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "advection.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/advection.hpp"
 #include "../../observer.hpp"
 
 // https://arxiv.org/pdf/1609.07625.pdf
@@ -22,22 +23,21 @@ int main(int argc, char *argv[])
   auto appObj      = pda::createProblemEigen(meshObj, probid, order);
 
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
+  using state_t = typename app_t::state_type;
 
   const auto stateSize = appObj.totalDofStencilMesh();
-  ode_state_t state(stateSize);
+  state_t state(stateSize);
   const auto & x = meshObj.viewX();
-  for (int i=0; i<state.extent(0); ++i){
+  for (int i=0; i<state.size(); ++i){
     state(i) = analytical(x(i), 0.0);
   }
 
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-  FomObserver<ode_state_t> Obs("eigen_1d_linear_adv_convergence_weno5_solution.bin", 10);
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  FomObserver<state_t> Obs("eigen_1d_linear_adv_convergence_weno5_solution.bin", 10);
 
   const auto dt = 0.001;
   const auto Nsteps = 2./dt;
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

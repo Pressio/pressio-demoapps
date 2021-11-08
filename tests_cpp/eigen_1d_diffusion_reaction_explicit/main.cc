@@ -1,6 +1,7 @@
 
-#include "pressio_ode_explicit.hpp"
-#include "diffusion_reaction.hpp"
+#include "pressio/ode_steppers_explicit.hpp"
+#include "pressio/ode_advancers.hpp"
+#include "pressiodemoapps/diffusion_reaction.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
@@ -12,16 +13,15 @@ int main(int argc, char *argv[])
 					       pda::DiffusionReaction1d::ProblemA,
 					       sch, 0.01, 0.005);
   using app_t = decltype(appObj);
-  using app_state_t = typename app_t::state_type;
-  using ode_state_t = pressio::containers::Vector<app_state_t>;
-  ode_state_t state = appObj.initialCondition();
+  using state_t = typename app_t::state_type;
+  auto state = appObj.initialCondition();
 
-  auto stepperObj = pressio::ode::createRungeKutta4Stepper(state, appObj);
-  FomObserver<ode_state_t> Obs("1d_diffreac_solution.bin", 10);
+  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  FomObserver<state_t> Obs("1d_diffreac_solution.bin", 10);
 
   const auto dt = 0.001;
   const auto Nsteps = 1000;
-  pressio::ode::advanceNSteps(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

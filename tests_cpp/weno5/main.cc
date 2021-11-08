@@ -1,5 +1,5 @@
 
-#include "weno.hpp"
+#include "pressiodemoapps/weno.hpp"
 #include <array>
 #include <iostream>
 #include <iomanip>
