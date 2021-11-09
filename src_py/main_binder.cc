@@ -11,6 +11,7 @@
 #include "types.hpp"
 #include "pressiodemoapps/mesh.hpp"
 #include "pressiodemoapps/advection.hpp"
+#include "pressiodemoapps/diffusion_reaction.hpp"
 #include "pressiodemoapps/euler1d.hpp"
 #include "pressiodemoapps/swe2d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
@@ -36,7 +37,7 @@ void bindCommonApiMethods(py_t & appObj)
 }
 
 // ---------------------------
-void bindEnums(pybind11::module & mParent)
+void bindSchemeEnums(pybind11::module & mParent)
 {
   namespace pda = pressiodemoapps;
 
@@ -45,11 +46,25 @@ void bindEnums(pybind11::module & mParent)
     .value("Weno3",	     pda::InviscidFluxReconstruction::Weno3)
     .value("Weno5",	     pda::InviscidFluxReconstruction::Weno5);
 
+  pybind11::enum_<pda::ViscousFluxReconstruction>(mParent, "ViscousFluxReconstruction")
+    .value("FirstOrder",     pda::ViscousFluxReconstruction::FirstOrder);
+
   pybind11::enum_<pda::InviscidFluxScheme>(mParent, "InviscidFluxScheme")
     .value("Rusanov",	     pda::InviscidFluxScheme::Rusanov);
 
+  pybind11::enum_<pda::ViscousFluxScheme>(mParent, "ViscousFluxScheme")
+    .value("Central",	     pda::ViscousFluxScheme::Central);
+}
+
+void bindProblemEnums(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
   pybind11::enum_<pda::Advection1d>(mParent, "Advection1d")
     .value("PeriodicLinear", pda::Advection1d::PeriodicLinear);
+
+  pybind11::enum_<pda::DiffusionReaction1d>(mParent, "DiffusionReaction1d")
+    .value("ProblemA", pda::DiffusionReaction1d::ProblemA);
 
   pybind11::enum_<pda::Euler1d>(mParent, "Euler1d")
     .value("PeriodicSmooth", pda::Euler1d::PeriodicSmooth)
@@ -73,7 +88,7 @@ void bindEnums(pybind11::module & mParent)
     .value("SedovSymmetry",  pda::Euler3d::SedovSymmetry);
 }
 
-// // ---------------------------
+// ---------------------------
 struct CcuMeshBinder
 {
   using mesh_t =
@@ -114,25 +129,27 @@ struct CcuMeshBinder
 };
 }}//end namespace pressiodemoappspy::impl
 
+
 //=======================================
 PYBIND11_MODULE(MODNAME, mTopLevel)
 //=======================================
 {
   namespace pda = pressiodemoapps;
 
-  // ---------------------------
-  // all enums
-  pressiodemoappspy::impl::bindEnums(mTopLevel);
+  pressiodemoappspy::impl::bindSchemeEnums(mTopLevel);
+  pressiodemoappspy::impl::bindProblemEnums(mTopLevel);
 
-  // ---------------------------
-  // ccu mesh
+  // ---------------------------------
+  // cell-centered uniform (ccu) mesh
+  // ---------------------------------
   using mesh_binder_t = pressiodemoappspy::impl::CcuMeshBinder;
   using ccumesh_t = typename mesh_binder_t::mesh_t;
   mesh_binder_t ccuMeshB;
   ccuMeshB(mTopLevel);
 
-  // -----------------------w
+  // -----------------------
   // advection 1d
+  // -----------------------
   using ad1d_t =
     pda::impladv::Advection1dAppRhsOnly<
       pressiodemoappspy::scalar_t,
@@ -142,15 +159,42 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
     >;
 
   pybind11::class_<ad1d_t> adv1dProb(mTopLevel, "Advection1dProblem");
-  // adv1dProb.def(pybind11::init<
-  // 		   const ccumesh_t &,
-  // 		   pda::InviscidFluxReconstruction
-  // 		   >());
-
   pressiodemoappspy::impl::bindCommonApiMethods<ad1d_t>(adv1dProb);
+
+  mTopLevel.def("createProblem",
+		&pda::createAdv1dForPy<ccumesh_t, ad1d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  // -----------------------
+  // diffusion-reaction 1d
+  // -----------------------
+  using diffusion_reaction_1d_t =
+    pda::impldiffreac::DiffReac1dApp<
+      pressiodemoappspy::scalar_t,
+      ccumesh_t,
+      pressiodemoappspy::py_cstyle_arr_sc,
+      pressiodemoappspy::py_cstyle_arr_sc,
+      pressiodemoappspy::py_cstyle_arr_sc
+    >;
+
+  pybind11::class_<diffusion_reaction_1d_t> diffReac1dProb(mTopLevel, "DiffusionReaction1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<diffusion_reaction_1d_t>(diffReac1dProb);
+
+  mTopLevel.def("createProblem",
+		&pda::impldiffreac::createDiffReac1dForPyA<ccumesh_t, diffusion_reaction_1d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+		&pda::impldiffreac::createDiffReac1dForPyB<ccumesh_t, diffusion_reaction_1d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+		&pda::impldiffreac::createDiffReac1dForPyC<ccumesh_t, diffusion_reaction_1d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   // -----------------------
   // Euler 1d
+  // -----------------------
   using ee1d_t =
     pda::impl::Euler1dAppRhsOnly<
       pressiodemoappspy::scalar_t,
@@ -164,8 +208,16 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   pressiodemoappspy::impl::bindCommonApiMethods<ee1d_t>(ee1dClass);
   ee1dClass.def("gamma", &ee1d_t::gamma);
 
+  mTopLevel.def("createProblem",
+		&pda::impl::createEuler1dForPyA<ccumesh_t, ee1d_t>,
+		pybind11::return_value_policy::take_ownership);
+  mTopLevel.def("createProblem",
+		&pda::impl::createEuler1dForPyB<ccumesh_t, ee1d_t>,
+		pybind11::return_value_policy::take_ownership);
+
   // -----------------------
   // Euler 2d
+  // -----------------------
   using ee2d_t =
     pda::ee::impl::Euler2dAppRhsOnly<
       pressiodemoappspy::scalar_t,
@@ -179,8 +231,22 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   pressiodemoappspy::impl::bindCommonApiMethods<ee2d_t>(ee2dClass);
   ee2dClass.def("gamma", &ee2d_t::gamma);
 
+  mTopLevel.def("createProblem",
+		&pda::createEuler2dForPyA<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+		&pda::createEuler2dForPyB<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+		&pda::createEuler2dForPyC<ccumesh_t, ee2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+
   // -----------------------
   // Swe 2d
+  // -----------------------
   using swe2d_t =
     pda::implswe::Swe2dAppT<
       pressiodemoappspy::scalar_t,
@@ -195,9 +261,21 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   swe2dClass.def("coriolis", &swe2d_t::coriolis);
   swe2dClass.def("gravity", &swe2d_t::gravity);
 
-  // -----------------------
+  mTopLevel.def("createProblem",
+		&pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
+  mTopLevel.def("createProblem",
+		&pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("createProblem",
+		&pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  // -----------------------
   // Euler 3d
+  // -----------------------
   using ee3d_t =
     pda::ee::impl::Euler3dAppT<
       pressiodemoappspy::scalar_t,
@@ -211,48 +289,8 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   pressiodemoappspy::impl::bindCommonApiMethods<ee3d_t>(ee3dClass);
   ee3dClass.def("gamma", &ee3d_t::gamma);
 
-  // -----------------------------------------------
-  // functions to create problems.
-  // add more as the c++ grows
-  // -----------------------------------------------
-  mTopLevel.def("createProblem",
-		&pda::createAdv1dForPy<ccumesh_t, ad1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::impl::createEuler1dForPyA<ccumesh_t, ee1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::impl::createEuler1dForPyB<ccumesh_t, ee1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createEuler2dForPyA<ccumesh_t, ee2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createEuler2dForPyB<ccumesh_t, ee2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createEuler2dForPyC<ccumesh_t, ee2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
   mTopLevel.def("createProblem",
 		&pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("createProblem",
-		&pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
 		pybind11::return_value_policy::take_ownership);
 }
 #endif

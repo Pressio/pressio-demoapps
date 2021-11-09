@@ -197,8 +197,6 @@ private:
     for (std::size_t it=0; it<specialRows.size(); ++it)
     {
       const auto smPt    = specialRows[it];
-      // const auto cellGID = graph(smPt, 0);
-      // const auto uIndex  = cellGID*numDofPerCell;
 
       // X
       StencilFillerX(smPt, it);
@@ -268,8 +266,6 @@ private:
     for (int it=0; it<rowsIn.size(); ++it)
     {
       const auto smPt = rowsIn[it];
-      // const auto cellGID = graph(smPt, 0);
-      // const auto uIndex = cellGID*numDofPerCell;
 
       // X
       ReconstructorX.template operator()<numDofPerCell>(smPt);
@@ -335,27 +331,6 @@ private:
 private:
   void allocateGhosts()
   {
-    /*
-      for stencil = 3, at leftBoundary:
-      ---------------
-      |	 0,1,2,3   ||
-      | rho,       ||
-      | rho u,	   ||
-      | rho v,     ||
-      | E	   ||
-      ---------------
-
-      for stencil = 7, at leftBoundary:
-      --------------------------------------
-      |	 8,9,10,11  | 4,5,6,7 |  0,1,2,3  ||
-      |	     	    |
-      | rho,        | rho,    | rho       ||
-      | rho u,	    | rho*u   | rho*u     ||
-      | rho v,      | rho*v   | rho*v     ||
-      | E	    | E       | E         ||
-      --------------------------------------
-     */
-
     const auto stencilSize    = reconstructionTypeToStencilSize(m_recEn);
     const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
 

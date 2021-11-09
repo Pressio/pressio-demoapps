@@ -4,22 +4,17 @@
 
 namespace pressiodemoapps{ namespace impldiffreac{
 
-template<
-  int numDofPerCell,
-  class state_t,
-  class mesh_t,
-  class ghost_t
-  >
-class GhostFillerHomDirich1d
+template<class state_t, class mesh_t, class ghost_t>
+class GhostFillerProblemA1d
 {
 
 public:
-  GhostFillerHomDirich1d() = delete;
-  GhostFillerHomDirich1d(const int stencilSize,
-	      const state_t & stateIn,
-	      const mesh_t & meshIn,
-	      ghost_t & ghostLeft,
-	      ghost_t & ghostRight)
+  GhostFillerProblemA1d() = delete;
+  GhostFillerProblemA1d(const int stencilSize,
+			 const state_t & stateIn,
+			 const mesh_t & meshIn,
+			 ghost_t & ghostLeft,
+			 ghost_t & ghostRight)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_meshObj(meshIn),

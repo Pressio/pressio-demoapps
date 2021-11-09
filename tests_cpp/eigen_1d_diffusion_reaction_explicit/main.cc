@@ -8,10 +8,10 @@ int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
-  const auto sch     = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
-  auto appObj        = pda::createProblemEigen(meshObj,
-					       pda::DiffusionReaction1d::ProblemA,
-					       sch, 0.01, 0.005);
+  const auto scheme  = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
+  const auto probId  = pda::DiffusionReaction1d::ProblemA;
+  auto appObj        = pda::createProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
+  appObj.disableJacobian();
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   auto state = appObj.initialCondition();

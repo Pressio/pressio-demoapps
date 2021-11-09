@@ -12,6 +12,7 @@ if __name__== "__main__":
   nt = int(np.size(D)/fomTotDofs)
   D = np.reshape(D, (nt, fomTotDofs))
   D = D[-1, :]
+  np.savetxt("field.txt", D)
   goldD = np.loadtxt("gold.txt")
 
   assert(np.allclose(D.shape, goldD.shape))

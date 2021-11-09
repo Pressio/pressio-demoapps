@@ -19,6 +19,8 @@ enum class DiffusionReaction1d{
     D,k,u(s) can be provided to constructor
     u(s) must be a functor:
       void operator()(const scalar_t & x, const scalar_t & time, scalar_t & value);
+
+    BC: ghost cells are set such that s is zero at boundary
    */
   ProblemA
 };
@@ -27,23 +29,45 @@ enum class DiffusionReaction1d{
 #include "./impl/diffusion_reaction_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-// namespace impldiffreac{
-// template<class mesh_t, class T>
-// T createDiffReac1d(const mesh_t & meshObj,
-// 		     ::pressiodemoapps::DiffusionReaction1d probEnum)
-// {
-//   return T(meshObj, probEnum);
-// }
-// } //end pressiodemoapps::impldiffreac
+namespace impldiffreac{
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-// template<class mesh_t, class T>
-// T createAdv1dForPy(const mesh_t & meshObj,
-// 		   ::pressiodemoapps::DiffusionReaction1d probEnum)
-// {
-//   return T(meshObj, probEnum);
-// }
-// #endif
+#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class T>
+T createDiffReac1dForPyA(const mesh_t & meshObj,
+			 ::pressiodemoapps::DiffusionReaction1d probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum)
+{
+  return T(meshObj, probEnum, recEnum);
+}
+
+template<class mesh_t, class T>
+T createDiffReac1dForPyB(const mesh_t & meshObj,
+			 ::pressiodemoapps::DiffusionReaction1d probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			 typename mesh_t::scalar_t diffusionCoeff,
+			 typename mesh_t::scalar_t reactionCoeff)
+{
+  return T(meshObj, probEnum, recEnum, diffusionCoeff, reactionCoeff);
+}
+
+template<class mesh_t, class T>
+T createDiffReac1dForPyC(const mesh_t & meshObj,
+			 ::pressiodemoapps::DiffusionReaction1d probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			 pybind11::object pyFunctor,
+			 typename mesh_t::scalar_t diffusionCoeff,
+			 typename mesh_t::scalar_t reactionCoeff)
+{
+  using scalar_t = typename mesh_t::scalar_t;
+  auto sourceWrapper = [=](const scalar_t & x, const scalar_t & evaltime, scalar_t & value){
+    value = pyFunctor.attr("__call__")(x, evaltime).template cast<scalar_t>();
+  };
+
+  return T(meshObj, probEnum, recEnum, sourceWrapper, diffusionCoeff, reactionCoeff);
+}
+#endif
+}//end namespace impldiffreac
+
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t, class ...Args>
@@ -60,7 +84,7 @@ auto createProblemEigen(const mesh_t & meshObj,
   }
 
   using scalar_t = typename mesh_t::scalar_t;
-  using return_type = ::pressiodemoapps::impldiffreac::DiffReac1dAppT<
+  using return_type = ::pressiodemoapps::impldiffreac::DiffReac1dApp<
     scalar_t, mesh_t,
     Eigen::Matrix<scalar_t,-1,1>, // state
     Eigen::Matrix<scalar_t,-1,1>, // velocity
@@ -70,6 +94,7 @@ auto createProblemEigen(const mesh_t & meshObj,
   return return_type(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
 }
 #endif
+
 
 }//end namespace pressiodemoapps
 #endif

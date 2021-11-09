@@ -1,5 +1,4 @@
 
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/pressiodemoapps)
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
 add_subdirectory(rankine_hugoniot)
@@ -12,6 +11,7 @@ add_subdirectory(eigen_mesh_ccu_class)
 add_subdirectory(eigen_mesh_ccu_special_cells_list)
 add_subdirectory(eigen_euler_rusanov_flux_jacobians)
 add_subdirectory(eigen_1d_linear_adv_jacobian_fd)
+add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
 add_subdirectory(eigen_1d_euler_jacobian_fd)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
