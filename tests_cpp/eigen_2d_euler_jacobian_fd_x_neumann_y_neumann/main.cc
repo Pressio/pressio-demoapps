@@ -100,12 +100,13 @@ int main(int argc, char *argv[])
 
   auto Ja = J*a;
   auto Ja_fd = (velo2 - velo)/eps;
-  for (int i=0; i<Ja.size(); ++i){
-    std::cout << i << " "
-	      << Ja(i) << " "
-	      << Ja_fd(i) << " "
-	      << std::endl;
+  for (int i=0; i<Ja.size(); ++i)
+  {
     const auto diff = std::abs(Ja(i)- Ja_fd(i));
+
+    printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
+	   i, Ja(i), Ja_fd(i), diff);
+
     if (diff > 1e-4){
       std::puts("FAILED");
       return 0;

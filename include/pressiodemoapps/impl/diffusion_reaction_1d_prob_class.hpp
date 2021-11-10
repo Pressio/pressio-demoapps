@@ -8,7 +8,7 @@
 namespace pressiodemoapps{ namespace impldiffreac{
 
 template<class scalar_t>
-struct DefaultSourceF
+struct DefaultSourceF1d
 {
   void operator()(const scalar_t & x, const scalar_t & evaltime, scalar_t & value){
     (void) evaltime;
@@ -32,7 +32,7 @@ public:
   using stencil_values_t = state_t;
   using scalar_type	 = scalar_t;
   using state_type	 = state_t;
-  using velocity_type	 = state_t;
+  using velocity_type	 = velo_t;
   using ghost_type	 = ghost_t;
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
@@ -53,7 +53,16 @@ public:
 		scalar_t diffusionCoeff,
 		scalar_t reactionCoeff)
     : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+    ,m_ghostLeft({1,1})
+    ,m_ghostRight({1,1})
+#endif
   {
+
+    if (m_meshObj.stencilSize() != 3){
+      throw std::runtime_error("DiffusionReaction1d currently, only supports 3-pt stencil");
+    }
+
     m_numDofStencilMesh = m_meshObj.stencilMeshSize()*numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*numDofPerCell;
 
@@ -68,18 +77,6 @@ public:
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
     m_jacobian.resize(m_numDofSampleMesh, m_numDofStencilMesh);
 #endif
-
-    // make sure that no matter what, the first and last sample cells
-    // are near the boundary. Even if we are doing sample mesh, we need
-    // to keep the cells near boundaries.
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    const auto & graph = m_meshObj.graph();
-    if (graph(0,1) != -1){
-      throw std::runtime_error("Point not on boundary, something wrong");
-    }
-    if (graph(sampleMeshSize-1, 2) != -1){
-      throw std::runtime_error("Point not on boundary, something wrong");
-    }
   }
 
   DiffReac1dApp(const mesh_t & meshObj,
@@ -88,14 +85,16 @@ public:
 		 scalar_t diffusionCoeff,
 		 scalar_t reactionCoeff)
     : DiffReac1dApp(meshObj, probEnum, recEnum,
-		     DefaultSourceF<scalar_t>(), diffusionCoeff, reactionCoeff)
+		    DefaultSourceF1d<scalar_t>(),
+		    diffusionCoeff, reactionCoeff)
   {}
 
   DiffReac1dApp(const mesh_t & meshObj,
 		 ::pressiodemoapps::DiffusionReaction1d probEnum,
 		 ::pressiodemoapps::ViscousFluxReconstruction recEnum)
     : DiffReac1dApp(meshObj, probEnum, recEnum,
-		    DefaultSourceF<scalar_t>(), 0.01, 0.01)
+		    DefaultSourceF1d<scalar_t>(),
+		    0.01, 0.01)
   {}
 
   index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
@@ -174,7 +173,11 @@ private:
 
       const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
-      ghF();
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
     }
   }
 
@@ -209,7 +212,7 @@ private:
       const auto uIndexLeft  = graph(smPt, 1);
       const auto uIndexRight = graph(smPt, 2);
 
-      StencilFiller(smPt);
+      StencilFiller(smPt, it);
 
       // compute source, store into V
       m_sourceFunctor(x(uIndex), t, V(smPt));
@@ -291,10 +294,11 @@ private:
 private:
   void allocateGhosts()
   {
-    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    const auto stencilSize    = reconstructionTypeToStencilSize(m_recEn);
     const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
-    ::pressiodemoapps::resize(m_ghostLeft,  numGhostValues);
-    ::pressiodemoapps::resize(m_ghostRight, numGhostValues);
+    const index_t s1 = m_meshObj.numCellsBd();
+    ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
+    ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
   }
 
 private:

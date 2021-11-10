@@ -6,29 +6,38 @@ add_subdirectory(weno3)
 add_subdirectory(weno5)
 
 if(PRESSIODEMOAPPS_ENABLE_TPL_EIGEN)
+
+# general tests
 # add_subdirectory(eigen_crs_matrix)
 add_subdirectory(eigen_mesh_ccu_class)
 add_subdirectory(eigen_mesh_ccu_special_cells_list)
 add_subdirectory(eigen_euler_rusanov_flux_jacobians)
 add_subdirectory(eigen_1d_linear_adv_jacobian_fd)
 add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
+add_subdirectory(eigen_2d_diffusion_reaction_jacobian_fd)
 add_subdirectory(eigen_1d_euler_jacobian_fd)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
+add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
+
 
 ### 1d problems ###
+add_subdirectory(eigen_1d_linear_adv_explicit)
+add_subdirectory(eigen_1d_linear_adv_implicit)
 add_subdirectory(eigen_1d_linear_adv_convergence)
 add_subdirectory(eigen_1d_linear_adv_sample_mesh_testA)
 add_subdirectory(eigen_1d_linear_adv_sample_mesh_testB)
 add_subdirectory(eigen_1d_diffusion_reaction_explicit)
 add_subdirectory(eigen_1d_diffusion_reaction_implicit)
+add_subdirectory(eigen_1d_diffusion_reaction_sample_mesh_test)
 add_subdirectory(eigen_1d_euler_convergence)
 add_subdirectory(eigen_1d_euler_sod_explicit)
 add_subdirectory(eigen_1d_euler_sod_implicit)
 add_subdirectory(eigen_1d_euler_lax)
 
 ### 2d problems ###
+add_subdirectory(eigen_2d_diffusion_reaction_explicit)
 add_subdirectory(eigen_2d_euler_smooth_explicit)
 add_subdirectory(eigen_2d_euler_smooth_implicit)
 add_subdirectory(eigen_2d_euler_normal_shock_explicit)
@@ -48,4 +57,5 @@ add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 ### 3d problems ###
 add_subdirectory(eigen_3d_euler_smooth)
 add_subdirectory(eigen_3d_euler_sedov_symmetry)
+
 endif()

@@ -30,69 +30,69 @@ public:
       m_ghostRight(ghostRight)
   {}
 
-  void operator()()
+  template<class index_t>
+  void operator()(index_t smPt, int gRow)
   {
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
+    constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*numDofPerCell;
 
-    // we assume:
-    // smPt=0 is at left bd
-    // smPt=sampleMeshSize-1 is at right bd
-    const auto cellGIDL    = graph(0, 0);
-    const auto cellGIDLe0  = graph(0, 2);
-    const auto uLe0i	   = cellGIDLe0*3;
-    // const auto myXL = x(cellGIDL);
-    if (graph(0,1) != -1){
-      throw std::runtime_error("Point not on boundary, something wrong");
+    const auto left0  = graph(smPt, 1);
+    const auto right0 = graph(smPt, 2);
+
+    if (left0 == -1){
+      m_ghostLeft(gRow, 0) = m_state(uIndex);
+      m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+      m_ghostLeft(gRow, 2) = m_state(uIndex+2);
     }
 
-    const auto cellGIDR   = graph(sampleMeshSize-1, 0);
-    const auto cellGIDRw0 = graph(sampleMeshSize-1, 1);
-    const auto uRw0i	  = cellGIDRw0*3;
-    // const auto myXR = x(cellGIDR);
-    if (graph(sampleMeshSize-1, 2) != -1){
-      throw std::runtime_error("Point not on boundary, something wrong");
+    if (right0 == -1){
+      m_ghostRight(gRow, 0) = m_state(uIndex);
+      m_ghostRight(gRow, 1) = m_state(uIndex+1);
+      m_ghostRight(gRow, 2) = m_state(uIndex+2);
     }
 
-    // this is the 0-degree ghost cell
-    m_ghostLeft(0)  = m_state(cellGIDL*3);
-    m_ghostLeft(1)  = m_state(cellGIDL*3+1);
-    m_ghostLeft(2)  = m_state(cellGIDL*3+2);
-
-    m_ghostRight(0) = m_state(cellGIDR*3);
-    m_ghostRight(1) = m_state(cellGIDR*3+1);
-    m_ghostRight(2) = m_state(cellGIDR*3+2);
-
-    if (m_stencilSize==5)
+    if (m_stencilSize>=5)
       {
-	m_ghostLeft(3) = m_state(uLe0i);
-	m_ghostLeft(4) = m_state(uLe0i+1);
-	m_ghostLeft(5) = m_state(uLe0i+2);
+	const auto left1  = graph(smPt, 3);
+	const auto right1 = graph(smPt, 4);
 
-	m_ghostRight(3) = m_state(uRw0i);
-	m_ghostRight(4) = m_state(uRw0i+1);
-	m_ghostRight(5) = m_state(uRw0i+2);
+	if (left1 == -1){
+	  const auto ind = right0*numDofPerCell;
+	  m_ghostLeft(gRow, 3) = m_state(ind);
+	  m_ghostLeft(gRow, 4) = m_state(ind+1);
+	  m_ghostLeft(gRow, 5) = m_state(ind+2);
+	}
+
+	if (right1 == -1){
+	  const auto ind = left0*numDofPerCell;
+	  m_ghostRight(gRow, 3) = m_state(ind);
+	  m_ghostRight(gRow, 4) = m_state(ind+1);
+	  m_ghostRight(gRow, 5) = m_state(ind+2);
+	}
       }
 
-    if (m_stencilSize==7)
-      {
-	const auto cellGIDLe1 = graph(0, 4);
-	const auto cellGIDRw1 = graph(sampleMeshSize-1, 3);
-	m_ghostLeft(6) = m_state(cellGIDLe1*3);
-	m_ghostLeft(7) = m_state(cellGIDLe1*3+1);
-	m_ghostLeft(8) = m_state(cellGIDLe1*3+2);
-	m_ghostLeft(3) = m_state(uLe0i);
-	m_ghostLeft(4) = m_state(uLe0i+1);
-	m_ghostLeft(5) = m_state(uLe0i+2);
+    if (m_stencilSize == 7){
+      const auto left1  = graph(smPt, 5);
+      const auto right1 = graph(smPt, 6);
+      const auto left2  = graph(smPt, 7);
+      const auto right2 = graph(smPt, 8);
 
-	m_ghostRight(3) = m_state(uRw0i);
-	m_ghostRight(4) = m_state(uRw0i+1);
-	m_ghostRight(5) = m_state(uRw0i+2);
-	m_ghostRight(6) = m_state(cellGIDRw1*3);
-	m_ghostRight(7) = m_state(cellGIDRw1*3+1);
-	m_ghostRight(8) = m_state(cellGIDRw1*3+2);
+      if (left2 == -1){
+	const auto ind = right1*numDofPerCell;
+	m_ghostLeft(gRow, 6) = m_state(ind);
+	m_ghostLeft(gRow, 7) = m_state(ind+1);
+	m_ghostLeft(gRow, 8) = m_state(ind+2);
       }
 
+      if (right2 == -1){
+	const auto ind = left1*numDofPerCell;
+	m_ghostRight(gRow, 6) = m_state(ind);
+	m_ghostRight(gRow, 7) = m_state(ind+1);
+	m_ghostRight(gRow, 8) = m_state(ind+2);
+      }
+    }
   }
 
 private:

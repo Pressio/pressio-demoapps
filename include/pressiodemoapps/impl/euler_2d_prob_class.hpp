@@ -45,7 +45,7 @@ public:
   using state_type     = StateType;
   using velocity_type  = VelocityType;
 
-  using ghost_vals_container_type	 = GhostContainerType;
+  using ghost_vals_container_type   = GhostContainerType;
   using stencil_vals_container_type = state_type;
   using flux_t		 = state_type;
   using edge_rec_t	 = state_type;
@@ -466,6 +466,7 @@ protected:
 };
 
 
+
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class ScalarType, class MeshType>
 using EigenEuler2dAppRhsOnly = Euler2dAppRhsOnly<
@@ -634,38 +635,16 @@ private:
 	const auto F0 = graph(cell, 2);
 	const auto R0 = graph(cell, 3);
 	const auto B0 = graph(cell, 4);
-	if (L0 != -1){
-	  const auto ci = L0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
-	    }
-	  }
-	}
+	for (int i=1; i<=4; ++i)
+	{
+	  const auto gID = graph(cell, i);
 
-	if (F0 != -1){
-	  const auto ci = F0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
-	    }
-	  }
-	}
-
-	if (R0 != -1){
-	  const auto ci = R0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
-	    }
-	  }
-	}
-
-	if (B0 != -1){
-	  const auto ci = B0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	  if (gID != -1){
+	    const auto ci = gID*numDofPerCell;
+	    for (int k=0; k<numDofPerCell; ++k){
+	      for (int j=0; j<numDofPerCell; ++j){
+		trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	      }
 	    }
 	  }
 	}
@@ -745,6 +724,127 @@ private:
     return 0;
   }
 
+  void velocityAndJacInnerCellsImpl(const state_type & U,
+				    const scalar_type currentTime,
+				    velocity_type & V,
+				    flux_t & FLeft,
+				    flux_t & FRight,
+				    flux_t & FBack,
+				    flux_t & FFront,
+				    flux_jac_type & JLneg,
+				    flux_jac_type & JLpos,
+				    flux_jac_type & JRneg,
+				    flux_jac_type & JRpos,
+				    flux_jac_type & JBneg,
+				    flux_jac_type & JBpos,
+				    flux_jac_type & JFneg,
+				    flux_jac_type & JFpos,
+				    edge_rec_t & uMinusHalfNeg,
+				    edge_rec_t & uMinusHalfPos,
+				    edge_rec_t & uPlusHalfNeg,
+				    edge_rec_t & uPlusHalfPos) const
+  {
+    constexpr int xAxis = 1;
+    constexpr int yAxis = 2;
+    const auto dxInv   = m_meshObj.dxInv();
+    const auto dyInv   = m_meshObj.dyInv();
+
+    using reconstructor_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
+      base_t::dimensionality, edge_rec_t, state_type, MeshType>;
+
+    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
+      base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
+
+    // reconstruct functor for face fluxes
+    // here we need to use whatever order (m_recEn) user decides
+    reconstructor_functor_t ReconstructorX(xAxis, m_recEn, U, m_meshObj,
+					   uMinusHalfNeg, uMinusHalfPos,
+					   uPlusHalfNeg,  uPlusHalfPos);
+
+    reconstructor_functor_t ReconstructorY(yAxis, m_recEn, U, m_meshObj,
+					   uMinusHalfNeg, uMinusHalfPos,
+					   uPlusHalfNeg,  uPlusHalfPos);
+
+    // cell jacobian functor
+    // currently, REGARDLESS of the reconstruction scheme,
+    // we have only first-order Jacobian so we need a first-order reconstructor for the Jacobian
+    const auto firstOrder = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
+    edge_rec_t uMinusHalfNegForJ(numDofPerCell);
+    edge_rec_t uMinusHalfPosForJ(numDofPerCell);
+    edge_rec_t uPlusHalfNegForJ(numDofPerCell);
+    edge_rec_t uPlusHalfPosForJ(numDofPerCell);
+    reconstructor_functor_t ReconstructorXForJ(xAxis, firstOrder, U, m_meshObj,
+					       uMinusHalfNegForJ, uMinusHalfPosForJ,
+					       uPlusHalfNegForJ,  uPlusHalfPosForJ);
+
+    reconstructor_functor_t ReconstructorYForJ(yAxis, firstOrder, U, m_meshObj,
+					       uMinusHalfNegForJ, uMinusHalfPosForJ,
+					       uPlusHalfNegForJ,  uPlusHalfPosForJ);
+
+    jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
+    jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
+
+    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    for (int it=0; it<targetGraphRows.size(); ++it)
+    {
+      const auto smPt = targetGraphRows[it];
+      const auto vIndex = smPt*numDofPerCell;
+
+      // *** X ***
+      ReconstructorX.template operator()<numDofPerCell>(smPt);
+
+      // note that REGARDLESS of the reconstruction scheme,
+      // we currently only have only first-order Jacobian so we need
+      // to run the reconstructor for the Jacobian
+      // which will ensure that uMinusNegForJ, etc have the right values
+      ReconstructorXForJ.template operator()<numDofPerCell>(smPt);
+
+      switch(m_fluxEn)
+	{
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	  eeRusanovFluxFourDof(FLeft,  uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
+	  eeRusanovFluxFourDof(FRight, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
+
+	  eeRusanovFluxJacobianFourDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+				       normalX_, m_gamma);
+	  eeRusanovFluxJacobianFourDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+				       normalX_, m_gamma);
+	  break;
+	}
+
+      CellJacobianFunctorX(smPt);
+
+      // *** Y ***
+      ReconstructorY.template operator()<numDofPerCell>(smPt);
+
+      // note that REGARDLESS of the reconstruction scheme,
+      // we currently only have only first-order Jacobian so we need
+      // to run the reconstructor for the Jacobian
+      // which will ensure that uMinusNegForJ, etc have the right values
+      ReconstructorYForJ.template operator()<numDofPerCell>(smPt);
+
+      switch(m_fluxEn)
+	{
+	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	  eeRusanovFluxFourDof(FBack,  uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
+	  eeRusanovFluxFourDof(FFront, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
+
+	  eeRusanovFluxJacobianFourDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+				       normalY_, m_gamma);
+	  eeRusanovFluxJacobianFourDof(JFneg, JFpos, uPlusHalfNegForJ,  uPlusHalfPosForJ,
+				       normalY_, m_gamma);
+	  break;
+	}
+
+      CellJacobianFunctorY(smPt);
+
+      V(vIndex)   = dxInv*(FLeft(0) - FRight(0)) + dyInv*(FBack(0) - FFront(0));
+      V(vIndex+1) = dxInv*(FLeft(1) - FRight(1)) + dyInv*(FBack(1) - FFront(1));
+      V(vIndex+2) = dxInv*(FLeft(2) - FRight(2)) + dyInv*(FBack(2) - FFront(2));
+      V(vIndex+3) = dxInv*(FLeft(3) - FRight(3)) + dyInv*(FBack(3) - FFront(3));
+    }
+  }
+
   void velocityAndJacNearBDCellsImpl(const state_type & U,
 				     const scalar_type currentTime,
 				     velocity_type & V,
@@ -822,6 +922,15 @@ private:
     jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
     jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
 
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsDefault;
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveX;
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveY;
+    bcCellJacFactorsDefault.fill(static_cast<scalar_type>(1));
+    bcCellJacFactorsReflectiveX.fill(static_cast<scalar_type>(1));
+    bcCellJacFactorsReflectiveY.fill(static_cast<scalar_type>(1));
+    bcCellJacFactorsReflectiveX[1] = static_cast<ScalarType>(-1);
+    bcCellJacFactorsReflectiveY[2] = static_cast<ScalarType>(-1);
+
     // ----------------------------------------
     // loop over cells
     // ----------------------------------------
@@ -852,8 +961,9 @@ private:
 	  break;
 	}
 
-      auto bdType = findCellBdType(it, xAxis);
-      CellJacobianFunctorX(smPt, bdType);
+      auto bcType = findCellBdType(smPt, xAxis);
+      const auto & factorsX = (bcType == 1) ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
+      CellJacobianFunctorX(smPt, factorsX, bcType);
 
       // *** Y ***
       StencilFillerY(smPt, it);
@@ -875,8 +985,9 @@ private:
 	  break;
 	}
 
-      bdType = findCellBdType(it, yAxis);
-      CellJacobianFunctorY(smPt, bdType);
+      bcType = findCellBdType(smPt, yAxis);
+      const auto & factorsY = (bcType == 1) ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
+      CellJacobianFunctorY(smPt, factorsY, bcType);
 
       V(vIndex)   = dxInv*(FLeft(0) - FRight(0)) + dyInv*(FBack(0) - FFront(0));
       V(vIndex+1) = dxInv*(FLeft(1) - FRight(1)) + dyInv*(FBack(1) - FFront(1));
@@ -885,129 +996,6 @@ private:
     }
   }
 
-  void velocityAndJacInnerCellsImpl(const state_type & U,
-				    const scalar_type currentTime,
-				    velocity_type & V,
-				    flux_t & FLeft,
-				    flux_t & FRight,
-				    flux_t & FBack,
-				    flux_t & FFront,
-				    flux_jac_type & JLneg,
-				    flux_jac_type & JLpos,
-				    flux_jac_type & JRneg,
-				    flux_jac_type & JRpos,
-				    flux_jac_type & JBneg,
-				    flux_jac_type & JBpos,
-				    flux_jac_type & JFneg,
-				    flux_jac_type & JFpos,
-				    edge_rec_t & uMinusHalfNeg,
-				    edge_rec_t & uMinusHalfPos,
-				    edge_rec_t & uPlusHalfNeg,
-				    edge_rec_t & uPlusHalfPos) const
-  {
-    constexpr int xAxis = 1;
-    constexpr int yAxis = 2;
-    const auto dxInv   = m_meshObj.dxInv();
-    const auto dyInv   = m_meshObj.dyInv();
-
-    using reconstructor_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      base_t::dimensionality, edge_rec_t, state_type, MeshType>;
-
-    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
-      base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
-
-    // reconstruct functor for face fluxes
-    // here we need to use whatever order (m_recEn) user decides
-    reconstructor_functor_t ReconstructorX(xAxis, m_recEn, U, m_meshObj,
-					   uMinusHalfNeg, uMinusHalfPos,
-					   uPlusHalfNeg,  uPlusHalfPos);
-
-    reconstructor_functor_t ReconstructorY(yAxis, m_recEn, U, m_meshObj,
-					   uMinusHalfNeg, uMinusHalfPos,
-					   uPlusHalfNeg,  uPlusHalfPos);
-
-    // cell jacobian functor
-    // currently, REGARDLESS of the reconstruction scheme,
-    // we have only first-order Jacobian so we need a first-order reconstructor for the Jacobian
-    edge_rec_t uMinusHalfNegForJ(numDofPerCell);
-    edge_rec_t uMinusHalfPosForJ(numDofPerCell);
-    edge_rec_t uPlusHalfNegForJ(numDofPerCell);
-    edge_rec_t uPlusHalfPosForJ(numDofPerCell);
-    reconstructor_functor_t ReconstructorXForJ(xAxis,
-					       ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder,
-					       U, m_meshObj,
-					       uMinusHalfNegForJ, uMinusHalfPosForJ,
-					       uPlusHalfNegForJ,  uPlusHalfPosForJ);
-
-    reconstructor_functor_t ReconstructorYForJ(yAxis,
-					       ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder,
-					       U, m_meshObj,
-					       uMinusHalfNegForJ, uMinusHalfPosForJ,
-					       uPlusHalfNegForJ,  uPlusHalfPosForJ);
-
-    jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
-    jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
-
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
-    for (int it=0; it<targetGraphRows.size(); ++it)
-    {
-      const auto smPt = targetGraphRows[it];
-      const auto vIndex = smPt*numDofPerCell;
-
-      // *** X ***
-      ReconstructorX.template operator()<numDofPerCell>(smPt);
-
-      // note that REGARDLESS of the reconstruction scheme,
-      // we currently only have only first-order Jacobian so we need
-      // to run the reconstructor for the Jacobian
-      // which will ensure that uMinusNegForJ, etc have the right values
-      ReconstructorXForJ.template operator()<numDofPerCell>(smPt);
-
-      switch(m_fluxEn)
-	{
-	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	  eeRusanovFluxFourDof(FLeft,  uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
-	  eeRusanovFluxFourDof(FRight, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
-
-	  eeRusanovFluxJacobianFourDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
-				       normalX_, m_gamma);
-	  eeRusanovFluxJacobianFourDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
-				       normalX_, m_gamma);
-	  break;
-	}
-
-      CellJacobianFunctorX(smPt);
-
-      // *** Y ***
-      ReconstructorY.template operator()<numDofPerCell>(smPt);
-
-      // note that REGARDLESS of the reconstruction scheme,
-      // we currently only have only first-order Jacobian so we need
-      // to run the reconstructor for the Jacobian
-      // which will ensure that uMinusNegForJ, etc have the right values
-      ReconstructorYForJ.template operator()<numDofPerCell>(smPt);
-
-      switch(m_fluxEn)
-	{
-	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	  eeRusanovFluxFourDof(FBack,  uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
-	  eeRusanovFluxFourDof(FFront, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
-
-	  eeRusanovFluxJacobianFourDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
-				       normalY_, m_gamma);
-	  eeRusanovFluxJacobianFourDof(JFneg, JFpos, uPlusHalfNegForJ,  uPlusHalfPosForJ,
-				       normalY_, m_gamma);
-	  break;
-	}
-
-      CellJacobianFunctorY(smPt);
-
-      V(vIndex)   = dxInv*(FLeft(0) - FRight(0)) + dyInv*(FBack(0) - FFront(0));
-      V(vIndex+1) = dxInv*(FLeft(1) - FRight(1)) + dyInv*(FBack(1) - FFront(1));
-      V(vIndex+2) = dxInv*(FLeft(2) - FRight(2)) + dyInv*(FBack(2) - FFront(2));
-      V(vIndex+3) = dxInv*(FLeft(3) - FRight(3)) + dyInv*(FBack(3) - FFront(3));
-    }
-  }
 
   using base_t::m_meshObj;
   using base_t::m_ghostLeft;

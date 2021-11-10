@@ -26,13 +26,12 @@ T createLinAdv1dImpl(const mesh_t & meshObj,
   const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
   if (!check1){
     throw std::runtime_error
-      ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
+      ("advection: stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
   }
 
   // the mesh should be periodic
   if (!meshObj.isPeriodic()){
-    throw std::runtime_error
-      ("For periodic linear adv1d, mesh must be periodic.");
+    throw std::runtime_error("For periodic linear adv1d, mesh must be periodic.");
   }
 
   return T(meshObj, probEnum, recEnum);

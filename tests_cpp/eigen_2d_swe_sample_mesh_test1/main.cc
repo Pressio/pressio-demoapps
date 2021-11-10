@@ -7,14 +7,6 @@
 std::mt19937 gen(2195884);
 std::uniform_real_distribution<double> distrib(1.1, 2.0);
 
-template<class scalar_type, class prim_t>
-void initcond(int i, const scalar_type x, const scalar_type y, prim_t & prim)
-{
-  prim[0] = 1. + 0.1*x + 0.2*y;
-  prim[1] = 0.001;
-  prim[2] = 0.002;
-}
-
 template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
 {
@@ -45,15 +37,18 @@ int main(int argc, char *argv[])
 
   const auto stateSize = appObj.totalDofStencilMesh();
   state_t state(stateSize);
-  std::array<scalar_t, 3> prim;
   const auto &x = meshObj.viewX();
   const auto &y = meshObj.viewY();
   for (int i=0; i<x.size(); ++i){
-    initcond(i, x(i), y(i), prim);
+
+    const auto a = 1. + 0.1*x(i) + 0.2*y(i);
+    const auto b = 2. + 0.1*x(i) + 0.2*y(i);
+    const auto c = 3. + 0.1*x(i) + 0.2*y(i);
+
     const auto ind = i*3;
-    state(ind)   = prim[0];
-    state(ind+1) = prim[0]*prim[1];
-    state(ind+2) = prim[0]*prim[2];
+    state(ind)   = a;
+    state(ind+1) = b;
+    state(ind+2) = c;
   }
 
   auto time = 0.0;

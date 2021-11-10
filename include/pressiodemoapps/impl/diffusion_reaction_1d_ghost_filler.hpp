@@ -22,19 +22,24 @@ public:
       m_ghostRight(ghostRight)
   {}
 
-  void operator()()
+  template<class index_t>
+  void operator()(index_t smPt, int gRow)
   {
-    if (m_stencilSize!=3){
-      throw std::runtime_error("1d-diff-reaction: ghost filler not implemented for stencil !=3 ");
+
+    const auto & graph = m_meshObj.graph();
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*1;
+
+    const auto left0  = graph(smPt, 1);
+    const auto right0 = graph(smPt, 2);
+
+    if (left0 == -1){
+      m_ghostLeft(gRow, 0) = -m_state(uIndex);
     }
 
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
-    const auto & graph = m_meshObj.graph();
-    const auto cellGIDL = graph(0, 0);
-    const auto cellGIDR = graph(sampleMeshSize-1, 0);
-
-    m_ghostLeft(0)  = -m_state(cellGIDL);
-    m_ghostRight(0) = -m_state(cellGIDR);
+    if (right0 == -1){
+      m_ghostRight(gRow, 0) = -m_state(uIndex);
+    }
   }
 
 private:

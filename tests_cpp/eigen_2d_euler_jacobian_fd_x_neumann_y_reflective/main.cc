@@ -92,34 +92,26 @@ int main(int argc, char *argv[])
   for (int i=0; i<Ja.size(); ++i)
   {
     const auto diff = std::abs(Ja(i)- Ja_fd(i));
-    std::cout << i << " "
-	      << Ja(i) << " "
-	      << Ja_fd(i) << " "
-	      << diff << " "
-	      << std::endl;
-
-    if ((i+1) % 4 ==0){
-      std::cout << "\n";
-    }
-
+    printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
+	   i, Ja(i), Ja_fd(i), diff);
     if (diff > 1e-4){
       std::puts("FAILED");
       return 0;
     }
   }
 
-  // // second order
-  // auto state3 = state-eps*a;
-  // app_rhs_t velo3(velo.size());
-  // appObj.velocity(state3, 0., velo3);
-  // auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
-  // for (int i=0; i<Ja.size(); ++i){
-  //   const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
-  //   if (diff > 1e-6){
-  //     std::puts("FAILED");
-  //     return 0;
-  //   }
-  // }
+  // second order
+  auto state3 = state-eps*a;
+  app_rhs_t velo3(velo.size());
+  appObj.velocity(state3, 0., velo3);
+  auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
+  for (int i=0; i<Ja.size(); ++i){
+    const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
+    if (diff > 1e-6){
+      std::puts("FAILED");
+      return 0;
+    }
+  }
 
   std::puts("PASS");
   return 0;

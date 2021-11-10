@@ -23,9 +23,10 @@ int main(int argc, char *argv[])
 #else
   const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
-  
+
   const auto probId  = pda::Euler3d::PeriodicSmooth;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
+  appObj.disableJacobian();
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 

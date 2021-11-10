@@ -25,13 +25,12 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
 }
 
 template<
-  int dim, int numDofPerCell,
   class ScalarType,
   class SparseMatrix,
   class CellJacobianType,
   class MeshType
   >
-class FirstOrderInnerCellJacobianFunctor
+struct CellJacobianMembers
 {
   // used to figure out which direction we are dealing with
   // if ==1, then we are doing "x"
@@ -50,6 +49,41 @@ class FirstOrderInnerCellJacobianFunctor
   // depends on which axis we are doing
   ScalarType m_hInv = {};
 
+  CellJacobianMembers(SparseMatrix & J,
+		      const MeshType & meshObj,
+		      const CellJacobianType & JLneg,
+		      const CellJacobianType & JLpos,
+		      const CellJacobianType & JRneg,
+		      const CellJacobianType & JRpos,
+		      int axis = 1)
+    : m_axis(axis), m_J(J), m_meshObj(meshObj),
+      m_JLneg(JLneg), m_JLpos(JLpos), m_JRneg(JRneg), m_JRpos(JRpos)
+  {
+    m_hInv = (m_axis == 1) ? m_meshObj.dxInv() : (m_axis==2) ? m_meshObj.dyInv() : m_meshObj.dzInv();
+  }
+};
+
+
+template<
+  int dim, int numDofPerCell,
+  class ScalarType,
+  class SparseMatrix,
+  class CellJacobianType,
+  class MeshType
+  >
+class FirstOrderInnerCellJacobianFunctor
+  : private CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>
+{
+  using members = CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>;
+  using members::m_axis;
+  using members::m_J;
+  using members::m_meshObj;
+  using members::m_JLneg;
+  using members::m_JLpos;
+  using members::m_JRneg;
+  using members::m_JRpos;
+  using members::m_hInv;
+
 public:
   FirstOrderInnerCellJacobianFunctor(SparseMatrix & J,
 				     const MeshType & meshObj,
@@ -58,11 +92,7 @@ public:
 				     const CellJacobianType & JRneg,
 				     const CellJacobianType & JRpos,
 				     int axis = 1)
-    : m_axis(axis), m_J(J), m_meshObj(meshObj),
-      m_JLneg(JLneg), m_JLpos(JLpos), m_JRneg(JRneg), m_JRpos(JRpos)
-  {
-    m_hInv = (m_axis == 1) ? m_meshObj.dxInv() : (m_axis==2) ? m_meshObj.dyInv() : m_meshObj.dzInv();
-  }
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
 
   template<class index_t>
   void operator()(const index_t smPt)
@@ -97,23 +127,17 @@ template<
 class FirstOrderInnerCellJacobianFunctor<
   dim, 1, ScalarType, SparseMatrix, CellJacobianType, MeshType
   >
+  : private CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>
 {
-  // used to figure out which direction we are dealing with
-  // if ==1, then we are doing "x"
-  // if ==2, then we are doing "y"
-  // if ==3, then we are doing "z"
-  int m_axis = 1;
-
-  SparseMatrix & m_J;
-  const MeshType & m_meshObj;
-  const CellJacobianType & m_JLneg;
-  const CellJacobianType & m_JLpos;
-  const CellJacobianType & m_JRneg;
-  const CellJacobianType & m_JRpos;
-
-  // m_hInv = 1/h where h is the cell width
-  // depends on which axis we are doing
-  ScalarType m_hInv = {};
+  using members = CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>;
+  using members::m_axis;
+  using members::m_J;
+  using members::m_meshObj;
+  using members::m_JLneg;
+  using members::m_JLpos;
+  using members::m_JRneg;
+  using members::m_JRpos;
+  using members::m_hInv;
 
 public:
   FirstOrderInnerCellJacobianFunctor(SparseMatrix & J,
@@ -123,11 +147,7 @@ public:
 				     const CellJacobianType & JRneg,
 				     const CellJacobianType & JRpos,
 				     int axis = 1)
-    : m_axis(axis), m_J(J), m_meshObj(meshObj),
-      m_JLneg(JLneg), m_JLpos(JLpos), m_JRneg(JRneg), m_JRpos(JRpos)
-  {
-    m_hInv = (m_axis == 1) ? m_meshObj.dxInv() : (m_axis==2) ? m_meshObj.dyInv() : m_meshObj.dzInv();
-  }
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
 
   template<class index_t>
   void operator()(const index_t smPt)
@@ -158,26 +178,17 @@ template<
   class MeshType
   >
 class FirstOrderBdCellJacobianFunctor
+  : private CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>
 {
-  // used to figure out which direction we are dealing with
-  // if ==1, then we are doing "x"
-  // if ==2, then we are doing "y"
-  // if ==3, then we are doing "z"
-  int m_axis = 1;
-
-  SparseMatrix & m_J;
-  const MeshType & m_meshObj;
-  const CellJacobianType & m_JLneg;
-  const CellJacobianType & m_JLpos;
-  const CellJacobianType & m_JRneg;
-  const CellJacobianType & m_JRpos;
-
-  // m_hInv = 1/h where h is the cell width
-  // depends on which axis we are doing
-  ScalarType m_hInv = {};
-
-  std::array<ScalarType, numDofPerCell> m_factorsDefault;
-  std::array<ScalarType, numDofPerCell> m_factorsReflective;
+  using members = CellJacobianMembers<ScalarType, SparseMatrix, CellJacobianType, MeshType>;
+  using members::m_axis;
+  using members::m_J;
+  using members::m_meshObj;
+  using members::m_JLneg;
+  using members::m_JLpos;
+  using members::m_JRneg;
+  using members::m_JRpos;
+  using members::m_hInv;
 
 public:
   FirstOrderBdCellJacobianFunctor(SparseMatrix & J,
@@ -185,47 +196,17 @@ public:
 				const CellJacobianType & JLneg, const CellJacobianType & JLpos,
 				const CellJacobianType & JRneg, const CellJacobianType & JRpos,
 				int axis = 1)
-    : m_axis(axis), m_J(J), m_meshObj(meshObj),
-      m_JLneg(JLneg), m_JLpos(JLpos), m_JRneg(JRneg), m_JRpos(JRpos)
-  {
-    m_hInv = (m_axis == 1) ? m_meshObj.dxInv() : (m_axis==2) ? m_meshObj.dyInv() : m_meshObj.dzInv();
-    m_factorsDefault.fill(static_cast<ScalarType>(1));
-
-    // prepare factors that we use below based on BC being reflective or not
-    m_factorsReflective.fill(static_cast<ScalarType>(1));
-    if (numDofPerCell == 3){
-      m_factorsReflective[1] = static_cast<ScalarType>(-1);
-    }
-    else if (numDofPerCell == 4){
-      if (m_axis==1){
-	m_factorsReflective[1] = static_cast<ScalarType>(-1);
-      }
-      else{
-	m_factorsReflective[2] = static_cast<ScalarType>(-1);
-      }
-    }
-    else if (numDofPerCell == 5){
-      if (m_axis==1){
-	m_factorsReflective[1] = static_cast<ScalarType>(-1);
-      }
-      else if (m_axis==2){
-	m_factorsReflective[2] = static_cast<ScalarType>(-1);
-      }
-      else if (m_axis==3){
-	m_factorsReflective[3] = static_cast<ScalarType>(-1);
-      }
-    }
-  }
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
 
   template<class index_t>
-  void operator()(const index_t smPt, int bc_type = 0)
+  void operator()(const index_t smPt,
+		  const std::array<ScalarType, numDofPerCell> & factors,
+		  int bc_type = 0)
   {
     const auto & graph = m_meshObj.graph();
     index_t l0 = {};
     index_t r0 = {};
     _get_left_right_cells_indices<dim>(l0, r0, smPt, graph, m_axis);
-
-    const auto & factors = (bc_type == 1) ? m_factorsReflective : m_factorsDefault;
 
     auto rowIndex  = smPt*numDofPerCell;
     auto col_i     = graph(smPt, 0)*numDofPerCell;
@@ -277,26 +258,3 @@ public:
 
 }}
 #endif
-
-
-// ScalarType coeff = 1.;
-// m_J.coeffRef(rowIndex,  col_i)     = (      m_JLneg(0,0) + m_JLpos(0,0) - m_JRneg(0,0))*m_hInv;
-// m_J.coeffRef(rowIndex,  col_i+1)   = (coeff*m_JLneg(0,1) + m_JLpos(0,1) - m_JRneg(0,1))*m_hInv;
-// m_J.coeffRef(rowIndex,  col_i+2)   = (      m_JLneg(0,2) + m_JLpos(0,2) - m_JRneg(0,2))*m_hInv;
-// m_J.coeffRef(rowIndex,  col_ip1)   = (-m_JRpos(0,0))*m_hInv;
-// m_J.coeffRef(rowIndex,  col_ip1+1) = (-m_JRpos(0,1))*m_hInv;
-// m_J.coeffRef(rowIndex,  col_ip1+2) = (-m_JRpos(0,2))*m_hInv;
-
-// m_J.coeffRef(rowIndex+1, col_i)     = (      m_JLneg(1,0) + m_JLpos(1,0)-m_JRneg(1,0))*m_hInv;
-// m_J.coeffRef(rowIndex+1, col_i+1)   = (coeff*m_JLneg(1,1) + m_JLpos(1,1)-m_JRneg(1,1))*m_hInv;
-// m_J.coeffRef(rowIndex+1, col_i+2)   = (      m_JLneg(1,2) + m_JLpos(1,2)-m_JRneg(1,2))*m_hInv;
-// m_J.coeffRef(rowIndex+1, col_ip1)   = -m_JRpos(1,0)*m_hInv;
-// m_J.coeffRef(rowIndex+1, col_ip1+1) = -m_JRpos(1,1)*m_hInv;
-// m_J.coeffRef(rowIndex+1, col_ip1+2) = -m_JRpos(1,2)*m_hInv;
-
-// m_J.coeffRef(rowIndex+2, col_i)     = (      m_JLneg(2,0) + m_JLpos(2,0)-m_JRneg(2,0))*m_hInv;
-// m_J.coeffRef(rowIndex+2, col_i+1)   = (coeff*m_JLneg(2,1) + m_JLpos(2,1)-m_JRneg(2,1))*m_hInv;
-// m_J.coeffRef(rowIndex+2, col_i+2)   = (      m_JLneg(2,2) + m_JLpos(2,2)-m_JRneg(2,2))*m_hInv;
-// m_J.coeffRef(rowIndex+2, col_ip1)   = -m_JRpos(2,0)*m_hInv;
-// m_J.coeffRef(rowIndex+2, col_ip1+1) = -m_JRpos(2,1)*m_hInv;
-// m_J.coeffRef(rowIndex+2, col_ip1+2) = -m_JRpos(2,2)*m_hInv;

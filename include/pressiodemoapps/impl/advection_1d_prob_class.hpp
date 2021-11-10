@@ -89,12 +89,9 @@ private:
 		    const scalar_type t,
 		    velocity_type & V) const
   {
-    scalar_type FL{0};
-    scalar_type FR{0};
-    scalar_type uMinusHalfNeg{0};
-    scalar_type uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0};
-    scalar_type uPlusHalfPos {0};
+    scalar_type FL{0}, FR{0};
+    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
+    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
 
     using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
       dimensionality, scalar_type, state_type, MeshType>;
@@ -126,16 +123,18 @@ protected:
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class ScalarType, class MeshType>
-using EigenAdvection1dAppRhsOnly = Advection1dAppRhsOnly<ScalarType, MeshType,
-							 Eigen::Matrix<ScalarType,-1,1>,
-							 Eigen::Matrix<ScalarType,-1,1>
-							 >;
+using EigenAdvection1dAppRhsOnly =
+  Advection1dAppRhsOnly<ScalarType, MeshType,
+			Eigen::Matrix<ScalarType,-1,1>,
+			Eigen::Matrix<ScalarType,-1,1>
+			>;
 
 template<class ScalarType, class MeshType>
 class EigenAdvection1dAppWithJacobian
   : public EigenAdvection1dAppRhsOnly<ScalarType, MeshType>
 {
   using base_t = EigenAdvection1dAppRhsOnly<ScalarType, MeshType>;
+  using typename base_t::stencil_values_t;
 
 public:
   using typename base_t::index_t;
@@ -143,12 +142,8 @@ public:
   using typename base_t::state_type;
   using typename base_t::velocity_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int>;
-
   static constexpr int	   dimensionality{1};
   static constexpr index_t numDofPerCell{1};
-
-private:
-  using typename base_t::stencil_values_t;
 
 public:
   template<class ...Args>
@@ -256,17 +251,10 @@ private:
 			  velocity_type & V) const
   {
 
-    scalar_type FL{0};
-    scalar_type FR{0};
-    scalar_type uMinusHalfNeg{0};
-    scalar_type uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0};
-    scalar_type uPlusHalfPos {0};
-
-    scalar_type JLneg;
-    scalar_type JLpos;
-    scalar_type JRneg;
-    scalar_type JRpos;
+    scalar_type FL{0}, FR{0};
+    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
+    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
+    scalar_type JLneg, JLpos, JRneg, JRpos;
 
     // reconstruct functor for face fluxes
     // here we need to use whatever order (m_recEn) user decides
@@ -289,6 +277,7 @@ private:
 				 uMinusHalfNegForJ, uMinusHalfPosForJ,
 				 uPlusHalfNegForJ,  uPlusHalfPosForJ);
 
+    // for this problem, due to periodic BC, any cell is an "inner" cell
     using jac_fnct_t = impl::FirstOrderInnerCellJacobianFunctor<
       base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
     jac_fnct_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);

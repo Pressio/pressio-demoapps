@@ -35,17 +35,17 @@ template<
   >
 class Euler1dAppRhsOnly
 {
+protected:
+  using ghost_vals_container_type   = GhostContainerType;
+  using stencil_vals_container_type = StateType;
+  using flux_t	   = StateType;
+  using edge_rec_t = StateType;
 
 public:
   using index_t	       = typename MeshType::index_t;
   using scalar_type    = ScalarType;
   using state_type     = StateType;
   using velocity_type  = VelocityType;
-
-  using ghost_vals_container_type   = GhostContainerType;
-  using stencil_vals_container_type = state_type;
-  using flux_t			= state_type;
-  using edge_rec_t		= state_type;
 
   static constexpr int	   dimensionality{1};
   static constexpr index_t numDofPerCell{3};
@@ -56,6 +56,14 @@ public:
 	      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
     : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum), m_fluxEn(fluxEnum)
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+    // note that when doing bindings, I need to first construct
+    // ghost with {1,1} just so that the numpy array picks up they
+    // are 2dim array otherwise it thinks they are 1d array.
+    // The right allocation for these is then done inside allocateGhosts.
+    ,m_ghostLeft({1,1})
+    ,m_ghostRight({1,1})
+#endif
   {
 
     // calculate total num of dofs on sample and stencil mesh
@@ -66,24 +74,8 @@ public:
     allocateGhostValues();
   }
 
-  state_type initialCondition() const
-  {
-    state_type res(m_numDofStencilMesh);
-
-    if (m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth){
-      ::pressiodemoapps::impl::euler1dsineInitialCondition(res, m_meshObj, m_gamma);
-    }
-    else if (m_probEn == ::pressiodemoapps::Euler1d::Sod){
-      ::pressiodemoapps::impl::sod1dInitialCondition(res, m_meshObj, m_gamma);
-    }
-    else if (m_probEn == ::pressiodemoapps::Euler1d::Lax){
-      ::pressiodemoapps::impl::lax1dInitialCondition(res, m_meshObj, m_gamma);
-    }
-    else{
-      //nothing
-    }
-
-    return res;
+  state_type initialCondition() const{
+    return initialConditionImpl();
   }
 
   scalar_type gamma()		const{ return m_gamma; }
@@ -105,6 +97,27 @@ public:
     velocityInnerCellsImpl(state, currentTime, V);
   }
 
+private:
+  state_type initialConditionImpl() const
+  {
+    state_type res(m_numDofStencilMesh);
+
+    if (m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth){
+      ::pressiodemoapps::impl::euler1dsineInitialCondition(res, m_meshObj, m_gamma);
+    }
+    else if (m_probEn == ::pressiodemoapps::Euler1d::Sod){
+      ::pressiodemoapps::impl::sod1dInitialCondition(res, m_meshObj, m_gamma);
+    }
+    else if (m_probEn == ::pressiodemoapps::Euler1d::Lax){
+      ::pressiodemoapps::impl::lax1dInitialCondition(res, m_meshObj, m_gamma);
+    }
+    else{
+      //nothing
+    }
+
+    return res;
+  }
+
 protected:
   void fillGhostsIfNeeded(const state_type & U,
 			  scalar_type /*currTime*/) const
@@ -117,7 +130,10 @@ protected:
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
 	numDofPerCell, state_type, MeshType, ghost_vals_container_type>;
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
-      ghF();
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
     }
   }
 
@@ -131,7 +147,6 @@ protected:
       we can use the state directly to do the reconstruction.
       we do not need to fill a temporary stencil array values.
     */
-
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
       dimensionality, edge_rec_t, state_type, MeshType>;
 
@@ -204,7 +219,7 @@ protected:
     {
       const auto smPt = specialRows[it];
 
-      StencilFiller(smPt);
+      StencilFiller(smPt, it);
       Reconstructor();
       switch(m_fluxEn)
       {
@@ -263,13 +278,13 @@ private:
       | rho, rho*u, E | rho, rho*u, E | rho, rho*u, E ||
       |		      |		      |		      ||
       ----------------|---------------|---------------||
-
      */
 
-    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
-    const auto ghostStorageSize = numDofPerCell*((stencilSizeNeeded-1)/2);
-    ::pressiodemoapps::resize(m_ghostLeft,  ghostStorageSize);
-    ::pressiodemoapps::resize(m_ghostRight, ghostStorageSize);
+    const auto stencilSize    = reconstructionTypeToStencilSize(m_recEn);
+    const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
+    const index_t s1 = m_meshObj.numCellsBd();
+    ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
+    ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
   }
 
 protected:
@@ -298,7 +313,7 @@ template<class ScalarType, class MeshType>
 using EigenEuler1dAppRhsOnly = Euler1dAppRhsOnly<ScalarType, MeshType,
 						 Eigen::Matrix<ScalarType,-1,1>,
 						 Eigen::Matrix<ScalarType,-1,1>,
-						 Eigen::Matrix<ScalarType,-1,1>>;
+						 Eigen::Matrix<ScalarType,-1,-1, Eigen::RowMajor>>;
 
 template<class ScalarType, class MeshType>
 class EigenEuler1dAppWithJacobian
@@ -600,6 +615,9 @@ private:
 						   uPlusHalfNegForJ,  uPlusHalfPosForJ);
     jac_functor_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);
 
+    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
+    bcCellJacFactors.fill(static_cast<scalar_type>(1));
+
     // ----------------------------------------
     // loop over cells
     // ----------------------------------------
@@ -610,14 +628,14 @@ private:
       const auto smPt = targetGraphRows[it];
       const auto vIndexCurrentCellDensity = smPt*numDofPerCell;
 
-      FillStencilValuesFunctor(smPt);
+      FillStencilValuesFunctor(smPt, it);
       FaceValuesReconstructFunctor();
 
       // note that REGARDLESS of the reconstruction scheme,
       // we currently only have only first-order Jacobian so we need
       // to run the reconstructor for the Jacobian
       // which will ensure that uMinusNegForJ, etc have the right values
-      FillStencilValuesFunctorForJ(smPt);
+      FillStencilValuesFunctorForJ(smPt, it);
       FaceValuesReconstructFunctorForJ();
 
       switch(m_fluxEn)
@@ -637,7 +655,7 @@ private:
       V(vIndexCurrentCellDensity+1) = dxInv*(FL(1) - FR(1));
       V(vIndexCurrentCellDensity+2) = dxInv*(FL(2) - FR(2));
 
-      CellJacobianFunctor(smPt);
+      CellJacobianFunctor(smPt, bcCellJacFactors);
     }
   }
 

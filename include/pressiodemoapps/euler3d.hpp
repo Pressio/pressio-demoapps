@@ -58,7 +58,8 @@ auto createProblemEigen(const mesh_t & meshObj,
     scalar_t, mesh_t,
     Eigen::Matrix<scalar_t,-1,1>,
     Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,-1, Eigen::RowMajor>
+    Eigen::Matrix<scalar_t,-1,-1, Eigen::RowMajor>,
+    Eigen::SparseMatrix<scalar_t, Eigen::RowMajor, int>
     >;
 
   return impl::createEe3dImpl<mesh_t, p_t>(meshObj, recEnum, probEnum,

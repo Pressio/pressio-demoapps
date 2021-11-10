@@ -5,24 +5,34 @@
 #include "../observer.hpp"
 #include <random>
 
-std::mt19937 gen(2195884);
-std::uniform_real_distribution<double> distrib(1.1, 2.0);
-
 template<class scalar_type, class prim_t>
 void initcond(int i, const scalar_type x, const scalar_type y, prim_t & prim)
 {
   prim[0] = 1. + 0.1*x + 0.2*y;
-  prim[1] = 0.001;
-  prim[2] = 0.002;
-  prim[3] = 0.00001;
+  prim[1] = 0.1;
+  prim[2] = 0.2;
+  prim[3] = 0.5;
 }
 
 template<class T>
-void writeToFile(const T& obj, const std::string & fileName)
+void writeToFileRank1(const T & obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.size(); i++){
+  for (size_t i=0; i<obj.rows(); i++){
     file << std::setprecision(14) << obj(i) << " \n";
+  }
+  file.close();
+}
+
+template<class T>
+void writeToFileSparseMat(const T & obj, const std::string & fileName)
+{
+  std::ofstream file; file.open(fileName);
+  for (size_t i=0; i<obj.rows(); i++){
+    for (size_t j=0; j<obj.cols(); j++){
+      file << std::setprecision(14) << obj.coeff(i,j) << " ";
+    }
+    file << " \n";
   }
   file.close();
 }
@@ -41,7 +51,6 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Euler2d::testingonlyneumann;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
-  appObj.disableJacobian();
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;
@@ -63,13 +72,13 @@ int main(int argc, char *argv[])
 
   auto time = 0.0;
   auto velo = appObj.createVelocity();
+  auto jac  = appObj.createJacobian();
   appObj.velocity(state, time, velo);
-  writeToFile(velo,  "velo.txt");
-  writeToFile(state, "state.txt");
+  appObj.jacobian(state, time, jac);
 
-  // for (int i=0; i<velo.size(); ++i){
-  //   std::cout << i << " " << i % 4 << " " << std::setprecision(14) << velo(i) << "\n";
-  // }
+  writeToFileRank1(state,   "state.txt");
+  writeToFileRank1(velo,    "velo.txt");
+  writeToFileSparseMat(jac, "jacobian.txt");
 
   return 0;
 }

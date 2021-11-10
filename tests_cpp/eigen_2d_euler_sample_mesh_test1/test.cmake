@@ -33,6 +33,9 @@ execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 set(CMD "mv ${OUTDIR}/velo.txt ${OUTDIR}/full")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 
+set(CMD "mv ${OUTDIR}/jacobian.txt ${OUTDIR}/full")
+execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
+
 set(CMD "mv ${OUTDIR}/connectivity.dat ${OUTDIR}/full")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 
