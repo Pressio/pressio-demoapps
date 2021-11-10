@@ -92,7 +92,7 @@ public:
 				     const CellJacobianType & JRneg,
 				     const CellJacobianType & JRpos,
 				     int axis = 1)
-    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos, axis){}
 
   template<class index_t>
   void operator()(const index_t smPt)
@@ -147,7 +147,7 @@ public:
 				     const CellJacobianType & JRneg,
 				     const CellJacobianType & JRpos,
 				     int axis = 1)
-    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos, axis){}
 
   template<class index_t>
   void operator()(const index_t smPt)
@@ -196,7 +196,7 @@ public:
 				const CellJacobianType & JLneg, const CellJacobianType & JLpos,
 				const CellJacobianType & JRneg, const CellJacobianType & JRpos,
 				int axis = 1)
-    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos){}
+    : members(J, meshObj, JLneg, JLpos, JRneg, JRpos, axis){}
 
   template<class index_t>
   void operator()(const index_t smPt,
