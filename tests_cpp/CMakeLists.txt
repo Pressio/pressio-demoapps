@@ -21,7 +21,7 @@ add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
 add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
-
+add_subdirectory(eigen_2d_swe_jacobian_fd_slip_wall)
 
 ### 1d problems ###
 add_subdirectory(eigen_1d_linear_adv_explicit)

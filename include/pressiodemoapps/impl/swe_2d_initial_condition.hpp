@@ -11,6 +11,7 @@ void GaussianPulse(state_type & state,
 {
   constexpr int numDofPerCell = 3;
   constexpr auto one  = static_cast<scalar_type>(1);
+  constexpr auto zero = static_cast<scalar_type>(0);
 
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
@@ -19,9 +20,9 @@ void GaussianPulse(state_type & state,
     {
       const auto ind = i*numDofPerCell;
       auto r = std::sqrt( (x(i) - one)*(x(i) - one) + (y(i) - one)*(y(i) - one) );
-      state(ind)   = 1. + pulseMag*std::exp( -(r*r) );
-      state(ind+1) = 0.;
-      state(ind+2) = 0.;
+      state(ind)   = static_cast<scalar_type>(1) + pulseMag*std::exp( -(r*r) );
+      state(ind+1) = zero;
+      state(ind+2) = zero;
     }
 }
 

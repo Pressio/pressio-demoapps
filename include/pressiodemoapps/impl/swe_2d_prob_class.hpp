@@ -7,6 +7,7 @@
 // improved later on but we have a starting point.
 
 #include "swe_fluxes.hpp"
+#include "swe_flux_jacobian.hpp"
 #include "swe_2d_initial_condition.hpp"
 #include "swe_2d_ghost_filler_inviscid_wall.hpp"
 #include "functor_fill_stencil.hpp"
@@ -50,51 +51,32 @@ public:
 #endif
 
 public:
-#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   Swe2dAppT(const mesh_t & meshObj,
 	      ::pressiodemoapps::Swe2d probEn,
 	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
         int icIdentifier)
-    : m_icIdentifier(icIdentifier),
-      m_probEn(probEn),
-      m_recEn(recEn),
-      m_fluxEn(fluxEnum),
-      m_meshObj(meshObj)
-  {
-
-    computeDofs();
-    allocateStencilValuesContainer();
-    allocateGhosts();
-    initializeJacobian();
-  }
-
-#else
-  // note that when doing bindings, I need to first construct
-  // ghost with {1,1} just so that the numpy array picks up they
-  // are 2dim array otherwise it thinks they are 1d array.
-  // The right allocation for these is then done inside allocateGhosts.
-  Swe2dAppT(const mesh_t & meshObj,
-	      ::pressiodemoapps::Swe2d probEn,
-	      ::pressiodemoapps::InviscidFluxReconstruction recEn,
-	      ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-        int icIdentifier)
-    : m_icIdentifier(icIdentifier),
-      m_probEn(probEn),
-      m_recEn(recEn),
-      m_fluxEn(fluxEnum),
-      m_meshObj(meshObj),
-      m_stencilVals(1),
-      m_ghostLeft({1,1}),
-      m_ghostFront({1,1}),
-      m_ghostRight({1,1}),
-      m_ghostBack({1,1})
-  {
-    computeDofs();
-    allocateStencilValuesContainer();
-    allocateGhosts();
-  }
+    : m_icIdentifier(icIdentifier)
+    ,m_probEn(probEn)
+    ,m_recEn(recEn)
+    ,m_fluxEn(fluxEnum)
+    ,m_meshObj(meshObj)
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+    ,m_stencilVals(1)
+    ,m_ghostLeft({1,1})
+    ,m_ghostFront({1,1})
+    ,m_ghostRight({1,1})
+    ,m_ghostBack({1,1})
 #endif
+  {
+    computeDofs();
+    allocateStencilValuesContainer();
+    allocateGhosts();
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    initializeJacobian();
+#endif
+  }
 
   scalar_type gravity()         const{ return m_gravity; }
   scalar_type coriolis()        const{ return m_coriolis; }
@@ -139,9 +121,18 @@ public:
     edge_rec_t uPlusHalfPos (numDofPerCell);
 
     fillGhosts(state, currentTime);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    auto values = m_jacobian.valuePtr();
+    for (int i=0; i<m_jacobian.nonZeros(); ++i){
+      values[i] = 0;
+    }
+#endif
+
     velocityCellsNearBdImpl(state, currentTime, V, FL, FR, FD, FU,
 			    uMinusHalfNeg, uMinusHalfPos,
 			    uPlusHalfNeg,  uPlusHalfPos);
+
     velocityInnerCellsImpl(state, currentTime, V, FL, FR, FD, FU,
 			   uMinusHalfNeg, uMinusHalfPos,
 			   uPlusHalfNeg,  uPlusHalfPos);
@@ -178,7 +169,6 @@ private:
   state_type initialConditionImpl() const
   {
     state_type initialState(m_numDofStencilMesh);
-
     switch(m_probEn)
       {
       case ::pressiodemoapps::Swe2d::SlipWall:{
@@ -221,12 +211,12 @@ private:
     const auto & graph = m_meshObj.graph();
     for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
       {
-	const auto jacRowOfCurrentCellDensity = cell*numDofPerCell;
+	const auto jacRow = cell*numDofPerCell;
 	const auto ci0  = graph(cell, 0)*numDofPerCell;
 
 	for (int k=0; k<numDofPerCell; ++k){
 	  for (int j=0; j<numDofPerCell; ++j){
-	    trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci0+j, val0) );
+	    trList.push_back( Tr(jacRow+k, ci0+j, val0) );
 	  }
 	}
 
@@ -238,7 +228,7 @@ private:
 	  const auto ci = L0*numDofPerCell;
 	  for (int k=0; k<numDofPerCell; ++k){
 	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	      trList.push_back( Tr(jacRow+k, ci+j, val0) );
 	    }
 	  }
 	}
@@ -247,7 +237,7 @@ private:
 	  const auto ci = F0*numDofPerCell;
 	  for (int k=0; k<numDofPerCell; ++k){
 	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	      trList.push_back( Tr(jacRow+k, ci+j, val0) );
 	    }
 	  }
 	}
@@ -256,7 +246,7 @@ private:
 	  const auto ci = R0*numDofPerCell;
 	  for (int k=0; k<numDofPerCell; ++k){
 	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	      trList.push_back( Tr(jacRow+k, ci+j, val0) );
 	    }
 	  }
 	}
@@ -265,7 +255,7 @@ private:
 	  const auto ci = B0*numDofPerCell;
 	  for (int k=0; k<numDofPerCell; ++k){
 	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci+j, val0) );
+	      trList.push_back( Tr(jacRow+k, ci+j, val0) );
 	    }
 	  }
 	}
@@ -348,6 +338,13 @@ private:
 
     jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
     jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
+
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsX;
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsY;
+    bcCellJacFactorsX.fill(static_cast<scalar_type>(1));
+    bcCellJacFactorsY.fill(static_cast<scalar_type>(1));
+    bcCellJacFactorsX[1] = static_cast<scalar_type>(-1);
+    bcCellJacFactorsY[2] = static_cast<scalar_type>(-1);
 #endif
 
     // ----------------------------------------
@@ -376,19 +373,25 @@ private:
 	  sweRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gravity);
 	  sweRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gravity);
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-// 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFourDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
-// 					 normalX_, m_gravity);
-// 	    eeRusanovFluxJacobianFourDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
-// 					 normalX_, m_gravity);
-// 	  }
-// #endif
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+	  if (!m_onlyComputeVelocity){
+	    sweRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+					   normalX_, m_gravity);
+	    sweRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+					   normalX_, m_gravity);
+	  }
+#endif
 
 	  break;
 	}
 
-      // Y
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	CellJacobianFunctorX(smPt, bcCellJacFactorsX, 1);
+      }
+#endif
+
+      // *** Y ***
       StencilFillerY(smPt, it);
       Reconstructor();
 
@@ -405,28 +408,39 @@ private:
 	  sweRusanovFluxThreeDof(FD, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gravity);
 	  sweRusanovFluxThreeDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gravity);
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-// 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFourDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
-// 					 normalY_, m_gravity);
-// 	    eeRusanovFluxJacobianFourDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
-// 					 normalY_, m_gravity);
-// 	  }
-// #endif
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+	  if (!m_onlyComputeVelocity){
+	    sweRusanovFluxJacobianThreeDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+					   normalY_, m_gravity);
+	    sweRusanovFluxJacobianThreeDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+					   normalY_, m_gravity);
+	  }
+#endif
 
 	  break;
 	}
 
-      // if (!m_onlyComputeVelocity){
-      // 	CellJacobianFunctorY(smPt, bdType);
-      // }
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	CellJacobianFunctorY(smPt, bcCellJacFactorsY, 1);
+      }
+#endif
 
       const auto vIndex = smPt*numDofPerCell;
       const auto uIndex = graph(smPt, 0)*numDofPerCell;
-
       V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FD(0) - FU(0));
       V(vIndex+1) = dxInv*(FL(1) - FR(1)) + dyInv*(FD(1) - FU(1)) - m_coriolis*U(uIndex+2)/U(uIndex);
       V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2)) + m_coriolis*U(uIndex+1)/U(uIndex);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	const index_t col_i = graph(smPt, 0)*numDofPerCell;
+	m_jacobian.coeffRef(vIndex+1, col_i)   +=  m_coriolis*U(uIndex+2)/(U(uIndex)*U(uIndex) );
+	m_jacobian.coeffRef(vIndex+1, col_i+2) += -m_coriolis/U(uIndex);
+	m_jacobian.coeffRef(vIndex+2, col_i+1) +=  m_coriolis/U(uIndex);
+	m_jacobian.coeffRef(vIndex+2, col_i)   +=  -m_coriolis*U(uIndex+1)/(U(uIndex)*U(uIndex) );
+      }
+#endif
     }
   }
 
@@ -452,6 +466,13 @@ private:
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
       dimensionality, edge_rec_t, state_type, mesh_t>;
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
+      dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, mesh_t>;
+#endif
+
+    // reconstruct functor for face fluxes
+    // here we need to use whatever order (m_recEn) user decides
     rec_fnct_t ReconstructorX(xAxis, m_recEn, U, m_meshObj,
 			      uMinusHalfNeg, uMinusHalfPos,
 			      uPlusHalfNeg,  uPlusHalfPos);
@@ -459,6 +480,32 @@ private:
     rec_fnct_t ReconstructorY(yAxis, m_recEn, U, m_meshObj,
 			      uMinusHalfNeg, uMinusHalfPos,
 			      uPlusHalfNeg,  uPlusHalfPos);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    // cell jacobian functor
+    // currently, REGARDLESS of the reconstruction scheme,
+    // we have only first-order Jacobian so we need a first-order reconstructor for the Jacobian
+    flux_jac_type JLneg, JLpos;
+    flux_jac_type JRneg, JRpos;
+    flux_jac_type JFneg, JFpos;
+    flux_jac_type JBneg, JBpos;
+
+    const auto firstOrder = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
+    edge_rec_t uMinusHalfNegForJ(numDofPerCell);
+    edge_rec_t uMinusHalfPosForJ(numDofPerCell);
+    edge_rec_t uPlusHalfNegForJ(numDofPerCell);
+    edge_rec_t uPlusHalfPosForJ(numDofPerCell);
+    rec_fnct_t ReconstructorXForJ(xAxis, firstOrder, U, m_meshObj,
+				  uMinusHalfNegForJ, uMinusHalfPosForJ,
+				  uPlusHalfNegForJ,  uPlusHalfPosForJ);
+
+    rec_fnct_t ReconstructorYForJ(yAxis, firstOrder, U, m_meshObj,
+				  uMinusHalfNegForJ, uMinusHalfPosForJ,
+				  uPlusHalfNegForJ,  uPlusHalfPosForJ);
+
+    jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
+    jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
+#endif
 
     // deal with cells away from boundaries
     // const auto & graph = m_meshObj.graph();
@@ -472,30 +519,86 @@ private:
 
       // X
       ReconstructorX.template operator()<numDofPerCell>(smPt);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	// note that REGARDLESS of the reconstruction scheme,
+	// we currently only have only first-order Jacobian so we need
+	// to run the reconstructor for the Jacobian
+	// which will ensure that uMinusNegForJ, etc have the right values
+	ReconstructorXForJ.template operator()<numDofPerCell>(smPt);
+      }
+#endif
+
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  sweRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gravity);
 	  sweRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gravity);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+	  sweRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+					 normalX_, m_gravity);
+	  sweRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+					 normalX_, m_gravity);
+#endif
 	  break;
 	}
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	CellJacobianFunctorX(smPt);
+      }
+#endif
+
       // Y
       ReconstructorY.template operator()<numDofPerCell>(smPt);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	// note that REGARDLESS of the reconstruction scheme,
+	// we currently only have only first-order Jacobian so we need
+	// to run the reconstructor for the Jacobian
+	// which will ensure that uMinusNegForJ, etc have the right values
+	ReconstructorYForJ.template operator()<numDofPerCell>(smPt);
+      }
+#endif
+
       switch(m_fluxEn)
 	{
 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
 	  sweRusanovFluxThreeDof(FD, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gravity);
 	  sweRusanovFluxThreeDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gravity);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+	  sweRusanovFluxJacobianThreeDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+					 normalY_, m_gravity);
+	  sweRusanovFluxJacobianThreeDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+					 normalY_, m_gravity);
+#endif
 	  break;
 	}
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	CellJacobianFunctorY(smPt);
+      }
+#endif
 
       V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FD(0) - FU(0));
       V(vIndex+1) = dxInv*(FL(1) - FR(1)) + dyInv*(FD(1) - FU(1)) - m_coriolis*U(uIndex+2)/U(uIndex);
       V(vIndex+2) = dxInv*(FL(2) - FR(2)) + dyInv*(FD(2) - FU(2)) + m_coriolis*U(uIndex+1)/U(uIndex);
-    }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+      if (!m_onlyComputeVelocity){
+	const index_t col_i = graph(smPt, 0)*numDofPerCell;
+	m_jacobian.coeffRef(vIndex+1, col_i)   +=  m_coriolis*U(uIndex+2)/(U(uIndex)*U(uIndex) );
+	m_jacobian.coeffRef(vIndex+1, col_i+2) += -m_coriolis/U(uIndex);
+	m_jacobian.coeffRef(vIndex+2, col_i+1) +=  m_coriolis/U(uIndex);
+	m_jacobian.coeffRef(vIndex+2, col_i)   +=  -m_coriolis*U(uIndex+1)/(U(uIndex)*U(uIndex) );
+      }
+#endif
+    }
   }
 
   void fillGhosts(const state_type & U, const scalar_type currentTime) const
