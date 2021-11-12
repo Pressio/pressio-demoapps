@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
   // make sure repeated evaluations work
   // not just a single time
-  for (int i=0; i<1; ++i)
+  for (int i=0; i<5; ++i)
   {
     appObj.velocity(state, 0., velo);
     appObj.jacobian(state, 0., J);
