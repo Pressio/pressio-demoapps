@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
   auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
   for (int i=0; i<Ja.size(); ++i){
     const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
-    if (diff > 1e-6){
+    if (diff > 1e-5){
       std::puts("FAILED");
       return 0;
     }
