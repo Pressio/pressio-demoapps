@@ -64,8 +64,8 @@ public:
     ,m_recEn(recEn)
     ,m_fluxEn(fluxEnum)
     ,m_icIdentifier(icIdentifier)
-    ,m_stencilVals(1)
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+    ,m_stencilVals(1)
     // note that when doing bindings, I need to first construct
     // ghost with {1,1} just so that the numpy array picks up they
     // are 2dim array otherwise it thinks they are 1d array.

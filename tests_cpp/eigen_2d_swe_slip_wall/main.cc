@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Swe2d::SlipWall;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
+  appObj.disableJacobian();
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 
