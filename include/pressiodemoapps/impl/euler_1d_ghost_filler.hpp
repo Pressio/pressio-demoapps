@@ -74,10 +74,10 @@ public:
       }
 
     if (m_stencilSize == 7){
-      const auto left1  = graph(smPt, 5);
-      const auto right1 = graph(smPt, 6);
-      const auto left2  = graph(smPt, 7);
-      const auto right2 = graph(smPt, 8);
+      const auto left1  = graph(smPt, 3);
+      const auto right1 = graph(smPt, 4);
+      const auto left2  = graph(smPt, 5);
+      const auto right2 = graph(smPt, 6);
 
       if (left2 == -1){
 	const auto ind = right1*numDofPerCell;

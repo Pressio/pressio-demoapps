@@ -206,6 +206,7 @@ private:
     ::pressiodemoapps::resize(m_stencilVals, numDofPerCell*stencilSizeNeeded);
   }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   void initializeJacobian()
   {
     initializeJacobianFirstOrder();
@@ -264,6 +265,7 @@ private:
 
     m_jacobian.setFromTriplets(trList.begin(), trList.end());
   }
+#endif
 
   void velocityInnerCellsImpl(const state_type & U,
 			      const scalar_type timeIn,
@@ -388,6 +390,7 @@ private:
       // *** Y ***
       ReconstructorY.template operator()<numDofPerCell>(smPt);
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	// note that REGARDLESS of the reconstruction scheme,
 	// we currently only have only first-order Jacobian so we need
@@ -395,6 +398,7 @@ private:
 	// which will ensure that uMinusNegForJ, etc have the right values
 	ReconstructorYForJ.template operator()<numDofPerCell>(smPt);
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -422,6 +426,7 @@ private:
       // *** Z ***
       ReconstructorZ.template operator()<numDofPerCell>(smPt);
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	// note that REGARDLESS of the reconstruction scheme,
 	// we currently only have only first-order Jacobian so we need
@@ -429,6 +434,7 @@ private:
 	// which will ensure that uMinusNegForJ, etc have the right values
 	ReconstructorZForJ.template operator()<numDofPerCell>(smPt);
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -490,7 +496,6 @@ private:
     return 0;
   }
 
-
   void velocityCellsNearBdImpl(const state_type & U,
 			       const scalar_type timeIn,
 			       velocity_type & V,
@@ -514,12 +519,14 @@ private:
     const auto dyInv   = m_meshObj.dyInv();
     const auto dzInv   = m_meshObj.dzInv();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
     flux_jac_type JLneg, JLpos;
     flux_jac_type JRneg, JRpos;
     flux_jac_type JBneg, JBpos;
     flux_jac_type JFneg, JFpos;
     flux_jac_type JDneg, JDpos;
     flux_jac_type JUneg, JUpos;
+#endif
 
     using sfiller_t = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
@@ -527,9 +534,10 @@ private:
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilFiveDofPerCell<
       edge_rec_t, stencil_values_t>;
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
     using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderBdCellJacobianFunctor<
       dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, mesh_t>;
-
+#endif
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
@@ -549,6 +557,7 @@ private:
 			     uPlusHalfNeg,  uPlusHalfPos);
 
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
     // ----------------------------------------
     // functors needed to compute cell jacobian
     // we have only first-order Jacobian for now, so we need
@@ -594,6 +603,7 @@ private:
     bcCellJacFactorsReflectiveX[1] = static_cast<scalar_type>(-1);
     bcCellJacFactorsReflectiveY[2] = static_cast<scalar_type>(-1);
     bcCellJacFactorsReflectiveZ[3] = static_cast<scalar_type>(-1);
+#endif
 
     // -----
     // loop
@@ -609,10 +619,12 @@ private:
       StencilFillerX(smPt, it);
       Reconstructor();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	FillStencilValuesXFunctorForJ(smPt, it);
 	FaceValuesReconstructFunctorForJ();
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -620,20 +632,25 @@ private:
 	  eeRusanovFluxFiveDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
 	  eeRusanovFluxFiveDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 	  if (!m_onlyComputeVelocity){
 	    eeRusanovFluxJacobianFiveDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 					 normalX_, m_gamma);
 	    eeRusanovFluxJacobianFiveDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 					 normalX_, m_gamma);
 	  }
+#endif
+
 	  break;
 	}
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	auto bcType = findCellBdType(smPt, xAxis);
 	const auto & factorsX = (bcType == 1) ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
 	CellJacobianFunctorX(smPt, factorsX, bcType);
       }
+#endif
 
       // ------------
       // Y
@@ -641,10 +658,12 @@ private:
       StencilFillerY(smPt, it);
       Reconstructor();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
       FillStencilValuesYFunctorForJ(smPt, it);
       FaceValuesReconstructFunctorForJ();
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -652,20 +671,25 @@ private:
 	  eeRusanovFluxFiveDof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
 	  eeRusanovFluxFiveDof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 	  if (!m_onlyComputeVelocity){
 	  eeRusanovFluxJacobianFiveDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 				       normalY_, m_gamma);
 	  eeRusanovFluxJacobianFiveDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 				       normalY_, m_gamma);
 	  }
+#endif
+
 	  break;
 	}
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	auto bcType = findCellBdType(smPt, yAxis);
 	const auto & factorsY = (bcType == 1) ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
 	CellJacobianFunctorY(smPt, factorsY, bcType);
       }
+#endif
 
       // ------------
       // Z
@@ -673,10 +697,12 @@ private:
       StencilFillerZ(smPt, it);
       Reconstructor();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	FillStencilValuesZFunctorForJ(smPt, it);
 	FaceValuesReconstructFunctorForJ();
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -684,20 +710,25 @@ private:
 	  eeRusanovFluxFiveDof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
 	  eeRusanovFluxFiveDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 	  if (!m_onlyComputeVelocity){
 	  eeRusanovFluxJacobianFiveDof(JDneg, JDpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 				       normalZ_, m_gamma);
 	  eeRusanovFluxJacobianFiveDof(JUneg, JUpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 				       normalZ_, m_gamma);
 	  }
+#endif
+
 	  break;
 	}
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	auto bcType = findCellBdType(smPt, zAxis);
 	const auto & factorsZ = (bcType == 1) ? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
 	CellJacobianFunctorZ(smPt, factorsZ, bcType);
       }
+#endif
 
       const auto vIndex = smPt*numDofPerCell;
       V(vIndex)   = dxInv*(FL(0) - FR(0)) + dyInv*(FB(0) - FF(0)) + dzInv*(FD(0) - FU(0));

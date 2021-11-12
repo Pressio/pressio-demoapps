@@ -5,7 +5,7 @@ import sys
 import subprocess
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-#from setuptools.command.install import install as _install
+from setuptools.command.install import install as _install
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,20 +22,20 @@ def description():
   with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
     return f.read()
 
-# # ----------------------------------------------
-# # overload install command
-# # ----------------------------------------------
-# class install(_install):
-#   user_options = _install.user_options
+# ----------------------------------------------
+# overload install command
+# ----------------------------------------------
+class install(_install):
+  user_options = _install.user_options
 
-#   def initialize_options(self):
-#     _install.initialize_options(self)
+  def initialize_options(self):
+    _install.initialize_options(self)
 
-#   def finalize_options(self):
-#     _install.finalize_options(self)
+  def finalize_options(self):
+    _install.finalize_options(self)
 
-#   def run(self):
-#     _install.run(self)
+  def run(self):
+    _install.run(self)
 
 # ----------------------------------------------
 # A CMakeExtension needs a sourcedir instead of a file list.
@@ -120,8 +120,8 @@ def run_setup():
     },
 
     ext_modules=[CMakeExtension("pressiodemoapps._pressiodemoappsimpl")],
-    #cmdclass={"build_ext": CMakeBuild, "install"  : install},
-    cmdclass={"build_ext": CMakeBuild},
+    cmdclass={"build_ext": CMakeBuild, "install"  : install},
+    #cmdclass={"build_ext": CMakeBuild},
     install_requires=["numpy", "scipy", "matplotlib", "sklearn"],
     zip_safe=False,
 

@@ -105,21 +105,25 @@ public:
     return initialConditionImpl();
   }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   // the Jacobian is by default fused with the velocity,
   // this method allows one to disable the jacobian
   // so only velocity is computed
   void disableJacobian() {
     m_onlyComputeVelocity = true;
   }
+#endif
 
   velocity_type createVelocity() const{
     velocity_type V(m_numDofSampleMesh);
     return V;
   }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   jacobian_type createJacobian() const {
     return m_jacobian;
   }
+#endif
 
   void velocity(const state_type & state,
 		const scalar_type currentTime,
@@ -143,6 +147,7 @@ public:
 			   uPlusHalfNeg,  uPlusHalfPos);
   }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
   void jacobian(const state_type & state,
 		const scalar_type timeValue,
 		jacobian_type & J) const
@@ -152,6 +157,7 @@ public:
       J = m_jacobian;
     }
   }
+#endif
 
 private:
   void computeDofs(){
@@ -267,7 +273,6 @@ private:
 
     m_jacobian.setFromTriplets(trList.begin(), trList.end());
   }
-
 #endif
 
   void velocityCellsNearBdImpl(const state_type & U,
@@ -288,18 +293,10 @@ private:
     const auto dxInv   = m_meshObj.dxInv();
     const auto dyInv   = m_meshObj.dyInv();
 
-    flux_jac_type JLneg, JLpos;
-    flux_jac_type JRneg, JRpos;
-    flux_jac_type JFneg, JFpos;
-    flux_jac_type JBneg, JBpos;
-
     using stencil_filler_t = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
     using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell
       <edge_rec_t, stencil_values_t>;
-
-    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderBdCellJacobianFunctor<
-      dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, mesh_t>;
 
     // stencil filler and reconstructor for face fluxes
     // here we need to use whatever order (m_recEn) user decides
@@ -323,6 +320,11 @@ private:
     // dedicate functors because we cannot use those above.
     // Once we have cell Jacobians of various order, we can change this.
     // ----------------------------------------
+    flux_jac_type JLneg, JLpos;
+    flux_jac_type JRneg, JRpos;
+    flux_jac_type JFneg, JFpos;
+    flux_jac_type JBneg, JBpos;
+
     const auto cellJacOrdEn = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
 
     stencil_values_t stencilValsForJ = {};
@@ -341,6 +343,9 @@ private:
 						uMinusHalfNegForJ, uMinusHalfPosForJ,
 						uPlusHalfNegForJ,  uPlusHalfPosForJ);
 
+    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderBdCellJacobianFunctor<
+      dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, mesh_t>;
+
     jac_fnct_t CellJacobianFunctorX(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos, xAxis);
     jac_fnct_t CellJacobianFunctorY(m_jacobian, m_meshObj, JBneg, JBpos, JFneg, JFpos, yAxis);
 #endif
@@ -358,10 +363,12 @@ private:
       StencilFillerX(smPt, it);
       Reconstructor();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	FillStencilValuesXFunctorForJ(smPt, it);
 	FaceValuesReconstructFunctorForJ();
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -385,10 +392,12 @@ private:
       StencilFillerY(smPt, it);
       Reconstructor();
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
       if (!m_onlyComputeVelocity){
 	FillStencilValuesYFunctorForJ(smPt, it);
 	FaceValuesReconstructFunctorForJ();
       }
+#endif
 
       switch(m_fluxEn)
 	{
@@ -521,7 +530,6 @@ private:
     else{
       // no op
     }
-
   }
 
 private:

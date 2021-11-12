@@ -1,5 +1,11 @@
 include(FindUnixCommands)
 
+set(CMD "rm 1d_lax_solution.bin")
+execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
+if(RES)
+  message("Nothing to delete, data file not present")
+endif()
+
 set(CMD "python ${MESHDRIVER} -n 100 1 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds -5.0 5.0 --periodic false")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
