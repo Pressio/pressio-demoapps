@@ -22,7 +22,7 @@ T createSwe2dImpl(const mesh_t & meshObj,
 		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		 ::pressiodemoapps::Swe2d probEnum,
 		 ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-     const int icId)
+		  const int icId)
 {
 
   const auto stencilSize = meshObj.stencilSize();
@@ -101,9 +101,7 @@ T createSwe2dForPyC(const mesh_t & meshObj,
   return impl::createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
 					 InviscidFluxScheme::Rusanov,1);
 }
-
 #endif
-
 
 }
 #endif
