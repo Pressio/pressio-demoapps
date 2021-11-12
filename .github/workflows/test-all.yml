@@ -88,7 +88,8 @@ jobs:
       - name: Install Python package
         run: |
           cd $DEMOAPPS_HOME
-          sudo -E python setup.py install
+          sudo -E python setup.py build
+          sudo -E python setup.py install --skip-build
 
       - name: Run Python tests
         run: |
