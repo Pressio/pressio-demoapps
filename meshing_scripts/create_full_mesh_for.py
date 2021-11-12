@@ -7,6 +7,8 @@ valid = ["linadv1d_s3", \
          "linadv1d_s5", \
          "linadv1d_s7", \
          #
+         "diffreac1d", \
+         #
          "euler1dsmooth_s3", \
          "euler1dsmooth_s5", \
          "euler1dsmooth_s7", \
@@ -96,6 +98,15 @@ if __name__== "__main__":
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0),
             "--periodic", "true")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("diffreac1d" in pName):
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(1),
+            "--outDir", args.outDir,
+            "--stencilSize", str(3),
+            "--bounds", str(0.0), str(1.0),
+            "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler1dsmooth" in pName):
