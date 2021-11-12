@@ -77,6 +77,25 @@ jobs:
           cd $DEMOAPPS_HOME
           git status
 
+      - name: Install required Python modules
+        run: |
+          sudo pip install $PIP_PACKAGES
+          echo ======================================================
+          pip list
+          echo ======================================================
+
+      # NOTE: run before C++ tests because it installs required modules (numpy, etc.)
+      - name: Install Python package
+        run: |
+          cd $DEMOAPPS_HOME
+          sudo -E python setup.py build
+          sudo -E python setup.py install --skip-build
+
+      - name: Run Python tests
+        run: |
+          cd $DEMOAPPS_HOME
+          pytest -s
+
       - name: Configure C++ tests
         run: |
           cmake \
@@ -97,21 +116,3 @@ jobs:
           export NUM_CPU=$(grep -c processor /proc/cpuinfo)
           cd $BUILD_DIR
           ctest -j $NUM_CPU --output-on-failure
-
-      - name: Install required Python modules
-        run: |
-          sudo pip install $PIP_PACKAGES
-          echo ======================================================
-          pip list
-          echo ======================================================
-
-      - name: Install Python package
-        run: |
-          cd $DEMOAPPS_HOME
-          sudo -E python setup.py build
-          sudo -E python setup.py install --skip-build
-
-      - name: Run Python tests
-        run: |
-          cd $DEMOAPPS_HOME
-          pytest -s
