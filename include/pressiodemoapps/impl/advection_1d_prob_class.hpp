@@ -2,10 +2,6 @@
 #ifndef PRESSIODEMOAPPS_LINEAR_ADVECTION_1D_IMPL_HPP_
 #define PRESSIODEMOAPPS_LINEAR_ADVECTION_1D_IMPL_HPP_
 
-// note that the code below is pretty ugly for now, but it works.
-// this is inside impl namespace for a reason, and will need to be
-// improved later on but we have a starting point.
-
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
 #include "cell_jacobian_first_order.hpp"
@@ -26,57 +22,37 @@ void linAdvRusanovFluxJacobian(sc_t & JL, sc_t & JR,
   JR = static_cast<sc_t>(0);
 }
 
-template<
-  class ScalarType,
-  class MeshType,
-  class StateType,
-  class VelocityType
-  >
-class Advection1dAppRhsOnly
+template<class MeshType>
+class EigenAdvection1dApp
 {
-public:
-  using index_t		 = typename MeshType::index_t;
-  using scalar_type	 = ScalarType;
-  using state_type	 = StateType;
-  using velocity_type	 = VelocityType;
-  using stencil_values_t = StateType;
-
-  static constexpr int dimensionality{1};
-  static constexpr int numDofPerCell{1};
 
 public:
-  Advection1dAppRhsOnly(const MeshType & meshObj,
+  using index_t	      = typename MeshType::index_t;
+  using scalar_type   = typename MeshType::scalar_t;
+  using state_type    = Eigen::Matrix<scalar_type,-1,1>;
+  using velocity_type = state_type;
+  using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+
+  static constexpr int	   dimensionality{1};
+  static constexpr index_t numDofPerCell{1};
+
+private:
+  using stencil_values_t = state_type;
+
+public:
+  EigenAdvection1dApp(const MeshType & meshObj,
 		      ::pressiodemoapps::Advection1d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
+    : m_meshObj(meshObj),
+      m_numDofStencilMesh(m_meshObj.stencilMeshSize()),
+      m_numDofSampleMesh(m_meshObj.sampleMeshSize()),
+      m_probEn(probEnum), m_recEn(recEnum)
   {
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize();
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize();
-
     const auto stencilSize = reconstructionTypeToStencilSize(recEnum);
     ::pressiodemoapps::resize(m_stencilVals, stencilSize);
   }
 
-  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh;  }
-  index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
-
   state_type initialCondition() const{
-    return initialConditionImpl();
-  }
-
-  velocity_type createVelocity() const {
-    velocity_type V(m_numDofSampleMesh);
-    return V;
-  }
-
-  void velocity(const state_type & stateO,
-		const scalar_type timeValue,
-		velocity_type & veloO) const{
-    velocityImpl(stateO, timeValue, veloO);
-  }
-
-private:
-  state_type initialConditionImpl() const{
     state_type res(m_numDofStencilMesh);
     const auto & x = m_meshObj.viewX();
     for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
@@ -85,145 +61,21 @@ private:
     return res;
   }
 
-  void velocityImpl(const state_type & U,
-		    const scalar_type t,
-		    velocity_type & V) const
-  {
-    scalar_type FL{0}, FR{0};
-    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
-
-    using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      dimensionality, scalar_type, state_type, MeshType>;
-
-    reconstruct_functor_t Reconstructor(m_recEn, U, m_meshObj,
-					uMinusHalfNeg, uMinusHalfPos,
-					uPlusHalfNeg,  uPlusHalfPos);
-
-    const auto dxInv = m_meshObj.dxInv();
-    for (index_t smPt=0; smPt < m_meshObj.sampleMeshSize(); ++smPt)
-    {
-      Reconstructor.template operator()<numDofPerCell>(smPt);
-      linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
-      linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
-      const auto vIndex = smPt*numDofPerCell;
-      V(vIndex) = dxInv*(FL - FR);
-    }
-  }
-
 protected:
-  const MeshType & m_meshObj;
-  ::pressiodemoapps::Advection1d m_probEn;
-  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
-  index_t m_numDofStencilMesh = {};
-  index_t m_numDofSampleMesh  = {};
-  mutable stencil_values_t m_stencilVals;
-};
-
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-template<class ScalarType, class MeshType>
-using EigenAdvection1dAppRhsOnly =
-  Advection1dAppRhsOnly<ScalarType, MeshType,
-			Eigen::Matrix<ScalarType,-1,1>,
-			Eigen::Matrix<ScalarType,-1,1>
-			>;
-
-template<class ScalarType, class MeshType>
-class EigenAdvection1dAppWithJacobian
-  : public EigenAdvection1dAppRhsOnly<ScalarType, MeshType>
-{
-  using base_t = EigenAdvection1dAppRhsOnly<ScalarType, MeshType>;
-  using typename base_t::stencil_values_t;
-
-public:
-  using typename base_t::index_t;
-  using typename base_t::scalar_type;
-  using typename base_t::state_type;
-  using typename base_t::velocity_type;
-  using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int>;
-  static constexpr int	   dimensionality{1};
-  static constexpr index_t numDofPerCell{1};
-
-public:
-  template<class ...Args>
-  EigenAdvection1dAppWithJacobian(Args && ... args)
-    : base_t(std::forward<Args>(args)...),
-      m_jacobian(m_numDofSampleMesh, m_numDofStencilMesh)
+  void initializeJacobian(jacobian_type & J)
   {
-    initializeJacobian();
-  }
-
-  // the Jacobian is by default fused with the velocity,
-  // this method allows one to disable the jacobian
-  // so only velocity is computed
-  void disableJacobian() {
-    m_onlyComputeVelocity = true;
-  }
-
-  jacobian_type createJacobian() const {
-    return m_jacobian;
-  }
-
-  void velocity(const state_type & state,
-		const scalar_type currentTime,
-		velocity_type & V) const
-  {
-    if (m_onlyComputeVelocity){
-      base_t::velocity(state, currentTime, V);
-    }
-    else{
-
-      zeroOutJacobianEntries();
-      velocityAndJacImpl(state, currentTime, V);
-
-#ifdef NDEBUG
-      // ensure that nonzeros count does not change
-      // this can happen for instance if during the Jacobian
-      // evlauation, new non-zero elements get inserted
-      assert(m_jacNonZerosCount == m_jacobian.nonZeros());
-#endif
-    }
-  }
-
-  void jacobian(const state_type & state,
-		const scalar_type timeValue,
-		jacobian_type & J) const
-  {
-    if (!m_onlyComputeVelocity){
-      // relies on jacobian been computed in velocity
-      J = m_jacobian;
-    }
-  }
-
-private:
-  void zeroOutJacobianEntries() const{
-    auto values = m_jacobian.valuePtr();
-    for (int i=0; i<m_jacobian.nonZeros(); ++i){
-      values[i] = 0.0;
-    }
-  }
-
-  void initializeJacobian()
-  {
-    initializeJacobianFirstOrder();
-
+    initializeJacobianFirstOrder(J);
     // compress to make it a real Crs matrix
-    if (!m_jacobian.isCompressed()){
-      m_jacobian.makeCompressed();
-    }
-
-    m_jacNonZerosCount = m_jacobian.nonZeros();
-
-    // if Jacobian is disabled, free it
-    if (m_onlyComputeVelocity){
-      ::pressiodemoapps::resize(m_jacobian, 0, 0);
+    if (!J.isCompressed()){
+      J.makeCompressed();
     }
   }
 
-  void initializeJacobianFirstOrder()
+  void initializeJacobianFirstOrder(jacobian_type & J)
   {
-    using Tr = Eigen::Triplet<ScalarType>;
+    J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
+
+    using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
     const scalar_type val0 = 0;
@@ -234,22 +86,30 @@ private:
 	const auto L0 = graph(cell, 1);
 	const auto R0 = graph(cell, 2);
 	const auto ciL0 = L0*numDofPerCell;
-
 	const auto ci  = graph(cell, 0)*numDofPerCell;
 	const auto ciR0 = R0*numDofPerCell;
 
 	trList.push_back( Tr(jacRowOfCurrentCell, ciL0, val0) );
-	trList.push_back( Tr(jacRowOfCurrentCell, ci, val0) );
+	trList.push_back( Tr(jacRowOfCurrentCell, ci,   val0) );
 	trList.push_back( Tr(jacRowOfCurrentCell, ciR0, val0) );
       }
 
-    m_jacobian.setFromTriplets(trList.begin(), trList.end());
+    J.setFromTriplets(trList.begin(), trList.end());
   }
 
-  void velocityAndJacImpl(const state_type & U,
-			  const scalar_type currentTime,
-			  velocity_type & V) const
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobian(const U_t & U,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   jacobian_type * J) const
   {
+    int nonZerosCountBeforeComputing = 0;
+    if (J){
+      nonZerosCountBeforeComputing = J->nonZeros();
+      ::pressiodemoapps::set_zero(*J);
+    }
 
     scalar_type FL{0}, FR{0};
     scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
@@ -259,66 +119,79 @@ private:
     // reconstruct functor for face fluxes
     // here we need to use whatever order (m_recEn) user decides
     using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      base_t::dimensionality, scalar_type, state_type, MeshType>;
+      dimensionality, scalar_type, U_t, MeshType>;
     reconstruct_functor_t Reconstructor(m_recEn, U, m_meshObj,
-			     uMinusHalfNeg, uMinusHalfPos,
-			     uPlusHalfNeg,  uPlusHalfPos);
+					uMinusHalfNeg, uMinusHalfPos,
+					uPlusHalfNeg,  uPlusHalfPos);
 
     // cell jacobian functor
     // currently, REGARDLESS of the reconstruction scheme,
     // we have only first-order Jacobian so we need a first-order reconstructor
     // for the Jacobian
+    const auto firstOrder = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
     scalar_type uMinusHalfNegForJ;
     scalar_type uMinusHalfPosForJ;
     scalar_type uPlusHalfNegForJ;
     scalar_type uPlusHalfPosForJ;
-    reconstruct_functor_t ReconstructorForJ(::pressiodemoapps::InviscidFluxReconstruction::FirstOrder,
-				 U, m_meshObj,
-				 uMinusHalfNegForJ, uMinusHalfPosForJ,
-				 uPlusHalfNegForJ,  uPlusHalfPosForJ);
+    reconstruct_functor_t ReconstructorForJ(firstOrder, U, m_meshObj,
+					    uMinusHalfNegForJ, uMinusHalfPosForJ,
+					    uPlusHalfNegForJ,  uPlusHalfPosForJ);
 
     // for this problem, due to periodic BC, any cell is an "inner" cell
     using jac_fnct_t = impl::FirstOrderInnerCellJacobianFunctor<
-      base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
-    jac_fnct_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);
+      dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
+    jac_fnct_t CellJacobianFunctor(*J, m_meshObj, JLneg, JLpos, JRneg, JRpos);
 
-    // loop
+    // loop over cells
     const auto dxInv = m_meshObj.dxInv();
     const auto sampleMeshSize = m_meshObj.sampleMeshSize();
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt)
     {
+      const auto vIndex = smPt*numDofPerCell;
+
       Reconstructor.template operator()<numDofPerCell>(smPt);
 
-      // note that REGARDLESS of the reconstruction scheme,
-      // we currently only have only first-order Jacobian so we need
-      // to run the reconstructor for the Jacobian
-      // which will ensure that uMinusNegForJ, etc have the right values
-      ReconstructorForJ.template operator()<numDofPerCell>(smPt);
+      if (J){
+	// for now, REGARDLESS of the reconstruction scheme,
+	// we currently only have only first-order Jacobian so we need
+	// to run the reconstructor for the Jacobian
+	// which will ensure that uMinusNegForJ, etc have the right values
+	ReconstructorForJ.template operator()<numDofPerCell>(smPt);
+      }
 
       linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
       linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
-      linAdvRusanovFluxJacobian(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ);
-      linAdvRusanovFluxJacobian(JRneg, JRpos, uPlusHalfNegForJ,  uPlusHalfPosForJ);
 
-      const auto vIndex = smPt*numDofPerCell;
+      if (J){
+	linAdvRusanovFluxJacobian(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ);
+	linAdvRusanovFluxJacobian(JRneg, JRpos, uPlusHalfNegForJ,  uPlusHalfPosForJ);
+      }
+
       V(vIndex) = dxInv*(FL - FR);
 
-      CellJacobianFunctor(smPt);
+      if (J){
+	CellJacobianFunctor(smPt);
+      }
     }
+
+#ifdef NDEBUG
+    if (J){
+      // ensure that nonzeros count does not change
+      // this can happen for instance if during the Jacobian
+      // evlauation, new non-zero elements get inserted
+      assert(J->nonZeros() != nonZerosCountBeforeComputing);
+    }
+#endif
   }
 
-private:
-  using base_t::m_meshObj;
-  using base_t::m_recEn;
-  using base_t::m_numDofStencilMesh;
-  using base_t::m_numDofSampleMesh;
-  using base_t::m_stencilVals;
-
-  mutable jacobian_type m_jacobian = {};
-  std::size_t m_jacNonZerosCount = {};
-  bool m_onlyComputeVelocity = false;
+protected:
+  const MeshType & m_meshObj;
+  index_t m_numDofStencilMesh = {};
+  index_t m_numDofSampleMesh  = {};
+  ::pressiodemoapps::Advection1d m_probEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
+  mutable stencil_values_t m_stencilVals;
 };
-#endif
 
 }}//end namespace
 #endif

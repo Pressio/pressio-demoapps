@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
   pressio::log::setVerbosity({pressio::log::level::debug});
 
   const auto probId  = pda::Euler1d::Lax;
-  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
-  // by default, velocoity and Jac are fused, only want velocity
-  appObj.disableJacobian();
+  auto appObj      = pda::createExplicitProblemEigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

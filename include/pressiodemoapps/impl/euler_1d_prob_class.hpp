@@ -2,10 +2,6 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_APP_HPP_
 #define PRESSIODEMOAPPS_EULER1D_APP_HPP_
 
-// note that the code below is pretty ugly for now, but it works.
-// this is inside impl namespace for a reason, and will need to be
-// improved later on but we have a starting point.
-
 #include "euler_fluxes.hpp"
 #include "euler_flux_jacobian.hpp"
 #include "euler_rankine_hugoniot.hpp"
@@ -15,55 +11,37 @@
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
 #include "cell_jacobian_first_order.hpp"
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include "Eigen/Sparse"
-#endif
 
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
-#include <omp.h>
-#endif
+namespace pressiodemoapps{ namespace implee1d{
 
-namespace pressiodemoapps{ namespace impl{
-
-template<
-  class ScalarType,
-  class MeshType,
-  class StateType,
-  class VelocityType,
-  class GhostContainerType
-  >
-class Euler1dAppRhsOnly
+template<class MeshType>
+class EigenEuler1dApp
 {
-protected:
-  using ghost_vals_container_type   = GhostContainerType;
-  using stencil_vals_container_type = StateType;
-  using flux_t	   = StateType;
-  using edge_rec_t = StateType;
 
 public:
-  using index_t	       = typename MeshType::index_t;
-  using scalar_type    = ScalarType;
-  using state_type     = StateType;
-  using velocity_type  = VelocityType;
+  using index_t	      = typename MeshType::index_t;
+  using scalar_type   = typename MeshType::scalar_t;
+  using state_type    = Eigen::Matrix<scalar_type,-1,1>;
+  using velocity_type = state_type;
+  using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
   static constexpr int	   dimensionality{1};
   static constexpr index_t numDofPerCell{3};
 
+private:
+  using ghost_container_type   = Eigen::Matrix<scalar_type,-1,-1, Eigen::RowMajor>;
+  using stencil_container_type = Eigen::Matrix<scalar_type,-1,1>;
+  using flux_type	       = Eigen::Matrix<scalar_type,-1,1>;
+  using edge_rec_type	       = Eigen::Matrix<scalar_type,-1,1>;
+  using flux_jac_type = Eigen::Matrix<scalar_type, numDofPerCell, numDofPerCell>;
+
 public:
-  Euler1dAppRhsOnly(const MeshType & meshObj,
-	      ::pressiodemoapps::Euler1d probEnum,
-	      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-	      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+  EigenEuler1dApp(const MeshType & meshObj,
+		  ::pressiodemoapps::Euler1d probEnum,
+		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		  ::pressiodemoapps::InviscidFluxScheme fluxEnum)
     : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum), m_fluxEn(fluxEnum)
-#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-    // note that when doing bindings, I need to first construct
-    // ghost with {1,1} just so that the numpy array picks up they
-    // are 2dim array otherwise it thinks they are 1d array.
-    // The right allocation for these is then done inside allocateGhosts.
-    ,m_ghostLeft({1,1})
-    ,m_ghostRight({1,1})
-#endif
   {
 
     // calculate total num of dofs on sample and stencil mesh
@@ -74,31 +52,11 @@ public:
     allocateGhostValues();
   }
 
-  state_type initialCondition() const{
-    return initialConditionImpl();
+  scalar_type gamma() const{
+    return m_gamma;
   }
 
-  scalar_type gamma()		const{ return m_gamma; }
-  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
-  index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
-
-  velocity_type createVelocity() const {
-    velocity_type V(m_numDofSampleMesh);
-    return V;
-  }
-
-  void velocity(const state_type & state,
-		const scalar_type currentTime,
-		velocity_type & V) const
-  {
-
-    fillGhostsIfNeeded(state, currentTime);
-    velocityCellsNearBdImpl(state, currentTime, V);
-    velocityInnerCellsImpl(state, currentTime, V);
-  }
-
-private:
-  state_type initialConditionImpl() const
+  state_type initialCondition() const
   {
     state_type res(m_numDofStencilMesh);
 
@@ -114,12 +72,65 @@ private:
     else{
       //nothing
     }
-
     return res;
   }
 
 protected:
-  void fillGhostsIfNeeded(const state_type & U,
+  void initializeJacobian(jacobian_type & J)
+  {
+    J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
+    initializeJacobianFirstOrder(J);
+
+    // compress to make it a real Crs matrix
+    if (!J.isCompressed()){
+      J.makeCompressed();
+    }
+  }
+
+  void initializeJacobianFirstOrder(jacobian_type & J)
+  {
+    using Tr = Eigen::Triplet<scalar_type>;
+    std::vector<Tr> trList;
+
+    const scalar_type val0 = 0.;
+    const auto & graph = m_meshObj.graph();
+    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
+      {
+	const auto jacRowOfCurrentCellDensity = cell*numDofPerCell;
+	const auto ci0  = graph(cell, 0)*numDofPerCell;
+
+	for (int k=0; k<numDofPerCell; ++k){
+	  for (int j=0; j<numDofPerCell; ++j){
+	    trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci0+j, val0) );
+	  }
+	}
+
+	const auto L0 = graph(cell, 1);
+	const auto R0 = graph(cell, 2);
+	if (L0 != -1){
+	  const auto ciL0 = L0*numDofPerCell;
+	  for (int k=0; k<numDofPerCell; ++k){
+	    for (int j=0; j<numDofPerCell; ++j){
+	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ciL0+j, val0) );
+	    }
+	  }
+	}
+
+	if (R0 != -1){
+	  const auto ciR0 = R0*numDofPerCell;
+	  for (int k=0; k<numDofPerCell; ++k){
+	    for (int j=0; j<numDofPerCell; ++j){
+	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ciR0+j, val0) );
+	    }
+	  }
+	}
+      }
+
+    J.setFromTriplets(trList.begin(), trList.end());
+  }
+
+  template<class U_t>
+  void fillGhostsIfNeeded(const U_t & U,
 			  scalar_type /*currTime*/) const
   {
     const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
@@ -128,7 +139,7 @@ protected:
 	m_probEn == ::pressiodemoapps::Euler1d::Lax)
     {
       using ghost_filler_t  = ::pressiodemoapps::impl::Ghost1dNeumannFiller<
-	numDofPerCell, state_type, MeshType, ghost_vals_container_type>;
+	numDofPerCell, U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
       for (int it=0; it<rowsBd.size(); ++it){
@@ -137,42 +148,118 @@ protected:
     }
   }
 
-protected:
-  void velocityInnerCellsImpl(const state_type & U,
-			      const scalar_type currentTime,
-			      velocity_type & V) const
+
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobian(const U_t & U,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   jacobian_type * J) const
   {
-    /*
-      for inner cells, we do not need to worry about boundaries,
-      we can use the state directly to do the reconstruction.
-      we do not need to fill a temporary stencil array values.
-    */
-    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      dimensionality, edge_rec_t, state_type, MeshType>;
 
-    flux_t FL(numDofPerCell);
-    flux_t FR(numDofPerCell);
-    edge_rec_t uMinusHalfNeg(numDofPerCell);
-    edge_rec_t uMinusHalfPos(numDofPerCell);
-    edge_rec_t uPlusHalfNeg (numDofPerCell);
-    edge_rec_t uPlusHalfPos (numDofPerCell);
+    // reconstructed values at faces
+    edge_rec_type uMinusHalfNeg(numDofPerCell);
+    edge_rec_type uMinusHalfPos(numDofPerCell);
+    edge_rec_type uPlusHalfNeg(numDofPerCell);
+    edge_rec_type uPlusHalfPos(numDofPerCell);
 
+    // flux at left and right faces
+    flux_type FL(numDofPerCell), FR(numDofPerCell);
+
+    // jac at left face wrt to left,right reconstructed states
+    flux_jac_type JLneg, JLpos;
+    // jac at right face wrt to left,right reconstructed states
+    flux_jac_type JRneg, JRpos;
+
+    fillGhostsIfNeeded(U, currentTime);
+
+    if (J){
+      ::pressiodemoapps::set_zero(*J);
+    }
+
+    velocityAndJacInnerCellsImpl(U, currentTime,
+				 V, J, FL, FR, JLneg, JLpos, JRneg, JRpos,
+				 uMinusHalfNeg, uMinusHalfPos,
+				 uPlusHalfNeg,  uPlusHalfPos);
+
+    velocityAndJacNearBDCellsImpl(U, currentTime,
+				  V, J, FL, FR, JLneg, JLpos, JRneg, JRpos,
+				  uMinusHalfNeg, uMinusHalfPos,
+				  uPlusHalfNeg,  uPlusHalfPos);
+  }
+
+  template<class U_t, class V_t>
+  void velocityAndJacInnerCellsImpl(const U_t & U,
+				    const scalar_type currentTime,
+				    V_t & V,
+				    jacobian_type * J,
+				    flux_type & FL,
+				    flux_type & FR,
+				    flux_jac_type & JLneg,
+				    flux_jac_type & JLpos,
+				    flux_jac_type & JRneg,
+				    flux_jac_type & JRpos,
+				    edge_rec_type & uMinusHalfNeg,
+				    edge_rec_type & uMinusHalfPos,
+				    edge_rec_type & uPlusHalfNeg,
+				    edge_rec_type & uPlusHalfPos) const
+  {
+    namespace pda = ::pressiodemoapps;
+
+    // reconstruct functor for face fluxes
+    // here we need to use whatever order (m_recEn) user decides
+    using rec_fnct_t = pda::impl::ReconstructorFromState<
+      dimensionality, edge_rec_type, U_t, MeshType>;
     rec_fnct_t Reconstructor(m_recEn, U, m_meshObj,
 			     uMinusHalfNeg, uMinusHalfPos,
 			     uPlusHalfNeg,  uPlusHalfPos);
 
+    // cell jacobian functor
+    // currently, REGARDLESS of the reconstruction scheme,
+    // we have only first-order Jacobian so we need a first-order reconstructor
+    // for the Jacobian
+    edge_rec_type uMinusHalfNegForJ(numDofPerCell);
+    edge_rec_type uMinusHalfPosForJ(numDofPerCell);
+    edge_rec_type uPlusHalfNegForJ(numDofPerCell);
+    edge_rec_type uPlusHalfPosForJ(numDofPerCell);
+    rec_fnct_t ReconstructorForJ(pda::InviscidFluxReconstruction::FirstOrder,
+				 U, m_meshObj,
+				 uMinusHalfNegForJ, uMinusHalfPosForJ,
+				 uPlusHalfNegForJ,  uPlusHalfPosForJ);
+
+    using jac_fnct_t = pda::impl::FirstOrderInnerCellJacobianFunctor<
+      dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
+    jac_fnct_t CellJacobianFunctor(*J, m_meshObj, JLneg, JLpos, JRneg, JRpos);
+
+    // loop
     const auto dxInv = m_meshObj.dxInv();
-    const auto & rowsIn = m_meshObj.graphRowsOfCellsAwayFromBd();
-    for (int it=0; it<rowsIn.size(); ++it)
+    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    for (int it=0; it<targetGraphRows.size(); ++it)
       {
-	const auto smPt = rowsIn[it];
+	const auto smPt = targetGraphRows[it];
 	Reconstructor.template operator()<numDofPerCell>(smPt);
+
+	if(J){
+	  // note that REGARDLESS of the reconstruction scheme,
+	  // we currently only have only first-order Jacobian so we need
+	  // to run the reconstructor for the Jacobian
+	  // which will ensure that uMinusNegForJ, etc have the right values
+	  ReconstructorForJ.template operator()<numDofPerCell>(smPt);
+	}
 
 	switch(m_fluxEn)
 	  {
-	  case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
+	  case pda::InviscidFluxScheme::Rusanov:
 	    ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
 	    ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+
+	    if(J){
+	      ee::impl::eeRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ,
+						      uMinusHalfPosForJ, m_gamma);
+	      ee::impl::eeRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ,
+						      uPlusHalfPosForJ, m_gamma);
+	    }
 	    break;
 	  }
 
@@ -180,63 +267,126 @@ protected:
 	V(vIndex)   = dxInv*(FL(0) - FR(0));
 	V(vIndex+1) = dxInv*(FL(1) - FR(1));
 	V(vIndex+2) = dxInv*(FL(2) - FR(2));
+
+	if(J){
+	  CellJacobianFunctor(smPt);
+	}
       }
   }
 
-  void velocityCellsNearBdImpl(const state_type & U,
-			       const scalar_type currentTime,
-			       velocity_type & V) const
+  template<class U_t, class V_t>
+  void velocityAndJacNearBDCellsImpl(const U_t & U,
+				     const scalar_type currentTime,
+				     V_t & V,
+				     jacobian_type * J,
+				     flux_type & FL,
+				     flux_type & FR,
+				     flux_jac_type & JLneg,
+				     flux_jac_type & JLpos,
+				     flux_jac_type & JRneg,
+				     flux_jac_type & JRpos,
+				     edge_rec_type & uMinusHalfNeg,
+				     edge_rec_type & uMinusHalfPos,
+				     edge_rec_type & uPlusHalfNeg,
+				     edge_rec_type & uPlusHalfPos) const
   {
-    /*
-      for cells that are near boundaries, we need use the stencil
-      values to handle properly the ghost cells.
-      We fill the stencil values needed, then do reconstruction and fluxes.
-     */
+    namespace pda = ::pressiodemoapps;
 
-    flux_t FL(numDofPerCell);
-    flux_t FR(numDofPerCell);
-    edge_rec_t uMinusHalfNeg(numDofPerCell);
-    edge_rec_t uMinusHalfPos(numDofPerCell);
-    edge_rec_t uPlusHalfNeg (numDofPerCell);
-    edge_rec_t uPlusHalfPos (numDofPerCell);
+    using stencil_filler_t  = pda::impl::StencilFiller<
+      dimensionality, numDofPerCell, stencil_container_type,
+      U_t, MeshType, ghost_container_type>;
 
-    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_vals_container_type,
-      state_type, MeshType, ghost_vals_container_type>;
-    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
-      edge_rec_t, stencil_vals_container_type>;
+    using rec_functor_t = pda::impl::ReconstructorFromStencilThreeDofPerCell<
+      edge_rec_type, stencil_container_type>;
 
-    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
-    sfiller_t StencilFiller(stencilSizeNeeded, U, m_meshObj,
-			    m_ghostLeft, m_ghostRight, m_stencilVals);
-    rec_fnct_t Reconstructor(m_recEn, m_stencilVals,
-			     uMinusHalfNeg, uMinusHalfPos,
-			     uPlusHalfNeg,  uPlusHalfPos);
+    using jac_functor_t = pda::impl::FirstOrderBdCellJacobianFunctor<
+      dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
 
+    // -----------------------------------------------
+    // functors needed to compute face fluxes
+    // NOTE: for face fluxes, we must be consistent with whatever scheme
+    // was specified by user, so we need to use this enum: m_recEn
+    // -----------------------------------------------
+    stencil_filler_t FillStencilValuesFunctor(reconstructionTypeToStencilSize(m_recEn), U,
+					      m_meshObj, m_ghostLeft, m_ghostRight,
+					      m_stencilVals);
+    rec_functor_t FaceValuesReconstructFunctor(m_recEn, m_stencilVals,
+					       uMinusHalfNeg, uMinusHalfPos,
+					       uPlusHalfNeg,  uPlusHalfPos);
+
+    // ----------------------------------------
+    // functors needed to compute cell jacobian
+    // we have only first-order Jacobian for now, so we need
+    // dedicate functors because we cannot use those above.
+    // Once we have cell Jacobians of various order, we can change this.
+    // ----------------------------------------
+    const auto cellJacOrdEn = pda::InviscidFluxReconstruction::FirstOrder;
+
+    stencil_container_type stencilValsForJ = {};
+    const auto stencilSizeForJ = reconstructionTypeToStencilSize(cellJacOrdEn);
+    pda::resize(stencilValsForJ, numDofPerCell*stencilSizeForJ);
+    stencil_filler_t FillStencilValuesFunctorForJ(stencilSizeForJ, U, m_meshObj,
+						  m_ghostLeft, m_ghostRight, stencilValsForJ);
+
+    edge_rec_type uMinusHalfNegForJ(numDofPerCell);
+    edge_rec_type uMinusHalfPosForJ(numDofPerCell);
+    edge_rec_type uPlusHalfNegForJ(numDofPerCell);
+    edge_rec_type uPlusHalfPosForJ(numDofPerCell);
+    rec_functor_t FaceValuesReconstructFunctorForJ(cellJacOrdEn, stencilValsForJ,
+						   uMinusHalfNegForJ, uMinusHalfPosForJ,
+						   uPlusHalfNegForJ,  uPlusHalfPosForJ);
+    jac_functor_t CellJacobianFunctor(*J, m_meshObj, JLneg, JLpos, JRneg, JRpos);
+
+    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
+    bcCellJacFactors.fill(static_cast<scalar_type>(1));
+
+    // ----------------------------------------
+    // loop over cells
+    // ----------------------------------------
     const auto dxInv = m_meshObj.dxInv();
-    const auto & specialRows = m_meshObj.graphRowsOfCellsNearBd();
-    for (std::size_t it=0; it<specialRows.size(); ++it)
+    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsNearBd();
+    for (std::size_t it=0; it<targetGraphRows.size(); ++it)
     {
-      const auto smPt = specialRows[it];
+      const auto smPt = targetGraphRows[it];
 
-      StencilFiller(smPt, it);
-      Reconstructor();
-      switch(m_fluxEn)
-      {
-      case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	  ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-	  ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
-	  break;
+      FillStencilValuesFunctor(smPt, it);
+      FaceValuesReconstructFunctor();
+
+      if(J){
+	// note that REGARDLESS of the reconstruction scheme,
+	// we currently only have only first-order Jacobian so we need
+	// to run the reconstructor for the Jacobian
+	// which will ensure that uMinusNegForJ, etc have the right values
+	FillStencilValuesFunctorForJ(smPt, it);
+	FaceValuesReconstructFunctorForJ();
       }
 
-      const auto vIndex = smPt*numDofPerCell;
-      V(vIndex)   = dxInv*(FL(0) - FR(0));
-      V(vIndex+1) = dxInv*(FL(1) - FR(1));
-      V(vIndex+2) = dxInv*(FL(2) - FR(2));
+      switch(m_fluxEn)
+      {
+      case pda::InviscidFluxScheme::Rusanov:
+	ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+	ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+
+	if (J){
+	  ee::impl::eeRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ,
+						  uMinusHalfPosForJ, m_gamma);
+	  ee::impl::eeRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ,
+						  uPlusHalfPosForJ, m_gamma);
+	}
+	break;
+      }
+
+      const auto vIndexCurrentCellDensity = smPt*numDofPerCell;
+      V(vIndexCurrentCellDensity)   = dxInv*(FL(0) - FR(0));
+      V(vIndexCurrentCellDensity+1) = dxInv*(FL(1) - FR(1));
+      V(vIndexCurrentCellDensity+2) = dxInv*(FL(2) - FR(2));
+
+      if(J){
+	CellJacobianFunctor(smPt, bcCellJacFactors);
+      }
     }
   }
 
-private:
   void allocateStencilValuesContainer()
   {
     // the stencil size needed is determined by the desired reconstruction
@@ -251,6 +401,9 @@ private:
     /*
       In 1d, the ghost values at left and right are stored in arrays.
       The size of this array depends on the stencil.
+      For now, we has as many rows as BD cells so that for each
+      BD cell, the corresponding ghosts can be easily found.
+      This could be changed since in 1d we literally just need two arrays only.
 
       stencil = 3:
       ghost array has 3 entries for the 3 dofs in the ghost cell.
@@ -302,378 +455,10 @@ protected:
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
-  mutable stencil_vals_container_type m_stencilVals = {};
-  mutable ghost_vals_container_type   m_ghostLeft = {};
-  mutable ghost_vals_container_type   m_ghostRight = {};
+  mutable stencil_container_type m_stencilVals = {};
+  mutable ghost_container_type   m_ghostLeft = {};
+  mutable ghost_container_type   m_ghostRight = {};
 };
-
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-template<class ScalarType, class MeshType>
-using EigenEuler1dAppRhsOnly = Euler1dAppRhsOnly<ScalarType, MeshType,
-						 Eigen::Matrix<ScalarType,-1,1>,
-						 Eigen::Matrix<ScalarType,-1,1>,
-						 Eigen::Matrix<ScalarType,-1,-1, Eigen::RowMajor>>;
-
-template<class ScalarType, class MeshType>
-class EigenEuler1dAppWithJacobian
-  : public EigenEuler1dAppRhsOnly<ScalarType, MeshType>
-{
-  using base_t = EigenEuler1dAppRhsOnly<ScalarType, MeshType>;
-
-public:
-  using typename base_t::index_t;
-  using typename base_t::scalar_type;
-  using typename base_t::state_type;
-  using typename base_t::velocity_type;
-  using jacobian_type  = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int>;
-
-  static constexpr int	   dimensionality{1};
-  static constexpr index_t numDofPerCell{3};
-
-private:
-  using typename base_t::ghost_vals_container_type;
-  using typename base_t::stencil_vals_container_type;
-  using typename base_t::flux_t;
-  using typename base_t::edge_rec_t;
-  using flux_jac_type = Eigen::Matrix<ScalarType, numDofPerCell, numDofPerCell>;
-
-public:
-  template<class ...Args>
-  EigenEuler1dAppWithJacobian(Args && ... args)
-    : base_t(std::forward<Args>(args)...),
-      m_jacobian(m_numDofSampleMesh, m_numDofStencilMesh)
-  {
-    initializeJacobian();
-  }
-
-  // the Jacobian is by default fused with the velocity,
-  // this method allows one to disable the jacobian
-  // so only velocity is computed
-  void disableJacobian() {
-    m_onlyComputeVelocity = true;
-  }
-
-  void velocity(const state_type & state,
-		const scalar_type currentTime,
-		velocity_type & V) const
-  {
-
-    // jac at left face wrt to left,right reconstructed states
-    flux_jac_type JLneg, JLpos;
-    // jac at right face wrt to left,right reconstructed states
-    flux_jac_type JRneg, JRpos;
-
-    // flux at left and right faces
-    flux_t FL(numDofPerCell), FR(numDofPerCell);
-
-    // reconstructed values at faces
-    edge_rec_t uMinusHalfNeg(numDofPerCell);
-    edge_rec_t uMinusHalfPos(numDofPerCell);
-    edge_rec_t uPlusHalfNeg(numDofPerCell);
-    edge_rec_t uPlusHalfPos(numDofPerCell);
-
-    base_t::fillGhostsIfNeeded(state, currentTime);
-
-    if (m_onlyComputeVelocity){
-      base_t::velocityCellsNearBdImpl(state, currentTime, V);
-      base_t::velocityInnerCellsImpl(state, currentTime, V);
-    }
-    else{
-
-      auto values = m_jacobian.valuePtr();
-      for (int i=0; i<m_jacobian.nonZeros(); ++i){
-	values[i] = 0.0;
-      }
-
-      velocityAndJacInnerCellsImpl(state, currentTime,
-				   V, FL, FR, JLneg, JLpos, JRneg, JRpos,
-				   uMinusHalfNeg, uMinusHalfPos,
-				   uPlusHalfNeg,  uPlusHalfPos);
-
-      velocityAndJacNearBDCellsImpl(state, currentTime,
-				    V, FL, FR, JLneg, JLpos, JRneg, JRpos,
-				    uMinusHalfNeg, uMinusHalfPos,
-				    uPlusHalfNeg,  uPlusHalfPos);
-
-#ifdef NDEBUG
-      // ensure that nonzeros count does not change
-      // this can happen for instance if during the Jacobian
-      // evlauation, new non-zero elements get inserted
-      assert(m_jacNonZerosCount == m_jacobian.nonZeros());
-#endif
-    }
-  }
-
-  jacobian_type createJacobian() const {
-    return m_jacobian;
-  }
-
-  void jacobian(const state_type & state,
-		const scalar_type timeValue,
-		jacobian_type & J) const
-  {
-    if (!m_onlyComputeVelocity){
-      // relies on jacobian been computed in velocity
-      J = m_jacobian;
-    }
-  }
-
-private:
-  void initializeJacobian()
-  {
-    initializeJacobianFirstOrder();
-
-    // compress to make it a real Crs matrix
-    if (!m_jacobian.isCompressed()){
-      m_jacobian.makeCompressed();
-    }
-
-    m_jacNonZerosCount = m_jacobian.nonZeros();
-
-    // if Jacobian is disabled, free it
-    if (m_onlyComputeVelocity){
-      ::pressiodemoapps::resize(m_jacobian, 0, 0);
-    }
-  }
-
-  void initializeJacobianFirstOrder()
-  {
-    using Tr = Eigen::Triplet<ScalarType>;
-    std::vector<Tr> trList;
-
-    const scalar_type val0 = 0.;
-    const auto & graph = m_meshObj.graph();
-    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
-      {
-	const auto jacRowOfCurrentCellDensity = cell*numDofPerCell;
-	const auto ci0  = graph(cell, 0)*numDofPerCell;
-
-	for (int k=0; k<numDofPerCell; ++k){
-	  for (int j=0; j<numDofPerCell; ++j){
-	    trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ci0+j, val0) );
-	  }
-	}
-
-	const auto L0 = graph(cell, 1);
-	const auto R0 = graph(cell, 2);
-	if (L0 != -1){
-	  const auto ciL0 = L0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ciL0+j, val0) );
-	    }
-	  }
-	}
-
-	if (R0 != -1){
-	  const auto ciR0 = R0*numDofPerCell;
-	  for (int k=0; k<numDofPerCell; ++k){
-	    for (int j=0; j<numDofPerCell; ++j){
-	      trList.push_back( Tr(jacRowOfCurrentCellDensity+k, ciR0+j, val0) );
-	    }
-	  }
-	}
-      }
-
-    m_jacobian.setFromTriplets(trList.begin(), trList.end());
-  }
-
-  void velocityAndJacInnerCellsImpl(const state_type & U,
-				    const scalar_type currentTime,
-				    velocity_type & V,
-				    flux_t & FL,
-				    flux_t & FR,
-				    flux_jac_type & JLneg,
-				    flux_jac_type & JLpos,
-				    flux_jac_type & JRneg,
-				    flux_jac_type & JRpos,
-				    edge_rec_t & uMinusHalfNeg,
-				    edge_rec_t & uMinusHalfPos,
-				    edge_rec_t & uPlusHalfNeg,
-				    edge_rec_t & uPlusHalfPos) const
-  {
-
-    // reconstruct functor for face fluxes
-    // here we need to use whatever order (m_recEn) user decides
-    using rec_fnct_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      base_t::dimensionality, edge_rec_t, state_type, MeshType>;
-    rec_fnct_t Reconstructor(m_recEn, U, m_meshObj,
-			     uMinusHalfNeg, uMinusHalfPos,
-			     uPlusHalfNeg,  uPlusHalfPos);
-
-    // cell jacobian functor
-    // currently, REGARDLESS of the reconstruction scheme,
-    // we have only first-order Jacobian so we need a first-order reconstructor
-    // for the Jacobian
-    edge_rec_t uMinusHalfNegForJ(numDofPerCell);
-    edge_rec_t uMinusHalfPosForJ(numDofPerCell);
-    edge_rec_t uPlusHalfNegForJ(numDofPerCell);
-    edge_rec_t uPlusHalfPosForJ(numDofPerCell);
-    rec_fnct_t ReconstructorForJ(::pressiodemoapps::InviscidFluxReconstruction::FirstOrder,
-				 U, m_meshObj,
-				 uMinusHalfNegForJ, uMinusHalfPosForJ,
-				 uPlusHalfNegForJ,  uPlusHalfPosForJ);
-
-    using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
-      base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
-    jac_fnct_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);
-
-    // loop
-    const auto dxInv = m_meshObj.dxInv();
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
-    for (int it=0; it<targetGraphRows.size(); ++it)
-      {
-	const auto smPt = targetGraphRows[it];
-	Reconstructor.template operator()<numDofPerCell>(smPt);
-
-	// note that REGARDLESS of the reconstruction scheme,
-	// we currently only have only first-order Jacobian so we need
-	// to run the reconstructor for the Jacobian
-	// which will ensure that uMinusNegForJ, etc have the right values
-	ReconstructorForJ.template operator()<numDofPerCell>(smPt);
-
-	switch(m_fluxEn)
-	  {
-	  case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	    ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-	    ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
-
-	    ee::impl::eeRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ, m_gamma);
-	    ee::impl::eeRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ, m_gamma);
-	    break;
-	  }
-
-	const auto vIndex = smPt*numDofPerCell;
-	V(vIndex)   = dxInv*(FL(0) - FR(0));
-	V(vIndex+1) = dxInv*(FL(1) - FR(1));
-	V(vIndex+2) = dxInv*(FL(2) - FR(2));
-
-	CellJacobianFunctor(smPt);
-      }
-  }
-
-  void velocityAndJacNearBDCellsImpl(const state_type & U,
-				     const scalar_type currentTime,
-				     velocity_type & V,
-				     flux_t & FL,
-				     flux_t & FR,
-				     flux_jac_type & JLneg,
-				     flux_jac_type & JLpos,
-				     flux_jac_type & JRneg,
-				     flux_jac_type & JRpos,
-				     edge_rec_t & uMinusHalfNeg,
-				     edge_rec_t & uMinusHalfPos,
-				     edge_rec_t & uPlusHalfNeg,
-				     edge_rec_t & uPlusHalfPos) const
-  {
-
-    // ------------
-    // aliases
-    // ------------
-    using stencil_filler_t  = ::pressiodemoapps::impl::StencilFiller<
-      base_t::dimensionality, numDofPerCell, stencil_vals_container_type,
-      state_type, MeshType, ghost_vals_container_type>;
-
-    using rec_functor_t = ::pressiodemoapps::impl::ReconstructorFromStencilThreeDofPerCell<
-      edge_rec_t, stencil_vals_container_type>;
-
-    using jac_functor_t = ::pressiodemoapps::impl::FirstOrderBdCellJacobianFunctor<
-      base_t::dimensionality, numDofPerCell, scalar_type, jacobian_type, flux_jac_type, MeshType>;
-
-    // -----------------------------------------------
-    // functors needed to compute face fluxes
-    // NOTE: for face fluxes, we must be consistent with whatever scheme
-    // was specified by user, so we need to use this enum: m_recEn
-    // -----------------------------------------------
-    stencil_filler_t FillStencilValuesFunctor(reconstructionTypeToStencilSize(base_t::m_recEn), U,
-					      m_meshObj, m_ghostLeft, m_ghostRight, m_stencilVals);
-    rec_functor_t FaceValuesReconstructFunctor(base_t::m_recEn, m_stencilVals,
-					       uMinusHalfNeg, uMinusHalfPos,
-					       uPlusHalfNeg,  uPlusHalfPos);
-
-    // ----------------------------------------
-    // functors needed to compute cell jacobian
-    // we have only first-order Jacobian for now, so we need
-    // dedicate functors because we cannot use those above.
-    // Once we have cell Jacobians of various order, we can change this.
-    // ----------------------------------------
-    const auto cellJacOrdEn = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
-
-    stencil_vals_container_type stencilValsForJ = {};
-    const auto stencilSizeForJ = reconstructionTypeToStencilSize(cellJacOrdEn);
-    ::pressiodemoapps::resize(stencilValsForJ, numDofPerCell*stencilSizeForJ);
-    stencil_filler_t FillStencilValuesFunctorForJ(stencilSizeForJ, U, m_meshObj,
-						  m_ghostLeft, m_ghostRight, stencilValsForJ);
-
-    edge_rec_t uMinusHalfNegForJ(numDofPerCell);
-    edge_rec_t uMinusHalfPosForJ(numDofPerCell);
-    edge_rec_t uPlusHalfNegForJ(numDofPerCell);
-    edge_rec_t uPlusHalfPosForJ(numDofPerCell);
-    rec_functor_t FaceValuesReconstructFunctorForJ(cellJacOrdEn, stencilValsForJ,
-						   uMinusHalfNegForJ, uMinusHalfPosForJ,
-						   uPlusHalfNegForJ,  uPlusHalfPosForJ);
-    jac_functor_t CellJacobianFunctor(m_jacobian, m_meshObj, JLneg, JLpos, JRneg, JRpos);
-
-    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
-    bcCellJacFactors.fill(static_cast<scalar_type>(1));
-
-    // ----------------------------------------
-    // loop over cells
-    // ----------------------------------------
-    const auto dxInv = m_meshObj.dxInv();
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsNearBd();
-    for (std::size_t it=0; it<targetGraphRows.size(); ++it)
-    {
-      const auto smPt = targetGraphRows[it];
-      const auto vIndexCurrentCellDensity = smPt*numDofPerCell;
-
-      FillStencilValuesFunctor(smPt, it);
-      FaceValuesReconstructFunctor();
-
-      // note that REGARDLESS of the reconstruction scheme,
-      // we currently only have only first-order Jacobian so we need
-      // to run the reconstructor for the Jacobian
-      // which will ensure that uMinusNegForJ, etc have the right values
-      FillStencilValuesFunctorForJ(smPt, it);
-      FaceValuesReconstructFunctorForJ();
-
-      switch(m_fluxEn)
-      {
-      case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	ee::impl::eeRusanovFluxThreeDof(FL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-	ee::impl::eeRusanovFluxThreeDof(FR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
-
-	ee::impl::eeRusanovFluxJacobianThreeDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
-						m_gamma);
-	ee::impl::eeRusanovFluxJacobianThreeDof(JRneg, JRpos, uPlusHalfNegForJ,  uPlusHalfPosForJ,
-						m_gamma);
-	break;
-      }
-
-      V(vIndexCurrentCellDensity)   = dxInv*(FL(0) - FR(0));
-      V(vIndexCurrentCellDensity+1) = dxInv*(FL(1) - FR(1));
-      V(vIndexCurrentCellDensity+2) = dxInv*(FL(2) - FR(2));
-
-      CellJacobianFunctor(smPt, bcCellJacFactors);
-    }
-  }
-
-private:
-  using base_t::m_meshObj;
-  using base_t::m_ghostLeft;
-  using base_t::m_ghostRight;
-  using base_t::m_stencilVals;
-  using base_t::m_gamma;
-  using base_t::m_numDofStencilMesh;
-  using base_t::m_numDofSampleMesh;
-  using base_t::m_recEn;
-  using base_t::m_fluxEn;
-  mutable jacobian_type m_jacobian = {};
-  std::size_t m_jacNonZerosCount = {};
-  bool m_onlyComputeVelocity = false;
-};
-#endif
 
 }}
 #endif

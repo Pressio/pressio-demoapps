@@ -27,10 +27,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler1d::PeriodicSmooth;
-  auto appObj	     = pda::createProblemEigen(meshObj, probId, order);
-  // by default, velocoity and Jac are fused, we only want velocity here
-  appObj.disableJacobian();
-
+  auto appObj	     = pda::createExplicitProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   state_t state(appObj.initialCondition());

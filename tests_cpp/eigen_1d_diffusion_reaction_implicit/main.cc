@@ -9,11 +9,10 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto sch     = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
-  auto appObj        = pda::createProblemEigen(meshObj,
-					       pda::DiffusionReaction1d::ProblemA,
-					       sch, 0.01, 0.005);
+  auto appObj        = pda::createImplicitProblemEigen(meshObj,
+						       pda::DiffusionReaction1d::ProblemA,
+						       sch, 0.01, 0.005);
   using app_t = decltype(appObj);
-
   using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;
   using jacob_t	= typename app_t::jacobian_type;

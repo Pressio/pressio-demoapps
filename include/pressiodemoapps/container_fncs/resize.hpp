@@ -3,10 +3,8 @@
 #define PRESSIODEMOAPPS_RESIZE_FUNC_HPP_
 
 #include <vector>
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#endif
 
 namespace pressiodemoapps{
 
@@ -17,7 +15,6 @@ void resize(std::vector<value_type> & a,
   a.resize(newSize);
 }
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class value_type, class sizetype>
 void resize(Eigen::Matrix<value_type, -1, 1> & a,
 	    sizetype newSize)
@@ -42,7 +39,7 @@ void resize(Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor> & M,
 }
 
 template<class value_type, class IntType, class sizetype>
-void resize(Eigen::SparseMatrix<value_type, Eigen::RowMajor, IntType> M,
+void resize(Eigen::SparseMatrix<value_type, Eigen::RowMajor, IntType> & M,
 	    sizetype rows,
 	    sizetype cols)
 {
@@ -50,13 +47,12 @@ void resize(Eigen::SparseMatrix<value_type, Eigen::RowMajor, IntType> M,
 }
 
 template<class value_type, class IntType, class sizetype>
-void resize(Eigen::SparseMatrix<value_type, Eigen::ColMajor, IntType> M,
+void resize(Eigen::SparseMatrix<value_type, Eigen::ColMajor, IntType> & M,
 	    sizetype rows,
 	    sizetype cols)
 {
   M.resize(rows, cols);
 }
-#endif
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class T, class sizetype>

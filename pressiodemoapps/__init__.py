@@ -18,22 +18,24 @@ try:
   from ._pressiodemoappsimpl \
     import InviscidFluxReconstruction, InviscidFluxScheme, \
     ViscousFluxReconstruction, ViscousFluxScheme, \
-    Advection1d, DiffusionReaction1d, Euler1d, Euler2d, Euler3d, Swe2d
+    Advection1d, DiffusionReaction1d, Euler1d #, Euler2d, Euler3d, Swe2d
 except ImportError:
   raise ImportError("Unable to import enums from _pressiodemoappsimpl")
 
 try:
-  from ._pressiodemoappsimpl import Advection1dProblem
+  from ._pressiodemoappsimpl import Advection1dProblemExp, Advection1dProblemImp
 except ImportError:
   raise ImportError("Unable to import Advection classes from _pressiodemoappsimpl")
 
 try:
-  from ._pressiodemoappsimpl import DiffusionReaction1dProblem
+  from ._pressiodemoappsimpl import DiffusionReaction1dProblemExp, DiffusionReaction1dProblemImp
 except ImportError:
   raise ImportError("Unable to import DiffusionReaction classes from _pressiodemoappsimpl")
 
 try:
-  from ._pressiodemoappsimpl import Euler1dProblem, Euler2dProblem, Euler3dProblem
+  from ._pressiodemoappsimpl \
+    import Euler1dProblemExp, Euler1dProblemImp \
+    #, Euler2dProblem, Euler3dProblem
 except ImportError:
   raise ImportError("Unable to import Euler classes from _pressiodemoappsimpl")
 
@@ -42,9 +44,9 @@ except ImportError:
   raise ImportError("Unable to import SWE classes from _pressiodemoappsimpl")
 
 try:
-  from ._pressiodemoappsimpl import createProblem
+  from ._pressiodemoappsimpl import createExplicitProblem, createImplicitProblem
 except ImportError:
-  raise ImportError("Unable to import createProblem from _pressiodemoappsimpl")
+  raise ImportError("Unable to import create{Ex,Im}plicitProblem from _pressiodemoappsimpl")
 
 
 # Runge-Kutta4 integrator

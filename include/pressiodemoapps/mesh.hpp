@@ -9,17 +9,12 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./impl/mesh_ccu.hpp"
 
 namespace pressiodemoapps{
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class scalar_type = double>
 auto loadCellCenterUniformMeshEigen(const std::string & meshFilesPath)
 {
@@ -32,7 +27,6 @@ auto loadCellCenterUniformMeshEigen(const std::string & meshFilesPath)
 
   return return_type(meshFilesPath);
 }
-#endif
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class T>

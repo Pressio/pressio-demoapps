@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto scheme   = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probid = pda::DiffusionReaction1d::ProblemA;
-  auto appObj      = pda::createProblemEigen(meshObj, probid, scheme);
+  auto appObj      = pda::createImplicitProblemEigen(meshObj, probid, scheme);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;

@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
   const auto scheme = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
   const auto probId = pda::DiffusionReaction1d::ProblemA;
-  auto appObj     = pda::createProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
+  auto appObj     = pda::createImplicitProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
   // not just a single time
   for (int loop=0; loop<5; ++loop)
   {
-    appObj.velocity(state, 0., velo);
     appObj.jacobian(state, 0., J);
+    appObj.velocity(state, 0., velo);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
 

@@ -17,9 +17,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj      = pda::createProblemEigen(meshObj, probid, scheme);
-  // by default, velocoity and Jac are fused, only want velocity here
-  appObj.disableJacobian();
+  auto appObj      = pda::createExplicitProblemEigen(meshObj, probid, scheme);
 
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
