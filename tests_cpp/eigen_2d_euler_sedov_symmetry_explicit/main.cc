@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::SedovSymmetry;
-  auto appObj      = pda::createExplicitProblemEigen(meshObj, probId, order);
+  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

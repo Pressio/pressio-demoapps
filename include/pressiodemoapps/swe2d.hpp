@@ -78,7 +78,7 @@ auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Swe2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createExplicitProblemEigen(meshObj, probEnum, recEnum,
+  return createProblemEigen(meshObj, probEnum, recEnum,
 				    InviscidFluxScheme::Rusanov, 1);
 }
 

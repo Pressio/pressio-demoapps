@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Swe2d::SlipWall;
-  auto appObj      = pda::createImplicitProblemEigen(meshObj, probId, order);
+  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;

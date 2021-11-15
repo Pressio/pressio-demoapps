@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::SedovFull;
-  auto appObj = pda::createImplicitProblemEigen(meshObj, probId, order);
+  auto appObj = pda::createProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;

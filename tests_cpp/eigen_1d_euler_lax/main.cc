@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   pressio::log::setVerbosity({pressio::log::level::debug});
 
   const auto probId  = pda::Euler1d::Lax;
-  auto appObj      = pda::createExplicitProblemEigen(meshObj, probId, order);
+  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

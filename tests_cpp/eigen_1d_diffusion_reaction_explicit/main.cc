@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto scheme  = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
   const auto probId  = pda::DiffusionReaction1d::ProblemA;
-  auto appObj        = pda::createExplicitProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
+  auto appObj        = pda::createProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   auto state = appObj.initialCondition();

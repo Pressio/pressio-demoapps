@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj      = pda::createExplicitProblemEigen(meshObj, probid, scheme);
+  auto appObj      = pda::createProblemEigen(meshObj, probid, scheme);
 
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;

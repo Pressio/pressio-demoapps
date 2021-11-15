@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto order   = pda::InviscidFluxReconstruction::Weno3;
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj      = pda::createExplicitProblemEigen(meshObj, probid, order);
+  auto appObj      = pda::createProblemEigen(meshObj, probid, order);
 
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;

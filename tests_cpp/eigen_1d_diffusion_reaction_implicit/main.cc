@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto sch     = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
-  auto appObj        = pda::createImplicitProblemEigen(meshObj,
+  auto appObj        = pda::createProblemEigen(meshObj,
 						       pda::DiffusionReaction1d::ProblemA,
 						       sch, 0.01, 0.005);
   using app_t = decltype(appObj);

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   // here we want to test FD Jacobian when we have Neumann BC on all boundaries
   // we can use Riemann for this since that problem has the correct BCs
 
-  auto appObj = pda::createImplicitProblemEigen(meshObj, pda::Euler2d::Riemann, order);
+  auto appObj = pda::createProblemEigen(meshObj, pda::Euler2d::Riemann, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   // and reflective on y
   // we can use NormalShock for this since that problem has the correct BCs
 
-  auto appObj = pda::createImplicitProblemEigen(meshObj, pda::Euler2d::NormalShock, order);
+  auto appObj = pda::createProblemEigen(meshObj, pda::Euler2d::NormalShock, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

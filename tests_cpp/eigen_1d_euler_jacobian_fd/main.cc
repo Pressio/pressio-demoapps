@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   // even if we set Sod, this does not really matter
-  auto appObj = pda::createImplicitProblemEigen(meshObj, pda::Euler1d::Sod, order);
+  auto appObj = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

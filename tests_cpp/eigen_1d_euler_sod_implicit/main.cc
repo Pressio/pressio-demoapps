@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  auto appObj      = pda::createImplicitProblemEigen(meshObj, pda::Euler1d::Sod, order);
+  auto appObj      = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;
