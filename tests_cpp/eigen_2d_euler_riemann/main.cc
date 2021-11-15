@@ -16,8 +16,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::Riemann;
-  auto appObj      = pda::createProblemEigen(meshObj, probId, order, 2);
-  appObj.disableJacobian();
+  auto appObj      = pda::createExplicitProblemEigen(meshObj, probId, order, 2);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 

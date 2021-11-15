@@ -11,8 +11,7 @@ int main(int argc, char *argv[])
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
   const auto order   = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probId  = pda::DiffusionReaction2d::ProblemA;
-  auto appObj        = pda::createProblemEigen(meshObj, probId, order);
-  appObj.disableJacobian();
+  auto appObj        = pda::createExplicitProblemEigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

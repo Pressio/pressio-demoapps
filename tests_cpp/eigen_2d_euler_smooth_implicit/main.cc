@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::PeriodicSmooth;
-  auto appObj = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj = pda::createImplicitProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
   const auto dt = 0.025;
   const auto Nsteps = 80;
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, 
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt,
     Nsteps, Obs, NonLinSolver);
 
   return 0;

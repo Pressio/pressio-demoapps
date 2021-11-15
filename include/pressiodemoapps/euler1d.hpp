@@ -67,28 +67,15 @@ T createProblemForPyB(const mesh_t & meshObj,
 #endif
 } //end pressiodemoapps::impl
 
-
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createExplicitProblemEigen(const mesh_t & meshObj,
-				::pressiodemoapps::Euler1d probEnum,
-				::pressiodemoapps::InviscidFluxReconstruction recEnum,
-				::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
+auto createProblemEigen(const mesh_t & meshObj,
+			::pressiodemoapps::Euler1d probEnum,
+			::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
   using p_t = ::pressiodemoapps::implee1d::EigenEuler1dApp<mesh_t>;
-  using RetType = ExplicitAdapterMixin<p_t>;
-  return implee1d::create1dImpl<mesh_t, RetType>(meshObj, probEnum,
-						 recEnum, fluxEnum);
-}
-
-template<class mesh_t>
-auto createImplicitProblemEigen(const mesh_t & meshObj,
-				::pressiodemoapps::Euler1d probEnum,
-				::pressiodemoapps::InviscidFluxReconstruction recEnum,
-				::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
-{
-  using p_t = ::pressiodemoapps::implee1d::EigenEuler1dApp<mesh_t>;
-  using RetType = ImplicitAdapterMixinCpp<p_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
   return implee1d::create1dImpl<mesh_t, RetType>(meshObj, probEnum,
 						 recEnum, fluxEnum);
 }

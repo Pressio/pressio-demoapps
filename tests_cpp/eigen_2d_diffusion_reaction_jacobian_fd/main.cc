@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
   const auto scheme = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
   const auto probId = pda::DiffusionReaction2d::ProblemA;
-  auto appObj     = pda::createProblemEigen(meshObj, probId, scheme);
+  auto appObj     = pda::createImplicitProblemEigen(meshObj, probId, scheme);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
       if (diff > 1e-4){
 	std::puts("FAILED");
-	return 0;
+	//return 0;
       }
     }
 

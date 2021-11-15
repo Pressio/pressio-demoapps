@@ -40,32 +40,27 @@ T create1dImpl(const mesh_t & meshObj,
 }
 
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createProblemForPy(const mesh_t & meshObj,
-		     ::pressiodemoapps::Advection1d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinPy<impladv::EigenAdvection1dApp<mesh_t>>
+  >
+RetType createProblemForPy(const mesh_t & meshObj,
+			   ::pressiodemoapps::Advection1d probEnum,
+			   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return impladv::create1dImpl<mesh_t, T>(meshObj, probEnum, recEnum);
+  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
 }
 #endif
-} //end impladv
+} //end namespace impladv
+
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createExplicitProblemEigen(const mesh_t & meshObj,
-				::pressiodemoapps::Advection1d probEnum,
-				::pressiodemoapps::InviscidFluxReconstruction recEnum)
+auto createProblemEigen(const mesh_t & meshObj,
+			::pressiodemoapps::Advection1d probEnum,
+			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  using RetType = ExplicitAdapterMixin<impladv::EigenAdvection1dApp<mesh_t>>;
-  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
-}
-
-template<class mesh_t>
-auto createImplicitProblemEigen(const mesh_t & meshObj,
-				::pressiodemoapps::Advection1d probEnum,
-				::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  using RetType = ImplicitAdapterMixinCpp<impladv::EigenAdvection1dApp<mesh_t>>;
+  using RetType = PublicProblemMixinCpp<impladv::EigenAdvection1dApp<mesh_t>>;
   return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
 }
 #endif

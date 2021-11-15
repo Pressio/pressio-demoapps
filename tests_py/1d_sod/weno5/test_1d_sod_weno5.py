@@ -10,7 +10,7 @@ def test_run():
   meshPath = str(file_path)
   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
   scheme = pda.InviscidFluxReconstruction.Weno5
-  appObj   = pda.createExplicitProblem(meshObj, pda.Euler1d.Sod, scheme)
+  appObj   = pda.createProblem(meshObj, pda.Euler1d.Sod, scheme)
 
   yn = appObj.initialCondition()
   dt = 0.001

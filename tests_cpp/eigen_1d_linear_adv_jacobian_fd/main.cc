@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj       = pda::createImplicitProblemEigen(meshObj, probid, order);
+  auto appObj       = pda::createProblemEigen(meshObj, probid, order);
 
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;

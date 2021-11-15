@@ -61,18 +61,18 @@ public:
   }
 
   EigenDiffReac1dApp(const MeshType & meshObj,
-		::pressiodemoapps::DiffusionReaction1d probEnum,
-		::pressiodemoapps::ViscousFluxReconstruction recEnum,
-		scalar_type diffusionCoeff,
-		scalar_type reactionCoeff)
+		     ::pressiodemoapps::DiffusionReaction1d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+		     scalar_type diffusionCoeff,
+		     scalar_type reactionCoeff)
     : EigenDiffReac1dApp(meshObj, probEnum, recEnum,
 		    DefaultSourceF1d<scalar_type>(),
 		    diffusionCoeff, reactionCoeff)
   {}
 
   EigenDiffReac1dApp(const MeshType & meshObj,
-		::pressiodemoapps::DiffusionReaction1d probEnum,
-		::pressiodemoapps::ViscousFluxReconstruction recEnum)
+		     ::pressiodemoapps::DiffusionReaction1d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum)
     : EigenDiffReac1dApp(meshObj, probEnum, recEnum,
 			 DefaultSourceF1d<scalar_type>(),
 			 0.01, 0.01)
@@ -97,25 +97,18 @@ protected:
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
-    const scalar_type val0 = 0;
+    constexpr auto val0 = static_cast<scalar_type>(0);
     const auto & graph = m_meshObj.graph();
     for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
       {
-	const auto jacRowOfCurrentCell = cell;
-	const auto ci   = graph(cell, 0);
-	const auto L0   = graph(cell, 1);
-	const auto R0   = graph(cell, 2);
-	const auto ciL0 = L0;
-	const auto ciR0 = R0;
+	const auto ci   = graph(cell, 0)*numDofPerCell;
+	trList.push_back( Tr(cell, ci, val0) );
 
-	trList.push_back( Tr(jacRowOfCurrentCell, ci, val0) );
-
-	if (ciL0 != -1){
-	  trList.push_back( Tr(jacRowOfCurrentCell, ciL0, val0) );
-	}
-
-	if (ciR0 != -1){
-	  trList.push_back( Tr(jacRowOfCurrentCell, ciR0, val0) );
+	for (index_t i=1; i<=2; ++i){
+	  const auto neighID = graph(cell, i);
+	  if( neighID != -1){
+	    trList.push_back( Tr(cell, neighID*numDofPerCell, val0) );
+	  }
 	}
       }
 
@@ -133,8 +126,7 @@ protected:
   {
     if (m_probEn == ::pressiodemoapps::DiffusionReaction1d::ProblemA)
     {
-      using ghost_filler_t  = ::pressiodemoapps::impldiffreac::GhostFillerProblemA1d<
-	U_t, MeshType, ghost_container_type>;
+      using ghost_filler_t  = GhostFillerProblemA1d<U_t, MeshType, ghost_container_type>;
 
       const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
@@ -291,7 +283,6 @@ protected:
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
-  int m_stencilSize = {};
   ::pressiodemoapps::DiffusionReaction1d m_probEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_recEn;
 

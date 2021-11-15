@@ -18,8 +18,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::NormalShock;
-  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
-  appObj.disableJacobian();
+  auto appObj      = pda::createExplicitProblemEigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

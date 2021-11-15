@@ -10,7 +10,7 @@ def test_applyJacobianFirstOrder():
   meshPath = str(file_path)+"/mesh_first_order"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createImplicitProblem(meshO, probId, pda.InviscidFluxReconstruction.FirstOrder)
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.FirstOrder)
 
   state = appObj.initialCondition()
   print(state)
@@ -31,7 +31,7 @@ def test_weno3():
   meshPath = str(file_path)+"/mesh_weno3"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createExplicitProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno3)
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno3)
 
   x = meshO.viewX()
   yn = analytical(x, 0.)
@@ -52,7 +52,7 @@ def test_weno5():
   meshPath = str(file_path)+"/mesh_weno5"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createExplicitProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)
 
   x = meshO.viewX()
   yn = analytical(x, 0.)

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   const auto probId  = pda::Euler2d::DoubleMachReflection;
-  auto appObj = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj = pda::createImplicitProblemEigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

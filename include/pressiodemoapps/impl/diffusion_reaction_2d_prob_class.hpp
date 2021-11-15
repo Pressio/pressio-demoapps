@@ -7,63 +7,53 @@
 
 namespace pressiodemoapps{ namespace impldiffreac{
 
-template<class scalar_t>
+template<class scalar_type>
 struct DefaultSourceF2d
 {
-  void operator()(const scalar_t & x,
-		  const scalar_t & y,
-		  const scalar_t & evaltime,
-		  scalar_t & value)
+  void operator()(const scalar_type & x,
+		  const scalar_type & y,
+		  const scalar_type & evaltime,
+		  scalar_type & value)
   {
     (void) evaltime;
     value = std::sin(M_PI*x*(y-0.2)) * 4.*std::sin(4.*M_PI*y*x);
   }
 };
 
-template<
-  class scalar_t,
-  class mesh_t,
-  class state_t,
-  class velo_t,
-  class ghost_t,
-  class jacobian_t = void
-  >
-class DiffReac2dApp
+template<class MeshType>
+class EigenDiffReac2dApp
 {
 
 public:
-  using index_t		 = typename mesh_t::index_t;
-  using stencil_values_t = state_t;
-  using scalar_type	 = scalar_t;
-  using state_type	 = state_t;
-  using velocity_type	 = velo_t;
-  using ghost_type	 = ghost_t;
+  using index_t	      = typename MeshType::index_t;
+  using scalar_type   = typename MeshType::scalar_t;
+  using state_type    = Eigen::Matrix<scalar_type,-1,1>;
+  using velocity_type = state_type;
+  using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-  using jacobian_type	 = jacobian_t;
-  typedef Eigen::Triplet<scalar_type> Tr;
-#endif
+  static constexpr int	   dimensionality{2};
+  static constexpr index_t numDofPerCell{1};
 
-  static constexpr int dimensionality{2};
-  static constexpr int numDofPerCell{1};
+private:
+  using ghost_container_type   = Eigen::Matrix<scalar_type,-1,-1, Eigen::RowMajor>;
+  using stencil_container_type = Eigen::Matrix<scalar_type,-1,1>;
 
 public:
-
   template<class SourceT>
-  DiffReac2dApp(const mesh_t & meshObj,
-		::pressiodemoapps::DiffusionReaction2d probEnum,
-		::pressiodemoapps::ViscousFluxReconstruction recEnum,
-		SourceT sf,
-		scalar_t diffusionCoeff,
-		scalar_t reactionCoeff)
-    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
+  EigenDiffReac2dApp(const MeshType & meshObj,
+		     ::pressiodemoapps::DiffusionReaction2d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+		     SourceT sf,
+		     scalar_type diffusionCoeff,
+		     scalar_type reactionCoeff)
+    : m_meshObj(meshObj),
+      m_numDofStencilMesh(m_meshObj.stencilMeshSize()*numDofPerCell),
+      m_numDofSampleMesh(m_meshObj.sampleMeshSize()*numDofPerCell),
+      m_probEn(probEnum), m_recEn(recEnum)
   {
     if (m_meshObj.stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction2d currently, only supports 3-pt stencil");
     }
-
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize()*numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*numDofPerCell;
 
     m_sourceFunctor = sf;
     m_diffusionCoeff = diffusionCoeff;
@@ -72,102 +62,75 @@ public:
     const auto stencilSize = reconstructionTypeToStencilSize(recEnum);
     ::pressiodemoapps::resize(m_stencilVals, numDofPerCell*stencilSize);
     allocateGhosts();
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-    m_jacobian.resize(m_numDofSampleMesh, m_numDofStencilMesh);
-#endif
   }
 
-  DiffReac2dApp(const mesh_t & meshObj,
-		 ::pressiodemoapps::DiffusionReaction2d probEnum,
-		 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
-		 scalar_t diffusionCoeff,
-		 scalar_t reactionCoeff)
-    : DiffReac2dApp(meshObj, probEnum, recEnum,
-		     DefaultSourceF2d<scalar_t>(), diffusionCoeff, reactionCoeff)
+  EigenDiffReac2dApp(const MeshType & meshObj,
+		     ::pressiodemoapps::DiffusionReaction2d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+		     scalar_type diffusionCoeff,
+		     scalar_type reactionCoeff)
+    : EigenDiffReac2dApp(meshObj, probEnum, recEnum,
+			 DefaultSourceF2d<scalar_type>(),
+			 diffusionCoeff, reactionCoeff)
   {}
 
-  DiffReac2dApp(const mesh_t & meshObj,
-		 ::pressiodemoapps::DiffusionReaction2d probEnum,
-		 ::pressiodemoapps::ViscousFluxReconstruction recEnum)
-    : DiffReac2dApp(meshObj, probEnum, recEnum,
-		    DefaultSourceF2d<scalar_t>(), 0.01, 0.01)
+  EigenDiffReac2dApp(const MeshType & meshObj,
+		     ::pressiodemoapps::DiffusionReaction2d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum)
+    : EigenDiffReac2dApp(meshObj, probEnum, recEnum,
+			 DefaultSourceF2d<scalar_type>(),
+			 0.01, 0.01)
   {}
-
-  index_t totalDofSampleMesh()  const{ return m_numDofSampleMesh; }
-  index_t totalDofStencilMesh() const{ return m_numDofStencilMesh; }
 
   state_type initialCondition() const
   {
     state_type ic(m_numDofStencilMesh);
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
       for (int i=0; i<::pressiodemoapps::extent(ic,0); ++i){
-	ic(i) = scalar_t(0);
+	ic(i) = scalar_type(0);
       }
     }
     return ic;
   }
 
-  velocity_type createVelocity() const {
-    velocity_type V(m_numDofSampleMesh);
-    return V;
-  }
-
-  void velocity(const state_type & state,
-		const scalar_type time,
-		velocity_type & v) const
+protected:
+  void initializeJacobian(jacobian_type & J)
   {
-    fillGhostsIfNeeded(state, time);
+    J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-    if (!m_onlyComputeVelocity){
-      m_tripletList.clear();
-    }
-#endif
+    using Tr = Eigen::Triplet<scalar_type>;
+    std::vector<Tr> trList;
 
-    velocityCellsNearBdImpl(state, time, v);
-    velocityInnerCellsImpl(state, time, v);
+    const scalar_type val0 = 0;
+    const auto & graph = m_meshObj.graph();
+    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
+      {
+	const auto ci   = graph(cell, 0)*numDofPerCell;
+	trList.push_back( Tr(cell, ci, val0) );
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-    if (!m_onlyComputeVelocity){
-      m_jacobian.setFromTriplets(m_tripletList.begin(), m_tripletList.end());
-    }
-#endif
-  }
+	for (index_t i=1; i<=4; ++i){
+	  const auto neighID = graph(cell, i);
+	  if( neighID != -1){
+	    trList.push_back( Tr(cell, neighID*numDofPerCell, val0) );
+	  }
+	}
+      }
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-  jacobian_type createJacobian() const{
-    jacobian_type JJ(m_numDofSampleMesh, m_numDofStencilMesh);
-    return JJ;
-  }
+    J.setFromTriplets(trList.begin(), trList.end());
 
-  void jacobian(const state_type & state,
-		const scalar_type time,
-		jacobian_type & J) const
-  {
-    if (!m_onlyComputeVelocity){
-      // relies on jacobian been computed in velocity
-      J = m_jacobian;
+    // compress to make it a real Crs matrix
+    if (!J.isCompressed()){
+      J.makeCompressed();
     }
   }
 
-  // the Jacobian is by default fused with the velocity,
-  // this method allows one to disable the jacobian
-  // so only velocity is computed
-  void disableJacobian() {
-    m_onlyComputeVelocity = true;
-  }
-#endif
-
-private:
-  void fillGhostsIfNeeded(const state_type & U,
+  template<class U_t>
+  void fillGhostsIfNeeded(const U_t & U,
 			  scalar_type /*currTime*/) const
   {
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA)
     {
-      using ghost_filler_t  = ::pressiodemoapps::impldiffreac::GhostFillerProblemA2d<
-	state_type, mesh_t, ghost_t>;
-
+      using ghost_filler_t = GhostFillerProblemA2d<U_t, MeshType, ghost_container_type>;
       const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj,
 			 m_ghostLeft, m_ghostFront,
@@ -180,18 +143,47 @@ private:
     }
   }
 
-  void velocityCellsNearBdImpl(const state_type & U,
-			       const scalar_type t,
-			       velocity_type & V) const
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobian(const U_t & state,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   jacobian_type * J) const
+  {
+    fillGhostsIfNeeded(state, currentTime);
+
+    int nonZerosCountBeforeComputing = 0;
+    if (J){
+      nonZerosCountBeforeComputing = J->nonZeros();
+      ::pressiodemoapps::set_zero(*J);
+    }
+
+    velocityAndOptionalJacobianNearBd(state, currentTime, V, J);
+    velocityAndOptionalJacobianInnerCells(state, currentTime, V, J);
+
+#ifdef NDEBUG
+    if (J){
+      assert(nonZerosCountBeforeComputing == J->nonZeros());
+    }
+#endif
+  }
+
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobianNearBd(const U_t & U,
+					 const scalar_type currentTime,
+					 V_t & V,
+					 jacobian_type * J) const
   {
     // note that numDofPerCell == 1, so we omit it below
-
     constexpr int xAxis = 1;
     constexpr int yAxis = 2;
 
     // stencil filler needed because we are doing cells near boundaries
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_values_t, state_type, mesh_t, ghost_t>;
+      dimensionality, numDofPerCell, stencil_container_type, U_t, MeshType, ghost_container_type>;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
@@ -201,19 +193,16 @@ private:
 			     m_ghostBack, m_ghostFront,
 			     m_stencilVals, yAxis);
 
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
-    const auto & x      = m_meshObj.viewX();
-    const auto & y      = m_meshObj.viewY();
-    const auto & graph  = m_meshObj.graph();
-    constexpr auto two  = static_cast<scalar_t>(2);
-    constexpr auto three= static_cast<scalar_t>(3);
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    const auto & x	    = m_meshObj.viewX();
+    const auto & y          = m_meshObj.viewY();
+    const auto & graph      = m_meshObj.graph();
+    constexpr auto two      = static_cast<scalar_type>(2);
+    constexpr auto three    = static_cast<scalar_type>(3);
+    const auto dxInvSq	    = m_meshObj.dxInv()*m_meshObj.dxInv();
+    const auto dyInvSq	    = m_meshObj.dyInv()*m_meshObj.dyInv();
     const auto twoReacCoeff = m_reactionCoeff*two;
     const auto diffDxInvSq  = m_diffusionCoeff*dxInvSq;
     const auto diffDyInvSq  = m_diffusionCoeff*dyInvSq;
-#endif
 
     const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<rows.size(); ++it)
@@ -226,78 +215,74 @@ private:
       const auto uIndexBack  = graph(smPt, 4);
 
       // compute source, store into V
-      m_sourceFunctor(x(uIndex), y(uIndex), t, V(smPt));
+      m_sourceFunctor(x(uIndex), y(uIndex), currentTime, V(smPt));
 
       // add to V reaction contribution
       V(smPt) += m_reactionCoeff*U(uIndex)*U(uIndex);
 
       // *** add X contribution of diffusion ***
       StencilFillerX(smPt, it);
-      V(smPt) += dxInvSq*m_diffusionCoeff*( m_stencilVals(2) - two*m_stencilVals(1) + m_stencilVals(0) );
+      V(smPt) += dxInvSq*m_diffusionCoeff*( m_stencilVals(2)
+					    -two*m_stencilVals(1)
+					    +m_stencilVals(0) );
 
       // *** add Y contribution of diffusion ***
       StencilFillerY(smPt, it);
-      V(smPt) += dyInvSq*m_diffusionCoeff*( m_stencilVals(2) - two*m_stencilVals(1) + m_stencilVals(0) );
+      V(smPt) += dyInvSq*m_diffusionCoeff*( m_stencilVals(2)
+					    -two*m_stencilVals(1)
+					    +m_stencilVals(0) );
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA &&
-	  !m_onlyComputeVelocity)
+      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA && J)
       {
 	auto selfValue = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*m_stencilVals(1);
 
 	if (uIndexLeft != -1){
-
-	  m_tripletList.push_back( Tr(smPt, uIndexLeft, diffDxInvSq) );
+	  J->coeffRef(smPt, uIndexLeft) += diffDxInvSq;
 	}else{
 	  selfValue += -diffDxInvSq;
 	}
 
 	if (uIndexFront != -1){
-	  m_tripletList.push_back( Tr(smPt, uIndexFront, diffDyInvSq) );
+	  J->coeffRef(smPt, uIndexFront) += diffDyInvSq;
 	}else{
 	  selfValue += -diffDyInvSq;
 	}
 
 	if (uIndexRight != -1){
-	  m_tripletList.push_back( Tr(smPt, uIndexRight, diffDxInvSq) );
+	  J->coeffRef(smPt, uIndexRight) += diffDxInvSq;
 	}
 	else{
 	  selfValue += -diffDxInvSq;
 	}
 
 	if (uIndexBack != -1){
-	  m_tripletList.push_back( Tr(smPt, uIndexBack, diffDyInvSq) );
+	  J->coeffRef(smPt, uIndexBack) += diffDyInvSq;
 	}
 	else{
 	  selfValue += -diffDyInvSq;
 	}
-
-	// note that this MUST bere here because selfValue takes
-	// multiple contributions above
-	m_tripletList.push_back( Tr(smPt, uIndex, selfValue) );
+	J->coeffRef(smPt, uIndex) = selfValue;
       }
-#endif
     }
   }
 
-  void velocityInnerCellsImpl(const state_type & U,
-			      const scalar_type t,
-			      velocity_type & V) const
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobianInnerCells(const U_t & U,
+					     const scalar_type currentTime,
+					     V_t & V,
+					     jacobian_type * J) const
   {
     // note that numDofPerCell == 1, so we omit it below
 
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
     const auto & x      = m_meshObj.viewX();
     const auto & y      = m_meshObj.viewY();
     const auto & graph  = m_meshObj.graph();
-    constexpr auto two  = static_cast<scalar_t>(2);
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+    constexpr auto two  = static_cast<scalar_type>(2);
+    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
+    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
     const auto twoReacCoeff = m_reactionCoeff*two;
     const auto diffDxInvSq  = m_diffusionCoeff*dxInvSq;
     const auto diffDyInvSq  = m_diffusionCoeff*dyInvSq;
-#endif
 
     const auto & rows   = m_meshObj.graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<rows.size(); ++it)
@@ -310,7 +295,7 @@ private:
       const auto uIndexBack  = graph(smPt, 4);
 
       // compute source, store into V
-      m_sourceFunctor(x(uIndex), y(uIndex), t, V(smPt));
+      m_sourceFunctor(x(uIndex), y(uIndex), currentTime, V(smPt));
 
       // ADD to V reaction contribution
       V(smPt) += m_reactionCoeff*U(uIndex)*U(uIndex);
@@ -321,22 +306,18 @@ private:
       // ADD to V x diffusion contribution
       V(smPt) += dyInvSq*m_diffusionCoeff*( U(uIndexFront) - two*U(uIndex) + U(uIndexBack) );
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA &&
-	  !m_onlyComputeVelocity)
+      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA && J)
       {
 	const auto jvalueself = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*U(uIndex);
-	m_tripletList.push_back( Tr(smPt, uIndex,      jvalueself) );
-	m_tripletList.push_back( Tr(smPt, uIndexLeft,  diffDxInvSq) );
-	m_tripletList.push_back( Tr(smPt, uIndexFront, diffDyInvSq) );
-	m_tripletList.push_back( Tr(smPt, uIndexRight, diffDxInvSq) );
-	m_tripletList.push_back( Tr(smPt, uIndexBack,  diffDyInvSq) );
+	(*J).coeffRef(smPt, uIndex)      += jvalueself;
+	(*J).coeffRef(smPt, uIndexLeft)  += diffDxInvSq;
+	(*J).coeffRef(smPt, uIndexFront) += diffDyInvSq;
+	(*J).coeffRef(smPt, uIndexRight) += diffDxInvSq;
+	(*J).coeffRef(smPt, uIndexBack)  += diffDyInvSq;
       }
-#endif
     }
   }
 
-private:
   void allocateGhosts()
   {
     const auto stencilSize    = reconstructionTypeToStencilSize(m_recEn);
@@ -349,35 +330,29 @@ private:
     ::pressiodemoapps::resize(m_ghostBack,  s1, numGhostValues);
   }
 
-private:
-  const mesh_t & m_meshObj;
-  ::pressiodemoapps::DiffusionReaction2d m_probEn;
-  ::pressiodemoapps::ViscousFluxReconstruction m_recEn;
-
-  std::function<void(const scalar_t & /*x*/,
-		     const scalar_t & /*y*/,
-		     const scalar_t & /*time*/,
-		     scalar_t &)> m_sourceFunctor;
-  scalar_t m_diffusionCoeff = {};
-  scalar_t m_reactionCoeff = {};
-
-  index_t m_numDofStencilMesh = {};
-  index_t m_numDofSampleMesh  = {};
-  mutable stencil_values_t m_stencilVals;
-
-  mutable ghost_t m_ghostLeft;
-  mutable ghost_t m_ghostFront;
-  mutable ghost_t m_ghostRight;
-  mutable ghost_t m_ghostBack;
-
+protected:
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-  mutable jacobian_type m_jacobian = {};
-  mutable std::vector<Tr> m_tripletList;
-  bool m_onlyComputeVelocity = false;
-#endif
+  const MeshType & m_meshObj;
+  index_t m_numDofStencilMesh = {};
+  index_t m_numDofSampleMesh  = {};
+
+  ::pressiodemoapps::DiffusionReaction2d m_probEn;
+  ::pressiodemoapps::ViscousFluxReconstruction m_recEn;
+
+  std::function<void(const scalar_type & /*x*/,
+		     const scalar_type & /*y*/,
+		     const scalar_type & /*time*/,
+		     scalar_type &)> m_sourceFunctor;
+  scalar_type m_diffusionCoeff = {};
+  scalar_type m_reactionCoeff = {};
+
+  mutable stencil_container_type m_stencilVals;
+  mutable ghost_container_type m_ghostLeft;
+  mutable ghost_container_type m_ghostFront;
+  mutable ghost_container_type m_ghostRight;
+  mutable ghost_container_type m_ghostBack;
 };
 
 }}
