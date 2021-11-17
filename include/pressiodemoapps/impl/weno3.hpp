@@ -86,13 +86,13 @@ void weno3(sc_t & uNeg,
 
 template<typename sc_t, typename grad_t>
 void weno3WithGrad(sc_t & uNeg,
-     sc_t & uPos,
-     grad_t & duNeg_dq,
-     grad_t & duPos_dq,
-	   const sc_t & qim1,
-	   const sc_t & qi,
-	   const sc_t & qip1,
-	   const sc_t & qip2)
+		   sc_t & uPos,
+		   grad_t & duNeg_dq,
+		   grad_t & duPos_dq,
+		   const sc_t & qim1,
+		   const sc_t & qi,
+		   const sc_t & qip1,
+		   const sc_t & qip2)
 {
 
   const sc_t epsilon  = static_cast<sc_t>(1e-6);
@@ -123,7 +123,6 @@ void weno3WithGrad(sc_t & uNeg,
 
     const auto B0 = (qim1-qi)*(qim1-qi);
     const auto B1 = (qi-qip1)*(qi-qip1);
-
     const auto alpha0    = oneOvthree/(epsilon*epsilon + two*epsilon*B0 + B0*B0);
     const auto alpha1    = twoOvthree/(epsilon*epsilon + two*epsilon*B1 + B1*B1);
     const auto alphaSInv = one/(alpha0 + alpha1);
@@ -135,7 +134,7 @@ void weno3WithGrad(sc_t & uNeg,
     dalpha1_dq[0] = 0.;
     dalpha1_dq[1] = -8.*(qi - qip1)/(3.*std::pow(std::pow(qi-qip1,2.) + epsilon , 3.));
     dalpha1_dq[2] = 8.*(qi - qip1)/(3.*std::pow(std::pow(qi-qip1,2.) + epsilon , 3.));
-  
+
     dalphaSInv_dq[0] = (4.*(qim1-qi))/(3.*std::pow(std::pow(qim1-qi,2.)+epsilon,3.)*std::pow(2./(3.*std::pow(std::pow(qi-qip1,2.)+epsilon,2.))+1./(3.*std::pow(std::pow(qim1-qi,2.)+epsilon,2.)),2.));
     dalphaSInv_dq[1] = -((4.*(qim1-qi))/(3.*std::pow(std::pow(qim1-qi,2.)+epsilon,3.))-(8.*(qi-qip1))/(3.*std::pow(std::pow(qi-qip1,2.)+epsilon,3.)))/std::pow(2./(3.*std::pow(std::pow(qi-qip1,2.)+epsilon,2.))+1./(3.*std::pow(std::pow(qim1-qi,2.)+epsilon,2.)),2.);
     dalphaSInv_dq[2] = -(8.*(qi-qip1))/(3.*std::pow(2./(3.*std::pow(std::pow(qi-qip1,2.)+epsilon,2.))+1./(3.*std::pow(std::pow(qim1-qi,2.)+epsilon,2.)),2.)*std::pow(std::pow(qi-qip1,2.)+epsilon,3.));
@@ -144,7 +143,7 @@ void weno3WithGrad(sc_t & uNeg,
 
     for (int i = 0; i < 3; i++){
       duNeg_dq[i] = (dalpha0_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha0)*p0 + dp0_dq[i]*w0;
-      duNeg_dq[i] += (dalpha1_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha1)*p1 + dp1_dq[i]*w1; 
+      duNeg_dq[i] += (dalpha1_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha1)*p1 + dp1_dq[i]*w1;
     }
     duNeg_dq[3] = 0.;
     uNeg = w0*p0 + w1*p1;
@@ -158,17 +157,13 @@ void weno3WithGrad(sc_t & uNeg,
     sc_t dalpha1_dq[3];
     sc_t dalphaSInv_dq[3];
 
-
     const auto p0 = ( qi + qip1)*oneOvtwo;
     const auto p1 = ( three*qip1 - qip2)*oneOvtwo;
-
     const auto B0 = (qi-qip1)*(qi-qip1);
     const auto B1 = (qip1-qip2)*(qip1-qip2);
-
     const auto alpha0    = twoOvthree/(epsilon*epsilon + two*epsilon*B0 + B0*B0);
     const auto alpha1    = oneOvthree/(epsilon*epsilon + two*epsilon*B1 + B1*B1);
     const auto alphaSInv = one/(alpha0 + alpha1);
-
     const auto w0 = alpha0*alphaSInv;
     const auto w1 = alpha1*alphaSInv;
 
@@ -189,12 +184,12 @@ void weno3WithGrad(sc_t & uNeg,
     dalpha1_dq[2] = 4.*(qip1 - qip2)/(3. * std::pow(std::pow(qip1 - qip2,2)+epsilon,3.));
 
     dalphaSInv_dq[0] = 8.*(qi - qip1)/(3.*std::pow(std::pow(qi-qip1,2.) + epsilon,3.)*std::pow(1./(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,2.))+2./(3.*std::pow(std::pow(qi-qip1,2.) + epsilon,2.)),2.));
-    dalphaSInv_dq[1] = -(8.*(qi - qip1)/(3*std::pow(std::pow(qi-qip1,2.) + epsilon,3.))-4.*(qip1 - qip2)/(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,3.)))/std::pow(1./(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,2.))+2./(3.*std::pow(std::pow(qi-qip1,2.) + epsilon,2.)),2.); 
+    dalphaSInv_dq[1] = -(8.*(qi - qip1)/(3*std::pow(std::pow(qi-qip1,2.) + epsilon,3.))-4.*(qip1 - qip2)/(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,3.)))/std::pow(1./(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,2.))+2./(3.*std::pow(std::pow(qi-qip1,2.) + epsilon,2.)),2.);
     dalphaSInv_dq[2] = -4.*(qip1 - qip2)/(3.*std::pow(1./(3.*std::pow(std::pow(qip1-qip2,2.) + epsilon,2.))+2./(3.*std::pow(std::pow(qi-qip1,2.) + epsilon,2.)),2.)*std::pow(std::pow(qip1-qip2,2.) + epsilon,3.));
 
     for (int i = 0; i < 3; i++){
       duPos_dq[i+1] = (dalpha0_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha0)*p0 + dp0_dq[i]*w0;
-      duPos_dq[i+1] += (dalpha1_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha1)*p1 + dp1_dq[i]*w1; 
+      duPos_dq[i+1] += (dalpha1_dq[i]*alphaSInv + dalphaSInv_dq[i]*alpha1)*p1 + dp1_dq[i]*w1;
     }
     duPos_dq[0] = 0.;
     uPos = w0*p0 + w1*p1;

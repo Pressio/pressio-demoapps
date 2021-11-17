@@ -64,7 +64,8 @@ bool stencilSizeCompatibleWithViscousFluxReconstruction
   return false;
 }
 
+}//end namespace pressiodemoapps
+
 #include "./weno.hpp"
 
-}//end namespace pressiodemoapps
 #endif

@@ -40,7 +40,6 @@ void eeRusanovFluxJacobianThreeDof(T & JL, T & JR,
   const auto a = std::sqrt( gm1*(H - half*(u*u)) );
   const auto smax = std::abs(u) + a;
 
-
   // compute gradient of maximum eigen value
   sc_t gradL[3];
   sc_t gradR[3];

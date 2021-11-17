@@ -2,6 +2,7 @@
 #include "pressio/type_traits.hpp"
 #include "pressiodemoapps/advection.hpp"
 #include <iomanip>
+#include <random>
 
 template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
@@ -17,13 +18,16 @@ template<class state_type, class mesh_t>
 void modify_state(state_type & state,
 		  const mesh_t & meshObj)
 {
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_real_distribution<> dist(0, 1);
 
   using scalar_type = typename mesh_t::scalar_t;
   const auto & x = meshObj.viewX();
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
-      const auto pert = 0.1*std::sin(16.*M_PI*x(i));
-      state(i) += pert;
+      //const auto pert = 2.*std::sin(16.*M_PI*(x(i)-0.2));
+      state(i) = dist(rng);//pert;
     }
 }
 
@@ -32,7 +36,14 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
 
+#ifdef USE_WENO5
+  const auto order   = pda::InviscidFluxReconstruction::Weno5;
+#elif defined USE_WENO3
+  const auto order   = pda::InviscidFluxReconstruction::Weno3;
+#elif defined USE_FIRSTORDER
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
+#endif
+
   const auto probid = pda::Advection1d::PeriodicLinear;
   auto appObj       = pda::createProblemEigen(meshObj, probid, order);
 
@@ -54,7 +65,9 @@ int main(int argc, char *argv[])
   // not just a single time
   for (int i=0; i<5; ++i)
   {
+    std::cout << "!!!! VELOCITY !!!\n";
     appObj.velocity(state, 0., velo);
+    std::cout << "!!!! JACOBIAN !!!\n";
     appObj.jacobian(state, 0., J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());

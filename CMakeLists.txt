@@ -50,12 +50,11 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
 
 else()
 
-  # find_package(OpenMP)
-  # if(OpenMP_CXX_FOUND)
-  #   add_compile_definitions(PRESSIODEMOAPPS_ENABLE_OPENMP)
-  #   link_libraries(OpenMP::OpenMP_CXX)
-  # endif()
-  #add_definitions(-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=${PRESSIODEMOAPPS_ENABLE_TPL_EIGEN})
+  find_package(OpenMP)
+  if(OpenMP_CXX_FOUND)
+    add_compile_definitions(PRESSIODEMOAPPS_ENABLE_OPENMP)
+    link_libraries(OpenMP::OpenMP_CXX)
+  endif()
 
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()

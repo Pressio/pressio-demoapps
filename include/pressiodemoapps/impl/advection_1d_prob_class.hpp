@@ -4,7 +4,8 @@
 
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "cell_jacobian_first_order.hpp"
+#include "functor_cell_jacobian_first_order.hpp"
+#include "functor_cell_jacobian_weno.hpp"
 
 namespace pressiodemoapps{ namespace impladv{
 
@@ -37,7 +38,8 @@ public:
   static constexpr index_t numDofPerCell{1};
 
 private:
-  using stencil_values_t = state_type;
+  using stencil_values_t = Eigen::Matrix<scalar_type,-1,1>;
+  using reconstruction_gradient_t = Eigen::Matrix<scalar_type,-1,1>;
 
 public:
   EigenAdvection1dApp(const MeshType & meshObj,
@@ -62,23 +64,106 @@ public:
   }
 
 protected:
-  void initializeJacobian(jacobian_type & J)
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobian(const U_t & U,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   jacobian_type * J) const
   {
-    initializeJacobianFirstOrder(J);
-    // compress to make it a real Crs matrix
-    if (!J.isCompressed()){
-      J.makeCompressed();
+
+    constexpr int xAxis = 1;
+
+    // reconstructions values
+    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
+    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
+    // fluxes
+    scalar_type fluxL{0}, fluxR{0};
+    // flux jacobians
+    scalar_type fluxJacLNeg, fluxJacLPos;
+    scalar_type fluxJacRNeg, fluxJacRPos;
+
+    // gradients of reconstructed states
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    reconstruction_gradient_t gradLNeg(stencilSize-1);
+    reconstruction_gradient_t gradLPos(stencilSize-1);
+    reconstruction_gradient_t gradRNeg(stencilSize-1);
+    reconstruction_gradient_t gradRPos(stencilSize-1);
+
+    if (m_recEn == InviscidFluxReconstruction::FirstOrder)
+    {
+      using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
+	dimensionality, numDofPerCell, scalar_type, U_t, MeshType>;
+      reconstruct_functor_t Reconstructor(xAxis, m_recEn, U, m_meshObj,
+					  uMinusHalfNeg, uMinusHalfPos,
+					  uPlusHalfNeg,  uPlusHalfPos);
+
+      using jac_fnct_t = ::pressiodemoapps::impl::FirstOrderInnerCellJacobianFunctor<
+	dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
+      jac_fnct_t CellJacobianFunctor(*J, m_meshObj, fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos);
+
+      loopImpl(U, currentTime, V, J,
+	       uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos,
+	       fluxL, fluxR, fluxJacLNeg, fluxJacLPos,
+	       fluxJacRNeg, fluxJacRPos,
+	       Reconstructor, CellJacobianFunctor);
+    }
+
+    else if (m_recEn == InviscidFluxReconstruction::Weno3 or
+	     m_recEn == InviscidFluxReconstruction::Weno5)
+    {
+
+      if (J){
+	using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
+	  dimensionality, numDofPerCell, scalar_type, U_t, MeshType, reconstruction_gradient_t>;
+	reconstruct_functor_t Reconstructor(xAxis, m_recEn, U, m_meshObj,
+					    uMinusHalfNeg, uMinusHalfPos,
+					    uPlusHalfNeg,  uPlusHalfPos,
+					    gradLNeg, gradLPos,
+					    gradRNeg, gradRPos);
+
+	using jac_fnct_t = ::pressiodemoapps::impl::WenoInnerCellJacobianFunctor<
+	  dimensionality, numDofPerCell, scalar_type, jacobian_type,
+	  scalar_type, MeshType, reconstruction_gradient_t>;
+	jac_fnct_t CellJacobianFunctor(m_recEn, *J, m_meshObj,
+				       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
+				       gradLNeg, gradLPos, gradRNeg, gradRPos);
+
+	loopImpl(U, currentTime, V, J,
+		 uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos,
+		 fluxL, fluxR, fluxJacLNeg, fluxJacLPos,
+		 fluxJacRNeg, fluxJacRPos,
+		 Reconstructor, CellJacobianFunctor);
+      }
+      else
+      {
+	using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
+	  dimensionality, numDofPerCell, scalar_type, U_t, MeshType>;
+	reconstruct_functor_t Reconstructor(xAxis, m_recEn, U, m_meshObj,
+					    uMinusHalfNeg, uMinusHalfPos,
+					    uPlusHalfNeg,  uPlusHalfPos);
+
+	loopImpl(U, currentTime, V, J,
+		 uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos,
+		 fluxL, fluxR, fluxJacLNeg, fluxJacLPos,
+		 fluxJacRNeg, fluxJacRPos,
+		 Reconstructor,
+		 // no-op lambda for cell jacobian since here the Jacobian is disabled
+		 [](index_t /*unused*/){}
+		 );
+      }
     }
   }
 
-  void initializeJacobianFirstOrder(jacobian_type & J)
+  void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
 
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
-    const scalar_type val0 = 0;
+    const scalar_type zero = 0;
     const auto & graph = m_meshObj.graph();
     for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
       {
@@ -89,58 +174,57 @@ protected:
 	const auto ci  = graph(cell, 0)*numDofPerCell;
 	const auto ciR0 = R0*numDofPerCell;
 
-	trList.push_back( Tr(jacRowOfCurrentCell, ciL0, val0) );
-	trList.push_back( Tr(jacRowOfCurrentCell, ci,   val0) );
-	trList.push_back( Tr(jacRowOfCurrentCell, ciR0, val0) );
+	trList.push_back( Tr(jacRowOfCurrentCell, ciL0, zero) );
+	trList.push_back( Tr(jacRowOfCurrentCell, ci,   zero) );
+	trList.push_back( Tr(jacRowOfCurrentCell, ciR0, zero) );
+
+	if (m_recEn == InviscidFluxReconstruction::Weno3 or
+	    m_recEn == InviscidFluxReconstruction::Weno5){
+	  const auto L1 = graph(cell, 3);
+	  const auto R1 = graph(cell, 4);
+	  trList.push_back( Tr(jacRowOfCurrentCell, L1*numDofPerCell, zero) );
+	  trList.push_back( Tr(jacRowOfCurrentCell, R1*numDofPerCell, zero) );
+	}
+	if (m_recEn == InviscidFluxReconstruction::Weno5){
+	  const auto L2 = graph(cell, 5);
+	  const auto R2 = graph(cell, 6);
+	  trList.push_back( Tr(jacRowOfCurrentCell, L2*numDofPerCell, zero) );
+	  trList.push_back( Tr(jacRowOfCurrentCell, R2*numDofPerCell, zero) );
+	}
       }
 
     J.setFromTriplets(trList.begin(), trList.end());
+
+    // compress to make it a real Crs matrix
+    if (!J.isCompressed()){
+      J.makeCompressed();
+    }
   }
 
-  // note that here we MUST use a template because when doing
-  // bindings, this gets deduced to be a Ref
-  template<class U_t, class V_t>
-  void velocityAndOptionalJacobian(const U_t & U,
-				   const scalar_type currentTime,
-				   V_t & V,
-				   jacobian_type * J) const
+private:
+  template<class U_t, class V_t, class ReconstructFunctor, class CellJacobianFunctor>
+  void loopImpl(const U_t & U,
+		const scalar_type currentTime,
+		V_t & V,
+		jacobian_type * J,
+		scalar_type & uMinusHalfNeg,
+		scalar_type & uMinusHalfPos,
+		scalar_type & uPlusHalfNeg,
+		scalar_type & uPlusHalfPos,
+		scalar_type & fluxL,
+		scalar_type & fluxR,
+		scalar_type & fluxJacLNeg,
+		scalar_type & fluxJacLPos,
+		scalar_type & fluxJacRNeg,
+		scalar_type & fluxJacRPos,
+		ReconstructFunctor & reconstructor,
+		CellJacobianFunctor && cellJacobianFunctor) const
   {
     int nonZerosCountBeforeComputing = 0;
     if (J){
       nonZerosCountBeforeComputing = J->nonZeros();
       ::pressiodemoapps::set_zero(*J);
     }
-
-    scalar_type FL{0}, FR{0};
-    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
-    scalar_type JLneg, JLpos, JRneg, JRpos;
-
-    // reconstruct functor for face fluxes
-    // here we need to use whatever order (m_recEn) user decides
-    using reconstruct_functor_t = ::pressiodemoapps::impl::ReconstructorFromState<
-      dimensionality, scalar_type, U_t, MeshType>;
-    reconstruct_functor_t Reconstructor(m_recEn, U, m_meshObj,
-					uMinusHalfNeg, uMinusHalfPos,
-					uPlusHalfNeg,  uPlusHalfPos);
-
-    // cell jacobian functor
-    // currently, REGARDLESS of the reconstruction scheme,
-    // we have only first-order Jacobian so we need a first-order reconstructor
-    // for the Jacobian
-    const auto firstOrder = ::pressiodemoapps::InviscidFluxReconstruction::FirstOrder;
-    scalar_type uMinusHalfNegForJ;
-    scalar_type uMinusHalfPosForJ;
-    scalar_type uPlusHalfNegForJ;
-    scalar_type uPlusHalfPosForJ;
-    reconstruct_functor_t ReconstructorForJ(firstOrder, U, m_meshObj,
-					    uMinusHalfNegForJ, uMinusHalfPosForJ,
-					    uPlusHalfNegForJ,  uPlusHalfPosForJ);
-
-    // for this problem, due to periodic BC, any cell is an "inner" cell
-    using jac_fnct_t = impl::FirstOrderInnerCellJacobianFunctor<
-      dimensionality, numDofPerCell, scalar_type, jacobian_type, scalar_type, MeshType>;
-    jac_fnct_t CellJacobianFunctor(*J, m_meshObj, JLneg, JLpos, JRneg, JRpos);
 
     // loop over cells
     const auto dxInv = m_meshObj.dxInv();
@@ -149,28 +233,19 @@ protected:
     {
       const auto vIndex = smPt*numDofPerCell;
 
-      Reconstructor.template operator()<numDofPerCell>(smPt);
+      reconstructor(smPt);
+      linAdvRusanovFlux(fluxL, uMinusHalfNeg, uMinusHalfPos);
+      linAdvRusanovFlux(fluxR, uPlusHalfNeg,  uPlusHalfPos);
 
       if (J){
-	// for now, REGARDLESS of the reconstruction scheme,
-	// we currently only have only first-order Jacobian so we need
-	// to run the reconstructor for the Jacobian
-	// which will ensure that uMinusNegForJ, etc have the right values
-	ReconstructorForJ.template operator()<numDofPerCell>(smPt);
+	linAdvRusanovFluxJacobian(fluxJacLNeg, fluxJacLPos, uMinusHalfNeg, uMinusHalfPos);
+	linAdvRusanovFluxJacobian(fluxJacRNeg, fluxJacRPos, uPlusHalfNeg,  uPlusHalfPos);
       }
 
-      linAdvRusanovFlux(FL, uMinusHalfNeg, uMinusHalfPos);
-      linAdvRusanovFlux(FR, uPlusHalfNeg,  uPlusHalfPos);
+      V(vIndex) = dxInv*(fluxL - fluxR);
 
       if (J){
-	linAdvRusanovFluxJacobian(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ);
-	linAdvRusanovFluxJacobian(JRneg, JRpos, uPlusHalfNegForJ,  uPlusHalfPosForJ);
-      }
-
-      V(vIndex) = dxInv*(FL - FR);
-
-      if (J){
-	CellJacobianFunctor(smPt);
+	cellJacobianFunctor(smPt);
       }
     }
 
@@ -179,7 +254,9 @@ protected:
       // ensure that nonzeros count does not change
       // this can happen for instance if during the Jacobian
       // evlauation, new non-zero elements get inserted
-      assert(J->nonZeros() != nonZerosCountBeforeComputing);
+      // std::cout << "NONZEROS BEFORE COMP = " << nonZerosCountBeforeComputing << "\n";
+      // std::cout << "NONZEROS AFTER  COMP = " << J->nonZeros() << "\n";
+      assert(J->nonZeros() == nonZerosCountBeforeComputing);
     }
 #endif
   }
