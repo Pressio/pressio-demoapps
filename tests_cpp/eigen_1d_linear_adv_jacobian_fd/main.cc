@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
   // make sure repeated evaluations work
   // not just a single time
-  for (int i=0; i<5; ++i)
+  for (int loop=0; loop<5; ++loop)
   {
     std::cout << "!!!! VELOCITY !!!\n";
     appObj.velocity(state, 0., velo);
@@ -71,13 +71,13 @@ int main(int argc, char *argv[])
     appObj.jacobian(state, 0., J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
+    auto Ja = J*a;
 
     // first order
     auto state2 = state+eps*a;
     app_rhs_t velo2(velo.size());
     appObj.velocity(state2, 0., velo2);
 
-    auto Ja = J*a;
     auto Ja_fd = (velo2 - velo)/eps;
     for (int i=0; i<Ja.size(); ++i)
     {
@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
 	return 0;
       }
     }
+
   }
 
   std::puts("PASS");

@@ -4,47 +4,63 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-template<class ...Args>
-struct _ReconstructorMembers;
+namespace{
+template<class ...Args> struct _ReconstructorMembers;
 
-// specialize for VOID reconstruction gradients
-template<class edge_rec_t, class state_t, class mesh_t>
-struct _ReconstructorMembers<edge_rec_t, state_t, mesh_t>
+template<
+  class ReconstructedValueType,
+  class DataType,
+  class MeshType
+  >
+struct _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>
 {
   _ReconstructorMembers() = delete;
 
-  _ReconstructorMembers(const int axis, InviscidFluxReconstruction recEn,
-			const state_t & state, const mesh_t & meshObj,
-			edge_rec_t & uMinusHalfNeg, edge_rec_t & uMinusHalfPos,
-			edge_rec_t & uPlusHalfNeg,  edge_rec_t & uPlusHalfPos)
-    : m_axis(axis), m_recEn(recEn), m_state(state), m_meshObj(meshObj),
+  _ReconstructorMembers(const int axis,
+			ReconstructionScheme recEn,
+			const DataType & functionValues,
+			const MeshType & meshObj,
+			ReconstructedValueType & uMinusHalfNeg,
+			ReconstructedValueType & uMinusHalfPos,
+			ReconstructedValueType & uPlusHalfNeg,
+			ReconstructedValueType & uPlusHalfPos)
+    : m_axis(axis), m_recEn(recEn), m_functionValues(functionValues), m_meshObj(meshObj),
       m_uMinusHalfNeg(uMinusHalfNeg), m_uMinusHalfPos(uMinusHalfPos),
       m_uPlusHalfNeg(uPlusHalfNeg),   m_uPlusHalfPos(uPlusHalfPos)
   {}
 
   int m_axis = -1;
-  InviscidFluxReconstruction m_recEn;
-  const state_t & m_state;
-  const mesh_t & m_meshObj;
-  edge_rec_t & m_uMinusHalfNeg;
-  edge_rec_t & m_uMinusHalfPos;
-  edge_rec_t & m_uPlusHalfNeg;
-  edge_rec_t & m_uPlusHalfPos;
+  ReconstructionScheme m_recEn;
+  const DataType & m_functionValues;
+  const MeshType & m_meshObj;
+  ReconstructedValueType & m_uMinusHalfNeg;
+  ReconstructedValueType & m_uMinusHalfPos;
+  ReconstructedValueType & m_uPlusHalfNeg;
+  ReconstructedValueType & m_uPlusHalfPos;
 };
 
 // reconstruction gradients are needed
-template<class edge_rec_t, class state_t, class mesh_t, class rec_grad_t>
-struct _ReconstructorMembers<edge_rec_t, state_t, mesh_t, rec_grad_t>
+template<
+  class ReconstructedValueType,
+  class DataType,
+  class MeshType,
+  class ReconstructedGradType
+  >
+struct _ReconstructorMembers<
+  ReconstructedValueType, DataType, MeshType, ReconstructedGradType
+  >
 {
   _ReconstructorMembers() = delete;
 
-  _ReconstructorMembers(const int axis, InviscidFluxReconstruction recEn,
-			const state_t & state, const mesh_t & meshObj,
-			edge_rec_t & uMinusHalfNeg, edge_rec_t & uMinusHalfPos,
-			edge_rec_t & uPlusHalfNeg,  edge_rec_t & uPlusHalfPos,
-			rec_grad_t & gradLNeg, rec_grad_t & gradLPos,
-			rec_grad_t & gradRNeg, rec_grad_t & gradRPos)
-    : m_recEn(recEn), m_state(state), m_meshObj(meshObj),
+  _ReconstructorMembers(const int axis,
+			ReconstructionScheme recEn,
+			const DataType & functionValues,
+			const MeshType & meshObj,
+			ReconstructedValueType & uMinusHalfNeg, ReconstructedValueType & uMinusHalfPos,
+			ReconstructedValueType & uPlusHalfNeg,  ReconstructedValueType & uPlusHalfPos,
+			ReconstructedGradType & gradLNeg, ReconstructedGradType & gradLPos,
+			ReconstructedGradType & gradRNeg, ReconstructedGradType & gradRPos)
+    : m_recEn(recEn), m_functionValues(functionValues), m_meshObj(meshObj),
       m_uMinusHalfNeg(uMinusHalfNeg), m_uMinusHalfPos(uMinusHalfPos),
       m_uPlusHalfNeg(uPlusHalfNeg),   m_uPlusHalfPos(uPlusHalfPos),
       m_gradLNeg(gradLNeg), m_gradLPos(gradLPos),
@@ -52,34 +68,62 @@ struct _ReconstructorMembers<edge_rec_t, state_t, mesh_t, rec_grad_t>
   {}
 
   int m_axis = -1;
-  InviscidFluxReconstruction m_recEn;
-  const state_t & m_state;
-  const mesh_t & m_meshObj;
-  edge_rec_t & m_uMinusHalfNeg;
-  edge_rec_t & m_uMinusHalfPos;
-  edge_rec_t & m_uPlusHalfNeg;
-  edge_rec_t & m_uPlusHalfPos;
-  rec_grad_t & m_gradLNeg ;
-  rec_grad_t & m_gradLPos ;
-  rec_grad_t & m_gradRNeg ;
-  rec_grad_t & m_gradRPos ;
+  ReconstructionScheme m_recEn;
+  const DataType & m_functionValues;
+  const MeshType & m_meshObj;
+  ReconstructedValueType & m_uMinusHalfNeg;
+  ReconstructedValueType & m_uMinusHalfPos;
+  ReconstructedValueType & m_uPlusHalfNeg;
+  ReconstructedValueType & m_uPlusHalfPos;
+  ReconstructedGradType & m_gradLNeg ;
+  ReconstructedGradType & m_gradLPos ;
+  ReconstructedGradType & m_gradRNeg ;
+  ReconstructedGradType & m_gradRPos ;
 };
+} // anonym namespace
 
 
-
-// class edge_rec_t, class state_t, class mesh_t, class rec_grad_t >
 template<int dim, int numDofPerCell, class ...Args>
-class ReconstructorFromState;
+class ReconstructorForDiscreteFunction;
 
 // -----------------------------------------------------------
-// 1d, multiple dofsPerCell, no reconstruction gradients
+// 1d, multiple dofsPerCell, only values, no gradients
 // -----------------------------------------------------------
-template<int ndpc, class edge_rec_t, class state_t, class mesh_t>
-class ReconstructorFromState<1, ndpc, edge_rec_t, state_t, mesh_t>
+template<
+  int ndpc,
+  class MeshType,
+  class DataType,
+  class ReconstructedValueType
+  >
+class ReconstructorForDiscreteFunction<
+  1, ndpc, MeshType, DataType, ReconstructedValueType
+  >
 {
+  using members_t = _ReconstructorMembers<
+    ReconstructedValueType, DataType, MeshType>;
+  members_t m_memb;
+
 public:
   template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : m_memb(std::forward<Args>(args)...){}
+
+  const ReconstructionScheme reconstructionScheme() const{
+    return m_memb.m_recEn;
+  }
+
+  const ReconstructedValueType & reconstructionLeftNeg() const{
+    return m_memb.m_uMinusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionLeftPos() const{
+    return m_memb.m_uMinusHalfPos;
+  }
+  const ReconstructedValueType & reconstructionRightNeg() const{
+    return m_memb.m_uPlusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionRightPos() const{
+    return m_memb.m_uPlusHalfPos;
+  }
 
   template<class IndexType>
   void operator()(IndexType smPt)
@@ -100,66 +144,102 @@ public:
 
     switch(m_memb.m_recEn)
       {
-      case InviscidFluxReconstruction::FirstOrder:
-	{
-	  for (int i=0; i<ndpc; ++i){
-	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
-	  }
-	  break;
+      case ReconstructionScheme::FirstOrder:{
+	for (int i=0; i<ndpc; ++i){
+	  m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
+	  m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
+	  m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
+	  m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
 	}
+	break;
+      }
 
-      case InviscidFluxReconstruction::Weno3:
-	{
-	  const auto l1i  = graph(smPt, 3)*ndpc;
-	  const auto r1i  = graph(smPt, 4)*ndpc;
-	  ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-				   m_memb.m_uMinusHalfPos,
-				   m_memb.m_uPlusHalfNeg,
-				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_state,
-				   l1i, l0i, r0i, r1i,
-				   uIndex,
-				   ndpc);
-	  break;
-	}
+      case ReconstructionScheme::Weno3:{
+	const auto l1i  = graph(smPt, 3)*ndpc;
+	const auto r1i  = graph(smPt, 4)*ndpc;
+	::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_functionValues,
+				 l1i, l0i, r0i, r1i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
 
-      case InviscidFluxReconstruction::Weno5:
-	{
-	  const auto l1i = graph(smPt, 3)*ndpc;
-	  const auto r1i = graph(smPt, 4)*ndpc;
-	  const auto l2i = graph(smPt, 5)*ndpc;
-	  const auto r2i = graph(smPt, 6)*ndpc;
-	  ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-				   m_memb.m_uMinusHalfPos,
-				   m_memb.m_uPlusHalfNeg,
-				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_state,
-				   l2i, l1i, l0i,
-				   r0i, r1i, r2i,
-				   uIndex,
-				   ndpc);
-	  break;
-	}
+      case ReconstructionScheme::Weno5:{
+	const auto l1i = graph(smPt, 3)*ndpc;
+	const auto r1i = graph(smPt, 4)*ndpc;
+	const auto l2i = graph(smPt, 5)*ndpc;
+	const auto r2i = graph(smPt, 6)*ndpc;
+	::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_functionValues,
+				 l2i, l1i, l0i,
+				 r0i, r1i, r2i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
       }
   }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t>;
-  members_t m_memb;
 };
 
 // -----------------------------------------------------------
 // 1d, multiple dofsPerCell, WITH reconstruction gradients
 // -----------------------------------------------------------
-template<int ndpc, class edge_rec_t, class state_t, class mesh_t, class rec_grad_t>
-class ReconstructorFromState<1, ndpc, edge_rec_t, state_t, mesh_t, rec_grad_t>
+template<
+  int ndpc,
+  class MeshType,
+  class DataType,
+  class ReconstructedValueType,
+  class ReconstructedGradType
+  >
+class ReconstructorForDiscreteFunction<
+  1, ndpc, MeshType, DataType, ReconstructedValueType, ReconstructedGradType
+  >
 {
+  using members_t = _ReconstructorMembers<
+    ReconstructedValueType, DataType, MeshType, ReconstructedGradType>;
+  members_t m_memb;
+
 public:
   template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : m_memb(std::forward<Args>(args)...){}
+
+  const ReconstructionScheme reconstructionScheme() const{
+    return m_memb.m_recEn;
+  }
+
+  const ReconstructedValueType & reconstructionLeftNeg() const{
+    return m_memb.m_uMinusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionLeftPos() const{
+    return m_memb.m_uMinusHalfPos;
+  }
+  const ReconstructedValueType & reconstructionRightNeg() const{
+    return m_memb.m_uPlusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionRightPos() const{
+    return m_memb.m_uPlusHalfPos;
+  }
+
+  const ReconstructedGradType & reconstructionGradLeftNeg() const{
+    return m_memb.m_gradLNeg;
+  }
+  const ReconstructedGradType & reconstructionGradLeftPos() const{
+    return m_memb.m_gradLPos;
+  }
+  const ReconstructedGradType & reconstructionGradRightNeg() const{
+    return m_memb.m_gradRNeg;
+  }
+  const ReconstructedGradType & reconstructionGradRightPos() const{
+    return m_memb.m_gradRPos;
+  }
 
   template<class IndexType>
   void operator()(IndexType smPt)
@@ -167,90 +247,104 @@ public:
     const auto & graph  = m_memb.m_meshObj.graph();
     const auto & uIndex = graph(smPt, 0)*ndpc;
     const auto axis = m_memb.m_axis;
-
     const auto l0i = graph(smPt, 1)*ndpc;
     const auto r0i = graph(smPt, 2)*ndpc;
 
     switch(m_memb.m_recEn)
       {
-      case InviscidFluxReconstruction::FirstOrder:
-	{
-	  for (int i=0; i<ndpc; ++i){
-	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
-	    m_memb.m_gradLNeg(i, 0) = 1;
-	    m_memb.m_gradLNeg(i, 1) = 0;
-	    m_memb.m_gradLPos(i, 0) = 0;
-	    m_memb.m_gradLPos(i, 1) = 1;
-	    m_memb.m_gradRNeg(i, 0) = 1;
-	    m_memb.m_gradRNeg(i, 1) = 0;
-	    m_memb.m_gradRPos(i, 0) = 0;
-	    m_memb.m_gradRPos(i, 1) = 1;
-	  }
-
-	  break;
+      case ReconstructionScheme::FirstOrder:{
+	for (int i=0; i<ndpc; ++i){
+	  m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
+	  m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
+	  m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
+	  m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
+	  m_memb.m_gradLNeg(i, 0) = 1;
+	  m_memb.m_gradLNeg(i, 1) = 0;
+	  m_memb.m_gradLPos(i, 0) = 0;
+	  m_memb.m_gradLPos(i, 1) = 1;
+	  m_memb.m_gradRNeg(i, 0) = 1;
+	  m_memb.m_gradRNeg(i, 1) = 0;
+	  m_memb.m_gradRPos(i, 0) = 0;
+	  m_memb.m_gradRPos(i, 1) = 1;
 	}
+	break;
+      }
 
-      case InviscidFluxReconstruction::Weno3:
-	{
-	  const auto l1i  = graph(smPt, 3)*ndpc;
-	  const auto r1i  = graph(smPt, 4)*ndpc;
-	  ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-				   m_memb.m_uMinusHalfPos,
-				   m_memb.m_uPlusHalfNeg,
-				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_gradLNeg,
-				   m_memb.m_gradLPos,
-				   m_memb.m_gradRNeg,
-				   m_memb.m_gradRPos,
-				   m_memb.m_state,
-				   l1i, l0i, r0i, r1i,
-				   uIndex,
-				   ndpc);
-	  break;
-	}
+      case ReconstructionScheme::Weno3:{
+	const auto l1i  = graph(smPt, 3)*ndpc;
+	const auto r1i  = graph(smPt, 4)*ndpc;
+	::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_gradLNeg,
+				 m_memb.m_gradLPos,
+				 m_memb.m_gradRNeg,
+				 m_memb.m_gradRPos,
+				 m_memb.m_functionValues,
+				 l1i, l0i, r0i, r1i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
 
-      case InviscidFluxReconstruction::Weno5:
-	{
-	  const auto l1i = graph(smPt, 3)*ndpc;
-	  const auto r1i = graph(smPt, 4)*ndpc;
-	  const auto l2i = graph(smPt, 5)*ndpc;
-	  const auto r2i = graph(smPt, 6)*ndpc;
-	  ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-				   m_memb.m_uMinusHalfPos,
-				   m_memb.m_uPlusHalfNeg,
-				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_gradLNeg,
-				   m_memb.m_gradLPos,
-				   m_memb.m_gradRNeg,
-				   m_memb.m_gradRPos,
-				   m_memb.m_state,
-				   l2i, l1i, l0i,
-				   r0i, r1i, r2i,
-				   uIndex,
-				   ndpc);
-	  break;
-	}
+      case ReconstructionScheme::Weno5:{
+	const auto l1i = graph(smPt, 3)*ndpc;
+	const auto r1i = graph(smPt, 4)*ndpc;
+	const auto l2i = graph(smPt, 5)*ndpc;
+	const auto r2i = graph(smPt, 6)*ndpc;
+	::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
+				 m_memb.m_uMinusHalfPos,
+				 m_memb.m_uPlusHalfNeg,
+				 m_memb.m_uPlusHalfPos,
+				 m_memb.m_gradLNeg,
+				 m_memb.m_gradLPos,
+				 m_memb.m_gradRNeg,
+				 m_memb.m_gradRPos,
+				 m_memb.m_functionValues,
+				 l2i, l1i, l0i,
+				 r0i, r1i, r2i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
       }
   }
-
-private:
-  using members_t = _ReconstructorMembers<
-  edge_rec_t, state_t, mesh_t, rec_grad_t>;
-  members_t m_memb;
 };
-
 
 // -----------------------------------------------------------
 // 1d, 1 dof, no reconstruction gradients
 // -----------------------------------------------------------
-template<class edge_rec_t, class state_t, class mesh_t>
-class ReconstructorFromState<1, 1, edge_rec_t, state_t, mesh_t>{
+template<class MeshType, class DataType, class ReconstructedValueType>
+class ReconstructorForDiscreteFunction<
+  1, 1, MeshType, DataType, ReconstructedValueType
+  >
+{
+  using members_t = _ReconstructorMembers<
+    ReconstructedValueType, DataType, MeshType>;
+  members_t m_memb;
+
 public:
   template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : m_memb(std::forward<Args>(args)...){}
+
+  const ReconstructionScheme reconstructionScheme() const{
+    return m_memb.m_recEn;
+  }
+
+  const ReconstructedValueType & reconstructionLeftNeg() const{
+    return m_memb.m_uMinusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionLeftPos() const{
+    return m_memb.m_uMinusHalfPos;
+  }
+  const ReconstructedValueType & reconstructionRightNeg() const{
+    return m_memb.m_uPlusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionRightPos() const{
+    return m_memb.m_uPlusHalfPos;
+  }
 
   template<class IndexType>
   void operator()(IndexType smPt)
@@ -263,16 +357,16 @@ public:
     const auto r0i = graph(smPt, 2);
     switch(m_memb.m_recEn)
       {
-      case InviscidFluxReconstruction::FirstOrder:
+      case ReconstructionScheme::FirstOrder:
 	{
-	  m_memb.m_uMinusHalfNeg = m_memb.m_state(l0i);
-	  m_memb.m_uMinusHalfPos = m_memb.m_state(uIndex);
-	  m_memb.m_uPlusHalfNeg  = m_memb.m_state(uIndex);
-	  m_memb.m_uPlusHalfPos  = m_memb.m_state(r0i);
+	  m_memb.m_uMinusHalfNeg = m_memb.m_functionValues(l0i);
+	  m_memb.m_uMinusHalfPos = m_memb.m_functionValues(uIndex);
+	  m_memb.m_uPlusHalfNeg  = m_memb.m_functionValues(uIndex);
+	  m_memb.m_uPlusHalfPos  = m_memb.m_functionValues(r0i);
 	  break;
 	}
 
-      case InviscidFluxReconstruction::Weno3:
+      case ReconstructionScheme::Weno3:
 	{
 	  const auto l1i = graph(smPt, 3);
 	  const auto r1i = graph(smPt, 4);
@@ -280,15 +374,15 @@ public:
 				   m_memb.m_uMinusHalfPos,
 				   m_memb.m_uPlusHalfNeg,
 				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_state(l1i),
-				   m_memb.m_state(l0i),
-				   m_memb.m_state(uIndex),
-				   m_memb.m_state(r0i),
-				   m_memb.m_state(r1i));
+				   m_memb.m_functionValues(l1i),
+				   m_memb.m_functionValues(l0i),
+				   m_memb.m_functionValues(uIndex),
+				   m_memb.m_functionValues(r0i),
+				   m_memb.m_functionValues(r1i));
 	  break;
 	}
 
-      case InviscidFluxReconstruction::Weno5:
+      case ReconstructionScheme::Weno5:
 	{
 	  const auto l1i = graph(smPt, 3);
 	  const auto r1i = graph(smPt, 4);
@@ -298,31 +392,70 @@ public:
 				   m_memb.m_uMinusHalfPos,
 				   m_memb.m_uPlusHalfNeg,
 				   m_memb.m_uPlusHalfPos,
-				   m_memb.m_state(l2i),
-				   m_memb.m_state(l1i),
-				   m_memb.m_state(l0i),
-				   m_memb.m_state(uIndex),
-				   m_memb.m_state(r0i),
-				   m_memb.m_state(r1i),
-				   m_memb.m_state(r2i));
+				   m_memb.m_functionValues(l2i),
+				   m_memb.m_functionValues(l1i),
+				   m_memb.m_functionValues(l0i),
+				   m_memb.m_functionValues(uIndex),
+				   m_memb.m_functionValues(r0i),
+				   m_memb.m_functionValues(r1i),
+				   m_memb.m_functionValues(r2i));
 	  break;
 	}
       }
   }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t>;
-  members_t m_memb;
 };
 
 // -----------------------------------------------------------
 // 1d, 1 dofsPerCell, WITH reconstruction gradients
 // -----------------------------------------------------------
-template<class edge_rec_t, class state_t, class mesh_t, class rec_grad_t>
-class ReconstructorFromState<1, 1, edge_rec_t, state_t, mesh_t, rec_grad_t>{
+template<
+  class MeshType,
+  class DataType,
+  class ReconstructedValueType,
+  class ReconstructedGradType
+  >
+class ReconstructorForDiscreteFunction<
+  1, 1, MeshType, DataType, ReconstructedValueType, ReconstructedGradType
+  >
+{
+  using members_t = _ReconstructorMembers<
+    ReconstructedValueType, DataType, MeshType, ReconstructedGradType>;
+  members_t m_memb;
+
 public:
   template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : m_memb(std::forward<Args>(args)...){}
+
+  const ReconstructionScheme reconstructionScheme() const{
+    return m_memb.m_recEn;
+  }
+
+  const ReconstructedValueType & reconstructionLeftNeg() const{
+    return m_memb.m_uMinusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionLeftPos() const{
+    return m_memb.m_uMinusHalfPos;
+  }
+  const ReconstructedValueType & reconstructionRightNeg() const{
+    return m_memb.m_uPlusHalfNeg;
+  }
+  const ReconstructedValueType & reconstructionRightPos() const{
+    return m_memb.m_uPlusHalfPos;
+  }
+
+  const ReconstructedGradType & reconstructionGradLeftNeg() const{
+    return m_memb.m_gradLNeg;
+  }
+  const ReconstructedGradType & reconstructionGradLeftPos() const{
+    return m_memb.m_gradLPos;
+  }
+  const ReconstructedGradType & reconstructionGradRightNeg() const{
+    return m_memb.m_gradRNeg;
+  }
+  const ReconstructedGradType & reconstructionGradRightPos() const{
+    return m_memb.m_gradRPos;
+  }
 
   template<class IndexType>
   void operator()(IndexType smPt)
@@ -335,12 +468,12 @@ public:
     const auto r0i  = graph(smPt, 2);
     switch(m_memb.m_recEn)
       {
-      case InviscidFluxReconstruction::FirstOrder:
+      case ReconstructionScheme::FirstOrder:
 	{
-	  m_memb.m_uMinusHalfNeg = m_memb.m_state(l0i);
-	  m_memb.m_uMinusHalfPos = m_memb.m_state(uIndex);
-	  m_memb.m_uPlusHalfNeg  = m_memb.m_state(uIndex);
-	  m_memb.m_uPlusHalfPos  = m_memb.m_state(r0i);
+	  m_memb.m_uMinusHalfNeg = m_memb.m_functionValues(l0i);
+	  m_memb.m_uMinusHalfPos = m_memb.m_functionValues(uIndex);
+	  m_memb.m_uPlusHalfNeg  = m_memb.m_functionValues(uIndex);
+	  m_memb.m_uPlusHalfPos  = m_memb.m_functionValues(r0i);
 	  m_memb.m_gradLNeg[0] = 1;
 	  m_memb.m_gradLNeg[1] = 0;
 	  m_memb.m_gradLPos[0] = 0;
@@ -352,7 +485,7 @@ public:
 	  break;
 	}
 
-      case InviscidFluxReconstruction::Weno3:
+      case ReconstructionScheme::Weno3:
 	{
 	  const auto l1i = graph(smPt, 3);
 	  const auto r1i = graph(smPt, 4);
@@ -364,15 +497,15 @@ public:
 				   m_memb.m_gradLPos,
 				   m_memb.m_gradRNeg,
 				   m_memb.m_gradRPos,
-				   m_memb.m_state(l1i),
-				   m_memb.m_state(l0i),
-				   m_memb.m_state(uIndex),
-				   m_memb.m_state(r0i),
-				   m_memb.m_state(r1i));
+				   m_memb.m_functionValues(l1i),
+				   m_memb.m_functionValues(l0i),
+				   m_memb.m_functionValues(uIndex),
+				   m_memb.m_functionValues(r0i),
+				   m_memb.m_functionValues(r1i));
 	  break;
 	}
 
-      case InviscidFluxReconstruction::Weno5:
+      case ReconstructionScheme::Weno5:
 	{
 	  const auto l1i  = graph(smPt, 3);
 	  const auto r1i  = graph(smPt, 4);
@@ -386,294 +519,290 @@ public:
 				   m_memb.m_gradLPos,
 				   m_memb.m_gradRNeg,
 				   m_memb.m_gradRPos,
-				   m_memb.m_state(l2i),
-				   m_memb.m_state(l1i),
-				   m_memb.m_state(l0i),
-				   m_memb.m_state(uIndex),
-				   m_memb.m_state(r0i),
-				   m_memb.m_state(r1i),
-				   m_memb.m_state(r2i));
+				   m_memb.m_functionValues(l2i),
+				   m_memb.m_functionValues(l1i),
+				   m_memb.m_functionValues(l0i),
+				   m_memb.m_functionValues(uIndex),
+				   m_memb.m_functionValues(r0i),
+				   m_memb.m_functionValues(r1i),
+				   m_memb.m_functionValues(r2i));
 	  break;
 	}
       }
   }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t, rec_grad_t>;
-  members_t m_memb;
 };
 
-
-// -----------------------------------------------------------
-// 2d, multiple dofsPerCell, no reconstruction gradients
-// -----------------------------------------------------------
-template<int ndpc, class edge_rec_t, class state_t, class mesh_t>
-class ReconstructorFromState<2, ndpc, edge_rec_t, state_t, mesh_t>{
-public:
-  template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
-
-  template<class IndexType>
-  void operator()(int smPt)
-  {
-    const auto & graph  = m_memb.m_meshObj.graph();
-    const auto & uIndex = graph(smPt, 0)*ndpc;
-    const auto axis = m_memb.m_axis;
-
-    /*
-      For 2d, graph is:
-      ptID left0 front0 right0 back0 [left1 front1 right1 back1 left2 front2 right2 back2]
-       0     1     2      3     4    [  5     6      7      8    9      10     11    12  ]
-
-      where [] are optionally present, depending on the stencil chosen.
-    */
-
-    switch(m_memb.m_recEn)
-      {
-      case InviscidFluxReconstruction::FirstOrder:
-	{
-	  const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
-	  const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
-	  const auto l0i = l0*ndpc;
-	  const auto r0i = r0*ndpc;
-
-	  for (int i=0; i<ndpc; ++i){
-	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
-	  }
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno3:
-	{
-	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
-	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
-	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
-	  const auto l0i = l0*ndpc;
-	  const auto r0i = r0*ndpc;
-	  const auto l1i = l1*ndpc;
-	  const auto r1i = r1*ndpc;
-
-	  ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-				 m_memb.m_uMinusHalfPos,
-				 m_memb.m_uPlusHalfNeg,
-				 m_memb.m_uPlusHalfPos,
-				 m_memb.m_state,
-				 l1i, l0i, r0i, r1i,
-				 uIndex,
-				 ndpc);
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno5:
-	{
-	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
-	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
-	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
-	  const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
-	  const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
-	  const auto l0i = l0*ndpc;
-	  const auto r0i = r0*ndpc;
-	  const auto l1i = l1*ndpc;
-	  const auto r1i = r1*ndpc;
-	  const auto l2i = l2*ndpc;
-	  const auto r2i = r2*ndpc;
-
-	  ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-				 m_memb.m_uMinusHalfPos,
-				 m_memb.m_uPlusHalfNeg,
-				 m_memb.m_uPlusHalfPos,
-				 m_memb.m_state,
-				 l2i, l1i, l0i,
-				 r0i, r1i, r2i,
-				 uIndex,
-				 ndpc);
-	  break;
-	}
-      }
-  }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t>;
-  members_t m_memb;
-};
-
-
-// -----------------------------------------------------------
-// 2d, multiple dofsPerCell, WITH reconstruction gradients
-// -----------------------------------------------------------
-template<int ndpc, class edge_rec_t, class state_t, class mesh_t, class rec_grad_t>
-class ReconstructorFromState<2, ndpc, edge_rec_t, state_t, mesh_t, rec_grad_t>{
-public:
-  template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
-
-  template<class IndexType>
-  void operator()(IndexType smPt)
-  {
-    const auto & graph  = m_memb.m_meshObj.graph();
-    const auto & uIndex = graph(smPt, 0)*ndpc;
-    const auto axis = m_memb.m_axis;
-
-    switch(m_memb.m_recEn)
-      {
-      case InviscidFluxReconstruction::FirstOrder:
-	{
-	  throw std::runtime_error("REC MISSING C");
-	  // const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
-	  // const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
-	  // const auto l0i = l0*ndpc;
-	  // const auto r0i = r0*ndpc;
-
-	  // for (int i=0; i<ndpc; ++i){
-	  //   m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	  //   m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	  //   m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	  //   m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
-	  // }
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno3:
-	{
-	  throw std::runtime_error("REC MISSING D");
-	  // const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	  // const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
-	  // const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
-	  // const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
-	  // const auto l0i = l0*ndpc;
-	  // const auto r0i = r0*ndpc;
-	  // const auto l1i = l1*ndpc;
-	  // const auto r1i = r1*ndpc;
-
-	  // ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-	  // 			 m_memb.m_uMinusHalfPos,
-	  // 			 m_memb.m_uPlusHalfNeg,
-	  // 			 m_memb.m_uPlusHalfPos,
-	  // 			 m_memb.m_state,
-	  // 			 l1i, l0i, r0i, r1i,
-	  // 			 uIndex,
-	  // 			 ndpc);
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno5:
-	{
-	  throw std::runtime_error("REC MISSING E");
-	  // const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
-	  // const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
-	  // const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
-	  // const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
-	  // const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
-	  // const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
-	  // const auto l0i = l0*ndpc;
-	  // const auto r0i = r0*ndpc;
-	  // const auto l1i = l1*ndpc;
-	  // const auto r1i = r1*ndpc;
-	  // const auto l2i = l2*ndpc;
-	  // const auto r2i = r2*ndpc;
-
-	  // ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-	  // 			 m_memb.m_uMinusHalfPos,
-	  // 			 m_memb.m_uPlusHalfNeg,
-	  // 			 m_memb.m_uPlusHalfPos,
-	  // 			 m_memb.m_state,
-	  // 			 l2i, l1i, l0i,
-	  // 			 r0i, r1i, r2i,
-	  // 			 uIndex,
-	  // 			 ndpc);
-	  break;
-	}
-      }
-  }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t, rec_grad_t>;
-  members_t m_memb;
-};
-
-
-// -----------------------------------------------------------
-// 3d, multiple dofsPerCell, no reconstruction gradients
-// -----------------------------------------------------------
-template<int ndpc, class edge_rec_t, class state_t, class mesh_t>
-class ReconstructorFromState<3, ndpc, edge_rec_t, state_t, mesh_t>{
-
-public:
-  template<typename ...Args>
-  ReconstructorFromState(Args && ... args) : m_memb(std::forward<Args>(args)...){}
-
-  template<class IndexType>
-  void operator()(IndexType smPt)
-  {
-    const auto & graph  = m_memb.m_meshObj.graph();
-    const auto & uIndex = graph(smPt, 0)*ndpc;
-    const auto axis = m_memb.m_axis;
-
-    /*
-      For 3d, graph is:
-      ptID l0 f0 r0 ba0 bot0 top0 [l1 f1 r1 ba1 bot1 top1 l2 f2 r2 ba2 bot2 top2]
-       0    1  2  3  4    5   6   [ 7  8  9  10  11   12  13 14 15  16  17  18  ]
-
-      where [] are optionally present, depending on the stencil chosen.
-    */
-
-    switch(m_memb.m_recEn)
-      {
-      case InviscidFluxReconstruction::FirstOrder:
-	{
-	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
-	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
-	  const auto l0i = l0*ndpc;
-	  const auto r0i = r0*ndpc;
-
-	  for (int i=0; i<ndpc; ++i){
-	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_state(l0i+i);
-	    m_memb.m_uMinusHalfPos(i) = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_state(uIndex+i);
-	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_state(r0i+i);
-	  }
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno3:
-	{
-	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
-	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
-	  auto l1 = (axis == 1) ? graph(smPt, 7) : (axis==2) ? graph(smPt, 10) : graph(smPt, 11);
-	  auto r1 = (axis == 1) ? graph(smPt, 9) : (axis==2) ? graph(smPt, 8) : graph(smPt, 12);
-
-	  const auto l0i = l0*ndpc;
-	  const auto r0i = r0*ndpc;
-	  const auto l1i = l1*ndpc;
-	  const auto r1i = r1*ndpc;
-	::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-			       m_memb.m_uMinusHalfPos,
-			       m_memb.m_uPlusHalfNeg,
-			       m_memb.m_uPlusHalfPos,
-			       m_memb.m_state,
-			       l1i, l0i, r0i, r1i,
-			       uIndex,
-			       ndpc);
-	  break;
-	}
-
-      case InviscidFluxReconstruction::Weno5:
-	{
-	  throw std::runtime_error("missing impl");
-	  break;
-	}
-      }
-  }
-
-private:
-  using members_t = _ReconstructorMembers<edge_rec_t, state_t, mesh_t>;
-  members_t m_memb;
-};
-
-}}
+}} // end namespaces
 #endif
+
+
+// // -----------------------------------------------------------
+// // 2d, multiple dofsPerCell, no reconstruction gradients
+// // -----------------------------------------------------------
+// template<int ndpc, class ReconstructedValueType, class DataType, class MeshType>
+// class ReconstructorForDiscreteFunction<2, ndpc, ReconstructedValueType, DataType, MeshType>{
+// public:
+//   template<typename ...Args>
+//   ReconstructorForDiscreteFunction(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+
+//   template<class IndexType>
+//   void operator()(int smPt)
+//   {
+//     const auto & graph  = m_memb.m_meshObj.graph();
+//     const auto & uIndex = graph(smPt, 0)*ndpc;
+//     const auto axis = m_memb.m_axis;
+
+//     /*
+//       For 2d, graph is:
+//       ptID left0 front0 right0 back0 [left1 front1 right1 back1 left2 front2 right2 back2]
+//        0     1     2      3     4    [  5     6      7      8    9      10     11    12  ]
+
+//       where [] are optionally present, depending on the stencil chosen.
+//     */
+
+//     switch(m_memb.m_recEn)
+//       {
+//       case ReconstructionScheme::FirstOrder:
+// 	{
+// 	  const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
+// 	  const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+// 	  const auto l0i = l0*ndpc;
+// 	  const auto r0i = r0*ndpc;
+
+// 	  for (int i=0; i<ndpc; ++i){
+// 	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
+// 	    m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
+// 	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
+// 	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
+// 	  }
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno3:
+// 	{
+// 	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+// 	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+// 	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+// 	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+// 	  const auto l0i = l0*ndpc;
+// 	  const auto r0i = r0*ndpc;
+// 	  const auto l1i = l1*ndpc;
+// 	  const auto r1i = r1*ndpc;
+
+// 	  ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+// 				 m_memb.m_uMinusHalfPos,
+// 				 m_memb.m_uPlusHalfNeg,
+// 				 m_memb.m_uPlusHalfPos,
+// 				 m_memb.m_functionValues,
+// 				 l1i, l0i, r0i, r1i,
+// 				 uIndex,
+// 				 ndpc);
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno5:
+// 	{
+// 	  const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+// 	  const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+// 	  const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+// 	  const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+// 	  const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+// 	  const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
+// 	  const auto l0i = l0*ndpc;
+// 	  const auto r0i = r0*ndpc;
+// 	  const auto l1i = l1*ndpc;
+// 	  const auto r1i = r1*ndpc;
+// 	  const auto l2i = l2*ndpc;
+// 	  const auto r2i = r2*ndpc;
+
+// 	  ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
+// 				 m_memb.m_uMinusHalfPos,
+// 				 m_memb.m_uPlusHalfNeg,
+// 				 m_memb.m_uPlusHalfPos,
+// 				 m_memb.m_functionValues,
+// 				 l2i, l1i, l0i,
+// 				 r0i, r1i, r2i,
+// 				 uIndex,
+// 				 ndpc);
+// 	  break;
+// 	}
+//       }
+//   }
+
+// private:
+//   using members_t = _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>;
+//   members_t m_memb;
+// };
+
+
+// // -----------------------------------------------------------
+// // 2d, multiple dofsPerCell, WITH reconstruction gradients
+// // -----------------------------------------------------------
+// template<int ndpc, class ReconstructedValueType, class DataType, class MeshType, class ReconstructedGradType>
+// class ReconstructorForDiscreteFunction<2, ndpc, ReconstructedValueType, DataType, MeshType, ReconstructedGradType>{
+// public:
+//   template<typename ...Args>
+//   ReconstructorForDiscreteFunction(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+
+//   template<class IndexType>
+//   void operator()(IndexType smPt)
+//   {
+//     const auto & graph  = m_memb.m_meshObj.graph();
+//     const auto & uIndex = graph(smPt, 0)*ndpc;
+//     const auto axis = m_memb.m_axis;
+
+//     switch(m_memb.m_recEn)
+//       {
+//       case ReconstructionScheme::FirstOrder:
+// 	{
+// 	  throw std::runtime_error("REC MISSING C");
+// 	  // const auto l0  = (axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
+// 	  // const auto r0  = (axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+// 	  // const auto l0i = l0*ndpc;
+// 	  // const auto r0i = r0*ndpc;
+
+// 	  // for (int i=0; i<ndpc; ++i){
+// 	  //   m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
+// 	  //   m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
+// 	  //   m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
+// 	  //   m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
+// 	  // }
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno3:
+// 	{
+// 	  throw std::runtime_error("REC MISSING D");
+// 	  // const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+// 	  // const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+// 	  // const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+// 	  // const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+// 	  // const auto l0i = l0*ndpc;
+// 	  // const auto r0i = r0*ndpc;
+// 	  // const auto l1i = l1*ndpc;
+// 	  // const auto r1i = r1*ndpc;
+
+// 	  // ::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+// 	  // 			 m_memb.m_uMinusHalfPos,
+// 	  // 			 m_memb.m_uPlusHalfNeg,
+// 	  // 			 m_memb.m_uPlusHalfPos,
+// 	  // 			 m_memb.m_functionValues,
+// 	  // 			 l1i, l0i, r0i, r1i,
+// 	  // 			 uIndex,
+// 	  // 			 ndpc);
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno5:
+// 	{
+// 	  throw std::runtime_error("REC MISSING E");
+// 	  // const auto l0  = (axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+// 	  // const auto r0  = (axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+// 	  // const auto l1  = (axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+// 	  // const auto r1  = (axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+// 	  // const auto l2  = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+// 	  // const auto r2  = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
+// 	  // const auto l0i = l0*ndpc;
+// 	  // const auto r0i = r0*ndpc;
+// 	  // const auto l1i = l1*ndpc;
+// 	  // const auto r1i = r1*ndpc;
+// 	  // const auto l2i = l2*ndpc;
+// 	  // const auto r2i = r2*ndpc;
+
+// 	  // ::pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
+// 	  // 			 m_memb.m_uMinusHalfPos,
+// 	  // 			 m_memb.m_uPlusHalfNeg,
+// 	  // 			 m_memb.m_uPlusHalfPos,
+// 	  // 			 m_memb.m_functionValues,
+// 	  // 			 l2i, l1i, l0i,
+// 	  // 			 r0i, r1i, r2i,
+// 	  // 			 uIndex,
+// 	  // 			 ndpc);
+// 	  break;
+// 	}
+//       }
+//   }
+
+// private:
+//   using members_t = _ReconstructorMembers<ReconstructedValueType, DataType, MeshType, ReconstructedGradType>;
+//   members_t m_memb;
+// };
+
+
+// // -----------------------------------------------------------
+// // 3d, multiple dofsPerCell, no reconstruction gradients
+// // -----------------------------------------------------------
+// template<int ndpc, class ReconstructedValueType, class DataType, class MeshType>
+// class ReconstructorForDiscreteFunction<3, ndpc, ReconstructedValueType, DataType, MeshType>{
+
+// public:
+//   template<typename ...Args>
+//   ReconstructorForDiscreteFunction(Args && ... args) : m_memb(std::forward<Args>(args)...){}
+
+//   template<class IndexType>
+//   void operator()(IndexType smPt)
+//   {
+//     const auto & graph  = m_memb.m_meshObj.graph();
+//     const auto & uIndex = graph(smPt, 0)*ndpc;
+//     const auto axis = m_memb.m_axis;
+
+//     /*
+//       For 3d, graph is:
+//       ptID l0 f0 r0 ba0 bot0 top0 [l1 f1 r1 ba1 bot1 top1 l2 f2 r2 ba2 bot2 top2]
+//        0    1  2  3  4    5   6   [ 7  8  9  10  11   12  13 14 15  16  17  18  ]
+
+//       where [] are optionally present, depending on the stencil chosen.
+//     */
+
+//     switch(m_memb.m_recEn)
+//       {
+//       case ReconstructionScheme::FirstOrder:
+// 	{
+// 	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
+// 	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
+// 	  const auto l0i = l0*ndpc;
+// 	  const auto r0i = r0*ndpc;
+
+// 	  for (int i=0; i<ndpc; ++i){
+// 	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
+// 	    m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
+// 	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
+// 	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
+// 	  }
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno3:
+// 	{
+// 	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
+// 	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
+// 	  auto l1 = (axis == 1) ? graph(smPt, 7) : (axis==2) ? graph(smPt, 10) : graph(smPt, 11);
+// 	  auto r1 = (axis == 1) ? graph(smPt, 9) : (axis==2) ? graph(smPt, 8) : graph(smPt, 12);
+
+// 	  const auto l0i = l0*ndpc;
+// 	  const auto r0i = r0*ndpc;
+// 	  const auto l1i = l1*ndpc;
+// 	  const auto r1i = r1*ndpc;
+// 	::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
+// 			       m_memb.m_uMinusHalfPos,
+// 			       m_memb.m_uPlusHalfNeg,
+// 			       m_memb.m_uPlusHalfPos,
+// 			       m_memb.m_functionValues,
+// 			       l1i, l0i, r0i, r1i,
+// 			       uIndex,
+// 			       ndpc);
+// 	  break;
+// 	}
+
+//       case ReconstructionScheme::Weno5:
+// 	{
+// 	  throw std::runtime_error("missing impl");
+// 	  break;
+// 	}
+//       }
+//   }
+
+// private:
+//   using members_t = _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>;
+//   members_t m_memb;
+// };

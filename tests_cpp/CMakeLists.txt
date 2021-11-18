@@ -1,17 +1,17 @@
 
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
-# add_subdirectory(rankine_hugoniot)
-#add_subdirectory(weno3)
-#add_subdirectory(weno5)
+add_subdirectory(rankine_hugoniot)
+add_subdirectory(weno3)
+add_subdirectory(weno5)
 
 # # general tests
 # # # add_subdirectory(eigen_crs_matrix)
-#add_subdirectory(eigen_mesh_ccu_class)
-#add_subdirectory(eigen_mesh_ccu_special_cells_list)
+add_subdirectory(eigen_mesh_ccu_class)
+add_subdirectory(eigen_mesh_ccu_special_cells_list)
 add_subdirectory(eigen_1d_linear_adv_jacobian_fd)
-# add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
-# add_subdirectory(eigen_euler_rusanov_flux_jacobians)
+#add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
+#add_subdirectory(eigen_euler_rusanov_flux_jacobians)
 add_subdirectory(eigen_1d_euler_jacobian_fd)
 # add_subdirectory(eigen_2d_diffusion_reaction_jacobian_fd)
 # add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
@@ -22,9 +22,9 @@ add_subdirectory(eigen_1d_euler_jacobian_fd)
 # # add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
 
 # ### 1d problems ###
-#add_subdirectory(eigen_1d_linear_adv_explicit)
-# add_subdirectory(eigen_1d_linear_adv_implicit)
-#add_subdirectory(eigen_1d_linear_adv_convergence)
+add_subdirectory(eigen_1d_linear_adv_explicit)
+add_subdirectory(eigen_1d_linear_adv_implicit)
+add_subdirectory(eigen_1d_linear_adv_convergence)
 #add_subdirectory(eigen_1d_linear_adv_sample_mesh_testA)
 #add_subdirectory(eigen_1d_linear_adv_sample_mesh_testB)
 # add_subdirectory(eigen_1d_diffusion_reaction_explicit)

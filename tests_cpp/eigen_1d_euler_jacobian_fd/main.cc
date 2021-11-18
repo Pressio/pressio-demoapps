@@ -82,26 +82,27 @@ int main(int argc, char *argv[])
 
   // make sure repeated evaluations work
   // not just a single time
-  for (int i=0; i<1; ++i)
+  for (int loop=0; loop<1; ++loop)
   {
     appObj.velocityAndJacobian(state, 0., velo, J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
+
+    auto Ja = J*a;
 
     // first order
     auto state2 = state+eps*a;
     app_rhs_t velo2(velo.size());
     appObj.velocity(state2, 0., velo2);
 
-    auto Ja = J*a;
     Eigen::VectorXd Ja_fd(velo.size());
     Ja_fd.setZero();
-    for (int i=0; i<Ja.size(); ++i){
+    for (int i=0; i<Ja_fd.size(); ++i){
       Ja_fd(i) = (velo2(i) - velo(i))/eps;
     }
 
-    for (int i=0; i<Ja.size(); ++i){
-      const auto diff = std::abs(Ja(i)- Ja_fd(i));
+    for (int i=0; i<Ja_fd.size(); ++i){
+      const auto diff = std::abs(Ja(i) - Ja_fd(i));
       printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
 	     i, Ja(i), Ja_fd(i), diff);
 
@@ -111,18 +112,22 @@ int main(int argc, char *argv[])
       }
     }
 
-    // second order
-    auto state3 = state-eps*a;
-    app_rhs_t velo3(velo.size());
-    appObj.velocity(state3, 0., velo3);
-    auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
-    for (int i=0; i<Ja.size(); ++i){
-      const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
-      if (diff > 1e-6){
-	std::puts("FAILED");
-	//return 0;
-      }
-    }
+    // // second order
+    // auto state3 = state-eps*a;
+    // app_rhs_t velo3(velo.size());
+    // appObj.velocity(state3, 0., velo3);
+    // auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
+    // for (int i=0; i<Ja.size(); ++i){
+    //   const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
+    //   printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n",
+    // 	     i, Ja(i), Ja_fd(i), diff);
+
+    //   if (diff > 1e-5){
+    // 	std::puts("FAILED");
+    // 	//return 0;
+    //   }
+    // }
+
   }
 
   std::puts("PASS");

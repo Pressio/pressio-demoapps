@@ -4,63 +4,60 @@
 
 namespace pressiodemoapps{
 
-enum class InviscidFluxScheme{
-  Rusanov
+// here we have an enum also for a generic function
+// reconstruction because this is not necessarily
+// tied to inviscid/viscous stuff
+enum class ReconstructionScheme{
+  Null, FirstOrder, Weno3, Weno5
 };
 
 enum class InviscidFluxReconstruction{
-  FirstOrder,
-  Weno3,
-  Weno5
+  FirstOrder, Weno3, Weno5
 };
+enum class InviscidFluxScheme{ Rusanov };
+enum class ViscousFluxReconstruction{ FirstOrder };
+enum class ViscousFluxScheme{ Central };
 
-enum class ViscousFluxScheme{
-  Central
-};
-
-enum class ViscousFluxReconstruction{
-  FirstOrder
-};
-
-int reconstructionTypeToStencilSize(InviscidFluxReconstruction enIn)
-{
-  switch(enIn)
-    {
-    case InviscidFluxReconstruction::FirstOrder: return 3;
-    case InviscidFluxReconstruction::Weno3:	 return 5;
-    case InviscidFluxReconstruction::Weno5:	 return 7;
-    }
-    return 0;
+int reconstructionTypeToStencilSize(InviscidFluxReconstruction enIn){
+  switch(enIn){
+  case InviscidFluxReconstruction::FirstOrder: return 3;
+  case InviscidFluxReconstruction::Weno3:	 return 5;
+  case InviscidFluxReconstruction::Weno5:	 return 7;
+  }
+  return 0;
 }
 
-int reconstructionTypeToStencilSize(ViscousFluxReconstruction enIn)
-{
-  switch(enIn)
-    {
-    case ViscousFluxReconstruction::FirstOrder: return 3;
-    }
-    return 0;
+ReconstructionScheme toReconstructionScheme(InviscidFluxReconstruction enIn){
+  switch(enIn){
+  case InviscidFluxReconstruction::FirstOrder: return ReconstructionScheme::FirstOrder;
+  case InviscidFluxReconstruction::Weno3:      return ReconstructionScheme::Weno3;
+  case InviscidFluxReconstruction::Weno5:      return ReconstructionScheme::Weno5;
+  }
+  return ReconstructionScheme::Null;
 }
 
-bool stencilSizeCompatibleWithInviscidFluxReconstruction
-(InviscidFluxReconstruction enIn, int stencilSize)
-{
-  switch(enIn)
-    {
-    case InviscidFluxReconstruction::FirstOrder: return stencilSize >= 3;
-    case InviscidFluxReconstruction::Weno3:	 return stencilSize >= 5;
-    case InviscidFluxReconstruction::Weno5:	 return stencilSize >= 7;
-    }
-    return false;
+int reconstructionTypeToStencilSize(ViscousFluxReconstruction enIn){
+  switch(enIn){
+  case ViscousFluxReconstruction::FirstOrder: return 3;
+  }
+  return 0;
 }
 
-bool stencilSizeCompatibleWithViscousFluxReconstruction
-(ViscousFluxReconstruction enIn, int stencilSize)
-{
-  switch(enIn)
-    {
-    case ViscousFluxReconstruction::FirstOrder: return stencilSize >= 3;
-    }
+bool stencilSizeCompatibleWithInviscidFluxReconstruction(InviscidFluxReconstruction enIn,
+							 int stencilSize){
+  switch(enIn){
+  case InviscidFluxReconstruction::FirstOrder: return stencilSize >= 3;
+  case InviscidFluxReconstruction::Weno3:	 return stencilSize >= 5;
+  case InviscidFluxReconstruction::Weno5:	 return stencilSize >= 7;
+  }
+  return false;
+}
+
+bool stencilSizeCompatibleWithViscousFluxReconstruction(ViscousFluxReconstruction enIn,
+							int stencilSize){
+  switch(enIn){
+  case ViscousFluxReconstruction::FirstOrder: return stencilSize >= 3;
+  }
   return false;
 }
 

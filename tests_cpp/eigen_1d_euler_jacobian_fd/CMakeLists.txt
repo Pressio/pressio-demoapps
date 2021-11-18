@@ -25,6 +25,6 @@ function(make_test reconstructionScheme stencilSize)
 
 endfunction()
 
-make_test(FIRSTORDER 3)
-#make_test(WENO3 5)
+#make_test(FIRSTORDER 3)
+make_test(WENO3 5)
 #make_test(WENO5 7)
