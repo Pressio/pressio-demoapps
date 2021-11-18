@@ -1,5 +1,5 @@
 
-set(testname eigen_1d_sod_weno3_firstordjac_implicit)
+set(testname eigen_1d_lineard_adv_weno3_implicit)
 set(exename  ${testname}_exe)
 
 configure_file(../compare.py compare.py COPYONLY)

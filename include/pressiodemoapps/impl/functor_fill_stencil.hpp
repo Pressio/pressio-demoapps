@@ -14,67 +14,67 @@ template<
   >
 class StencilFiller;
 
-// //------------------------------
-// // dim=1, 1 dofs/cell
-// //------------------------------
-// template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
-// class StencilFiller<
-//   1, 1, StencilDataType, StateType, MeshType, GhostDataType
-//   >
-// {
+//------------------------------
+// dim=1, 1 dofs/cell
+//------------------------------
+template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
+class StencilFiller<
+  1, 1, StencilDataType, StateType, MeshType, GhostDataType
+  >
+{
 
-// public:
-//   StencilFiller() = delete;
-//   StencilFiller(const int stencilSize,
-// 		const StateType & stateIn,
-// 		const MeshType & meshIn,
-// 		const GhostDataType & ghostLeft,
-// 		const GhostDataType & ghostRight,
-// 		StencilDataType & stencilVals)
-//     : m_stencilSize(stencilSize),
-//       m_state(stateIn),
-//       m_meshObj(meshIn),
-//       m_ghostLeft(ghostLeft),
-//       m_ghostRight(ghostRight),
-//       m_stencilVals(stencilVals)
-//   {}
+public:
+  StencilFiller() = delete;
+  StencilFiller(const int stencilSize,
+		const StateType & stateIn,
+		const MeshType & meshIn,
+		const GhostDataType & ghostLeft,
+		const GhostDataType & ghostRight,
+		StencilDataType & stencilVals)
+    : m_stencilSize(stencilSize),
+      m_state(stateIn),
+      m_meshObj(meshIn),
+      m_ghostLeft(ghostLeft),
+      m_ghostRight(ghostRight),
+      m_stencilVals(stencilVals)
+  {}
 
-//   const StencilDataType & stencilValues() const{
-//     return m_stencilVals;
-//   }
+  const StencilDataType & stencilValues() const{
+    return m_stencilVals;
+  }
 
-//   template<class index_t>
-//   void operator()(const index_t smPt, int ghostRow)
-//   {
-//     constexpr int numDofPerCell = 1;
+  template<class index_t>
+  void operator()(const index_t smPt, int ghostRow)
+  {
+    constexpr int numDofPerCell = 1;
 
-//     const auto & graph = m_meshObj.graph();
-//     const auto uIndex  = graph(smPt, 0)*numDofPerCell;
-//     const auto w0      = graph(smPt, 1);
-//     const auto e0      = graph(smPt, 2);
-//     const auto w0i     = w0*numDofPerCell;
-//     const auto e0i     = e0*numDofPerCell;
+    const auto & graph = m_meshObj.graph();
+    const auto uIndex  = graph(smPt, 0)*numDofPerCell;
+    const auto w0      = graph(smPt, 1);
+    const auto e0      = graph(smPt, 2);
+    const auto w0i     = w0*numDofPerCell;
+    const auto e0i     = e0*numDofPerCell;
 
-//     switch(m_stencilSize)
-//       {
-//       case 3:
-// 	{
-// 	  m_stencilVals(0) = (w0==-1) ? m_ghostLeft(ghostRow, 0)  : m_state(w0i);
-// 	  m_stencilVals(1) = m_state(uIndex);
-// 	  m_stencilVals(2) = (e0==-1) ? m_ghostRight(ghostRow, 0) : m_state(e0i);
-// 	  break;
-// 	}
-//       }
-//   }
+    switch(m_stencilSize)
+      {
+      case 3:
+	{
+	  m_stencilVals(0) = (w0==-1) ? m_ghostLeft(ghostRow, 0)  : m_state(w0i);
+	  m_stencilVals(1) = m_state(uIndex);
+	  m_stencilVals(2) = (e0==-1) ? m_ghostRight(ghostRow, 0) : m_state(e0i);
+	  break;
+	}
+      }
+  }
 
-// private:
-//   const int m_stencilSize;
-//   const StateType & m_state;
-//   const MeshType & m_meshObj;
-//   const GhostDataType & m_ghostLeft;
-//   const GhostDataType & m_ghostRight;
-//   StencilDataType & m_stencilVals;
-// };
+private:
+  const int m_stencilSize;
+  const StateType & m_state;
+  const MeshType & m_meshObj;
+  const GhostDataType & m_ghostLeft;
+  const GhostDataType & m_ghostRight;
+  StencilDataType & m_stencilVals;
+};
 
 
 //------------------------------
@@ -131,8 +131,6 @@ public:
 	  m_stencilVals(6) = (e0==-1) ? m_ghostRight(ghostRow,0) : m_state(e0i);
 	  m_stencilVals(7) = (e0==-1) ? m_ghostRight(ghostRow,1) : m_state(e0i+1);
 	  m_stencilVals(8) = (e0==-1) ? m_ghostRight(ghostRow,2) : m_state(e0i+2);
-
-	  //std::cout << m_stencilVals << std::endl;
 	  break;
 	}
 

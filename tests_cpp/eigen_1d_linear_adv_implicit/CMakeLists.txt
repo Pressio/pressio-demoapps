@@ -1,3 +1,3 @@
 
 add_subdirectory(firstorder)
-add_subdirectory(weno3_firstOrderJac)
+add_subdirectory(weno3)
