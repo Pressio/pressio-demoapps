@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
       if (diff > 1e-4){
 	std::puts("FAILED");
-	return 0;
+	//return 0;
       }
     }
 

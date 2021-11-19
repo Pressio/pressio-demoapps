@@ -17,9 +17,6 @@ int main(int argc, char *argv[])
 #endif
 
   auto appObj      = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
-  // by default, velocoity and Jac are fused, but we only want velocity here
-  appObj.disableJacobian();
-
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   state_t state = appObj.initialCondition();

@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
   // not just a single time
   for (int loop=0; loop<5; ++loop)
   {
-    appObj.velocity(state, 0., velo);
     appObj.jacobian(state, 0., J);
+    appObj.velocity(state, 0., velo);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
 

@@ -6,6 +6,23 @@ import numpy as np
 from numpy import linalg as LA
 import pressiodemoapps as pda
 
+def test_applyJacobianFirstOrder():
+  meshPath = str(file_path)+"/mesh_first_order"
+  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  probId   = pda.Advection1d.PeriodicLinear
+  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.FirstOrder)
+
+  state = appObj.initialCondition()
+  print(state)
+
+  operand = np.arange(state.size)
+  print(operand)
+  result = appObj.createApplyJacobianResult(operand)
+  appObj.applyJacobian(state, 0., operand, result)
+  assert(result[0] == 19900.)
+  for it in result[1:]:
+    assert(it == -100.)
+
 def test_weno3():
   def analytical(x, t):
     pixmt = np.pi * (x-t)

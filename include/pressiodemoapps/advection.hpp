@@ -6,6 +6,7 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
 enum class Advection1d{
@@ -16,9 +17,10 @@ enum class Advection1d{
 #include "./impl/advection_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impl{
+namespace impladv{
+
 template<class mesh_t, class T>
-T createLinAdv1dImpl(const mesh_t & meshObj,
+T create1dImpl(const mesh_t & meshObj,
 		     ::pressiodemoapps::Advection1d probEnum,
 		     InviscidFluxReconstruction recEnum)
 {
@@ -36,27 +38,30 @@ T createLinAdv1dImpl(const mesh_t & meshObj,
 
   return T(meshObj, probEnum, recEnum);
 }
-} //end impl
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinPy<impladv::EigenAdvection1dApp<mesh_t>>
+  >
+RetType createProblemForPy(const mesh_t & meshObj,
+			   ::pressiodemoapps::Advection1d probEnum,
+			   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
+}
+#endif
+} //end namespace impladv
+
+
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Advection1d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  using scalar_t = typename mesh_t::scalar_t;
-  using p_type = ::pressiodemoapps::impladv::EigenAdvection1dAppWithJacobian<scalar_t, mesh_t>;
-  return impl::createLinAdv1dImpl<mesh_t, p_type>(meshObj, probEnum, recEnum);
-}
-#endif
-
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createAdv1dForPy(const mesh_t & meshObj,
-		   ::pressiodemoapps::Advection1d probEnum,
-		   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createLinAdv1dImpl<mesh_t, T>(meshObj, probEnum, recEnum);
+  using RetType = PublicProblemMixinCpp<impladv::EigenAdvection1dApp<mesh_t>>;
+  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
 }
 #endif
 

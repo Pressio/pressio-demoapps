@@ -18,7 +18,6 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Euler2d::SedovSymmetry;
   auto appObj      = pda::createProblemEigen(meshObj, probId, order);
-  appObj.disableJacobian();
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

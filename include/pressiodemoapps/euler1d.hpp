@@ -7,6 +7,7 @@
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
 #include "./euler_compute_energy.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
 enum class Euler1d{
@@ -20,13 +21,13 @@ enum class Euler1d{
 #include "./impl/euler_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impl{
+namespace implee1d{
 
 template<class mesh_t, class T>
-T createEuler1dImpl(const mesh_t & meshObj,
-		    ::pressiodemoapps::Euler1d probEnum,
-		    ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		    ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+T create1dImpl(const mesh_t & meshObj,
+	       ::pressiodemoapps::Euler1d probEnum,
+	       ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	       ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
 
   const auto stencilSize = meshObj.stencilSize();
@@ -45,40 +46,38 @@ T createEuler1dImpl(const mesh_t & meshObj,
   return T(meshObj, probEnum, recEnum, fluxEnum);
 }
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
-T createEuler1dForPyA(const mesh_t & meshObj,
+T createProblemForPyA(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler1d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum,
+					   recEnum, InviscidFluxScheme::Rusanov);
+}
+
+template<class mesh_t, class T>
+T createProblemForPyB(const mesh_t & meshObj,
 		      ::pressiodemoapps::Euler1d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
-  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
-}
-
-template<class mesh_t, class T>
-T createEuler1dForPyB(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum,
-					    InviscidFluxScheme::Rusanov);
+  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
 }
 #endif
-
 } //end pressiodemoapps::impl
 
-
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
 auto createProblemEigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler1d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
 			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
-
-  using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::impl::EigenEuler1dAppWithJacobian<scalar_t, mesh_t>;
-  return impl::createEuler1dImpl<mesh_t, p_t>(meshObj, probEnum, recEnum, fluxEnum);
+  using p_t = ::pressiodemoapps::implee1d::EigenEuler1dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return implee1d::create1dImpl<mesh_t, RetType>(meshObj, probEnum,
+						 recEnum, fluxEnum);
 }
 #endif
 

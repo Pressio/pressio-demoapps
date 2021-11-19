@@ -11,7 +11,8 @@ def test_default_coefficients():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.DiffusionReaction1d.ProblemA
-  appObj   = pda.createProblem(meshO, probId, pda.ViscousFluxReconstruction.FirstOrder, 0.01, 0.005)
+  scheme = pda.ViscousFluxReconstruction.FirstOrder
+  appObj   = pda.createProblem(meshO, probId, scheme)
 
   yn = appObj.initialCondition()
   dt = 0.001
@@ -27,7 +28,8 @@ def test_custom_diffusion_and_reaction():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.DiffusionReaction1d.ProblemA
-  appObj   = pda.createProblem(meshO, probId, pda.ViscousFluxReconstruction.FirstOrder, 0.01, 0.005)
+  scheme = pda.ViscousFluxReconstruction.FirstOrder
+  appObj   = pda.createProblem(meshO, probId, scheme, 0.01, 0.005)
 
   yn = appObj.initialCondition()
   dt, Nsteps = 0.001, 1000
@@ -46,7 +48,8 @@ def test_custom_source_diffusion_and_reaction():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.loadCellCenterUniformMesh(meshPath)
   probId   = pda.DiffusionReaction1d.ProblemA
-  appObj   = pda.createProblem(meshO, probId, pda.ViscousFluxReconstruction.FirstOrder, mysource, 0.01, 0.005)
+  scheme = pda.ViscousFluxReconstruction.FirstOrder
+  appObj   = pda.createProblem(meshO, probId, scheme, mysource, 0.01, 0.005)
 
   yn = appObj.initialCondition()
   dt, Nsteps = 0.001, 1000
