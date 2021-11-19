@@ -6,6 +6,8 @@
 
 int main(int argc, char *argv[])
 {
+  pressio::log::initialize(pressio::logto::terminal);
+  pressio::log::setVerbosity({pressio::log::level::debug});
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
@@ -30,5 +32,6 @@ int main(int argc, char *argv[])
   auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
   pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0.0, dt, Nsteps, Obs);
 
+  pressio::log::finalize();
   return 0;
 }

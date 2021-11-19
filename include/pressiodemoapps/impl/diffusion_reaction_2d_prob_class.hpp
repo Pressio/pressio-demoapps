@@ -162,11 +162,9 @@ protected:
     velocityAndOptionalJacobianNearBd(state, currentTime, V, J);
     velocityAndOptionalJacobianInnerCells(state, currentTime, V, J);
 
-#ifdef NDEBUG
     if (J){
       assert(nonZerosCountBeforeComputing == J->nonZeros());
     }
-#endif
   }
 
   // note that here we MUST use a template because when doing

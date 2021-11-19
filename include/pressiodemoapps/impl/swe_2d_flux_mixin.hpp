@@ -1,35 +1,39 @@
 
-#ifndef PRESSIODEMOAPPS_EE_FLUXE_FUNCTOR_HPP_
-#define PRESSIODEMOAPPS_EE_FLUXE_FUNCTOR_HPP_
+#ifndef PRESSIODEMOAPPS_SWE2D_FLUX_FUNCTOR_HPP_
+#define PRESSIODEMOAPPS_SWE2D_FLUX_FUNCTOR_HPP_
 
-namespace pressiodemoapps{ namespace ee{ namespace impl{
+namespace pressiodemoapps{ namespace implswe{
 
-template<class Parent, int ndpc, class scalar_type, class flux_type>
+template<class Parent, class scalar_type, class flux_type>
 struct FluxValues : Parent
 {
 private:
+  const std::array<scalar_type, 2> m_normal;
   InviscidFluxScheme m_fluxEnum;
-  scalar_type m_gamma;
+  scalar_type m_gravity;
   flux_type & m_fluxL;
   flux_type & m_fluxR;
 
 public:
   template<class ...Args>
   FluxValues(InviscidFluxScheme fluxEnum,
-	     scalar_type gamma,
+	     const std::array<scalar_type, 2> normal,
+	     scalar_type gravity,
 	     flux_type & fluxL,
 	     flux_type & fluxR,
 	     Args && ...args)
     : Parent(std::forward<Args>(args)...),
-      m_fluxEnum(fluxEnum), m_gamma(gamma),
+      m_normal(normal),
+      m_fluxEnum(fluxEnum),
+      m_gravity(gravity),
       m_fluxL(fluxL), m_fluxR(fluxR)
   {}
 
   const flux_type & fluxLeft()  const { return m_fluxL; }
   const flux_type & fluxRight() const { return m_fluxR; }
 
-  template<class IndexType, int _ndpc = ndpc>
-  std::enable_if_t<_ndpc == 3> operator()(IndexType smPt)
+  template<class IndexType>
+  void operator()(IndexType smPt)
   {
     Parent::operator()(smPt);
 
@@ -41,19 +45,22 @@ public:
     switch(m_fluxEnum)
     {
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+      sweRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
+			     m_normal, m_gravity);
+      sweRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,
+			     m_normal, m_gravity);
       break;
     }
   }
 };
 
-template<class Parent, int ndpc, class scalar_type, class flux_jac_type>
+template<class Parent, class scalar_type, class flux_jac_type>
 struct FluxJacobians : Parent
 {
 private:
+  const std::array<scalar_type, 2> m_normal;
   InviscidFluxScheme m_fluxEnum;
-  scalar_type m_gamma;
+  scalar_type m_gravity;
   flux_jac_type & m_fluxJacLNeg;
   flux_jac_type & m_fluxJacLPos;
   flux_jac_type & m_fluxJacRNeg;
@@ -62,14 +69,17 @@ private:
 public:
   template<class ...Args>
   FluxJacobians(InviscidFluxScheme fluxEnum,
-		scalar_type gamma,
+		const std::array<scalar_type, 2> normal,
+		scalar_type gravity,
 		flux_jac_type & fluxJacLNeg,
 		flux_jac_type & fluxJacLPos,
 		flux_jac_type & fluxJacRNeg,
 		flux_jac_type & fluxJacRPos,
 		Args && ...args)
     : Parent(std::forward<Args>(args)...),
-      m_fluxEnum(fluxEnum), m_gamma(gamma),
+      m_normal(normal),
+      m_fluxEnum(fluxEnum),
+      m_gravity(gravity),
       m_fluxJacLNeg(fluxJacLNeg), m_fluxJacLPos(fluxJacLPos),
       m_fluxJacRNeg(fluxJacRNeg), m_fluxJacRPos(fluxJacRPos)
   {}
@@ -79,8 +89,8 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType, int _ndpc = ndpc>
-  std::enable_if_t<_ndpc == 3> operator()(IndexType smPt)
+  template<class IndexType>
+  void operator()(IndexType smPt)
   {
     Parent::operator()(smPt);
 
@@ -92,24 +102,24 @@ public:
     switch(m_fluxEnum)
     {
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
-					      uMinusHalfNeg, uMinusHalfPos,
-					      m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
-					      uPlusHalfNeg, uPlusHalfPos,
-					      m_gamma);
+      sweRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+				     uMinusHalfNeg, uMinusHalfPos,
+				     m_normal, m_gravity);
+      sweRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+				     uPlusHalfNeg, uPlusHalfPos,
+				     m_normal, m_gravity);
       break;
     }
   }
 };
 
-
-template<class Parent, int ndpc, class scalar_type, class flux_type, class flux_jac_type>
+template<class Parent, class scalar_type, class flux_type, class flux_jac_type>
 struct FluxValuesAndJacobians : Parent
 {
 private:
+  const std::array<scalar_type, 2> m_normal;
   InviscidFluxScheme m_fluxEnum;
-  scalar_type m_gamma;
+  scalar_type m_gravity;
   flux_type & m_fluxL;
   flux_type & m_fluxR;
   flux_jac_type & m_fluxJacLNeg;
@@ -120,7 +130,8 @@ private:
 public:
   template<class ...Args>
   FluxValuesAndJacobians(InviscidFluxScheme fluxEnum,
-			 scalar_type gamma,
+			 const std::array<scalar_type, 2> normal,
+			 scalar_type gravity,
 			 flux_type & fluxL,
 			 flux_type & fluxR,
 			 flux_jac_type & fluxJacLNeg,
@@ -129,7 +140,9 @@ public:
 			 flux_jac_type & fluxJacRPos,
 			 Args && ...args)
     : Parent(std::forward<Args>(args)...),
-      m_fluxEnum(fluxEnum), m_gamma(gamma),
+      m_normal(normal),
+      m_fluxEnum(fluxEnum),
+      m_gravity(gravity),
       m_fluxL(fluxL), m_fluxR(fluxR),
       m_fluxJacLNeg(fluxJacLNeg), m_fluxJacLPos(fluxJacLPos),
       m_fluxJacRNeg(fluxJacRNeg), m_fluxJacRPos(fluxJacRPos)
@@ -142,8 +155,8 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType, int _ndpc = ndpc>
-  std::enable_if_t<_ndpc == 3> operator()(IndexType smPt)
+  template<class IndexType>
+  void operator()(IndexType smPt)
   {
     Parent::operator()(smPt);
 
@@ -155,20 +168,21 @@ public:
     switch(m_fluxEnum)
     {
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg,
-				      uMinusHalfPos, m_gamma);
-      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,
-				      uPlusHalfPos,  m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
-					      uMinusHalfNeg, uMinusHalfPos,
-					      m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
-					      uPlusHalfNeg, uPlusHalfPos,
-					      m_gamma);
+      sweRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
+			     m_normal, m_gravity);
+      sweRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg, uPlusHalfPos,
+			     m_normal, m_gravity);
+
+      sweRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+				     uMinusHalfNeg, uMinusHalfPos,
+				     m_normal, m_gravity);
+      sweRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+				     uPlusHalfNeg, uPlusHalfPos,
+				     m_normal, m_gravity);
       break;
     }
   }
 };
 
-}}}
+}}
 #endif

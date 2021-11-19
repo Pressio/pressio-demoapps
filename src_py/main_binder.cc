@@ -272,35 +272,9 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 		&pda::implswe2d::createProblemForPyB<ccumesh_t, swe_2d_t>,
 		pybind11::return_value_policy::take_ownership);
 
+}
+#endif
 
-  // // -----------------------
-  // // Swe 2d
-  // // -----------------------
-  // using swe2d_t =
-  //   pda::implswe::Swe2dAppT<
-  //     pressiodemoappspy::scalar_t,
-  //   ccumesh_t,
-  //   pressiodemoappspy::py_cstyle_arr_sc, // state type
-  //   pressiodemoappspy::py_cstyle_arr_sc, // velo type
-  //   pressiodemoappspy::py_cstyle_arr_sc  // ghost type
-  //   >;
-
-  // pybind11::class_<swe2d_t> swe2dClass(mTopLevel, "Swe2dProblem");
-  // pressiodemoappspy::impl::bindCommonApiMethods<swe2d_t>(swe2dClass);
-  // swe2dClass.def("coriolis", &swe2d_t::coriolis);
-  // swe2dClass.def("gravity", &swe2d_t::gravity);
-
-  // mTopLevel.def("createProblem",
-  // 		&pda::createSwe2dForPyA<ccumesh_t, swe2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
-
-  // mTopLevel.def("createProblem",
-  // 		&pda::createSwe2dForPyB<ccumesh_t, swe2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
-
-  // mTopLevel.def("createProblem",
-  // 		&pda::createSwe2dForPyC<ccumesh_t, swe2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
 
   // // -----------------------
   // // Euler 3d
@@ -321,5 +295,3 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // mTopLevel.def("createProblem",
   // 		&pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
   // 		pybind11::return_value_policy::take_ownership);
-}
-#endif

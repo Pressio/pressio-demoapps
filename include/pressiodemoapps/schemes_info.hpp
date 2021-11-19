@@ -8,7 +8,7 @@ namespace pressiodemoapps{
 // reconstruction because this is not necessarily
 // tied to inviscid/viscous stuff
 enum class ReconstructionScheme{
-  Null, FirstOrder, Weno3, Weno5
+  FirstOrder, Weno3, Weno5
 };
 
 enum class InviscidFluxReconstruction{
@@ -33,7 +33,7 @@ ReconstructionScheme toReconstructionScheme(InviscidFluxReconstruction enIn){
   case InviscidFluxReconstruction::Weno3:      return ReconstructionScheme::Weno3;
   case InviscidFluxReconstruction::Weno5:      return ReconstructionScheme::Weno5;
   }
-  return ReconstructionScheme::Null;
+  return {};
 }
 
 int reconstructionTypeToStencilSize(ViscousFluxReconstruction enIn){

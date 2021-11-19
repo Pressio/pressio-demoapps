@@ -45,7 +45,9 @@ int main(int argc, char *argv[])
 
   const auto dt = 0.001;
   const auto Nsteps = 2000;
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
+  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0.,
+					    dt, Nsteps, Obs, NonLinSolver);
 
+  pressio::log::finalize();
   return 0;
 }

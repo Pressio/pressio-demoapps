@@ -39,10 +39,12 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
     r1 = graph(smPt, 4);
   }
   else if(dim==2){
-    throw std::runtime_error("get_left_right_for_2dim_celljacweno MISSING");
+    l1 = (axis == 1) ? graph(smPt, 5) : graph(smPt, 8);
+    r1 = (axis == 1) ? graph(smPt, 7) : graph(smPt, 6);
   }
   else if(dim==3){
-    throw std::runtime_error("get_left_right_for_3dim_celljacweno MISSING");
+    l1 = (axis == 1) ? graph(smPt, 7) : (axis==2) ? graph(smPt, 10) : graph(smPt,11);
+    r1 = (axis == 1) ? graph(smPt, 9) : (axis==2) ? graph(smPt, 8) : graph(smPt, 12);
   }
 }
 
@@ -61,7 +63,8 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
     r2 = graph(smPt, 6);
   }
   else if(dim==2){
-    throw std::runtime_error("get_left_right_for_2dim_celljacweno MISSING");
+    l1 = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+    r1 = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
   }
   else if(dim==3){
     throw std::runtime_error("get_left_right_for_3dim_celljacweno MISSING");

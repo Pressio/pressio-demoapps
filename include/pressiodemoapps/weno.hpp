@@ -107,7 +107,7 @@ weno3(edge_t & uLeftNeg,
   }
 }
 
-template<class edge_t, class state_t, class index_t, class sc_t>
+template<class edge_t, class state_t, class index_t, class sc_t, int numRows>
 typename std::enable_if<
   !std::is_floating_point<edge_t>::value and
   !std::is_void<decltype(std::declval<state_t>()(0))>::value
@@ -116,10 +116,10 @@ weno3(edge_t & uLeftNeg,
       edge_t & uLeftPos,
       edge_t & uRightNeg,
       edge_t & uRightPos,
-      Eigen::Matrix<sc_t, -1, -1> & gradLNeg,
-      Eigen::Matrix<sc_t, -1, -1> & gradLPos,
-      Eigen::Matrix<sc_t, -1, -1> & gradRNeg,
-      Eigen::Matrix<sc_t, -1, -1> & gradRPos,
+      Eigen::Matrix<sc_t, numRows, -1> & gradLNeg,
+      Eigen::Matrix<sc_t, numRows, -1> & gradLPos,
+      Eigen::Matrix<sc_t, numRows, -1> & gradRNeg,
+      Eigen::Matrix<sc_t, numRows, -1> & gradRPos,
       const state_t & q,
       index_t l1i, index_t l0i,
       index_t r0i, index_t r1i,
@@ -131,7 +131,6 @@ weno3(edge_t & uLeftNeg,
   {
     auto gLNeg = gradLNeg.row(dof);
     auto gLPos = gradLPos.row(dof);
-
     impl::weno3WithGrad(uLeftNeg(dof), uLeftPos(dof),
 			gLNeg, gLPos,
 			q(l1i+dof), q(l0i+dof), q(uIndex+dof), q(r0i+dof));
@@ -281,7 +280,7 @@ weno5(edge_t & uLeftNeg,
     }
 }
 
-template<class edge_t, class state_t, class index_t, class sc_t>
+template<class edge_t, class state_t, class index_t, class sc_t, int numRows>
 typename std::enable_if<
   !std::is_floating_point<edge_t>::value and
   !std::is_void<decltype(std::declval<state_t>()(0))>::value
@@ -290,10 +289,10 @@ weno5(edge_t & uLeftNeg,
       edge_t & uLeftPos,
       edge_t & uRightNeg,
       edge_t & uRightPos,
-      Eigen::Matrix<sc_t, -1, -1> & gradLNeg,
-      Eigen::Matrix<sc_t, -1, -1> & gradLPos,
-      Eigen::Matrix<sc_t, -1, -1> & gradRNeg,
-      Eigen::Matrix<sc_t, -1, -1> & gradRPos,
+      Eigen::Matrix<sc_t, numRows, -1> & gradLNeg,
+      Eigen::Matrix<sc_t, numRows, -1> & gradLPos,
+      Eigen::Matrix<sc_t, numRows, -1> & gradRNeg,
+      Eigen::Matrix<sc_t, numRows, -1> & gradRPos,
       const state_t & q,
       index_t l2i, index_t l1i, index_t l0i,
       index_t r0i, index_t r1i, index_t r2i,
@@ -305,7 +304,6 @@ weno5(edge_t & uLeftNeg,
   {
     auto gLNeg = gradLNeg.row(dof);
     auto gLPos = gradLPos.row(dof);
-
     impl::weno5WithGrad(uLeftNeg(dof), uLeftPos(dof),
 			gLNeg, gLPos,
 			q(l2i+dof), q(l1i+dof), q(l0i+dof),

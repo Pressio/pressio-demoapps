@@ -2,8 +2,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
-#include "pressiodemoapps/impl/swe_flux_jacobian.hpp"
-#include "pressiodemoapps/impl/swe_fluxes.hpp"
+#include "pressiodemoapps/impl/swe_flux_jacobian_function.hpp"
+#include "pressiodemoapps/impl/swe_flux_values_function.hpp"
 #include <complex>
 int main(){
   auto passedString = "PASS";
