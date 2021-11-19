@@ -38,6 +38,19 @@ struct _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>
       m_uPlusHalfPos(uPlusHalfPos)
   {}
 
+  _ReconstructorMembers(ReconstructionScheme recEn,
+			const DataType & functionValues,
+			const MeshType & meshObj,
+			ReconstructedValueType & uMinusHalfNeg,
+			ReconstructedValueType & uMinusHalfPos,
+			ReconstructedValueType & uPlusHalfNeg,
+			ReconstructedValueType & uPlusHalfPos)
+    : _ReconstructorMembers(1, /* default axis is 1 */
+			    recEn, functionValues, meshObj,
+			    uMinusHalfNeg, uMinusHalfPos,
+			    uPlusHalfNeg, uPlusHalfPos)
+  {}
+
   const ReconstructionScheme reconstructionScheme() const{
     return m_recEn;
   }
@@ -101,6 +114,26 @@ struct _ReconstructorMembers<
       m_gradLPos(gradLPos),
       m_gradRNeg(gradRNeg),
       m_gradRPos(gradRPos)
+  {}
+
+
+  _ReconstructorMembers(ReconstructionScheme recEn,
+			const DataType & functionValues,
+			const MeshType & meshObj,
+			ReconstructedValueType & uMinusHalfNeg,
+			ReconstructedValueType & uMinusHalfPos,
+			ReconstructedValueType & uPlusHalfNeg,
+			ReconstructedValueType & uPlusHalfPos,
+			ReconstructedGradType & gradLNeg,
+			ReconstructedGradType & gradLPos,
+			ReconstructedGradType & gradRNeg,
+			ReconstructedGradType & gradRPos)
+    : _ReconstructorMembers(1, /* default axis is 1 */
+			    recEn, functionValues, meshObj,
+			    uMinusHalfNeg, uMinusHalfPos,
+			    uPlusHalfNeg, uPlusHalfPos,
+			    gradLNeg, gradLPos,
+			    gradRNeg, gradRPos)
   {}
 
   const ReconstructionScheme reconstructionScheme() const{

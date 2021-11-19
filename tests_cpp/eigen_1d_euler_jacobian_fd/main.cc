@@ -29,18 +29,9 @@ void modify_state(state_type & state,
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto pert = 0.01*std::sin(8.*M_PI*x(i));
-
-      //if (x(i) <= zero){
-	prim[0] = one + pert;
-	prim[1] = zero + pert;
-	prim[2] = two + pert;
-      // }
-
-      // if (x(i) > zero){
-      // 	prim[0] = static_cast<scalar_type>(0.125) + pert;
-      // 	prim[1] = zero + pert;
-      // 	prim[2] = static_cast<scalar_type>(0.1) + pert;
-      // }
+      prim[0] = one + pert;
+      prim[1] = zero + pert;
+      prim[2] = two + pert;
 
       const auto ind = i*numDofPerCell;
       state(ind)   = prim[0];
@@ -64,6 +55,7 @@ int main(int argc, char *argv[])
 #endif
 
   // even if we set Sod, this does not really matter
+  // because Sod and Lax both have Neumann BC
   auto appObj = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
@@ -87,7 +79,6 @@ int main(int argc, char *argv[])
     appObj.velocityAndJacobian(state, 0., velo, J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
-
     auto Ja = J*a;
 
     // first order

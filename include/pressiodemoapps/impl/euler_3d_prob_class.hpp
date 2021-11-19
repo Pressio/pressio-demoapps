@@ -2,20 +2,17 @@
 #ifndef PRESSIODEMOAPPS_EULER3D_HPP_
 #define PRESSIODEMOAPPS_EULER3D_HPP_
 
-// note that the code below is pretty ugly for now, but it works.
-// this is inside impl namespace for a reason, and will need to be
-// improved later on but we have a starting point.
-
-#include "euler_flux_values_function.hpp"
-#include "euler_flux_jacobian_function.hpp"
 #include "euler_rankine_hugoniot.hpp"
+#include "euler_rusanov_flux_values_function.hpp"
+#include "euler_rusanov_flux_jacobian_function.hpp"
 #include "euler_3d_initial_condition.hpp"
 #include "functor_ghost_fill_neumann.hpp"
 #include "euler_3d_ghost_filler.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "mixin_cell_jacobian.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 
 namespace pressiodemoapps{ namespace ee{ namespace impl{
 

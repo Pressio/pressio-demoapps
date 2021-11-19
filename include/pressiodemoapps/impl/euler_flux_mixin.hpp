@@ -9,11 +9,11 @@ namespace pressiodemoapps{ namespace ee{ namespace impl{
 //
 
 template<class Parent, int ndpc, class scalar_type, class flux_type>
-struct FluxValues;
+struct ComputeDirectionalFluxValues;
 
 // for 3 dofs, so Euler 1d
 template<class Parent, class scalar_type, class flux_type>
-struct FluxValues<Parent, 3, scalar_type, flux_type> : Parent{
+struct ComputeDirectionalFluxValues<Parent, 3, scalar_type, flux_type> : Parent{
 private:
   InviscidFluxScheme m_fluxEnum;
   scalar_type m_gamma;
@@ -22,8 +22,8 @@ private:
 
 public:
   template<class ...Args>
-  FluxValues(InviscidFluxScheme fluxEnum, scalar_type gamma,
-	     flux_type & fluxL, flux_type & fluxR, Args && ...args)
+  ComputeDirectionalFluxValues(InviscidFluxScheme fluxEnum, scalar_type gamma,
+			       flux_type & fluxL, flux_type & fluxR, Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_fluxEnum(fluxEnum), m_gamma(gamma),
       m_fluxL(fluxL), m_fluxR(fluxR)
@@ -42,8 +42,8 @@ public:
     const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-	ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
       break;
     }
   }
@@ -51,7 +51,7 @@ public:
 
 // for 4 dofs, so Euler 2d
 template<class Parent, class scalar_type, class flux_type>
-struct FluxValues<Parent, 4, scalar_type, flux_type> : Parent {
+struct ComputeDirectionalFluxValues<Parent, 4, scalar_type, flux_type> : Parent {
 private:
   const std::array<scalar_type, 2> m_normal = {};
   InviscidFluxScheme m_fluxEnum;
@@ -61,10 +61,10 @@ private:
 
 public:
   template<class ...Args>
-  FluxValues(InviscidFluxScheme fluxEnum,
-	     const std::array<scalar_type, 2> normal,
-	     scalar_type gamma, flux_type & fluxL, flux_type & fluxR,
-	     Args && ...args)
+  ComputeDirectionalFluxValues(InviscidFluxScheme fluxEnum,
+			       const std::array<scalar_type, 2> normal,
+			       scalar_type gamma, flux_type & fluxL, flux_type & fluxR,
+			       Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_normal(normal), m_fluxEnum(fluxEnum), m_gamma(gamma),
       m_fluxL(fluxL), m_fluxR(fluxR)
@@ -98,11 +98,11 @@ public:
 //
 
 template<class Parent, int ndpc, class scalar_type, class flux_jac_type>
-struct FluxJacobians;
+struct ComputeDirectionalFluxJacobians;
 
 // for 3 dofs, so Euler 1d
 template<class Parent, class scalar_type, class flux_jac_type>
-struct FluxJacobians<Parent, 3, scalar_type, flux_jac_type> : Parent {
+struct ComputeDirectionalFluxJacobians<Parent, 3, scalar_type, flux_jac_type> : Parent {
 private:
   InviscidFluxScheme m_fluxEnum;
   scalar_type m_gamma;
@@ -113,13 +113,13 @@ private:
 
 public:
   template<class ...Args>
-  FluxJacobians(InviscidFluxScheme fluxEnum,
-		scalar_type gamma,
-		flux_jac_type & fluxJacLNeg,
-		flux_jac_type & fluxJacLPos,
-		flux_jac_type & fluxJacRNeg,
-		flux_jac_type & fluxJacRPos,
-		Args && ...args)
+  ComputeDirectionalFluxJacobians(InviscidFluxScheme fluxEnum,
+				  scalar_type gamma,
+				  flux_jac_type & fluxJacLNeg,
+				  flux_jac_type & fluxJacLPos,
+				  flux_jac_type & fluxJacRNeg,
+				  flux_jac_type & fluxJacRPos,
+				  Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_fluxEnum(fluxEnum), m_gamma(gamma),
       m_fluxJacLNeg(fluxJacLNeg), m_fluxJacLPos(fluxJacLPos),
@@ -153,7 +153,7 @@ public:
 
 // for 4 dofs, so Euler 2d
 template<class Parent, class scalar_type, class flux_jac_type>
-struct FluxJacobians<Parent, 4, scalar_type, flux_jac_type> : Parent {
+struct ComputeDirectionalFluxJacobians<Parent, 4, scalar_type, flux_jac_type> : Parent {
 private:
   const std::array<scalar_type, 2> m_normal = {};
   InviscidFluxScheme m_fluxEnum;
@@ -165,14 +165,14 @@ private:
 
 public:
   template<class ...Args>
-  FluxJacobians(InviscidFluxScheme fluxEnum,
-		const std::array<scalar_type, 2> normal,
-		scalar_type gamma,
-		flux_jac_type & fluxJacLNeg,
-		flux_jac_type & fluxJacLPos,
-		flux_jac_type & fluxJacRNeg,
-		flux_jac_type & fluxJacRPos,
-		Args && ...args)
+  ComputeDirectionalFluxJacobians(InviscidFluxScheme fluxEnum,
+				  const std::array<scalar_type, 2> normal,
+				  scalar_type gamma,
+				  flux_jac_type & fluxJacLNeg,
+				  flux_jac_type & fluxJacLPos,
+				  flux_jac_type & fluxJacRNeg,
+				  flux_jac_type & fluxJacRPos,
+				  Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_normal(normal),
       m_fluxEnum(fluxEnum), m_gamma(gamma),
@@ -212,11 +212,11 @@ public:
 //
 
 template<class Parent, int ndpc, class scalar_type, class flux_type, class flux_jac_type>
-struct FluxValuesAndJacobians;
+struct ComputeDirectionalFluxValuesAndJacobians;
 
 // for 3 dofs, so Euler 1d
 template<class Parent, class scalar_type, class flux_type, class flux_jac_type>
-struct FluxValuesAndJacobians<Parent, 3, scalar_type, flux_type, flux_jac_type> : Parent {
+struct ComputeDirectionalFluxValuesAndJacobians<Parent, 3, scalar_type, flux_type, flux_jac_type> : Parent {
 private:
   InviscidFluxScheme m_fluxEnum;
   scalar_type m_gamma;
@@ -229,15 +229,15 @@ private:
 
 public:
   template<class ...Args>
-  FluxValuesAndJacobians(InviscidFluxScheme fluxEnum,
-			 scalar_type gamma,
-			 flux_type & fluxL,
-			 flux_type & fluxR,
-			 flux_jac_type & fluxJacLNeg,
-			 flux_jac_type & fluxJacLPos,
-			 flux_jac_type & fluxJacRNeg,
-			 flux_jac_type & fluxJacRPos,
-			 Args && ...args)
+  ComputeDirectionalFluxValuesAndJacobians(InviscidFluxScheme fluxEnum,
+					   scalar_type gamma,
+					   flux_type & fluxL,
+					   flux_type & fluxR,
+					   flux_jac_type & fluxJacLNeg,
+					   flux_jac_type & fluxJacLPos,
+					   flux_jac_type & fluxJacRNeg,
+					   flux_jac_type & fluxJacRPos,
+					   Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_fluxEnum(fluxEnum), m_gamma(gamma),
       m_fluxL(fluxL), m_fluxR(fluxR),
@@ -262,16 +262,16 @@ public:
 
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg,
-					uMinusHalfPos, m_gamma);
-	ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,
-					uPlusHalfPos,  m_gamma);
-	ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
-						uMinusHalfNeg, uMinusHalfPos,
-						m_gamma);
-	ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
-						uPlusHalfNeg, uPlusHalfPos,
-						m_gamma);
+      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg,
+				      uMinusHalfPos, m_gamma);
+      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,
+				      uPlusHalfPos,  m_gamma);
+      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+					      uMinusHalfNeg, uMinusHalfPos,
+					      m_gamma);
+      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+					      uPlusHalfNeg, uPlusHalfPos,
+					      m_gamma);
       break;
     }
   }
@@ -279,7 +279,7 @@ public:
 
 // for 4 dofs, so Euler 2d
 template<class Parent, class scalar_type, class flux_type, class flux_jac_type>
-struct FluxValuesAndJacobians<Parent, 4, scalar_type, flux_type, flux_jac_type> : Parent {
+struct ComputeDirectionalFluxValuesAndJacobians<Parent, 4, scalar_type, flux_type, flux_jac_type> : Parent {
 private:
   const std::array<scalar_type, 2> m_normal = {};
   InviscidFluxScheme m_fluxEnum;
@@ -293,16 +293,16 @@ private:
 
 public:
   template<class ...Args>
-  FluxValuesAndJacobians(InviscidFluxScheme fluxEnum,
-			 const std::array<scalar_type, 2> normal,
-			 scalar_type gamma,
-			 flux_type & fluxL,
-			 flux_type & fluxR,
-			 flux_jac_type & fluxJacLNeg,
-			 flux_jac_type & fluxJacLPos,
-			 flux_jac_type & fluxJacRNeg,
-			 flux_jac_type & fluxJacRPos,
-			 Args && ...args)
+  ComputeDirectionalFluxValuesAndJacobians(InviscidFluxScheme fluxEnum,
+					   const std::array<scalar_type, 2> normal,
+					   scalar_type gamma,
+					   flux_type & fluxL,
+					   flux_type & fluxR,
+					   flux_jac_type & fluxJacLNeg,
+					   flux_jac_type & fluxJacLPos,
+					   flux_jac_type & fluxJacRNeg,
+					   flux_jac_type & fluxJacRPos,
+					   Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_normal(normal),
       m_fluxEnum(fluxEnum), m_gamma(gamma),

@@ -4,9 +4,9 @@
 
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "advection_velocity_mixin.hpp"
-#include "mixin_cell_jacobian.hpp"
-#include "advection_flux_mixin.hpp"
+#include "advection_mixins.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 
 namespace pressiodemoapps{ namespace impladv{
 
@@ -74,26 +74,6 @@ protected:
 	for (int i=1; i<=numNeighbors; ++i){
 	  trList.push_back( Tr(jacRowOfCurrentCell, graph(cell, i), zero) );
 	}
-
-	// const auto L0 = graph(cell, 1);
-	// const auto R0 = graph(cell, 2);
-	// const auto ciL0 = L0*numDofPerCell;
-	// const auto ciR0 = R0*numDofPerCell;
-	// trList.push_back( Tr(jacRowOfCurrentCell, ciL0, zero) );
-	// trList.push_back( Tr(jacRowOfCurrentCell, ciR0, zero) );
-	// if (m_recEn == InviscidFluxReconstruction::Weno3 or
-	//     m_recEn == InviscidFluxReconstruction::Weno5){
-	//   const auto L1 = graph(cell, 3);
-	//   const auto R1 = graph(cell, 4);
-	//   trList.push_back( Tr(jacRowOfCurrentCell, L1*numDofPerCell, zero) );
-	//   trList.push_back( Tr(jacRowOfCurrentCell, R1*numDofPerCell, zero) );
-	// }
-	// if (m_recEn == InviscidFluxReconstruction::Weno5){
-	//   const auto L2 = graph(cell, 5);
-	//   const auto R2 = graph(cell, 6);
-	//   trList.push_back( Tr(jacRowOfCurrentCell, L2*numDofPerCell, zero) );
-	//   trList.push_back( Tr(jacRowOfCurrentCell, R2*numDofPerCell, zero) );
-	// }
       }
 
     J.setFromTriplets(trList.begin(), trList.end());
@@ -158,14 +138,14 @@ private:
     reconstruction_gradient_t gradRPos(stencilSize-1);
 
     using functor_type =
-      pda::impladv::CellVelocity<
-	pda::impl::InnerCellJacobian<
-	  pda::impladv::FluxValuesAndJacobians<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
+	  pda::impladv::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, numDofPerCell, MeshType, U_t, scalar_type, reconstruction_gradient_t>,
-	    numDofPerCell, scalar_type, scalar_type, scalar_type>,
+	    scalar_type, scalar_type, scalar_type>,
 	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type F(V, m_meshObj.dxInv(),
@@ -175,7 +155,7 @@ private:
 		   m_fluxEn, fluxL, fluxR,
 		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		   /* end args for flux */
-		   xAxis, toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_recEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
@@ -202,19 +182,19 @@ private:
     scalar_type fluxJacRNeg, fluxJacRPos;
 
     using functor_type =
-      pda::impladv::CellVelocity<
-	pda::impladv::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impladv::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, numDofPerCell, MeshType, U_t, scalar_type>,
-	  numDofPerCell, scalar_type, scalar_type>,
-      V_t, scalar_type
+	  scalar_type, scalar_type>,
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type F(V, m_meshObj.dxInv(),
 		   /* end args for velo */
 		   m_fluxEn, fluxL, fluxR,
 		   /* end args for flux */
-		   xAxis, toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_recEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );

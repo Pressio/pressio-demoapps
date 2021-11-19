@@ -2,16 +2,16 @@
 #ifndef PRESSIODEMOAPPS_SWE2D_IMPL_HPP_
 #define PRESSIODEMOAPPS_SWE2D_IMPL_HPP_
 
-#include "swe_flux_values_function.hpp"
-#include "swe_flux_jacobian_function.hpp"
+#include "swe_rusanov_flux_values_function.hpp"
+#include "swe_rusanov_flux_jacobian_function.hpp"
 #include "swe_2d_initial_condition.hpp"
 #include "swe_2d_ghost_filler_inviscid_wall.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
 #include "swe_2d_flux_mixin.hpp"
-#include "swe_velocity_mixin.hpp"
-#include "mixin_cell_jacobian.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 
 namespace pressiodemoapps{ namespace implswe{
@@ -318,14 +318,14 @@ private:
     reconstruction_gradient_t gradBPos(numDofPerCell, stencilSize-1);
 
     using functor_type =
-      pda::implswe::CellVelocityNoForcing<
-	pda::impl::InnerCellJacobian<
-	  pda::implswe::FluxValuesAndJacobians<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
+	  pda::implswe::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),
@@ -406,14 +406,14 @@ private:
 				   m_stencilVals, yAxis);
 
     using functor_type =
-      pda::implswe::CellVelocityNoForcing<
-	pda::impl::FirstOrderBdCellJacobian<
-	  pda::implswe::FluxValuesAndJacobians<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	  pda::implswe::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorFromStencil<
 	      numDofPerCell, edge_rec_type, stencil_container_type>,
 	    scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type funcx(V, m_meshObj.dxInv(),
@@ -502,12 +502,12 @@ private:
 				      m_stencilVals, yAxis);
 
     using velo_functor_type =
-      pda::implswe::CellVelocityNoForcing<
-	pda::implswe::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::implswe::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  scalar_type, flux_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     velo_functor_type funcVeloX(V, m_meshObj.dxInv(),
@@ -542,8 +542,8 @@ private:
 				     stencilValsForJ, yAxis);
 
     using jac_functor_type =
-      pda::impl::FirstOrderBdCellJacobian<
-	pda::implswe::FluxJacobians<
+      pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	pda::implswe::ComputeDirectionalFluxJacobians<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  scalar_type, flux_jac_type>,
@@ -626,12 +626,12 @@ private:
 				  m_stencilVals, yAxis);
 
     using functor_type =
-      pda::implswe::CellVelocityNoForcing<
-	pda::implswe::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::implswe::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  scalar_type, flux_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),
@@ -681,12 +681,12 @@ private:
     constexpr int yAxis = 2;
 
     using functor_type =
-      pda::implswe::CellVelocityNoForcing<
-	pda::implswe::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::implswe::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type>,
 	  scalar_type, flux_type>,
-      V_t, scalar_type
+      numDofPerCell, V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),

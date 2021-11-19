@@ -7,6 +7,7 @@
 
 namespace pressiodemoapps{ namespace impldiffreac{
 
+// this is the default source functor
 template<class scalar_type>
 struct DefaultSourceF2d
 {
@@ -27,7 +28,7 @@ class EigenDiffReac2dApp
 public:
   using index_t	      = typename MeshType::index_t;
   using scalar_type   = typename MeshType::scalar_t;
-  using state_type    = Eigen::Matrix<scalar_type,-1,1>;
+  using state_type    = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
@@ -35,8 +36,8 @@ public:
   static constexpr index_t numDofPerCell{1};
 
 private:
-  using ghost_container_type   = Eigen::Matrix<scalar_type,-1,-1, Eigen::RowMajor>;
-  using stencil_container_type = Eigen::Matrix<scalar_type,-1,1>;
+  using ghost_container_type   = Eigen::Matrix<scalar_type,Eigen::Dynamic,Eigen::Dynamic, Eigen::RowMajor>;
+  using stencil_container_type = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
 
 public:
   template<class SourceT>
@@ -124,9 +125,33 @@ protected:
     }
   }
 
+  // note that here we MUST use a template because when doing
+  // bindings, this gets deduced to be a Ref
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobian(const U_t & state,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   jacobian_type * J) const
+  {
+    fillGhostsIfNeeded(state);
+
+    int nonZerosCountBeforeComputing = 0;
+    if (J){
+      nonZerosCountBeforeComputing = J->nonZeros();
+      ::pressiodemoapps::set_zero(*J);
+    }
+
+    velocityAndOptionalJacobianNearBd(state, currentTime, V, J);
+    velocityAndOptionalJacobianInnerCells(state, currentTime, V, J);
+
+    if (J){
+      assert(nonZerosCountBeforeComputing == J->nonZeros());
+    }
+  }
+
+private:
   template<class U_t>
-  void fillGhostsIfNeeded(const U_t & U,
-			  scalar_type /*currTime*/) const
+  void fillGhostsIfNeeded(const U_t & U) const
   {
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA)
     {
@@ -146,30 +171,6 @@ protected:
   // note that here we MUST use a template because when doing
   // bindings, this gets deduced to be a Ref
   template<class U_t, class V_t>
-  void velocityAndOptionalJacobian(const U_t & state,
-				   const scalar_type currentTime,
-				   V_t & V,
-				   jacobian_type * J) const
-  {
-    fillGhostsIfNeeded(state, currentTime);
-
-    int nonZerosCountBeforeComputing = 0;
-    if (J){
-      nonZerosCountBeforeComputing = J->nonZeros();
-      ::pressiodemoapps::set_zero(*J);
-    }
-
-    velocityAndOptionalJacobianNearBd(state, currentTime, V, J);
-    velocityAndOptionalJacobianInnerCells(state, currentTime, V, J);
-
-    if (J){
-      assert(nonZerosCountBeforeComputing == J->nonZeros());
-    }
-  }
-
-  // note that here we MUST use a template because when doing
-  // bindings, this gets deduced to be a Ref
-  template<class U_t, class V_t>
   void velocityAndOptionalJacobianNearBd(const U_t & U,
 					 const scalar_type currentTime,
 					 V_t & V,
@@ -181,7 +182,8 @@ protected:
 
     // stencil filler needed because we are doing cells near boundaries
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_container_type, U_t, MeshType, ghost_container_type>;
+      dimensionality, numDofPerCell,
+      stencil_container_type, U_t, MeshType, ghost_container_type>;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,

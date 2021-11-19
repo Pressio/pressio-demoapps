@@ -2,8 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_APP_HPP_
 #define PRESSIODEMOAPPS_EULER1D_APP_HPP_
 
-#include "euler_flux_values_function.hpp"
-#include "euler_flux_jacobian_function.hpp"
+#include "euler_rusanov_flux_values_function.hpp"
+#include "euler_rusanov_flux_jacobian_function.hpp"
 #include "euler_rankine_hugoniot.hpp"
 #include "euler_1d_initial_condition.hpp"
 #include "euler_1d_ghost_filler.hpp"
@@ -11,8 +11,8 @@
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
 #include "euler_flux_mixin.hpp"
-#include "euler_velocity_mixin.hpp"
-#include "mixin_cell_jacobian.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 
 namespace pressiodemoapps{ namespace implee1d{
@@ -272,11 +272,10 @@ private:
 				  edge_rec_type & uPlusHalfPos) const
   {
     namespace pda = ::pressiodemoapps;
-    constexpr int xAxis = 1;
 
     using functor_type =
-      pda::ee::impl::CellVelocity<
-	pda::ee::impl::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type>,
 	  numDofPerCell, scalar_type, flux_type>,
@@ -287,7 +286,7 @@ private:
 		   /* end args for velo */
 		   m_fluxEn, m_gamma, fluxL, fluxR,
 		   /* end args for flux */
-		   xAxis, toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_recEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );
@@ -320,8 +319,8 @@ private:
 				  m_stencilVals);
 
     using functor_type =
-      pda::ee::impl::CellVelocity<
-	pda::ee::impl::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_type>,
@@ -372,9 +371,9 @@ private:
     reconstruction_gradient_t gradRPos(numDofPerCell, stencilSize-1);
 
     using functor_type =
-      pda::ee::impl::CellVelocity<
-	pda::impl::InnerCellJacobian<
-	  pda::ee::impl::FluxValuesAndJacobians<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
+	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    numDofPerCell, scalar_type, flux_type, flux_jac_type>,
@@ -389,7 +388,7 @@ private:
 		   m_fluxEn, m_gamma, fluxL, fluxR,
 		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		   /* end args for flux */
-		   xAxis, toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_recEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
@@ -432,9 +431,9 @@ private:
 				  m_stencilVals);
 
     using functor_type =
-      pda::ee::impl::CellVelocity<
-	pda::impl::FirstOrderBdCellJacobian<
-	  pda::ee::impl::FluxValuesAndJacobians<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorFromStencil<
 	      numDofPerCell, edge_rec_type, stencil_container_type>,
 	    numDofPerCell, scalar_type, flux_type, flux_jac_type>,
@@ -516,8 +515,8 @@ private:
 				     m_stencilVals);
 
     using velo_functor_type =
-      pda::ee::impl::CellVelocity<
-	pda::ee::impl::FluxValues<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_type>,
@@ -544,8 +543,8 @@ private:
 				    stencilValsForJ);
 
     using jac_functor_type =
-      pda::impl::FirstOrderBdCellJacobian<
-	pda::ee::impl::FluxJacobians<
+      pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	pda::ee::impl::ComputeDirectionalFluxJacobians<
 	  pda::impl::ReconstructorFromStencil<
 	    numDofPerCell, edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_jac_type>,
