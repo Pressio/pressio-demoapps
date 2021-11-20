@@ -12,14 +12,11 @@ Key features include:
 - built-in support for a sample mesh: this mean that one can evaluate the residual and Jacobian
 at a disjoint subset of the mesh cells (this is useful for intrusive ROMs)
 
-## Documentation
-
 Check the documentation website for more details:
 
-<a href="https://pressio.github.io/pressio4py/html/index.html" target="_blank">
-    <img src='figures/web.svg' width='100%'>
+<a href="https://pressio.github.io/pressio-demoapps/html/index.html" target="_blank">
+    <img src='figures/logo-display.svg' width='90%'>
 </a>
-
 
 ## Development status
 
