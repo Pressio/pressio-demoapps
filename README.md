@@ -14,7 +14,7 @@ at a disjoint subset of the mesh cells (this is useful for intrusive ROMs)
 
 Check the documentation website for more details:
 
-<a href="https://pressio.github.io/pressio-demoapps/html/index.html" target="_blank">
+<a href="https://pressio.github.io/pressio-demoapps/index.html" target="_blank">
     <img src='figures/logo-display.svg' width='90%'>
 </a>
 
