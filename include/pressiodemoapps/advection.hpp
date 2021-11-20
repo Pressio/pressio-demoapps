@@ -44,7 +44,7 @@ template<
   class mesh_t,
   class RetType = PublicProblemMixinPy<impladv::EigenAdvection1dApp<mesh_t>>
   >
-RetType createProblemForPy(const mesh_t & meshObj,
+RetType create_problem_for_py(const mesh_t & meshObj,
 			   ::pressiodemoapps::Advection1d probEnum,
 			   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
@@ -56,7 +56,7 @@ RetType createProblemForPy(const mesh_t & meshObj,
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Advection1d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {

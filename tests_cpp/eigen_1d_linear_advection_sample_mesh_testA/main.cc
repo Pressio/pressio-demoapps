@@ -30,7 +30,7 @@ void writeToFileSparseMat(const T & obj, const std::string & fileName)
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO3
   const auto order   = pda::InviscidFluxReconstruction::Weno3;
 #elif USE_WENO5
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj      = pda::createProblemEigen(meshObj, probid, order);
+  auto appObj      = pda::create_problem_eigen(meshObj, probid, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 

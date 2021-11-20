@@ -47,7 +47,7 @@ T createEe3dImpl(const mesh_t & meshObj,
 
 #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
 			::pressiodemoapps::InviscidFluxScheme fluxEnum,
@@ -67,24 +67,24 @@ auto createProblemEigen(const mesh_t & meshObj,
 }
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, 1);
+  return create_problem_eigen(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, 1);
 }
 #endif
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createEuler3dForPyC(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler3d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov, 1);
-}
-#endif
+// #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+// template<class mesh_t, class T>
+// T createEuler3dForPyC(const mesh_t & meshObj,
+// 		     ::pressiodemoapps::Euler3d probEnum,
+// 		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+// {
+//   return impl::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+// 					 InviscidFluxScheme::Rusanov, 1);
+// }
+// #endif
 
 }
 #endif

@@ -32,12 +32,12 @@ void modify_state(state_type & state,
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   const auto scheme = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
   const auto probId = pda::DiffusionReaction1d::ProblemA;
-  auto appObj     = pda::createProblemEigen(meshObj, probId, scheme, 0.01, 0.005);
+  auto appObj     = pda::create_problem_eigen(meshObj, probId, scheme, 0.01, 0.005);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

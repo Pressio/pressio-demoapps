@@ -16,7 +16,7 @@
 namespace pressiodemoapps{
 
 template<class scalar_type = double>
-auto loadCellCenterUniformMeshEigen(const std::string & meshFilesPath)
+auto load_cellcentered_uniform_mesh_eigen(const std::string & meshFilesPath)
 {
   using return_type =  impl::CellCenteredUniformMesh<
     scalar_type,

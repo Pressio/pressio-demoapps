@@ -57,7 +57,7 @@ namespace pressiodemoapps{
 namespace impldiffreac{
 
 template<class mesh_t>
-void checkStencilAdmissibility(const mesh_t & meshObj,
+void check_stencil_admissibility(const mesh_t & meshObj,
 			       ::pressiodemoapps::ViscousFluxReconstruction recEnum)
 {
   const auto stencilSize = meshObj.stencilSize();
@@ -70,34 +70,34 @@ void checkStencilAdmissibility(const mesh_t & meshObj,
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T, class ProbType>
-T createProblemForPyA(const mesh_t & meshObj,
+T create_problem_for_pyA(const mesh_t & meshObj,
 		      ProbType probEnum,
 		      ::pressiodemoapps::ViscousFluxReconstruction recEnum)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   return T(meshObj, probEnum, recEnum);
 }
 
 template<class mesh_t, class T, class ProbType>
-T createProblemForPyB(const mesh_t & meshObj,
+T create_problem_for_pyB(const mesh_t & meshObj,
 		      ProbType probEnum,
 		      ::pressiodemoapps::ViscousFluxReconstruction recEnum,
 		      typename mesh_t::scalar_t diffusionCoeff,
 		      typename mesh_t::scalar_t reactionCoeff)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   return T(meshObj, probEnum, recEnum, diffusionCoeff, reactionCoeff);
 }
 
 template<class mesh_t, class T>
-T createProblemForPyC1d(const mesh_t & meshObj,
+T create_problem_for_pyC1d(const mesh_t & meshObj,
 			::pressiodemoapps::DiffusionReaction1d probEnum,
 			::pressiodemoapps::ViscousFluxReconstruction recEnum,
 			pybind11::object pyFunctor,
 			typename mesh_t::scalar_t diffusionCoeff,
 			typename mesh_t::scalar_t reactionCoeff)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using scalar_t = typename mesh_t::scalar_t;
   auto sourceWrapper = [=](const scalar_t & x, const scalar_t & evaltime, scalar_t & value){
     value = pyFunctor.attr("__call__")(x, evaltime).template cast<scalar_t>();
@@ -107,14 +107,14 @@ T createProblemForPyC1d(const mesh_t & meshObj,
 }
 
 template<class mesh_t, class T>
-T createProblemForPyC2d(const mesh_t & meshObj,
+T create_problem_for_pyC2d(const mesh_t & meshObj,
 			::pressiodemoapps::DiffusionReaction2d probEnum,
 			::pressiodemoapps::ViscousFluxReconstruction recEnum,
 			pybind11::object pyFunctor,
 			typename mesh_t::scalar_t diffusionCoeff,
 			typename mesh_t::scalar_t reactionCoeff)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using scalar_t = typename mesh_t::scalar_t;
   auto sourceWrapper = [=](const scalar_t & x,
 			   const scalar_t & y,
@@ -131,23 +131,23 @@ T createProblemForPyC2d(const mesh_t & meshObj,
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class ...Args>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::DiffusionReaction1d probEnum,
 			::pressiodemoapps::ViscousFluxReconstruction recEnum,
 			Args && ... args)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using RetType = PublicProblemMixinCpp<impldiffreac::EigenDiffReac1dApp<mesh_t>>;
   return RetType(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
 }
 
 template<class mesh_t, class ...Args>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::DiffusionReaction2d probEnum,
 			::pressiodemoapps::ViscousFluxReconstruction recEnum,
 			Args && ... args)
 {
-  impldiffreac::checkStencilAdmissibility(meshObj, recEnum);
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using RetType = PublicProblemMixinCpp<impldiffreac::EigenDiffReac2dApp<mesh_t>>;
   return RetType(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
 }

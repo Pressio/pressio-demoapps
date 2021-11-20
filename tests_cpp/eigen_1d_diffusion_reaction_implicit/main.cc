@@ -7,9 +7,9 @@
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
   const auto sch     = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
-  auto appObj        = pda::createProblemEigen(meshObj,
+  auto appObj        = pda::create_problem_eigen(meshObj,
 						       pda::DiffusionReaction1d::ProblemA,
 						       sch, 0.01, 0.005);
   using app_t = decltype(appObj);

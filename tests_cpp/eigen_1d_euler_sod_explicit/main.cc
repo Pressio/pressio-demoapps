@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO5
   constexpr auto order   = pda::InviscidFluxReconstruction::Weno5;
 #elif defined USE_WENO3
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  auto appObj      = pda::createProblemEigen(meshObj, pda::Euler1d::Sod, order);
+  auto appObj      = pda::create_problem_eigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   state_t state = appObj.initialCondition();

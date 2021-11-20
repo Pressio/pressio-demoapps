@@ -29,7 +29,7 @@ std::vector<double> goldY = {
 
 int main(int argc, char *argv[])
 {
-  const auto meshObj = pressiodemoapps::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pressiodemoapps::load_cellcentered_uniform_mesh_eigen(".");
 
   std::array<bool, 11> v= {};
   v[0] = meshObj.dimensionality() == 2;

@@ -8,10 +8,10 @@ int main(int argc, char *argv[])
 {
 
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
   const auto order   = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probId  = pda::DiffusionReaction2d::ProblemA;
-  auto appObj        = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj        = pda::create_problem_eigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

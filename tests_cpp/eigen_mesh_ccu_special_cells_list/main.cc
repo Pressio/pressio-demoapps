@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-  const auto meshObj = pressiodemoapps::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pressiodemoapps::load_cellcentered_uniform_mesh_eigen(".");
   using int_t = typename decltype(meshObj)::index_t;
 
   std::vector<int_t> goldInn = {6,7,8,11,12,13,16,17,18};

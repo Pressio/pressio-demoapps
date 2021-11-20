@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
 
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO5
   const auto order   = pda::InviscidFluxReconstruction::Weno5;
 #elif defined USE_WENO3
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::SedovSymmetry;
-  auto appObj      = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj      = pda::create_problem_eigen(meshObj, probId, order);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

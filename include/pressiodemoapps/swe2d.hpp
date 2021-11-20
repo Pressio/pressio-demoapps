@@ -39,7 +39,7 @@ T createSwe2dImpl(const mesh_t & meshObj,
 
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
-T createProblemForPyA(const mesh_t & meshObj,
+T create_problem_for_pyA(const mesh_t & meshObj,
 		      ::pressiodemoapps::Swe2d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
@@ -48,7 +48,7 @@ T createProblemForPyA(const mesh_t & meshObj,
 }
 
 template<class mesh_t, class T>
-T createProblemForPyB(const mesh_t & meshObj,
+T create_problem_for_pyB(const mesh_t & meshObj,
 		      ::pressiodemoapps::Swe2d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		      const int ic)
@@ -61,7 +61,7 @@ T createProblemForPyB(const mesh_t & meshObj,
 } //end pressiodemoapps::impl
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Swe2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
 			::pressiodemoapps::InviscidFluxScheme fluxEnum,
@@ -74,11 +74,11 @@ auto createProblemEigen(const mesh_t & meshObj,
 }
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Swe2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum,
+  return create_problem_eigen(meshObj, probEnum, recEnum,
 				    InviscidFluxScheme::Rusanov, 1);
 }
 

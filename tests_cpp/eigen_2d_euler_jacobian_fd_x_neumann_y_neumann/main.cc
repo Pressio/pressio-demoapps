@@ -66,13 +66,13 @@ void modify_state(state_type & state,
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   // here we want to test FD Jacobian when we have Neumann BC on all boundaries
   // we can use Riemann for this since that problem has the correct BCs
 
-  auto appObj = pda::createProblemEigen(meshObj, pda::Euler2d::Riemann, order);
+  auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::Riemann, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   pressio::log::setVerbosity({pressio::log::level::debug});
 
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 
 #ifdef USE_WENO5
   constexpr auto order   = pda::InviscidFluxReconstruction::Weno5;
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Euler2d::SedovSymmetry;
-  auto appObj = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj = pda::create_problem_eigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;

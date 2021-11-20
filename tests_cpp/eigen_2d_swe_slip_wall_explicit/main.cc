@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   pressio::log::setVerbosity({pressio::log::level::debug});
 
   namespace pda = pressiodemoapps;
-  const auto meshObj = pda::loadCellCenterUniformMeshEigen(".");
+  const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO5
   const auto order   = pda::InviscidFluxReconstruction::Weno5;
 #elif defined USE_WENO3
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probId  = pda::Swe2d::SlipWall;
-  auto appObj = pda::createProblemEigen(meshObj, probId, order);
+  auto appObj = pda::create_problem_eigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 
