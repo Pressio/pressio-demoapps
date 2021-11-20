@@ -5,9 +5,9 @@
 namespace pressiodemoapps{ namespace impl{
 
 template<class g_t>
-void readMeshConnectivity(const std::string & meshDir,
-			  g_t & graph,
-			  int numCols)
+void read_mesh_connectivity(const std::string & meshDir,
+			    g_t & graph,
+			    int numCols)
 {
   const auto inFile   = meshDir+"/connectivity.dat";
   std::ifstream foundFile(inFile);

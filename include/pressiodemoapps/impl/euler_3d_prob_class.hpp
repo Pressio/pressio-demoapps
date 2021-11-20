@@ -334,14 +334,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFiveDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 					 normalX_, m_gamma);
-// 	    eeRusanovFluxJacobianFiveDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 					 normalX_, m_gamma);
 // 	  }
 // #endif
@@ -370,14 +370,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFiveDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 					 normalY_, m_gamma);
-// 	    eeRusanovFluxJacobianFiveDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 					 normalY_, m_gamma);
 // 	  }
 // #endif
@@ -406,14 +406,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFiveDof(JDneg, JDpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JDneg, JDpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 					 normalZ_, m_gamma);
-// 	    eeRusanovFluxJacobianFiveDof(JUneg, JUpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JUneg, JUpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 					 normalZ_, m_gamma);
 // 	  }
 // #endif
@@ -596,14 +596,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FL, uMinusHalfNeg, uMinusHalfPos, normalX_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FR, uPlusHalfNeg,  uPlusHalfPos,  normalX_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	    eeRusanovFluxJacobianFiveDof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JLneg, JLpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 					 normalX_, m_gamma);
-// 	    eeRusanovFluxJacobianFiveDof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	    ee_rusanov_flux_jacobian_five_dof(JRneg, JRpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 					 normalX_, m_gamma);
 // 	  }
 // #endif
@@ -635,14 +635,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FB, uMinusHalfNeg, uMinusHalfPos, normalY_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FF, uPlusHalfNeg,  uPlusHalfPos,  normalY_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	  eeRusanovFluxJacobianFiveDof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	  ee_rusanov_flux_jacobian_five_dof(JBneg, JBpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 				       normalY_, m_gamma);
-// 	  eeRusanovFluxJacobianFiveDof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	  ee_rusanov_flux_jacobian_five_dof(JFneg, JFpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 				       normalY_, m_gamma);
 // 	  }
 // #endif
@@ -674,14 +674,14 @@ public:
 //       switch(m_fluxEn)
 // 	{
 // 	case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-// 	  eeRusanovFluxFiveDof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
-// 	  eeRusanovFluxFiveDof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FD, uMinusHalfNeg, uMinusHalfPos, normalZ_, m_gamma);
+// 	  ee_rusanov_flux_five_dof(FU, uPlusHalfNeg,  uPlusHalfPos,  normalZ_, m_gamma);
 
 // #ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 // 	  if (!m_onlyComputeVelocity){
-// 	  eeRusanovFluxJacobianFiveDof(JDneg, JDpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
+// 	  ee_rusanov_flux_jacobian_five_dof(JDneg, JDpos, uMinusHalfNegForJ, uMinusHalfPosForJ,
 // 				       normalZ_, m_gamma);
-// 	  eeRusanovFluxJacobianFiveDof(JUneg, JUpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
+// 	  ee_rusanov_flux_jacobian_five_dof(JUneg, JUpos, uPlusHalfNegForJ, uPlusHalfPosForJ,
 // 				       normalZ_, m_gamma);
 // 	  }
 // #endif

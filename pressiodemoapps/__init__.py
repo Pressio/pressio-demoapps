@@ -13,7 +13,7 @@ https://stackoverflow.com/questions/47599162/pybind11-how-to-package-c-and-pytho
 # import all meshing classes
 try:
   from ._pressiodemoappsimpl import \
-    CellCenteredUniformMesh, loadCellCenterUniformMesh
+    CellCenteredUniformMesh, load_cellcentered_uniform_mesh
 except ImportError:
   raise ImportError("Unable to import mesh classes from _pressiodemoappsimpl")
 
@@ -52,9 +52,9 @@ except ImportError:
 
 # import functions to create problems
 try:
-  from ._pressiodemoappsimpl import createProblem
+  from ._pressiodemoappsimpl import create_problem
 except ImportError:
-  raise ImportError("Unable to import create{Ex,Im}plicitProblem from _pressiodemoappsimpl")
+  raise ImportError("Unable to import create_problem from _pressiodemoappsimpl")
 
 
 # Runge-Kutta4 integrator

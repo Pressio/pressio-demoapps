@@ -5,7 +5,7 @@
 namespace pressiodemoapps{ namespace ee{ namespace impl{
 
 template<class T, typename T2, typename sc_t>
-void eeRusanovFluxJacobianThreeDof(T & JL, T & JR,
+void ee_rusanov_flux_jacobian_three_dof(T & JL, T & JR,
 				   const T2 & qL,
 				   const T2 & qR,
 				   const sc_t gamma)
@@ -96,7 +96,7 @@ void eeRusanovFluxJacobianThreeDof(T & JL, T & JR,
 }
 
 template<class T, typename T2, typename sc_t, typename normal_t>
-void eeRusanovFluxJacobianFourDof(T & JL, T & JR,
+void ee_rusanov_flux_jacobian_four_dof(T & JL, T & JR,
 				  const T2 & qL,
 				  const T2 & qR,
 				  const normal_t & n,
@@ -215,7 +215,7 @@ void eeRusanovFluxJacobianFourDof(T & JL, T & JR,
 }
 
 template<class T, typename T2, typename sc_t, typename normal_t>
-void eeRusanovFluxJacobianFiveDof(T & JL, T & JR,
+void ee_rusanov_flux_jacobian_five_dof(T & JL, T & JR,
 				  const T2 & qL,
 				  const T2 & qR,
 				  const normal_t & n,

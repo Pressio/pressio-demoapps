@@ -9,10 +9,10 @@ import pressiodemoapps as pda
 
 def test_default_coefficients():
   meshPath = str(file_path)+"/mesh"
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.createProblem(meshO, probId, scheme)
+  appObj   = pda.create_problem(meshO, probId, scheme)
 
   yn = appObj.initialCondition()
   dt = 0.001
@@ -26,10 +26,10 @@ def test_default_coefficients():
 
 def test_custom_diffusion_and_reaction():
   meshPath = str(file_path)+"/mesh"
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.createProblem(meshO, probId, scheme, 0.01, 0.005)
+  appObj   = pda.create_problem(meshO, probId, scheme, 0.01, 0.005)
 
   yn = appObj.initialCondition()
   dt, Nsteps = 0.001, 1000
@@ -45,10 +45,10 @@ def test_custom_source_diffusion_and_reaction():
   mysource = lambda x,y,time : np.sin(math.pi*x*(y-0.2)) * 4.*np.sin(4.*math.pi*x*y)
 
   meshPath = str(file_path)+"/mesh"
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.createProblem(meshO, probId, scheme, mysource, 0.01, 0.01)
+  appObj   = pda.create_problem(meshO, probId, scheme, mysource, 0.01, 0.01)
 
   yn = appObj.initialCondition()
   dt, Nsteps = 0.001, 1000

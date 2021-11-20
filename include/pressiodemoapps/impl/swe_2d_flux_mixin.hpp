@@ -45,9 +45,9 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	sweRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
+	swe_rusanov_flux_three_dof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
 			       m_normal, m_gravity);
-	sweRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,
+	swe_rusanov_flux_three_dof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,
 			       m_normal, m_gravity);
 	break;
       }
@@ -102,10 +102,10 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	sweRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+	swe_rusanov_flux_jacobian_three_dof(m_fluxJacLNeg, m_fluxJacLPos,
 				       uMinusHalfNeg, uMinusHalfPos,
 				       m_normal, m_gravity);
-	sweRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+	swe_rusanov_flux_jacobian_three_dof(m_fluxJacRNeg, m_fluxJacRPos,
 				       uPlusHalfNeg, uPlusHalfPos,
 				       m_normal, m_gravity);
 	break;
@@ -168,15 +168,15 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	sweRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
+	swe_rusanov_flux_three_dof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
 			       m_normal, m_gravity);
-	sweRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg, uPlusHalfPos,
+	swe_rusanov_flux_three_dof(m_fluxR, uPlusHalfNeg, uPlusHalfPos,
 			       m_normal, m_gravity);
 
-	sweRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+	swe_rusanov_flux_jacobian_three_dof(m_fluxJacLNeg, m_fluxJacLPos,
 				       uMinusHalfNeg, uMinusHalfPos,
 				       m_normal, m_gravity);
-	sweRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+	swe_rusanov_flux_jacobian_three_dof(m_fluxJacRNeg, m_fluxJacRPos,
 				       uPlusHalfNeg, uPlusHalfPos,
 				       m_normal, m_gravity);
 	break;

@@ -5,7 +5,7 @@
 namespace pressiodemoapps{ namespace implswe{
 
 template<typename T, class normal_t, class sc_t>
-void sweRusanovFluxThreeDof(T & F,
+void swe_rusanov_flux_three_dof(T & F,
 			    const T & qL,
 			    const T & qR,
 			    const normal_t & n,

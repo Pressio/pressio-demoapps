@@ -42,8 +42,8 @@ public:
     const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
-      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
+      ee::impl::ee_rusanov_flux_three_dof(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_gamma);
+      ee::impl::ee_rusanov_flux_three_dof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,  m_gamma);
       break;
     }
   }
@@ -82,9 +82,9 @@ public:
     const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxFourDof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
+      ee::impl::ee_rusanov_flux_four_dof(m_fluxL, uMinusHalfNeg, uMinusHalfPos,
 				     m_normal, m_gamma);
-      ee::impl::eeRusanovFluxFourDof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,
+      ee::impl::ee_rusanov_flux_four_dof(m_fluxR, uPlusHalfNeg,  uPlusHalfPos,
 				     m_normal, m_gamma);
       break;
     }
@@ -140,10 +140,10 @@ public:
     const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+      ee::impl::ee_rusanov_flux_jacobian_three_dof(m_fluxJacLNeg, m_fluxJacLPos,
 					      uMinusHalfNeg, uMinusHalfPos,
 					      m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+      ee::impl::ee_rusanov_flux_jacobian_three_dof(m_fluxJacRNeg, m_fluxJacRPos,
 					      uPlusHalfNeg, uPlusHalfPos,
 					      m_gamma);
       break;
@@ -194,10 +194,10 @@ public:
     const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxJacobianFourDof(m_fluxJacLNeg, m_fluxJacLPos,
+      ee::impl::ee_rusanov_flux_jacobian_four_dof(m_fluxJacLNeg, m_fluxJacLPos,
 					     uMinusHalfNeg, uMinusHalfPos,
 					     m_normal, m_gamma);
-      ee::impl::eeRusanovFluxJacobianFourDof(m_fluxJacRNeg, m_fluxJacRPos,
+      ee::impl::ee_rusanov_flux_jacobian_four_dof(m_fluxJacRNeg, m_fluxJacRPos,
 					     uPlusHalfNeg, uPlusHalfPos,
 					     m_normal, m_gamma);
       break;
@@ -262,14 +262,14 @@ public:
 
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxThreeDof(m_fluxL, uMinusHalfNeg,
+      ee::impl::ee_rusanov_flux_three_dof(m_fluxL, uMinusHalfNeg,
 				      uMinusHalfPos, m_gamma);
-      ee::impl::eeRusanovFluxThreeDof(m_fluxR, uPlusHalfNeg,
+      ee::impl::ee_rusanov_flux_three_dof(m_fluxR, uPlusHalfNeg,
 				      uPlusHalfPos,  m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacLNeg, m_fluxJacLPos,
+      ee::impl::ee_rusanov_flux_jacobian_three_dof(m_fluxJacLNeg, m_fluxJacLPos,
 					      uMinusHalfNeg, uMinusHalfPos,
 					      m_gamma);
-      ee::impl::eeRusanovFluxJacobianThreeDof(m_fluxJacRNeg, m_fluxJacRPos,
+      ee::impl::ee_rusanov_flux_jacobian_three_dof(m_fluxJacRNeg, m_fluxJacRPos,
 					      uPlusHalfNeg, uPlusHalfPos,
 					      m_gamma);
       break;
@@ -328,14 +328,14 @@ public:
 
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-      ee::impl::eeRusanovFluxFourDof(m_fluxL, uMinusHalfNeg,
+      ee::impl::ee_rusanov_flux_four_dof(m_fluxL, uMinusHalfNeg,
 				     uMinusHalfPos, m_normal, m_gamma);
-      ee::impl::eeRusanovFluxFourDof(m_fluxR, uPlusHalfNeg,
+      ee::impl::ee_rusanov_flux_four_dof(m_fluxR, uPlusHalfNeg,
 				     uPlusHalfPos,  m_normal, m_gamma);
-      ee::impl::eeRusanovFluxJacobianFourDof(m_fluxJacLNeg, m_fluxJacLPos,
+      ee::impl::ee_rusanov_flux_jacobian_four_dof(m_fluxJacLNeg, m_fluxJacLPos,
 					     uMinusHalfNeg, uMinusHalfPos,
 					     m_normal, m_gamma);
-      ee::impl::eeRusanovFluxJacobianFourDof(m_fluxJacRNeg, m_fluxJacRPos,
+      ee::impl::ee_rusanov_flux_jacobian_four_dof(m_fluxJacRNeg, m_fluxJacRPos,
 					     uPlusHalfNeg, uPlusHalfPos,
 					     m_normal, m_gamma);
       break;

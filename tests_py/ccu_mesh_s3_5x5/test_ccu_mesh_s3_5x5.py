@@ -6,7 +6,7 @@ file_path = pathlib.Path(__file__).parent.absolute()
 
 def test_meshclass1():
   meshPath = str(file_path)
-  meshO = pda.loadCellCenterUniformMesh(meshPath)
+  meshO = pda.load_cellcentered_uniform_mesh(meshPath)
 
   assert( meshO.dimensionality() == 2 )
   assert( meshO.stencilMeshSize() == 25 )

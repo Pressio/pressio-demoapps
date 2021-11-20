@@ -5,13 +5,13 @@
 namespace pressiodemoapps{ namespace impl{
 
 template<class sc_t, class int_t>
-void readMeshInfo(const std::string & meshDir,
-		  int & dim,
-		  std::array<sc_t, 3> & cellDeltas,
-		  std::array<sc_t, 3> & cellDeltasInv,
-		  int & stencilSize,
-		  int_t & numGptStencilMesh,
-		  int_t & numGptSampleMesh)
+void read_mesh_info(const std::string & meshDir,
+		    int & dim,
+		    std::array<sc_t, 3> & cellDeltas,
+		    std::array<sc_t, 3> & cellDeltasInv,
+		    int & stencilSize,
+		    int_t & numGptStencilMesh,
+		    int_t & numGptSampleMesh)
 {
   const auto inFile   = meshDir+"/info.dat";
   std::ifstream foundFile(inFile);

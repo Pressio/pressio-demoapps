@@ -31,8 +31,8 @@ def makePlot(meshPath, yn):
 
 def test_run():
   meshPath = str(file_path)
-  meshObj  = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createProblem(meshObj,
+  meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
+  appObj   = pda.create_problem(meshObj,
                                pda.Euler2d.NormalShock,
                                pda.InviscidFluxReconstruction.Weno3)
   yn = appObj.initialCondition()

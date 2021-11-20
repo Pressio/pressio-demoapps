@@ -39,11 +39,11 @@ int main(){
   Eigen::Matrix<scalar_t,-1,-1> JR(4,4);
   Eigen::Matrix<scalar_t,-1,-1> JL_FD(4,4);
   Eigen::Matrix<scalar_t,-1,-1> JR_FD(4,4);
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianFourDof(JL,JR,UL,UR,normals,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxFourDof(fluxBase,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_four_dof(JL,JR,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 4; i++){
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFourDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 4;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -51,7 +51,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFourDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 4;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";
@@ -61,11 +61,11 @@ int main(){
 
   normals[0] = 0;
   normals[1] = 1;
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianFourDof(JL,JR,UL,UR,normals,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxFourDof(fluxBase,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_four_dof(JL,JR,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 4; i++){
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFourDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 4;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -73,7 +73,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFourDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_four_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 4;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";

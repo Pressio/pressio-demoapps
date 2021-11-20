@@ -267,12 +267,12 @@ private:
 
   void allocateAndSetup(const std::string & meshDir)
   {
-    pressiodemoapps::impl::readMeshInfo(meshDir, m_dim,
-					m_cellDeltas,
-					m_cellDeltasInv,
-					m_stencilSize,
-					m_stencilMeshSize,
-					m_sampleMeshSize);
+    pressiodemoapps::impl::read_mesh_info(meshDir, m_dim,
+					  m_cellDeltas,
+					  m_cellDeltasInv,
+					  m_stencilSize,
+					  m_stencilMeshSize,
+					  m_sampleMeshSize);
     if(m_dim==3 and m_stencilSize==7){
       throw std::runtime_error("3D mesh with 7pt stencil not yet supported.");
     }
@@ -280,7 +280,7 @@ private:
     pressiodemoapps::resize(m_x, m_stencilMeshSize);
     pressiodemoapps::resize(m_y, m_stencilMeshSize);
     pressiodemoapps::resize(m_z, m_stencilMeshSize);
-    pressiodemoapps::impl::readMeshCoordinates(meshDir, m_dim, m_x, m_y, m_z);
+    pressiodemoapps::impl::read_mesh_coordinates(meshDir, m_dim, m_x, m_y, m_z);
 
     // compute the number of of neighbors
     const auto numNeighbors = (m_stencilSize-1)*m_dim;
@@ -288,7 +288,7 @@ private:
     // the graph col(0) contains the global ID of the cell itself
     const auto graphNumCols = numNeighbors + 1;
     pressiodemoapps::resize(m_graph, m_sampleMeshSize, graphNumCols);
-    pressiodemoapps::impl::readMeshConnectivity(meshDir, m_graph, graphNumCols);
+    pressiodemoapps::impl::read_mesh_connectivity(meshDir, m_graph, graphNumCols);
 
     // figure out how many cells are near the boundaries
     for (index_t it=0; it<m_sampleMeshSize; ++it)

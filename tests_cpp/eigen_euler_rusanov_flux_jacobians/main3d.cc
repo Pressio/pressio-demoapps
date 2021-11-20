@@ -45,11 +45,11 @@ int main(){
   Eigen::Matrix<scalar_t,-1,-1> JR(5,5);
   Eigen::Matrix<scalar_t,-1,-1> JL_FD(5,5);
   Eigen::Matrix<scalar_t,-1,-1> JR_FD(5,5);
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianFiveDof(JL,JR,UL,UR,normals,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(fluxBase,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_five_dof(JL,JR,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 5; i++){
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol){
@@ -58,7 +58,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol){
@@ -71,11 +71,11 @@ int main(){
   normals[1] = 1;
   normals[2] = 0;
 
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianFiveDof(JL,JR,UL,UR,normals,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(fluxBase,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_five_dof(JL,JR,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 5; i++){
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -83,7 +83,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";
@@ -95,11 +95,11 @@ int main(){
   normals[1] = 0;
   normals[2] = 1;
 
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianFiveDof(JL,JR,UL,UR,normals,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(fluxBase,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_five_dof(JL,JR,UL,UR,normals,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(fluxBase,UL,UR,normals,gamma);
   for (int i = 0;i < 5; i++){
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -107,7 +107,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxFiveDof(flux,UL,UR,normals,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_five_dof(flux,UL,UR,normals,gamma);
     for (int j = 0 ; j < 5;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";

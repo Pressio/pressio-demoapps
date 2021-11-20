@@ -5,11 +5,11 @@
 namespace pressiodemoapps{ namespace impl{
 
 template<class x_t, class y_t, class z_t>
-void readMeshCoordinates(const std::string & meshDir,
-			 int dim,
-			 x_t& x,
-			 y_t& y,
-			 z_t& z)
+void read_mesh_coordinates(const std::string & meshDir,
+			   int dim,
+			   x_t& x,
+			   y_t& y,
+			   z_t& z)
 {
   const auto inFile   = meshDir+"/coordinates.dat";
   std::ifstream foundFile(inFile);

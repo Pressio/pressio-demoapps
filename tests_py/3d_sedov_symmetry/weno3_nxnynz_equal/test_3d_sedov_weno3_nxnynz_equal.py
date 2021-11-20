@@ -16,7 +16,7 @@ def computePressure(rho, u, v, w, E):
 
 # def test_run():
 #   meshPath = str(file_path)
-#   meshObj  = pda.loadCellCenterUniformMesh(meshPath)
+#   meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
 #   appObj   = pda.createExplicitProblem(meshObj,
 #                                pda.Euler3d.SedovSymmetry,
 #                                pda.InviscidFluxReconstruction.Weno3)

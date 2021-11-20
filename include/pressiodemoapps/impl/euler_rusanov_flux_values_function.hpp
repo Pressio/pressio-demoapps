@@ -5,7 +5,7 @@
 namespace pressiodemoapps{ namespace ee{ namespace impl{
 
 template<class T, typename sc_t>
-void eeRusanovFluxThreeDof(T & F,
+void ee_rusanov_flux_three_dof(T & F,
 			   const T & qL,
 			   const T & qR,
 			   const sc_t gamma)
@@ -49,7 +49,7 @@ void eeRusanovFluxThreeDof(T & F,
 }
 
 template<typename T, class normal_t, class sc_t>
-void eeRusanovFluxFourDof(T & F,
+void ee_rusanov_flux_four_dof(T & F,
 			  const T & qL,
 			  const T & qR,
 			  const normal_t & n,
@@ -102,7 +102,7 @@ void eeRusanovFluxFourDof(T & F,
 }
 
 template<typename T, class normal_t, class sc_t>
-void eeRusanovFluxFiveDof(T & F,
+void ee_rusanov_flux_five_dof(T & F,
 			  const T & qL,
 			  const T & qR,
 			  const normal_t & n,

@@ -37,12 +37,12 @@ int main(){
   Eigen::Matrix<scalar_t,-1,-1> JL_FD(3,3);
   Eigen::Matrix<scalar_t,-1,-1> JR_FD(3,3);
 
-  pressiodemoapps::ee::impl::eeRusanovFluxJacobianThreeDof(JL,JR,UL,UR,gamma);
-  pressiodemoapps::ee::impl::eeRusanovFluxThreeDof(fluxBase,UL,UR,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_jacobian_three_dof(JL,JR,UL,UR,gamma);
+  pressiodemoapps::ee::impl::ee_rusanov_flux_three_dof(fluxBase,UL,UR,gamma);
   for (int i = 0;i < 3; i++){
 
     UL(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxThreeDof(flux,UL,UR,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_three_dof(flux,UL,UR,gamma);
     for (int j = 0 ; j < 3;j++){
       JL_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol){
@@ -52,7 +52,7 @@ int main(){
     UL(i) -= eps;
 
     UR(i) += eps;
-    pressiodemoapps::ee::impl::eeRusanovFluxThreeDof(flux,UL,UR,gamma);
+    pressiodemoapps::ee::impl::ee_rusanov_flux_three_dof(flux,UL,UR,gamma);
     for (int j = 0 ; j < 3;j++){
       JR_FD(j,i) = 1./eps*(flux(j) - fluxBase(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol){
