@@ -1,8 +1,16 @@
-Run your first problem in Python
-================================
+Step-by-step in Python
+======================
 
-This page shows you how to setup, run and visualize your first problem in Python.
-For demonstration purposes, we will show you how run 1D Sod problem.
+This page shows how to setup, run and visualize your first problem using Python.
+
+For demonstration purposes, we show how to run the **1D Sod** problem.
+The *same* process applies to *every* other problem.
+
+.. Hint::
+   You can copy each snippet below by simply moving your mouse over
+   the snippet's box, and clicking the copy icon
+   appearing on the top-right corner.
+
 
 Step 1: Prepare
 ---------------
@@ -22,8 +30,7 @@ Let's make a directory to run things and export the C++ compiler:
   python setup.py install
 
 
-After this step, you should have demoapps installed
-and you should be inside the directory.
+After this step, you should have demoapps installed.
 
 
 Step 2: Generate the mesh for Sod1D
@@ -58,7 +65,7 @@ Make a ``main.py`` and copy the following code in it:
      meshPath = str(file_path) + "/mesh"
      meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
      problem  = pda.Euler1d.Sod
-     scheme   = pda.InviscidFluxReconstruction.Weno3
+     scheme   = pda.InviscidFluxReconstruction.Weno5
      appObj   = pda.create_problem(meshObj, problem, scheme)
 
      yn = appObj.initialCondition()

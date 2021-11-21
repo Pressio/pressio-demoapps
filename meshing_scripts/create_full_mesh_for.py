@@ -24,6 +24,9 @@ valid = ["linadv1d_s3", \
          ##############
          ##### 2d #####
          ##############
+         #
+         "diffreac2d", \
+         #
          "euler2dsmooth_s3", \
          "euler2dsmooth_s5", \
          "euler2dsmooth_s7", \
@@ -31,6 +34,10 @@ valid = ["linadv1d_s3", \
          "euler2dKelvinHelmholtz_s3", \
          "euler2dKelvinHelmholtz_s5", \
          "euler2dKelvinHelmholtz_s7", \
+         #
+         "normalshock2d_s3", \
+         "normalshock2d_s5", \
+         "normalshock2d_s7", \
          #
          "sedov2d_s3", \
          "sedov2d_s5", \
@@ -50,6 +57,10 @@ valid = ["linadv1d_s3", \
          "swe2dSlipWall_s3",\
          "swe2dSlipWall_s5",\
          "swe2dSlipWall_s7",\
+         "swe2dslipwall_s3",\
+         "swe2dslipwall_s5",\
+         "swe2dslipwall_s7",\
+         #
          ##############
          ##### 3d #####
          ##############
@@ -139,6 +150,15 @@ if __name__== "__main__":
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
+  elif ("diffreac2d" in pName):
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(3),
+            "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
+            "--periodic", "false")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
   elif ("euler2dsmooth" in pName):
     s = int(pName[-1])
     args = ("python", fullMeshScript,
@@ -157,6 +177,16 @@ if __name__== "__main__":
             "--stencilSize", str(s),
             "--bounds", str(-5.0), str(5.0), str(-5.0), str(5.0),
             "--periodic", "true")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("normalshock2d" in pName):
+    s = int(pName[-1])
+    args = ("python", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(0.0), str(2.0), str(0.0), str(1.0),
+            "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov2d" in pName):
@@ -198,13 +228,14 @@ if __name__== "__main__":
             "--bounds", str(0.0), str(4.0), str(0.0), str(1.0),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
-  elif ("swe2dSlipWall" in pName):
+
+  elif ("swe2dSlipWall" in pName or "swe2dslipwall" in pName):
     s = int(pName[-1])
     args = ("python", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-5), str(5), str(-5), str(5),
+            "--bounds", str(-5.), str(5.), str(-5.), str(5.),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 

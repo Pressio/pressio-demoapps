@@ -250,8 +250,8 @@ If you pass three values, I assume 3d.")
     nargs="*",
     type=float,
     dest="bounds",
-    help="Domain bounds along x and y. \
-First, you pass all values of x, then pass all values of y.")
+    help="Domain bounds along each axis \
+First, you pass bounds for x. If needed, then ou pass those for y. If needed, those for z.")
 
   parser.add_argument(
     "-o", "--ordering",

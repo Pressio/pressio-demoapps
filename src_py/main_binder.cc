@@ -16,7 +16,7 @@
 #include "pressiodemoapps/euler1d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/swe2d.hpp"
-// #include "pressiodemoapps/euler3d.hpp"
+#include "pressiodemoapps/euler3d.hpp"
 
 namespace pressiodemoappspy{ namespace impl{
 
@@ -92,9 +92,9 @@ void bindProblemEnums(pybind11::module & mParent)
   pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
     .value("SlipWall", pda::Swe2d::SlipWall);
 
-  // pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
-  //   .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)
-  //   .value("SedovSymmetry",  pda::Euler3d::SedovSymmetry);
+  pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
+    .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)
+    .value("SedovSymmetry",  pda::Euler3d::SedovSymmetry);
 }
 
 // ---------------------------
@@ -276,26 +276,23 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
 		pybind11::return_value_policy::take_ownership);
 
+  // -----------------------
+  // Euler 3d
+  // -----------------------
+  using euler_impl_3d_t = pda::ee::impl::EigenEuler3dApp<ccumesh_t>;
+
+  using euler_3d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_3d_t>;
+  pybind11::class_<euler_3d_t> ee3dProb(mTopLevel, "Euler3dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<euler_3d_t>(ee3dProb);
+  ee3dProb.def("gamma", &euler_3d_t::gamma);
+
+  mTopLevel.def("create_problem",
+		&pda::implee3d::create_problem_for_pyA<ccumesh_t, euler_3d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("create_problem",
+		&pda::implee3d::create_problem_for_pyB<ccumesh_t, euler_3d_t>,
+		pybind11::return_value_policy::take_ownership);
+
 }
 #endif
-
-
-  // // -----------------------
-  // // Euler 3d
-  // // -----------------------
-  // using ee3d_t =
-  //   pda::ee::impl::Euler3dAppT<
-  //     pressiodemoappspy::scalar_t,
-  //   ccumesh_t,
-  //   pressiodemoappspy::py_cstyle_arr_sc, // state type
-  //   pressiodemoappspy::py_cstyle_arr_sc, // velo type
-  //   pressiodemoappspy::py_cstyle_arr_sc  // ghost type
-  //   >;
-
-  // pybind11::class_<ee3d_t> ee3dClass(mTopLevel, "Euler3dProblem");
-  // pressiodemoappspy::impl::bindCommonApiMethods<ee3d_t>(ee3dClass);
-  // ee3dClass.def("gamma", &ee3d_t::gamma);
-
-  // mTopLevel.def("create_problem",
-  // 		&pda::createEuler3dForPyC<ccumesh_t, ee3d_t>,
-  // 		pybind11::return_value_policy::take_ownership);

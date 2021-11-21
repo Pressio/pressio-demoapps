@@ -23,7 +23,7 @@ C++ API
 
    .. cpp:type:: jacobian_type
 
-      Data structure type to store the Jacobian: currently, this is an Eigen sparse Crs matrix.
+      Data structure type to store the Jacobian: currently, this is an Eigen sparse CSR matrix.
 
    .. cpp:function:: auto totalDofSampleMesh()
 

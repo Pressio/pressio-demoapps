@@ -49,7 +49,6 @@ T createEe2dImpl(const mesh_t & meshObj,
       ("Double mach reflection does NOT currently suppot Weno5.");
   }
 
-
   if (probEnum == ::pressiodemoapps::Euler2d::PeriodicSmooth)
   {
     if (!meshObj.isPeriodic()){
@@ -91,7 +90,7 @@ T create_problem_for_pyB(const mesh_t & meshObj,
 }
 #endif
 
-} //end pressiodemoapps::impl
+} //end pressiodemoapps::implee2d
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>

@@ -9,7 +9,7 @@ that can be used for a variety of purposes.
 Is this *another* physics PDE solver?
 -------------------------------------
 
-No, it is not! This will **not** become a full solver. The scope is and will stay limited.
+No! This will **not** become a full solver, since its scope is and will stay limited.
 
 .. Important::
    The main distinguishing feature from other codes is the built-in support
@@ -29,13 +29,14 @@ and hyper-reduction techniques.
 
 Some features of this work include:
 
-* a cell-centered finite volume discretization on uniform structured meshes
+* support for both C++ and Python
 
-* a (simple) meshing tool written in Python that also handles sample meshes
+* cell-centered finite volume discretization with various numerical schemes and *exact Jacobians*
 
-* well-established shock-capturing schemes and flux forms (which can be easily extended)
+* built-in support for sample mesh in 1D, 2D and 3D for varying stencil sizes
 
-* sample mesh in 1D, 2D and 3D for varying stencil sizes
+* focus on providing self-contained and well-defined problems
+
 
 
 Enough text, show me some code!
@@ -71,15 +72,20 @@ You don't want to use C++? We have Python bindings too!
 Core development principles
 ---------------------------
 
-* **simplicity**: we use high-level abstractions and a well-defined API to make this code as simple as possible to use, minimizing the number of steps needed to set up a problem. We follow a three-step process: (1) generate the mesh, (2) load the mesh and (3) create a problem instance that has a specific API.
-
-* **generic programming**: the core component is a header-only C++ library based on generic programming, thus allowing us to write the code once and then instantiate it with various data types;
-
-* **prototyping**: fast prototyping is essential for research, motivating us to develop Python bindings. This makes the code accessible to Python users, while maintaining the performance of the compiled C++ backend;
+* **simplicity**: we use high-level abstractions and well-defined APIs aiming
+  to make this code as simple as possible to use, thus minimizing the number
+  of steps needed to set up and run a problem.
+  The main idea is a three-step process: (1) generate the mesh, (2) load the mesh and (3) create a problem instance that has a specific API.
 
 * **quality assurance**: we maintain a test suite for both the C++ code and Python bindings to ensure stability and reliability;
 
 * **extensibility**: easily add new problems, other numerical schemes (e.g. fluxes, reconstruction methods) and different data types.
+
+
+..
+   * **generic programming**: the core component is a header-only C++ library based on generic programming, thus allowing us to write the code once and then instantiate it with various data types;
+   * **fast prototyping**: being able to do fast prototyping is essential for research. This motivated us to develop Python bindings.
+     This makes the code accessible to Python users, while maintaining the performance of the compiled C++ backend;
 
 
 Contents
@@ -90,7 +96,7 @@ Contents
 
     installation
     howtouse
-    endtoend_py
+    your_first_problem
     api
     problems_1d
     problems_2d

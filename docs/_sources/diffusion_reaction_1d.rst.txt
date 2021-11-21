@@ -93,7 +93,7 @@ Python synopsis
 
    # C. setting custom coefficients and custom source function, you can do
    mysource = lambda x, time : np.sin(math.pi*x) *x*x * 4.*np.cos(4.*math.pi*x)
-   problem = pda.create_problem(meshObj, probId, scheme, 0.2, 0.001)
+   problem = pda.create_problem(meshObj, probId, scheme, mysource, 0.2, 0.001)
 
 
 Notes:

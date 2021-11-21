@@ -1,0 +1,441 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="License" href="license.html" /><link rel="prev" title="Full mesh" href="meshfull.html" />
+
+    <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
+        <title>Sample Mesh Capabilty - pressio-demoapps 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">pressio-demoapps 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">pressio-demoapps 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_sedov_full.html">2D Euler Sedov Full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_sedov_symmetry.html">2D Euler Sedov (with symmetry)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_riemann.html">2D Euler Riemann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_normal_shock.html">2D Euler Normal Shock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_2d_double_mach.html">2D Euler Double Mach Reflection</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="euler_3d_smooth.html">3D Euler Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_3d_sedov_symmetry.html">3D Euler Sedov (with symmetry)</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Sample Mesh Capabilty</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps">GitHub Repo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps/issues">Open an issue/feature req.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="sample-mesh-capabilty">
+<h1>Sample Mesh Capabilty<a class="headerlink" href="#sample-mesh-capabilty" title="Permalink to this headline">¶</a></h1>
+<p>One of the key features of pressio-demoapps is its native support for <em>sample mesh</em>.</p>
+<div class="section" id="what-is-a-sample-mesh-and-why">
+<h2>What is a sample mesh and why?<a class="headerlink" href="#what-is-a-sample-mesh-and-why" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>In practice, a sample mesh is a disjoint collection
+of cells where one computes the velocity (or RHS or residual) vector
+and Jacobian matrix of the target system.</p>
+</div>
+<p>The sample mesh is critical, for example, for projection-based ROMs of nonlinear systems.
+It is at the core of hyper-reduction methods, since it allows one to
+create ROMs with a computational cost which <em>does not</em>
+scale with the size of the full model’s state vector.
+One can also see the sample mesh as important for studying
+function approximation: given samples of the residual collected
+at the sample mesh, one can use these to reconstruct the residual
+on the full mesh.</p>
+<p>Several methods exist to determine which cells to include, e.g., random sampling,
+the <a class="reference external" href="https://doi.org/10.1137/090766498">discrete empirical interpolation method (DEIM)</a>,
+and <a class="reference external" href="https://doi.org/10.1016/j.jcp.2013.02.028">Gauss-Newton with approximate tensors (GNAT)</a>.</p>
+<p>While the sample mesh strictly speaking refers to the collection of cells
+where we compute the residual and Jacobian, a related concept is what we refer to as <strong>stencil mesh</strong>.
+We refer to <strong>stencil mesh</strong> the collection of cells that are needed to compute
+the velocity or residual vector on the <em>sample mesh</em>.
+Note that, in general, the sample mesh is a subset of the stencil mesh,
+because to compute the velocity or residual at a given cell, one also needs
+the cell-centered values at that target cell.</p>
+<p>For more discussion on this, see <a class="reference external" href="https://pressio.github.io/proms/hyper/">this page</a>.</p>
+</div>
+<div class="section" id="let-s-look-at-a-figure-to-understand-this">
+<h2>Let’s look at a figure to understand this<a class="headerlink" href="#let-s-look-at-a-figure-to-understand-this" title="Permalink to this headline">¶</a></h2>
+<p>The figure below shows a two dimensional full mesh (left) and
+a sample and a stencil mesh for a first order cell-centered finite volume scheme.
+The stencil mesh is the set of <strong>all cells</strong> shown, while the sample mesh
+is the subset color-coded yellow.</p>
+<a class="reference internal image-reference" href="_images/readme_2dmesh.png"><img alt="Alternative text" src="_images/readme_2dmesh.png" style="width: 75%;"/></a>
+<p>The following is an example in three dimensions.</p>
+<a class="reference internal image-reference" href="_images/readme_3dmesh.png"><img alt="Alternative text" src="_images/readme_3dmesh.png" style="width: 75%;"/></a>
+</div>
+<div class="section" id="how-to-do-all-this-in-pressio-demoapps">
+<h2>How to do all this in pressio-demoapps?<a class="headerlink" href="#how-to-do-all-this-in-pressio-demoapps" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pressio-demoapps/meshing/create_sample_mesh.py</span></code> is the script we use for this.
+Specifically, this script accepts a path to a full mesh and a list of cell indices,
+and generate the new (reduced) mesh.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python create_sample_mesh.py <span class="se">\</span>
+             --fullMeshDir        &lt;path-to-the-FULL-mesh-dir-to-start-from&gt; <span class="se">\</span>
+             --targetCellIndices  &lt;path-to-ascii-file-with-desired-cell-indices-list&gt; <span class="se">\</span>
+             --outDir &lt;path-to-where-to-output-new-mesh&gt; <span class="se">\</span>
+             --debug  true/false <span class="c1"># default=false</span>
+</pre></div>
+</div>
+<p>where:
+- <code class="docutils literal notranslate"><span class="pre">--fullMeshDir</span></code>: full path to a FULL mesh directory; this dir should contain mesh files as generated using the <code class="docutils literal notranslate"><span class="pre">create_full_mesh.py</span></code> script of pressio-demoapps.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--targetCellIndices</span></code>: full path to ASCII file with list of indices identifying the subset of cells you want to use a <strong>sample</strong> mesh cells. Note that this list must contain indices valid wrt the full mesh provided in <code class="docutils literal notranslate"><span class="pre">fullMeshDir</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--workDir</span></code>: full path to directory such that:
+- this dir contains where you want all <strong>new</strong> mesh files to be generated;</p></li>
+</ul>
+</div>
+<div class="section" id="show-me-an-example">
+<h2>Show me an example!<a class="headerlink" href="#show-me-an-example" title="Permalink to this headline">¶</a></h2>
+<p>Here we show an end-to-end example for 2D that includes: generating a full mesh,
+visualizing it, selecting a subset of cells, generating a sample mesh
+and visualizing the sample mesh.</p>
+<p>To simplify things, let’s set the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">REPODIR</span><span class="o">=</span>&lt;full-path-to-your-clone-of-pressiodemoapps&gt;
+<span class="nb">export</span> <span class="nv">WORKDIR</span><span class="o">=</span>/home/mesh_test
+</pre></div>
+</div>
+<div class="section" id="a-generate-full-mesh">
+<h3>(A) Generate full mesh<a class="headerlink" href="#a-generate-full-mesh" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_full_mesh.py <span class="se">\</span>
+             -n <span class="m">10</span> <span class="m">8</span> --outDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
+             --bounds <span class="m">0</span>.0 <span class="m">1</span>.2 <span class="m">0</span>.0 <span class="m">1</span>.0 <span class="se">\</span>
+             --periodic <span class="nb">false</span> -s <span class="m">5</span>
+</pre></div>
+</div>
+<p>This creates the mesh files inside <code class="docutils literal notranslate"><span class="pre">${WORKDIR}/full_mesh</span></code>
+for a rectangular domain, using a 10x8 grid and setting a
+target connectivity of 5 to specify how many neighbors each cell has.
+If you look inside <code class="docutils literal notranslate"><span class="pre">${WORKDIR}/full_mesh</span></code>, you will see these files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">info.dat</span></code>: contains some info about the mesh</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connectivity.dat</span></code>: contains the connectivity graph for all cells</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">coordinates.dat</span></code>: contains the x [in first column],
+y [in second column] coordinates for each <em>cell center</em></p></li>
+</ul>
+<p>If we then do:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/full_mesh -p show <span class="m">9</span>
+</pre></div>
+</div>
+<p>where we use <cite>show</cite> to specify we want the figure plotted,
+and 9 is the font size to use to print the global ID of each cell.
+You should see this plot:</p>
+<a class="reference internal image-reference" href="_images/docs_meshing_sample_1.png"><img alt="Alternative text" src="_images/docs_meshing_sample_1.png" style="width: 60%;"/></a>
+</div>
+<div class="section" id="b-select-subset-of-cells-and-generate-sample-mesh">
+<h3>(B) Select subset of cells, and generate sample mesh<a class="headerlink" href="#b-select-subset-of-cells-and-generate-sample-mesh" title="Permalink to this headline">¶</a></h3>
+<p>Let’s say that we want our <strong>sample mesh</strong>
+to comprise cells 1, 26, 36, 52, 67.
+We can do:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="m">1</span> <span class="m">26</span> <span class="m">36</span> <span class="m">52</span> <span class="m">67</span> &gt;&gt; <span class="si">${</span><span class="nv">WORKDIR</span><span class="si">}</span>/sample_gids.txt
+python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_sample_mesh.py <span class="se">\</span>
+             --outDir <span class="nv">$WORKDIR</span>/sample_mesh <span class="se">\</span>
+             --fullMeshDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
+             --sampleMeshIndices <span class="nv">$WORKDIR</span>/sample_gids.txt
+</pre></div>
+</div>
+<p>this will generate, inside <code class="docutils literal notranslate"><span class="pre">$WORKDIR/sample_mesh</span></code>,
+the mesh files for this “reduced” mesh.</p>
+<p>Let’s visualize this reduced mesh:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/sample_mesh -p show <span class="m">9</span>
+</pre></div>
+</div>
+<p>You should see this plot:</p>
+<a class="reference internal image-reference" href="_images/docs_meshing_sample_2.png"><img alt="_images/docs_meshing_sample_2.png" src="_images/docs_meshing_sample_2.png" style="width: 60%;"/></a>
+<p>In the figure above, the yellow cells are the “sample mesh cells”,
+which are those we wanted. All the remaining uniflled cells make
+up the “stencil mesh”. Note that the sample mesh script
+automatically picks up the level of connecitivty used for
+the starting full mesh. If you recall above, we used <code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">5</span></code>
+when generating the full mesh, meaning we wanted
+a 5-pt stencil connectivity for each cell.</p>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Note how the reduced mesh has a different enumeration of the cells.
+This is because this new mesh is effectively a new, self-contained mesh.</p>
+</div>
+<p><strong>todo: finish</strong></p>
+</div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="license.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">License</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="meshfull.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Full mesh</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
+            Last updated on Nov 21, 2021. |
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+              and
+              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+              <a href="https://github.com/pradyunsg/furo">Furo theme</a>. |
+            <a class="muted-link" href="_sources/meshsample.rst.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Sample Mesh Capabilty</a><ul>
+<li><a class="reference internal" href="#what-is-a-sample-mesh-and-why">What is a sample mesh and why?</a></li>
+<li><a class="reference internal" href="#let-s-look-at-a-figure-to-understand-this">Let’s look at a figure to understand this</a></li>
+<li><a class="reference internal" href="#how-to-do-all-this-in-pressio-demoapps">How to do all this in pressio-demoapps?</a></li>
+<li><a class="reference internal" href="#show-me-an-example">Show me an example!</a><ul>
+<li><a class="reference internal" href="#a-generate-full-mesh">(A) Generate full mesh</a></li>
+<li><a class="reference internal" href="#b-select-subset-of-cells-and-generate-sample-mesh">(B) Select subset of cells, and generate sample mesh</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/main.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    </body>
+</html>

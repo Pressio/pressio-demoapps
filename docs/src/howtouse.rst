@@ -79,9 +79,7 @@ Step 3: Solving the problem
 ---------------------------
 
 To use a problem instance, you need to know that all *pressio-demoapps*
-problem instances meet a specific API as described below.
-
-
+problem instances meet a specific API as described in :doc:`this page <api>`.
 
 
 **!! to do: finish**

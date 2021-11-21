@@ -3,7 +3,7 @@
 
 **pressio-demoapps** is a library of 1D, 2D and 3D demo problems
 of varying complexity, ranging from a simple 1D linear advection,
-to 2D reaction-diffusion, and 3D compressible Euler, and more.
+to 2D reaction-diffusion, and 3D Euler equations, and more.
 Key features include:
 
 - support for both C++ and Python
@@ -12,7 +12,7 @@ Key features include:
 - built-in support for a sample mesh: this mean that one can evaluate the residual and Jacobian
 at a disjoint subset of the mesh cells (this is useful for intrusive ROMs)
 
-Check the documentation website for more details:
+Click below to check the documentation for more details:
 
 <a href="https://pressio.github.io/pressio-demoapps/index.html" target="_blank">
     <img src='figures/logo-display.svg' width='90%'>

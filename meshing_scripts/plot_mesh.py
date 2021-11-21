@@ -110,9 +110,9 @@ if __name__== "__main__":
                       nargs="*",
                       dest="plottingInfo",
                       default="none",
-                      help="What type of plotting you want:\n"+
-                           "use <show> for showing plots,\n"+
-                           "use <print> for printing only")
+                      help="Multiple args to tailor plotting:\n"+
+                      "(1) string: 'show' to enable showing plots; 'print' for printing figures only;\n"+
+                      "(2) [int] optional: integer specifying fontsize to visualize index scheme used to enumerate all the cells")
 
   parser.add_argument(
     "-d", "-debug", "--debug",

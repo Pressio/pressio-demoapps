@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="License" href="license.html" /><link rel="prev" title="3D Euler Sedov (with symmetry)" href="euler_3d_sedov_symmetry.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Full mesh" href="meshfull.html" /><link rel="prev" title="3D Euler Sedov (with symmetry)" href="euler_3d_sedov_symmetry.html" />
 
     <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
-        <title>Meshing script - pressio-demoapps 0.1.0 documentation</title>
+        <title>Meshing Capability - pressio-demoapps 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -157,9 +157,13 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="endtoend_py.html">Run your first problem in Python</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
@@ -167,7 +171,7 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -178,12 +182,16 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_double_mach.html">2D Euler Double Mach Reflection</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_smooth.html">3D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_sedov_symmetry.html">3D Euler Sedov (with symmetry)</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Meshing script</a></li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Meshing Capability</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps/issues">Open an issue/feature req.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -207,51 +215,33 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <div class="section" id="meshing-script">
-<h1>Meshing script<a class="headerlink" href="#meshing-script" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="how-to-use-it">
-<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this headline">¶</a></h2>
-<p>Missing!</p>
-</div>
-<div class="section" id="sample-mesh">
-<h2>Sample Mesh<a class="headerlink" href="#sample-mesh" title="Permalink to this headline">¶</a></h2>
-<p>In practice, the <em>sample mesh is a disjoint collection of cells at which the velocity or residual vector are computed</em>.</p>
-<p>Several methods exist to determine which cells to include, e.g., random sampling,
-the discrete empirical interpolation method ([DEIM](<a class="reference external" href="https://doi.org/10.1137/090766498">https://doi.org/10.1137/090766498</a>)),
-and Gauss-Newton with approximate tensors ([GNAT](<a class="reference external" href="https://doi.org/10.1016/j.jcp.2013.02.028">https://doi.org/10.1016/j.jcp.2013.02.028</a>)).</p>
-<p>The sample mesh is critical to make projection-based ROMs of nonlinear systems practical.
-Its at the core of hyper-reduction methods, since it allows one to create ROMs with a computational
-cost which <em>does not</em> scale with the size of the full model’s state vector.</p>
-<p>The sample mesh is used in conjunction with what we refer to as the <strong>stencil mesh</strong>,
-which contains all cells needed to compute the velocity or residual vector on the sample mesh.
-Note that, in general, the sample mesh is a subset of the stencil mesh, because to compute
-the velocity or residual at a given cell, one also needs the cell-centered values at that target cell.
-Several examples of sample and stencil meshes are shown below.</p>
-<div class="section" id="d-example">
-<h3>1D Example<a class="headerlink" href="#d-example" title="Permalink to this headline">¶</a></h3>
-<p>The figures below show a full 1D mesh for a first order cell-centered finite volume scheme, and right below
-a representative sample mesh (yellow-filled cells) and the stencil mesh.</p>
-<a class="reference internal image-reference" href="_images/readme_1dmesh.png"><img alt="Alternative text" src="_images/readme_1dmesh.png" style="width: 75%;"/></a>
-</div>
-<div class="section" id="id1">
-<h3>2D Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>The second example shows a two dimensional sample mesh and a stencil mesh for a first order cell-centered finite volume scheme.
-The coloring scheme is the same as in the first example.</p>
-<a class="reference internal image-reference" href="_images/readme_2dmesh.png"><img alt="Alternative text" src="_images/readme_2dmesh.png" style="width: 75%;"/></a>
-</div>
-<div class="section" id="id2">
-<h3>3D Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>The third example shows a three dimensional sample mesh and
-a stencil mesh for a first order cell-centered finite volume scheme.
-The coloring scheme is the same as in the previous examples. Cell IDs are omitted for clarity.</p>
-<a class="reference internal image-reference" href="_images/readme_3dmesh.png"><img alt="Alternative text" src="_images/readme_3dmesh.png" style="width: 75%;"/></a>
-</div>
+          <div class="section" id="meshing-capability">
+<h1>Meshing Capability<a class="headerlink" href="#meshing-capability" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="meshfull.html">Full mesh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html#script-usage">Script Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html#problem-specific-mesh-script">Problem-specific mesh script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html#what-is-a-sample-mesh-and-why">What is a sample mesh and why?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html#let-s-look-at-a-figure-to-understand-this">Let’s look at a figure to understand this</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html#how-to-do-all-this-in-pressio-demoapps">How to do all this in pressio-demoapps?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html#show-me-an-example">Show me an example!</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meshsample.html#a-generate-full-mesh">(A) Generate full mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="meshsample.html#b-select-subset-of-cells-and-generate-sample-mesh">(B) Select subset of cells, and generate sample mesh</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 
@@ -260,12 +250,12 @@ The coloring scheme is the same as in the previous examples. Cell IDs are omitte
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="license.html">
+          <a class="next-page" href="meshfull.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">License</div>
+                <div class="title">Full mesh</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -284,7 +274,7 @@ The coloring scheme is the same as in the previous examples. Cell IDs are omitte
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 20, 2021. |
+            Last updated on Nov 21, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
@@ -297,33 +287,8 @@ The coloring scheme is the same as in the previous examples. Cell IDs are omitte
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            Contents
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Meshing script</a><ul>
-<li><a class="reference internal" href="#how-to-use-it">How to use it</a></li>
-<li><a class="reference internal" href="#sample-mesh">Sample Mesh</a><ul>
-<li><a class="reference internal" href="#d-example">1D Example</a></li>
-<li><a class="reference internal" href="#id1">2D Example</a></li>
-<li><a class="reference internal" href="#id2">3D Example</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

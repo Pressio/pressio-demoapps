@@ -1,6 +1,6 @@
 include(FindUnixCommands)
 
-set(CMD "python ${MESHDRIVER} -n 3 3 3 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 0.4 0.0 0.4 0.0 0.4 --periodic false")
+set(CMD "python ${MESHDRIVER} -n 7 5 9 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 0.4 0.0 0.4 0.0 0.4 --periodic false")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")

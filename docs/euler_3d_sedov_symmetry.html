@@ -2,7 +2,7 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Meshing script" href="meshing.html" /><link rel="prev" title="3D Euler Smooth" href="euler_3d_smooth.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Meshing Capability" href="meshing.html" /><link rel="prev" title="3D Euler Smooth" href="euler_3d_smooth.html" />
 
     <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
         <title>3D Euler Sedov (with symmetry) - pressio-demoapps 0.1.0 documentation</title>
@@ -157,9 +157,13 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="endtoend_py.html">Run your first problem in Python</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
@@ -167,7 +171,7 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -178,12 +182,16 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_double_mach.html">2D Euler Double Mach Reflection</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_smooth.html">3D Euler Smooth</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">3D Euler Sedov (with symmetry)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="meshing.html">Meshing script</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps/issues">Open an issue/feature req.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -215,24 +223,44 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-with-symmetry">
 <h1>3D Euler Sedov (with symmetry)<a class="headerlink" href="#d-euler-sedov-with-symmetry" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the …</p>
+<ul class="simple">
+<li><p>IC involves a small spherical region of radius <span class="math notranslate nohighlight">\(R = 3. * min(dx, dy)\)</span> with high pressure</p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(r&lt;=R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = (4 (\gamma-1) 0.851072)/(4 pi R^3)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(r&gt;R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = 2.5e-5\)</span></p></li>
+</ul>
+</li>
+<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[0.0,</span> <span class="pre">1.2]^3</span></code> with reflective BC on <cite>x=y=z=0</cite>, and homogeneous Neumann on the others.</p></li>
+<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 1.)\)</span>.</p></li>
+</ul>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Currently, this problem only works for first order and Weno3 inviscid flux reconstruction.</p>
+</div>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh_for.py ...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh_for.py --problem sedov3dsym_s<span class="o">{</span><span class="m">3</span>,5<span class="o">}</span> -n Nx Ny Nz --outDir ...
 </pre></div>
 </div>
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span></code>.</p>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
-<span class="p">...</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler3d</span><span class="o">::</span><span class="n">SedovSymmetry</span><span class="p">;</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3</span>
+<span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">state</span>        <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
-<span class="o">...</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler3d</span><span class="o">.</span><span class="n">SedovSymmetry</span>
+<span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+<span class="n">state</span>   <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">initialCondition</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -248,7 +276,7 @@
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Meshing script</div>
+                <div class="title">Meshing Capability</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -267,7 +295,7 @@
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 20, 2021. |
+            Last updated on Nov 21, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
@@ -314,5 +342,6 @@
     <script src="_static/scripts/main.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

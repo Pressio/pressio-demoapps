@@ -23,7 +23,8 @@ add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
 add_subdirectory(eigen_2d_swe_jacobian_fd_slip_wall)
-# # add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
+add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
+add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
 
 # ---------------------------------------------------------
 ### 1d problems ###
@@ -59,6 +60,6 @@ add_subdirectory(eigen_2d_kelvin_helmholtz_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 
-# # ### 3d problems ###
-# # add_subdirectory(eigen_3d_euler_smooth)
-# # add_subdirectory(eigen_3d_euler_sedov_symmetry)
+### 3d problems ###
+add_subdirectory(eigen_3d_euler_smooth)
+add_subdirectory(eigen_3d_euler_sedov_symmetry)

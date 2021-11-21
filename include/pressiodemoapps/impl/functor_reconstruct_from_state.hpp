@@ -720,87 +720,152 @@ public:
   }
 };
 
+// -----------------------------------------------------------
+// 3d, multiple dofsPerCell, no reconstruction gradients
+// -----------------------------------------------------------
+template<
+  int ndpc,
+  class MeshType,
+  class DataType,
+  class ReconstructedValueType
+  >
+class ReconstructorForDiscreteFunction<
+  3, ndpc, MeshType, DataType, ReconstructedValueType
+  > : public _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>
+{
+  using members_t = _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>;
+
+public:
+  template<typename ...Args>
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : members_t(std::forward<Args>(args)...){}
+
+  template<class IndexType>
+  void operator()(IndexType smPt)
+  {
+    const auto & graph  = members_t::m_meshObj.graph();
+    const auto & uIndex = graph(smPt, 0)*ndpc;
+    const auto axis = members_t::m_axis;
+
+    /*
+      For 3d, graph is:
+      ptID l0 f0 r0 ba0 bot0 top0 [l1 f1 r1 ba1 bot1 top1 l2 f2 r2 ba2 bot2 top2]
+       0    1  2  3  4    5   6   [ 7  8  9  10  11   12  13 14 15  16  17  18  ]
+
+      where [] are optionally present, depending on the stencil chosen.
+    */
+
+    switch(members_t::m_recEn)
+      {
+      case ReconstructionScheme::FirstOrder:{
+	auto l0i = (axis == 1) ? graph(smPt, 1)*ndpc : (axis==2) ? graph(smPt, 4)*ndpc : graph(smPt, 5)*ndpc;
+	auto r0i = (axis == 1) ? graph(smPt, 3)*ndpc : (axis==2) ? graph(smPt, 2)*ndpc : graph(smPt, 6)*ndpc;
+	for (int i=0; i<ndpc; ++i){
+	  members_t::m_uMinusHalfNeg(i) = members_t::m_functionValues(l0i+i);
+	  members_t::m_uMinusHalfPos(i) = members_t::m_functionValues(uIndex+i);
+	  members_t::m_uPlusHalfNeg(i)  = members_t::m_functionValues(uIndex+i);
+	  members_t::m_uPlusHalfPos(i)  = members_t::m_functionValues(r0i+i);
+	}
+	break;
+      }
+
+      case ReconstructionScheme::Weno3:{
+	auto l0i = (axis == 1) ? graph(smPt, 1)*ndpc : (axis==2) ? graph(smPt, 4)*ndpc : graph(smPt, 5)*ndpc;
+	auto r0i = (axis == 1) ? graph(smPt, 3)*ndpc : (axis==2) ? graph(smPt, 2)*ndpc : graph(smPt, 6)*ndpc;
+	auto l1i = (axis == 1) ? graph(smPt, 7)*ndpc : (axis==2) ? graph(smPt, 10)*ndpc : graph(smPt, 11)*ndpc;
+	auto r1i = (axis == 1) ? graph(smPt, 9)*ndpc : (axis==2) ? graph(smPt, 8)*ndpc : graph(smPt, 12)*ndpc;
+	::pressiodemoapps::weno3(members_t::m_uMinusHalfNeg,
+				 members_t::m_uMinusHalfPos,
+				 members_t::m_uPlusHalfNeg,
+				 members_t::m_uPlusHalfPos,
+				 members_t::m_functionValues,
+				 l1i, l0i, r0i, r1i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
+
+      case ReconstructionScheme::Weno5:
+	{
+	  throw std::runtime_error("missing impl");
+	  break;
+	}
+      }
+  }
+};
+
+// -----------------------------------------------------------
+// 3d, multiple dofsPerCell, WITH reconstruction gradients
+// -----------------------------------------------------------
+template<
+  int ndpc,
+  class MeshType,
+  class DataType,
+  class ReconstructedValueType,
+  class ReconstructedGradType
+  >
+class ReconstructorForDiscreteFunction<
+  3, ndpc, MeshType, DataType, ReconstructedValueType, ReconstructedGradType
+  > : public _ReconstructorMembers<ReconstructedValueType, DataType, MeshType, ReconstructedGradType>
+{
+  using members_t = _ReconstructorMembers<
+    ReconstructedValueType, DataType, MeshType, ReconstructedGradType>;
+
+public:
+  template<typename ...Args>
+  ReconstructorForDiscreteFunction(Args && ... args)
+    : members_t(std::forward<Args>(args)...){}
+
+  template<class IndexType>
+  void operator()(IndexType smPt)
+  {
+    const auto & graph  = members_t::m_meshObj.graph();
+    const auto & uIndex = graph(smPt, 0)*ndpc;
+    const auto axis = members_t::m_axis;
+
+    switch(members_t::m_recEn)
+      {
+      case ReconstructionScheme::FirstOrder:{
+	auto l0i = (axis == 1) ? graph(smPt, 1)*ndpc : (axis==2) ? graph(smPt, 4)*ndpc : graph(smPt, 5)*ndpc;
+	auto r0i = (axis == 1) ? graph(smPt, 3)*ndpc : (axis==2) ? graph(smPt, 2)*ndpc : graph(smPt, 6)*ndpc;
+	for (int i=0; i<ndpc; ++i){
+	  members_t::m_uMinusHalfNeg(i) = members_t::m_functionValues(l0i+i);
+	  members_t::m_uMinusHalfPos(i) = members_t::m_functionValues(uIndex+i);
+	  members_t::m_uPlusHalfNeg(i)  = members_t::m_functionValues(uIndex+i);
+	  members_t::m_uPlusHalfPos(i)  = members_t::m_functionValues(r0i+i);
+	}
+	break;
+      }
+
+      case ReconstructionScheme::Weno3:{
+	auto l0i = (axis == 1) ? graph(smPt, 1)*ndpc : (axis==2) ? graph(smPt, 4)*ndpc : graph(smPt, 5)*ndpc;
+	auto r0i = (axis == 1) ? graph(smPt, 3)*ndpc : (axis==2) ? graph(smPt, 2)*ndpc : graph(smPt, 6)*ndpc;
+	auto l1i = (axis == 1) ? graph(smPt, 7)*ndpc : (axis==2) ? graph(smPt, 10)*ndpc : graph(smPt, 11)*ndpc;
+	auto r1i = (axis == 1) ? graph(smPt, 9)*ndpc : (axis==2) ? graph(smPt, 8)*ndpc : graph(smPt, 12)*ndpc;
+	::pressiodemoapps::weno3(members_t::m_uMinusHalfNeg,
+				 members_t::m_uMinusHalfPos,
+				 members_t::m_uPlusHalfNeg,
+				 members_t::m_uPlusHalfPos,
+				 members_t::m_gradLNeg,
+				 members_t::m_gradLPos,
+				 members_t::m_gradRNeg,
+				 members_t::m_gradRPos,
+				 members_t::m_functionValues,
+				 l1i, l0i, r0i, r1i,
+				 uIndex,
+				 ndpc);
+	break;
+      }
+
+      case ReconstructionScheme::Weno5:
+	{
+	  throw std::runtime_error("missing impl");
+	  break;
+	}
+      }
+  }
+};
+
+
 }} // end namespaces
 #endif
-
-
-
-
-
-// // -----------------------------------------------------------
-// // 3d, multiple dofsPerCell, no reconstruction gradients
-// // -----------------------------------------------------------
-// template<int ndpc, class ReconstructedValueType, class DataType, class MeshType>
-// class ReconstructorForDiscreteFunction<3, ndpc, ReconstructedValueType, DataType, MeshType>{
-
-// public:
-//   template<typename ...Args>
-//   ReconstructorForDiscreteFunction(Args && ... args) : m_memb(std::forward<Args>(args)...){}
-
-//   template<class IndexType>
-//   void operator()(IndexType smPt)
-//   {
-//     const auto & graph  = m_memb.m_meshObj.graph();
-//     const auto & uIndex = graph(smPt, 0)*ndpc;
-//     const auto axis = m_memb.m_axis;
-
-//     /*
-//       For 3d, graph is:
-//       ptID l0 f0 r0 ba0 bot0 top0 [l1 f1 r1 ba1 bot1 top1 l2 f2 r2 ba2 bot2 top2]
-//        0    1  2  3  4    5   6   [ 7  8  9  10  11   12  13 14 15  16  17  18  ]
-
-//       where [] are optionally present, depending on the stencil chosen.
-//     */
-
-//     switch(m_memb.m_recEn)
-//       {
-//       case ReconstructionScheme::FirstOrder:
-// 	{
-// 	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
-// 	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
-// 	  const auto l0i = l0*ndpc;
-// 	  const auto r0i = r0*ndpc;
-
-// 	  for (int i=0; i<ndpc; ++i){
-// 	    m_memb.m_uMinusHalfNeg(i) = m_memb.m_functionValues(l0i+i);
-// 	    m_memb.m_uMinusHalfPos(i) = m_memb.m_functionValues(uIndex+i);
-// 	    m_memb.m_uPlusHalfNeg(i)  = m_memb.m_functionValues(uIndex+i);
-// 	    m_memb.m_uPlusHalfPos(i)  = m_memb.m_functionValues(r0i+i);
-// 	  }
-// 	  break;
-// 	}
-
-//       case ReconstructionScheme::Weno3:
-// 	{
-// 	  auto l0 = (axis == 1) ? graph(smPt, 1) : (axis==2) ? graph(smPt, 4) : graph(smPt, 5);
-// 	  auto r0 = (axis == 1) ? graph(smPt, 3) : (axis==2) ? graph(smPt, 2) : graph(smPt, 6);
-// 	  auto l1 = (axis == 1) ? graph(smPt, 7) : (axis==2) ? graph(smPt, 10) : graph(smPt, 11);
-// 	  auto r1 = (axis == 1) ? graph(smPt, 9) : (axis==2) ? graph(smPt, 8) : graph(smPt, 12);
-
-// 	  const auto l0i = l0*ndpc;
-// 	  const auto r0i = r0*ndpc;
-// 	  const auto l1i = l1*ndpc;
-// 	  const auto r1i = r1*ndpc;
-// 	::pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-// 			       m_memb.m_uMinusHalfPos,
-// 			       m_memb.m_uPlusHalfNeg,
-// 			       m_memb.m_uPlusHalfPos,
-// 			       m_memb.m_functionValues,
-// 			       l1i, l0i, r0i, r1i,
-// 			       uIndex,
-// 			       ndpc);
-// 	  break;
-// 	}
-
-//       case ReconstructionScheme::Weno5:
-// 	{
-// 	  throw std::runtime_error("missing impl");
-// 	  break;
-// 	}
-//       }
-//   }
-
-// private:
-//   using members_t = _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>;
-//   members_t m_memb;
-// };
