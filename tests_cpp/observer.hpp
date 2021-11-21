@@ -2,8 +2,6 @@
 #ifndef PRESSIODEMOAPPS_TESTS_OBSERVER_HPP_
 #define PRESSIODEMOAPPS_TESTS_OBSERVER_HPP_
 
-#include "pressio_ode_explicit.hpp"
-
 template <typename state_t>
 class FomObserver
 {
@@ -22,9 +20,8 @@ public:
   		  const state_t & y)
   {
     if (step % sampleFreq_ == 0){
-      const auto & ydata = *y.data();
-      const std::size_t ext = y.extent(0)*sizeof(double);
-      myfile0_.write(reinterpret_cast<const char*>(&ydata(0)), ext);
+      const std::size_t ext = y.size()*sizeof(double);
+      myfile0_.write(reinterpret_cast<const char*>(&y(0)), ext);
     }
   }
 

@@ -2,9 +2,11 @@
 #ifndef PRESSIODEMOAPPS_EXTENT_FUNC_HPP_
 #define PRESSIODEMOAPPS_EXTENT_FUNC_HPP_
 
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
 namespace pressiodemoapps{
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
 template<class value_type>
 auto extent(const Eigen::Matrix<value_type, -1, 1> & objIn,
 	    int axis)
@@ -44,8 +46,6 @@ auto extent(Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor> & objIn,
 {
   return (axis==0) ? objIn.rows() : objIn.cols();
 }
-#endif
-
 
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<

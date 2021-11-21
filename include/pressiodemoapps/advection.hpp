@@ -5,7 +5,8 @@
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
+#include "./schemes_info.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
 enum class Advection1d{
@@ -13,12 +14,13 @@ enum class Advection1d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/advection1d/linear_adv_impl.hpp"
+#include "./impl/advection_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impl{
+namespace impladv{
+
 template<class mesh_t, class T>
-T createLinAdv1dImpl(const mesh_t & meshObj,
+T create1dImpl(const mesh_t & meshObj,
 		     ::pressiodemoapps::Advection1d probEnum,
 		     InviscidFluxReconstruction recEnum)
 {
@@ -26,40 +28,40 @@ T createLinAdv1dImpl(const mesh_t & meshObj,
   const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
   if (!check1){
     throw std::runtime_error
-      ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
+      ("advection: stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
   }
 
   // the mesh should be periodic
   if (!meshObj.isPeriodic()){
-    throw std::runtime_error
-      ("For periodic linear adv1d, mesh must be periodic.");
+    throw std::runtime_error("For periodic linear adv1d, mesh must be periodic.");
   }
 
   return T(meshObj, probEnum, recEnum);
 }
-} //end impl
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinPy<impladv::EigenAdvection1dApp<mesh_t>>
+  >
+RetType create_problem_for_py(const mesh_t & meshObj,
+			   ::pressiodemoapps::Advection1d probEnum,
+			   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
+}
+#endif
+} //end namespace impladv
+
+
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Advection1d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  using scalar_t = typename mesh_t::scalar_t;
-  using return_type = ::pressiodemoapps::ad::impl::AdvectionAppT<
-    scalar_t, mesh_t, Eigen::Matrix<scalar_t,-1,1>, Eigen::Matrix<scalar_t,-1,1>
-    >;
-  return impl::createLinAdv1dImpl<mesh_t, return_type>(meshObj, probEnum, recEnum);
-}
-#endif
-
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createAdv1dForPy(const mesh_t & meshObj,
-		   ::pressiodemoapps::Advection1d probEnum,
-		   ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createLinAdv1dImpl<mesh_t, T>(meshObj, probEnum, recEnum);
+  using RetType = PublicProblemMixinCpp<impladv::EigenAdvection1dApp<mesh_t>>;
+  return impladv::create1dImpl<mesh_t, RetType>(meshObj, probEnum, recEnum);
 }
 #endif
 

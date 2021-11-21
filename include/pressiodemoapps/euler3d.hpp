@@ -2,15 +2,12 @@
 #ifndef PRESSIODEMOAPPS_EULER3D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER3D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./schemes_info.hpp"
+#include "./euler_compute_energy.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
 enum class Euler3d{
@@ -19,16 +16,15 @@ enum class Euler3d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/euler3d/euler3d_app_impl.hpp"
+#include "./impl/euler_3d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impl{
+namespace implee3d{
 template<class mesh_t, class T>
 T createEe3dImpl(const mesh_t & meshObj,
 		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		 ::pressiodemoapps::Euler3d probEnum,
-		 ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-		 const int icId)
+		 ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
   const auto stencilSize = meshObj.stencilSize();
   const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
@@ -45,49 +41,62 @@ T createEe3dImpl(const mesh_t & meshObj,
     }
   }
 
-  return T(meshObj, probEnum, recEnum, fluxEnum, icId);
+  return T(meshObj, probEnum, recEnum, fluxEnum);
 }
-} //end pressiodemoapps::impl
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class T>
+T create_problem_for_pyA(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler3d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return implee3d::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					     InviscidFluxScheme::Rusanov);
+}
+
+template<class mesh_t, class T>
+T create_problem_for_pyB(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler3d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		      const int ic)
+{
+  return implee3d::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					     InviscidFluxScheme::Rusanov);
+}
+#endif
+
+} //end pressiodemoapps::implee3d
+
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
-			::pressiodemoapps::InviscidFluxScheme fluxEnum,
-			const int icId)
+			::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
-  using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::ee::impl::Euler3dAppT<
-    scalar_t, mesh_t,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,-1, Eigen::RowMajor>
-    >;
-
-  return impl::createEe3dImpl<mesh_t, p_t>(meshObj, recEnum, probEnum,
-					   fluxEnum, icId);
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler3dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return implee3d::createEe3dImpl<mesh_t, RetType>(meshObj, recEnum, probEnum, fluxEnum);
 }
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
+			::pressiodemoapps::Euler3d probEnum,
+			::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			const int initCondIdentifier)
+{
+  return create_problem_eigen(meshObj, probEnum, recEnum,  InviscidFluxScheme::Rusanov);
+}
+
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler3d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, 1);
+  return create_problem_eigen(meshObj, probEnum, recEnum,
+			    InviscidFluxScheme::Rusanov);
 }
 #endif
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createEuler3dForPyC(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler3d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createEe3dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov, 1);
-}
-#endif
-
-}
+}//end namespace pressiodemoapps
 #endif

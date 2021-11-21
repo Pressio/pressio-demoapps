@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (c497b03c, 2020-09-10)"
+   sodipodi:docname="web.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.62"
+     inkscape:cx="508.40566"
+     inkscape:cy="514.08794"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="1792"
+     inkscape:window-height="1075"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:21.1667px;line-height:1.25;font-family:Avenir;-inkscape-font-specification:'Avenir, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="-28.071648"
+       y="106.80132"
+       id="text835"><tspan
+         sodipodi:role="line"
+         id="tspan833"
+         x="-28.071648"
+         y="106.80132"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:21.1667px;font-family:Avenir;-inkscape-font-specification:'Avenir, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"><tspan
+           style="fill:#b3b3b3"
+           id="tspan2060">pressio.github.io/</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:21.1667px;font-family:Avenir;-inkscape-font-specification:'Avenir, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ff7f2a"
+           id="tspan837">pressio-demoapps</tspan></tspan></text>
+    <path
+       style="fill:#000000;fill-rule:nonzero;stroke:none;stroke-width:1.31503px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 314.46125,117.95921 c 0,0 0,-0.55904 0,-0.55904 -68.36503,0 -273.460176,0.55904 -341.825221,0.55904 68.365045,0 273.460191,0.55903 341.825221,0.55903 0,0 0,-0.55903 0,-0.55903 z"
+       id="path1770-2"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

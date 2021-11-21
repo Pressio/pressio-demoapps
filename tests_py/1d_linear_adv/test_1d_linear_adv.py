@@ -6,15 +6,32 @@ import numpy as np
 from numpy import linalg as LA
 import pressiodemoapps as pda
 
+def test_applyJacobianFirstOrder():
+  meshPath = str(file_path)+"/mesh_first_order"
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
+  probId   = pda.Advection1d.PeriodicLinear
+  appObj   = pda.create_problem(meshO, probId, pda.InviscidFluxReconstruction.FirstOrder)
+
+  state = appObj.initialCondition()
+  print(state)
+
+  operand = np.arange(state.size)
+  print(operand)
+  result = appObj.createApplyJacobianResult(operand)
+  appObj.applyJacobian(state, 0., operand, result)
+  assert(result[0] == 19900.)
+  for it in result[1:]:
+    assert(it == -100.)
+
 def test_weno3():
   def analytical(x, t):
     pixmt = np.pi * (x-t)
     return np.sin(pixmt)**4
 
   meshPath = str(file_path)+"/mesh_weno3"
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno3)
+  appObj   = pda.create_problem(meshO, probId, pda.InviscidFluxReconstruction.Weno3)
 
   x = meshO.viewX()
   yn = analytical(x, 0.)
@@ -33,9 +50,9 @@ def test_weno5():
     return np.sin(np.pi * (x-t) )
 
   meshPath = str(file_path)+"/mesh_weno5"
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.Advection1d.PeriodicLinear
-  appObj   = pda.createProblem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)
+  appObj   = pda.create_problem(meshO, probId, pda.InviscidFluxReconstruction.Weno5)
 
   x = meshO.viewX()
   yn = analytical(x, 0.)

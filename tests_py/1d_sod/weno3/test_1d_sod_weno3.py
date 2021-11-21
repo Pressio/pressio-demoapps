@@ -8,16 +8,16 @@ import pressiodemoapps as pda
 
 def test_create_vel():
   meshPath = str(file_path)
-  meshO    = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createProblem(meshO, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno3)
+  meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
+  appObj   = pda.create_problem(meshO, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno3)
   v = appObj.createVelocity()
   print(v.shape)
   assert(v.shape[0] == 300)
 
 def test_run():
   meshPath = str(file_path)
-  meshObj  = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createProblem(meshObj, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno3)
+  meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
+  appObj   = pda.create_problem(meshObj, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno3)
 
   yn = appObj.initialCondition()
   dt = 0.001
@@ -34,6 +34,7 @@ def test_run():
   # x = meshObj.viewX()
   # plt.plot(x, yn[0:-1:3])
   # plt.show()
+
 
 if __name__ == '__main__':
   test_create_vel()

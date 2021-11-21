@@ -8,8 +8,9 @@ import pressiodemoapps as pda
 
 def test_run():
   meshPath = str(file_path)
-  meshObj  = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createProblem(meshObj, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno5)
+  meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
+  scheme = pda.InviscidFluxReconstruction.Weno5
+  appObj   = pda.create_problem(meshObj, pda.Euler1d.Sod, scheme)
 
   yn = appObj.initialCondition()
   dt = 0.001

@@ -16,10 +16,10 @@ def computePressure(rho, u, v, w, E):
 
 def test_run():
   meshPath = str(file_path)
-  meshObj  = pda.loadCellCenterUniformMesh(meshPath)
-  appObj   = pda.createProblem(meshObj,
-                               pda.Euler3d.SedovSymmetry,
-                               pda.InviscidFluxReconstruction.FirstOrder)
+  meshObj  = pda.load_cellcentered_uniform_mesh(meshPath)
+  appObj   = pda.create_problem(meshObj,
+                                pda.Euler3d.SedovSymmetry,
+                                pda.InviscidFluxReconstruction.FirstOrder)
 
   dt = 0.0001
   Nsteps = int(0.025/dt)
@@ -38,7 +38,7 @@ def test_run():
   # fig = plt.figure()
   # ax = plt.axes(projection ="3d")
   # coords = np.loadtxt('coordinates.dat', dtype=float)
-  # x, y, z = coords[:,1], coords[:,2], coords[:,3] 
+  # x, y, z = coords[:,1], coords[:,2], coords[:,3]
   # rho = yn[0::5]
   # u   = yn[1::5]/rho
   # v   = yn[2::5]/rho

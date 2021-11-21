@@ -25,7 +25,7 @@ def str2bool(v):
     raise argparse.ArgumentTypeError('Boolean value expected.')
 
 #=========================================================================
-def main(workDir, debug, fullMeshDir, tilingDir):
+def main(workDir, debug, fullMeshDir, tilingDir, smGIDsFile):
   dim,dx,dy,dz,samplesMeshSize, stencilMeshSize, domainBounds,stencilSize = readMeshInfo(fullMeshDir)
   _,x,y,z = readMeshCoordinates(fullMeshDir, dim)
   G,gids = readMeshConnec(fullMeshDir)
@@ -36,7 +36,7 @@ def main(workDir, debug, fullMeshDir, tilingDir):
     print("\n")
 
   # read list of GIDs for the sample mesh
-  sampleMeshGIDs = np.loadtxt(workDir+"/sample_mesh_gids.dat", dtype=np.int64)
+  sampleMeshGIDs = np.loadtxt(smGIDsFile, dtype=np.int64)
   sampleMeshGIDs = np.sort(sampleMeshGIDs)
   if debug:
     print("Sample mesh gids:")
@@ -218,13 +218,18 @@ if __name__== "__main__":
   parser = ArgumentParser()
 
   parser.add_argument(
-    "-o", "--outDir", "--outdir",
-    dest="wdir",
-    help="Full path to where to store all the mesh output files.")
-
-  parser.add_argument(
     "-d", "-debug", "--debug",
     type=bool, dest="debug", default=False)
+
+  parser.add_argument(
+    "--sampleMeshIndices",
+    dest="sampleMeshGIDsFile", default=None,
+    help="Full path to text file with indices of cells to use as sample mesh celles")
+
+  parser.add_argument(
+    "-o", "--outDir", "--outdir", "--workDir",
+    dest="wdir",
+    help="Full path to where to store all the mesh output files.")
 
   parser.add_argument(
     "--fullMeshDir", "--fullmeshdir", "--fullmeshDir", "--fullMeshdir",
@@ -238,4 +243,15 @@ if __name__== "__main__":
   # ------------------------------------
 
   assert(args.fullMeshDir != None)
-  main(args.wdir, args.debug, args.fullMeshDir, args.tilingDir)
+
+  # check if working dir exists, if not, make it
+  if not os.path.exists(args.wdir):
+    os.system('mkdir -p ' + args.wdir)
+
+  # by default, we look for file with GIDs in workdir
+  smGIDsFile = args.wdir + "/sample_mesh_gids.dat"
+  # if file is specified by user, use that instead
+  if (args.sampleMeshGIDsFile != None):
+    smGIDsFile = args.sampleMeshGIDsFile
+
+  main(args.wdir, args.debug, args.fullMeshDir, args.tilingDir, smGIDsFile)

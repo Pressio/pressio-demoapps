@@ -2,46 +2,34 @@
 #ifndef PRESSIODEMOAPPS_EULER1D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER1D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./schemes_info.hpp"
+#include "./euler_compute_energy.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
-
 enum class Euler1d{
-  // for periodic, the user must provide a periodic domain and
-  // a default smooth IC is provided
   PeriodicSmooth,
-
-  // sod taken from: https://www.mdpi.com/2227-7390/6/10/211/pdf
-  // x \in [-0.5, 0.5]
-  // initial condition is provided by the app class
   Sod,
-
-  // from https://www.sciencedirect.com/science/article/abs/pii/S0045793019300234
-  // x \in [-5., 5.]
-  // initial condition is provided by the app class
   Lax
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/euler1d/euler1d_app_impl.hpp"
+// this is here because it needs to see the enum above
+#include "./impl/euler_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
+namespace implee1d{
 
-namespace impl{
 template<class mesh_t, class T>
-T createEuler1dImpl(const mesh_t & meshObj,
-		    ::pressiodemoapps::Euler1d probEnum,
-		    ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		    ::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
+T create1dImpl(const mesh_t & meshObj,
+	       ::pressiodemoapps::Euler1d probEnum,
+	       ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	       ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
+
   const auto stencilSize = meshObj.stencilSize();
   const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
   if (!check1){
@@ -51,51 +39,45 @@ T createEuler1dImpl(const mesh_t & meshObj,
 
   if (probEnum == ::pressiodemoapps::Euler1d::PeriodicSmooth){
     if (!meshObj.isPeriodic()){
-      throw std::runtime_error
-      ("For periodicSmooth euler1d, mesh must be periodic.");
+      throw std::runtime_error("For periodicSmooth euler1d, mesh must be periodic.");
     }
   }
 
   return T(meshObj, probEnum, recEnum, fluxEnum);
 }
-} //end pressiodemoapps::impl
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
-			::pressiodemoapps::Euler1d probEnum,
-			::pressiodemoapps::InviscidFluxReconstruction recEnum,
-			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
-{
-
-  using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::ee::impl::Euler1dAppT<
-    scalar_t, mesh_t,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,1>
-    >;
-  return impl::createEuler1dImpl<mesh_t, p_t>(meshObj, probEnum, recEnum, fluxEnum);
-}
-#endif
-
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
-T createEuler1dForPyA(const mesh_t & meshObj,
+T create_problem_for_pyA(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler1d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum,
+					   recEnum, InviscidFluxScheme::Rusanov);
+}
+
+template<class mesh_t, class T>
+T create_problem_for_pyB(const mesh_t & meshObj,
 		      ::pressiodemoapps::Euler1d probEnum,
 		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
 {
-  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
+  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
 }
+#endif
+} //end pressiodemoapps::impl
 
-template<class mesh_t, class T>
-T createEuler1dForPyB(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
+			::pressiodemoapps::Euler1d probEnum,
+			::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
 {
-  return impl::createEuler1dImpl<mesh_t, T>(meshObj, probEnum,
-					    recEnum, InviscidFluxScheme::Rusanov);
+  using p_t = ::pressiodemoapps::implee1d::EigenEuler1dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return implee1d::create1dImpl<mesh_t, RetType>(meshObj, probEnum,
+						 recEnum, fluxEnum);
 }
 #endif
 

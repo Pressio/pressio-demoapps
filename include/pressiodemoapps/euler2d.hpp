@@ -2,15 +2,12 @@
 #ifndef PRESSIODEMOAPPS_EULER2D_INC_HPP_
 #define PRESSIODEMOAPPS_EULER2D_INC_HPP_
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
-#include "Eigen/Core"
-#endif
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
-#include "./reconstruction.hpp"
-#include "flux_enum.hpp"
+#include "./schemes_info.hpp"
+#include "./euler_compute_energy.hpp"
+#include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
 enum class Euler2d{
@@ -25,10 +22,11 @@ enum class Euler2d{
 };
 }//end namespace pressiodemoapps
 
-#include "./impl_apps/euler2d/euler2d_app_impl.hpp"
+#include "./impl/euler_2d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impl{
+namespace implee2d{
+
 template<class mesh_t, class T>
 T createEe2dImpl(const mesh_t & meshObj,
 		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
@@ -51,7 +49,6 @@ T createEe2dImpl(const mesh_t & meshObj,
       ("Double mach reflection does NOT currently suppot Weno5.");
   }
 
-
   if (probEnum == ::pressiodemoapps::Euler2d::PeriodicSmooth)
   {
     if (!meshObj.isPeriodic()){
@@ -68,83 +65,66 @@ T createEe2dImpl(const mesh_t & meshObj,
     }
   }
 
-
   return T(meshObj, probEnum, recEnum, fluxEnum, icId);
 }
-} //end pressiodemoapps::impl
 
-#ifdef PRESSIODEMOAPPS_ENABLE_TPL_EIGEN
+
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class T>
+T create_problem_for_pyA(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler2d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+{
+  return implee2d::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					     InviscidFluxScheme::Rusanov, 1);
+}
+
+template<class mesh_t, class T>
+T create_problem_for_pyB(const mesh_t & meshObj,
+		      ::pressiodemoapps::Euler2d probEnum,
+		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		      const int ic)
+{
+  return implee2d::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+					     InviscidFluxScheme::Rusanov, ic);
+}
+#endif
+
+} //end pressiodemoapps::implee2d
+
+#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
 			::pressiodemoapps::InviscidFluxScheme fluxEnum,
 			int initCondIdentifier)
 {
-
-  using scalar_t = typename mesh_t::scalar_t;
-  using p_t = ::pressiodemoapps::ee::impl::Euler2dAppT<
-    scalar_t, mesh_t,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,1>,
-    Eigen::Matrix<scalar_t,-1,-1, Eigen::RowMajor>
-    >;
-
-  return impl::createEe2dImpl<mesh_t, p_t>(meshObj, recEnum, probEnum,
-					   fluxEnum, initCondIdentifier);
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return implee2d::createEe2dImpl<mesh_t, RetType>(meshObj, recEnum, probEnum,
+						   fluxEnum, initCondIdentifier);
 }
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum,
 			const int initCondIdentifier)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum,
+  return create_problem_eigen(meshObj, probEnum, recEnum,
 			    InviscidFluxScheme::Rusanov, initCondIdentifier);
 }
 
 template<class mesh_t>
-auto createProblemEigen(const mesh_t & meshObj,
+auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::Euler2d probEnum,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
-  return createProblemEigen(meshObj, probEnum, recEnum, InviscidFluxScheme::Rusanov, 1);
+  return create_problem_eigen(meshObj, probEnum, recEnum,
+			    InviscidFluxScheme::Rusanov, 1);
 }
 #endif
 
-#ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T createEuler2dForPyA(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler2d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		     ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-		     const int initCondIdentifier = 1)
-{
-  return impl::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 fluxEnum, initCondIdentifier);
-}
-
-template<class mesh_t, class T>
-T createEuler2dForPyB(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler2d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		     const int icId = 1)
-{
-  return impl::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov, icId);
-}
-
-
-template<class mesh_t, class T>
-T createEuler2dForPyC(const mesh_t & meshObj,
-		     ::pressiodemoapps::Euler2d probEnum,
-		     ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return impl::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					 InviscidFluxScheme::Rusanov, 1);
-}
-#endif
-
-}
+}//end namespace pressiodemoapps
 #endif

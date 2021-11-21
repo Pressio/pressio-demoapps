@@ -4,5 +4,6 @@
 
 #include "./resize.hpp"
 #include "./extent.hpp"
+#include "./set_zero.hpp"
 
 #endif
