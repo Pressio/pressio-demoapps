@@ -47,7 +47,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   probId  = pda.Euler1d.SedovFull
+   probId  = pda.Euler2d.SedovFull
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
    state   = problem.initialCondition()

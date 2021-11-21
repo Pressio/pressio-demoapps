@@ -48,8 +48,10 @@ C++ synopsis
    namespace pda = pressiodemoapps;
    const auto probId = pda::Euler2d::Riemann;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId]);
    auto state	     = problem.initialCondition();
+
+Where the ``icId`` is an integer identifying the initial condition above.
 
 Python synopsis
 ---------------
@@ -57,11 +59,12 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   probId  = pda.Euler1d.Riemann
+   probId  = pda.Euler2d.Riemann
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
-   problem = pda.create_problem(meshObj, probId, scheme)
+   problem = pda.create_problem(meshObj, probId, scheme [, icId])
    state   = problem.initialCondition()
 
+Where the ``icId`` is an integer identifying the initial condition above.
 
 
 Sample Plot

@@ -5,6 +5,7 @@
     :maxdepth: 2
 
     diffusion_reaction_2d
+    swe_2d
     euler_2d_smooth
     euler_2d_kelvin_helmholtz
     euler_2d_sedov_full

@@ -41,7 +41,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   probId  = pda.Euler1d.DoubleMachReflection
+   probId  = pda.Euler2d.DoubleMachReflection
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3
    problem = pda.create_problem(meshObj, probId, scheme)
    state   = problem.initialCondition()
