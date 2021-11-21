@@ -244,15 +244,14 @@ if __name__== "__main__":
 
   assert(args.fullMeshDir != None)
 
-  # by default, we look for file with GIDs in workdir
-  smGIDsFile = args.wdir + "/sample_mesh_gids.dat",
-  # if file is specified by user, use that instead
-  if (args.sampleMeshGIDsFile != None):
-    smGIDsFile = args.sampleMeshGIDsFile
-
   # check if working dir exists, if not, make it
   if not os.path.exists(args.wdir):
     os.system('mkdir -p ' + args.wdir)
 
-  print(args.sampleMeshGIDsFile)
+  # by default, we look for file with GIDs in workdir
+  smGIDsFile = args.wdir + "/sample_mesh_gids.dat"
+  # if file is specified by user, use that instead
+  if (args.sampleMeshGIDsFile != None):
+    smGIDsFile = args.sampleMeshGIDsFile
+
   main(args.wdir, args.debug, args.fullMeshDir, args.tilingDir, smGIDsFile)
