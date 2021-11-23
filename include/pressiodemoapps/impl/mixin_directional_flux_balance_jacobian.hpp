@@ -63,8 +63,8 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
     r2 = graph(smPt, 6);
   }
   else if(dim==2){
-    l1 = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
-    r1 = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
+    l2 = (axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+    r2 = (axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
   }
   else if(dim==3){
     throw std::runtime_error("get_left_right_for_3dim_celljacweno MISSING");

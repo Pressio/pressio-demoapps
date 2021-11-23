@@ -74,8 +74,10 @@ protected:
 
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
+
     initializeJacobianForNearBoundaryCells(trList);
     initializeJacobianForInnerCells(trList);
+
     J.setFromTriplets(trList.begin(), trList.end());
     // compress to make it Csr
     if (!J.isCompressed()){
@@ -189,7 +191,7 @@ private:
 	  (m_recEn == InviscidFluxReconstruction::FirstOrder) ? 4
 	    : (m_recEn == InviscidFluxReconstruction::Weno3) ? 8 : 12;
 
-	for (int i=1; i<=numNeighbors; ++i){
+ 	for (int i=1; i<=numNeighbors; ++i){
 	  const auto ci = graph(smPt, i)*numDofPerCell;
 	  for (int k=0; k<numDofPerCell; ++k){
 	    for (int j=0; j<numDofPerCell; ++j){
@@ -365,7 +367,6 @@ private:
     }
   }
 
-
   template<class U_t, class V_t>
   void velocityAndJacInnerCellsImpl(const U_t & U,
 				    const scalar_type currentTime,
@@ -448,6 +449,7 @@ private:
     const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
+      std::cout << it << " " << smPt << "\n";
       Fx(smPt);
       Fy(smPt);
     }
