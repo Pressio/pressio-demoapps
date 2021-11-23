@@ -449,7 +449,6 @@ private:
     const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      std::cout << it << " " << smPt << "\n";
       Fx(smPt);
       Fy(smPt);
     }
