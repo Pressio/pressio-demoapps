@@ -36,6 +36,14 @@ if( NOT cmake_build_type_tolower STREQUAL "debug"
 endif()
 
 #=====================================================================
+
+if(PRESSIODEMOAPPS_ENABLE_OPENMP)
+  find_package(OpenMP)
+  if(NOT OpenMP_CXX_FOUND)
+    message(FATAL_ERROR "You enabled OpenMP but I cannot find it")
+  endif()
+endif()
+
 if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
 
   include_directories(
@@ -47,14 +55,18 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
   pybind11_add_module(${modulename} ${CMAKE_CURRENT_SOURCE_DIR}/src_py/main_binder.cc)
   target_compile_definitions(${modulename} PRIVATE MODNAME=${modulename})
   target_compile_definitions(${modulename} PRIVATE PRESSIODEMOAPPS_ENABLE_BINDINGS)
+  if(PRESSIODEMOAPPS_ENABLE_OPENMP)
+    target_compile_definitions(${modulename} PRIVATE PRESSIODEMOAPPS_ENABLE_OPENMP)
+    target_link_libraries(${modulename} OpenMP::OpenMP_CXX)
+  endif()
 
 else()
 
-  find_package(OpenMP)
-  if(OpenMP_CXX_FOUND)
+  if(PRESSIODEMOAPPS_ENABLE_OPENMP)
     add_compile_definitions(PRESSIODEMOAPPS_ENABLE_OPENMP)
     link_libraries(OpenMP::OpenMP_CXX)
   endif()
+  #add_compile_definitions(EIGEN_DONT_PARALLELIZE)
 
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()
@@ -64,6 +76,14 @@ else()
       ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
     add_subdirectory(tests_mesh)
     add_subdirectory(tests_cpp)
+  endif()
+
+  if(PRESSIODEMOAPPS_ENABLE_PERF)
+    include_directories(
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
+      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
+    add_subdirectory(tests_perf)
   endif()
 
 endif()

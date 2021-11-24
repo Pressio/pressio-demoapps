@@ -701,21 +701,21 @@ private:
       FillStencilJacX(smPt, it);
       auto bcTypeX = findCellBdType(smPt, xAxis);
       const auto & factorsX = (bcTypeX == 1) ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcJacX(smPt, factorsX, 1);
+      funcJacX(smPt, factorsX, bcTypeX);
 
       FillStencilVeloY(smPt, it);
       funcVeloY(smPt);
       FillStencilJacY(smPt, it);
       auto bcTypeY = findCellBdType(smPt, yAxis);
       const auto & factorsY = (bcTypeY == 1) ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcJacY(smPt, factorsY, 1);
+      funcJacY(smPt, factorsY, bcTypeY);
 
       FillStencilVeloZ(smPt, it);
       funcVeloZ(smPt);
       FillStencilJacZ(smPt, it);
       auto bcTypeZ = findCellBdType(smPt, zAxis);
       const auto & factorsZ = (bcTypeZ == 1) ? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
-      funcJacZ(smPt, factorsZ, 1);
+      funcJacZ(smPt, factorsZ, bcTypeZ);
 
     }
   }

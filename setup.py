@@ -22,20 +22,25 @@ def description():
   with open(os.path.join(topdir, 'DESCRIPTION.rst')) as f:
     return f.read()
 
-# # ----------------------------------------------
-# # overload install command
-# # ----------------------------------------------
-# class install(_install):
-#   user_options = _install.user_options
+# ----------------------------------------------
+# overload install command
+# ----------------------------------------------
+class install(_install):
+  user_options = _install.user_options + [
+    ('enable-openmp=', None, "Enable OpenMP")
+  ]
 
-#   def initialize_options(self):
-#     _install.initialize_options(self)
+  def initialize_options(self):
+    _install.initialize_options(self)
+    self.enable-openmp = False
 
-#   def finalize_options(self):
-#     _install.finalize_options(self)
+  def finalize_options(self):
+    _install.finalize_options(self)
 
-#   def run(self):
-#     _install.run(self)
+  def run(self):
+    global enableOpenMP
+    enableOpenMP = self.enable-openmp
+    _install.run(self)
 
 # ----------------------------------------------
 # A CMakeExtension needs a sourcedir instead of a file list.
@@ -68,12 +73,17 @@ class CMakeBuild(build_ext):
     # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
     # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
     # from Python.
+    ompstring = "Off"
+    if (enableOpenMP):
+      ompstring = "On"
+
     cmake_args = [
       "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
       "-DPYTHON_EXECUTABLE={}".format(sys.executable),
       "-DCMAKE_BUILD_TYPE={}".format(buildMode),
       "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
-      "-DCMAKE_VERBOSE_MAKEFILE=On"
+      "-DCMAKE_VERBOSE_MAKEFILE=On",
+      "-DPRESSIODEMOAPPS_ENABLE_OPENMP=".format(ompstring)
       #"-DVERSION_INFO={}".format(self.distribution.get_version()),
     ]
     build_args = []
@@ -120,8 +130,10 @@ def run_setup():
     },
 
     ext_modules=[CMakeExtension("pressiodemoapps._pressiodemoappsimpl")],
-    #cmdclass={"build_ext": CMakeBuild, "install"  : install},
-    cmdclass={"build_ext": CMakeBuild},
+    cmdclass={"build_ext": CMakeBuild,
+              "install"  : install},
+    #cmdclass={"build_ext": CMakeBuild},
+
     install_requires=["numpy", "scipy", "matplotlib", "sklearn"],
     zip_safe=False,
 

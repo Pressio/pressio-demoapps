@@ -450,10 +450,11 @@ private:
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
+
       FillStencilX(smPt, it);
-      funcx(smPt, bdCellJacFactorsX, 1);
+      funcx(smPt, bdCellJacFactorsX, 1); //1 signals a reflective BC
       FillStencilY(smPt, it);
-      funcy(smPt, bdCellJacFactorsY, 1);
+      funcy(smPt, bdCellJacFactorsY, 1); //1 signals a reflective BC
       addForcingContributionToVelocityAndJacobian(U, V, J, smPt);
     }
   }

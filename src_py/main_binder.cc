@@ -37,9 +37,11 @@ void bindCommonApiMethods(T & appObj)
   appObj.def("velocity", &p_t::velocity);
 
   appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank1);
-  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank2);
+  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank2_ll);
+  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank2_lr);
   appObj.def("applyJacobian", &p_t::applyJacobianRank1);
-  appObj.def("applyJacobian", &p_t::applyJacobianRank2);
+  appObj.def("applyJacobian", &p_t::applyJacobianRank2_ll);
+  appObj.def("applyJacobian", &p_t::applyJacobianRank2_lr);
 }
 
 // ---------------------------

@@ -3,10 +3,10 @@
 #include "pressio/ode_advancers.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
+#include <chrono>
 
 int main(int argc, char *argv[])
 {
-
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO5
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
   FomObserver<state_t> Obs("kelvin_helmholtz_2d_solution.bin", 5);
 
   const auto dt = 0.010439892262204077;
-  const auto Nsteps =  4790;
+  const auto Nsteps = 4790;
   pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;

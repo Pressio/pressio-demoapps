@@ -477,7 +477,9 @@ private:
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       sF(smPt, it);
-      F(smPt, bdCellJacFactors, 0);
+      // both Sod and Lax have Neumann BC type
+      const auto bcType = 0;
+      F(smPt, bdCellJacFactors, bcType);
     }
   }
 

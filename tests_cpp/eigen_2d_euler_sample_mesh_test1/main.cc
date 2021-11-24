@@ -40,6 +40,7 @@ void writeToFileSparseMat(const T & obj, const std::string & fileName)
 int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
+
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 #ifdef USE_WENO5
   const auto order   = pda::InviscidFluxReconstruction::Weno5;
@@ -73,8 +74,8 @@ int main(int argc, char *argv[])
   auto time = 0.0;
   auto velo = appObj.createVelocity();
   auto jac  = appObj.createJacobian();
-  appObj.velocity(state, time, velo);
-  appObj.jacobian(state, time, jac);
+  appObj.velocityAndJacobian(state, time, velo, jac);
+  //appObj.jacobian(state, time, jac);
 
   writeToFileRank1(state,   "state.txt");
   writeToFileRank1(velo,    "velo.txt");

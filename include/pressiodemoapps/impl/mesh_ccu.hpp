@@ -39,6 +39,7 @@ public:
   explicit CellCenteredUniformMesh(const std::string & meshDir)
   {
     allocateAndSetup(meshDir);
+    m_meshIsPeriodic = checkIfPeriodic();
   }
 
 #else
@@ -53,6 +54,7 @@ public:
     : m_x(1), m_y(1), m_z(1), m_graph({1,1})
   {
     allocateAndSetup(meshDir);
+    m_meshIsPeriodic = checkIfPeriodic();
   }
 #endif
 
@@ -95,20 +97,8 @@ public:
     return m_rowsForCellsBd;
   }
 
-  // mesh connectivity is periodic if for each mesh cell,
-  // all neighbors global GIDs are non-negative.
   bool isPeriodic() const{
-    // Note that we need to check along ALL directions.
-    const auto n = (m_stencilSize-1)*m_dim;
-
-    for (index_t i=0; i<m_sampleMeshSize; ++i){
-      for (index_t j=0; j<n+1; ++j){
-	if (m_graph(i, j) < 0){
-	  return false;
-	}
-      }
-    }
-    return true;
+    return m_meshIsPeriodic;
   }
 
   // 1d
@@ -250,6 +240,21 @@ public:
 
 
 private:
+  // mesh connectivity is periodic if for each mesh cell,
+  // all neighbors global GIDs are non-negative.
+  bool checkIfPeriodic(){
+    // Note that we need to check along ALL directions.
+    const auto n = (m_stencilSize-1)*m_dim;
+    for (index_t i=0; i<m_sampleMeshSize; ++i){
+      for (index_t j=0; j<n+1; ++j){
+	if (m_graph(i, j) < 0){
+	  return false;
+	}
+      }
+    }
+    return true;
+  }
+
   auto boundsImpl(int i) const
   {
     using numlimits = std::numeric_limits<scalar_type>;
@@ -370,6 +375,7 @@ private:
   indices_v_t m_rowsForCellsInner;
   indices_v_t m_rowsForCellsBd;
 
+  bool m_meshIsPeriodic = false;
 };
 
 }}
