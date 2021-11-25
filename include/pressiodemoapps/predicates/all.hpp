@@ -7,5 +7,7 @@
 #endif
 
 #include "./is_subscriptable.hpp"
+#include "./native_eigen_vector.hpp"
+#include "./native_eigen_sparse_matrix.hpp"
 
 #endif

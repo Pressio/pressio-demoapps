@@ -44,7 +44,8 @@ public:
     : m_meshObj(meshObj),
       m_numDofStencilMesh(m_meshObj.stencilMeshSize()),
       m_numDofSampleMesh(m_meshObj.sampleMeshSize()),
-      m_probEn(probEnum), m_recEn(recEnum)
+      m_probEn(probEnum),
+      m_recEn(recEnum)
   {
 
     if (m_meshObj.stencilSize() != 3){
@@ -54,9 +55,6 @@ public:
     m_sourceFunctor = sourceFunctor;
     m_diffusionCoeff = diffusionCoeff;
     m_reactionCoeff = reactionCoeff;
-
-    const auto stencilSize = reconstructionTypeToStencilSize(recEnum);
-    ::pressiodemoapps::resize(m_stencilVals, numDofPerCell*stencilSize);
     allocateGhosts();
   }
 
@@ -174,12 +172,15 @@ private:
     // note that numDofPerCell == 1, so we omit it below
 
     // stencil filler needed because we are doing cells near boundaries
+
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    stencil_values_t stencilVals(numDofPerCell*stencilSize);
+
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell,
       stencil_values_t, U_t, MeshType, ghost_container_type>;
-    sfiller_t StencilFiller(reconstructionTypeToStencilSize(m_recEn),
-			    U, m_meshObj, m_ghostLeft,
-			    m_ghostRight, m_stencilVals);
+    sfiller_t StencilFiller(stencilSize, U, m_meshObj, m_ghostLeft,
+			    m_ghostRight, stencilVals);
 
     const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
     const auto & graph  = m_meshObj.graph();
@@ -206,13 +207,13 @@ private:
       V(smPt) += m_reactionCoeff*U(uIndex)*U(uIndex);
 
       // ADD to V diffusion contribution
-      const auto fd = m_stencilVals(2) - two*m_stencilVals(1) + m_stencilVals(0);
+      const auto fd = stencilVals(2) - two*stencilVals(1) + stencilVals(0);
       V(smPt) += dxInvSq*m_diffusionCoeff*fd;
 
       if (m_probEn == ::pressiodemoapps::DiffusionReaction1d::ProblemA && J)
       {
 	// the 3 here stems from the contribution from ghost cell
-	auto jvalue = -three*diffDxInvSq + twoReacCoeff*m_stencilVals(1);
+	auto jvalue = -three*diffDxInvSq + twoReacCoeff*stencilVals(1);
 	(*J).coeffRef(smPt, uIndex) += jvalue;
 
 	if (uIndexLeft != -1){
@@ -291,11 +292,15 @@ protected:
 
   scalar_type m_diffusionCoeff = {};
   scalar_type m_reactionCoeff = {};
-
-  mutable stencil_values_t m_stencilVals;
   mutable ghost_container_type m_ghostLeft;
   mutable ghost_container_type m_ghostRight;
 };
+
+template<class MeshType>
+constexpr int EigenDiffReac1dApp<MeshType>::numDofPerCell;
+
+template<class MeshType>
+constexpr int EigenDiffReac1dApp<MeshType>::dimensionality;
 
 }}
 #endif

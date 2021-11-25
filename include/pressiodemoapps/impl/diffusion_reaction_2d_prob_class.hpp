@@ -5,6 +5,10 @@
 #include "functor_fill_stencil.hpp"
 #include "diffusion_reaction_2d_ghost_filler.hpp"
 
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#include <omp.h>
+#endif
+
 namespace pressiodemoapps{ namespace impldiffreac{
 
 // this is the default source functor
@@ -32,8 +36,8 @@ public:
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
-  static constexpr int	   dimensionality{2};
-  static constexpr index_t numDofPerCell{1};
+  static constexpr int dimensionality{2};
+  static constexpr int numDofPerCell{1};
 
 private:
   using ghost_container_type   = Eigen::Matrix<scalar_type,Eigen::Dynamic,Eigen::Dynamic, Eigen::RowMajor>;
@@ -50,7 +54,8 @@ public:
     : m_meshObj(meshObj),
       m_numDofStencilMesh(m_meshObj.stencilMeshSize()*numDofPerCell),
       m_numDofSampleMesh(m_meshObj.sampleMeshSize()*numDofPerCell),
-      m_probEn(probEnum), m_recEn(recEnum)
+      m_probEn(probEnum),
+      m_recEn(recEnum)
   {
     if (m_meshObj.stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction2d currently, only supports 3-pt stencil");
@@ -59,9 +64,6 @@ public:
     m_sourceFunctor = sf;
     m_diffusionCoeff = diffusionCoeff;
     m_reactionCoeff = reactionCoeff;
-
-    const auto stencilSize = reconstructionTypeToStencilSize(recEnum);
-    ::pressiodemoapps::resize(m_stencilVals, numDofPerCell*stencilSize);
     allocateGhosts();
   }
 
@@ -128,25 +130,49 @@ protected:
   // note that here we MUST use a template because when doing
   // bindings, this gets deduced to be a Ref
   template<class U_t, class V_t>
-  void velocityAndOptionalJacobian(const U_t & state,
+  void velocityAndOptionalJacobian(const U_t & U,
 				   const scalar_type currentTime,
 				   V_t & V,
 				   jacobian_type * J) const
   {
-    fillGhostsIfNeeded(state);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp parallel
+{
+#endif
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+    ::pressiodemoapps::set_zero_omp(V);
+#else
+    ::pressiodemoapps::set_zero(V);
+#endif
+
+    if (J){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+      ::pressiodemoapps::set_zero_omp(*J);
+#else
+      ::pressiodemoapps::set_zero(*J);
+#endif
+    }
+
+    fillGhostsIfNeeded(U);
 
     int nonZerosCountBeforeComputing = 0;
     if (J){
       nonZerosCountBeforeComputing = J->nonZeros();
-      ::pressiodemoapps::set_zero(*J);
     }
 
-    velocityAndOptionalJacobianNearBd(state, currentTime, V, J);
-    velocityAndOptionalJacobianInnerCells(state, currentTime, V, J);
+    velocityAndOptionalJacobianNearBd(U, currentTime, V, J);
+    velocityAndOptionalJacobianInnerCells(U, currentTime, V, J);
 
     if (J){
       assert(nonZerosCountBeforeComputing == J->nonZeros());
     }
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+}//end omp parallel
+#endif
+
   }
 
 private:
@@ -162,6 +188,9 @@ private:
 			 m_ghostRight, m_ghostBack);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
       for (int it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it);
       }
@@ -180,18 +209,20 @@ private:
     constexpr int xAxis = 1;
     constexpr int yAxis = 2;
 
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+
     // stencil filler needed because we are doing cells near boundaries
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, numDofPerCell,
       stencil_container_type, U_t, MeshType, ghost_container_type>;
 
-    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
 			     m_ghostLeft, m_ghostRight,
-			     m_stencilVals, xAxis);
+			     stencilVals, xAxis);
     sfiller_t StencilFillerY(stencilSize, U, m_meshObj,
 			     m_ghostBack, m_ghostFront,
-			     m_stencilVals, yAxis);
+			     stencilVals, yAxis);
 
     const auto & x	    = m_meshObj.viewX();
     const auto & y          = m_meshObj.viewY();
@@ -205,6 +236,9 @@ private:
     const auto diffDyInvSq  = m_diffusionCoeff*dyInvSq;
 
     const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (std::size_t it=0; it<rows.size(); ++it)
     {
       const auto smPt        = rows[it];
@@ -222,19 +256,19 @@ private:
 
       // *** add X contribution of diffusion ***
       StencilFillerX(smPt, it);
-      V(smPt) += dxInvSq*m_diffusionCoeff*( m_stencilVals(2)
-					    -two*m_stencilVals(1)
-					    +m_stencilVals(0) );
+      V(smPt) += dxInvSq*m_diffusionCoeff*( stencilVals(2)
+					    -two*stencilVals(1)
+					    +stencilVals(0) );
 
       // *** add Y contribution of diffusion ***
       StencilFillerY(smPt, it);
-      V(smPt) += dyInvSq*m_diffusionCoeff*( m_stencilVals(2)
-					    -two*m_stencilVals(1)
-					    +m_stencilVals(0) );
+      V(smPt) += dyInvSq*m_diffusionCoeff*( stencilVals(2)
+					    -two*stencilVals(1)
+					    +stencilVals(0) );
 
       if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA && J)
       {
-	auto selfValue = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*m_stencilVals(1);
+	auto selfValue = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*stencilVals(1);
 
 	if (uIndexLeft != -1){
 	  J->coeffRef(smPt, uIndexLeft) += diffDxInvSq;
@@ -285,6 +319,9 @@ private:
     const auto diffDyInvSq  = m_diffusionCoeff*dyInvSq;
 
     const auto & rows   = m_meshObj.graphRowsOfCellsAwayFromBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (std::size_t it=0; it<rows.size(); ++it)
     {
       const auto smPt        = rows[it];
@@ -348,12 +385,14 @@ protected:
   scalar_type m_diffusionCoeff = {};
   scalar_type m_reactionCoeff = {};
 
-  mutable stencil_container_type m_stencilVals;
   mutable ghost_container_type m_ghostLeft;
   mutable ghost_container_type m_ghostFront;
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 };
+
+template<class MeshType> constexpr int EigenDiffReac2dApp<MeshType>::numDofPerCell;
+template<class MeshType> constexpr int EigenDiffReac2dApp<MeshType>::dimensionality;
 
 }}
 #endif

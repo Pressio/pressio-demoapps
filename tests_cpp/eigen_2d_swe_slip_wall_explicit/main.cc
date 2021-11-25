@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
   pressio::log::initialize(pressio::logto::terminal);
-  pressio::log::setVerbosity({pressio::log::level::debug});
+  pressio::log::setVerbosity({pressio::log::level::info});
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");

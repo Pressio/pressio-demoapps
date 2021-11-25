@@ -5,7 +5,7 @@ import sys
 import subprocess
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-#from setuptools.command.install import install as _install
+from setuptools.command.install import install as _install
 
 topdir = os.path.abspath(os.path.dirname(__file__))
 
@@ -32,14 +32,14 @@ class install(_install):
 
   def initialize_options(self):
     _install.initialize_options(self)
-    self.enable-openmp = False
+    self.enable_openmp = False
 
   def finalize_options(self):
     _install.finalize_options(self)
 
   def run(self):
     global enableOpenMP
-    enableOpenMP = self.enable-openmp
+    enableOpenMP = self.enable_openmp
     _install.run(self)
 
 # ----------------------------------------------
@@ -75,6 +75,7 @@ class CMakeBuild(build_ext):
     # from Python.
     ompstring = "Off"
     if (enableOpenMP):
+      print("ENableing OMP")
       ompstring = "On"
 
     cmake_args = [
@@ -83,7 +84,7 @@ class CMakeBuild(build_ext):
       "-DCMAKE_BUILD_TYPE={}".format(buildMode),
       "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
       "-DCMAKE_VERBOSE_MAKEFILE=On",
-      "-DPRESSIODEMOAPPS_ENABLE_OPENMP=".format(ompstring)
+      "-DPRESSIODEMOAPPS_ENABLE_OPENMP=On"
       #"-DVERSION_INFO={}".format(self.distribution.get_version()),
     ]
     build_args = []

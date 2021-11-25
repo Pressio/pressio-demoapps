@@ -14,6 +14,10 @@
 #include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#include <omp.h>
+#endif
+
 namespace pressiodemoapps{ namespace implswe{
 
 template<class MeshType>
@@ -27,8 +31,8 @@ public:
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
-  static constexpr int	   dimensionality{2};
-  static constexpr index_t numDofPerCell{3};
+  static constexpr int dimensionality{2};
+  static constexpr int numDofPerCell{3};
 
 private:
   using ghost_container_type      = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -49,7 +53,6 @@ public:
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
-    allocateStencilValuesContainer();
     allocateGhosts();
   }
 
@@ -97,6 +100,13 @@ protected:
 				   jacobian_type * J) const
   {
 
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp parallel
+{
+#endif
+
+    // these are private variables for each thread
+    // when openmp is enabled
     // reconstructions values
     edge_rec_type uMinusHalfNeg, uMinusHalfPos;
     edge_rec_type uPlusHalfNeg,  uPlusHalfPos;
@@ -104,54 +114,27 @@ protected:
     flux_type fluxL, fluxF;
     flux_type fluxR, fluxB;
 
-    // flux jacobians
-    flux_jac_type fluxJacLNeg, fluxJacLPos;
-    flux_jac_type fluxJacFNeg, fluxJacFPos;
-    flux_jac_type fluxJacRNeg, fluxJacRPos;
-    flux_jac_type fluxJacBNeg, fluxJacBPos;
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+    ::pressiodemoapps::set_zero_omp(V);
+#else
+    ::pressiodemoapps::set_zero(V);
+#endif
+
+    if (J){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+      ::pressiodemoapps::set_zero_omp(*J);
+#else
+      ::pressiodemoapps::set_zero(*J);
+#endif
+    }
 
     fillGhosts(U);
 
-    V.setZero();
-
-    int nonZerosCountBeforeComputing = 0;
     if (J){
-      nonZerosCountBeforeComputing = J->nonZeros();
-      ::pressiodemoapps::set_zero(*J);
-
-      // near boundary I have be careful because
-      // the jacobian can only be first order for now
-      if (m_recEn == InviscidFluxReconstruction::FirstOrder){
-	velocityAndJacNearBDCellsImplFirstOrder(U, currentTime, V, *J,
-						fluxL, fluxF, fluxR, fluxB,
-						fluxJacLNeg, fluxJacLPos,
-						fluxJacFNeg, fluxJacFPos,
-						fluxJacRNeg, fluxJacRPos,
-						fluxJacBNeg, fluxJacBPos,
-						uMinusHalfNeg, uMinusHalfPos,
-						uPlusHalfNeg,  uPlusHalfPos);
-      }
-      else{
-	velocityAndJacNearBDCellsImplDifferentScheme(U, currentTime, V, *J,
-						     fluxL, fluxF, fluxR, fluxB,
-						     fluxJacLNeg, fluxJacLPos,
-						     fluxJacFNeg, fluxJacFPos,
-						     fluxJacRNeg, fluxJacRPos,
-						     fluxJacBNeg, fluxJacBPos,
-						     uMinusHalfNeg, uMinusHalfPos,
-						     uPlusHalfNeg,  uPlusHalfPos);
-      }
-
-      velocityAndJacInnerCellsImpl(U, currentTime, V, *J,
-				   fluxL, fluxF, fluxR, fluxB,
-				   fluxJacLNeg, fluxJacLPos,
-				   fluxJacFNeg, fluxJacFPos,
-				   fluxJacRNeg, fluxJacRPos,
-				   fluxJacBNeg, fluxJacBPos,
-				   uMinusHalfNeg, uMinusHalfPos,
-				   uPlusHalfNeg,  uPlusHalfPos);
-
-      assert(J->nonZeros() == nonZerosCountBeforeComputing);
+      velocityAndJacobianImpl(U, currentTime, V, *J,
+			      fluxL, fluxF, fluxR, fluxB,
+			      uMinusHalfNeg, uMinusHalfPos,
+			      uPlusHalfNeg,  uPlusHalfPos);
     }
     else{
       velocityOnlyNearBdCellsImpl(U, currentTime, V,
@@ -164,6 +147,11 @@ protected:
 				 uMinusHalfNeg, uMinusHalfPos,
 				 uPlusHalfNeg,  uPlusHalfPos);
     }
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+}//end omp parallel
+#endif
+
   }
 
 private:
@@ -254,16 +242,25 @@ private:
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
       if (stencilSize==3){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<3>(rowsBd[it], it);
 	}
       }
       else if(stencilSize==5){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<5>(rowsBd[it], it);
 	}
       }
       else{
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
 	for (int it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<7>(rowsBd[it], it);
 	}
@@ -273,6 +270,66 @@ private:
     else{
       // no op
     }
+  }
+
+
+  template<class U_t, class V_t>
+  void velocityAndJacobianImpl(const U_t & U,
+			       const scalar_type currentTime,
+			       V_t & V,
+			       jacobian_type & J,
+			       flux_type & fluxL,
+			       flux_type & fluxF,
+			       flux_type & fluxR,
+			       flux_type & fluxB,
+			       edge_rec_type & uMinusHalfNeg,
+			       edge_rec_type & uMinusHalfPos,
+			       edge_rec_type & uPlusHalfNeg,
+			       edge_rec_type & uPlusHalfPos) const
+  {
+
+    // flux jacobians
+    flux_jac_type fluxJacLNeg, fluxJacLPos;
+    flux_jac_type fluxJacFNeg, fluxJacFPos;
+    flux_jac_type fluxJacRNeg, fluxJacRPos;
+    flux_jac_type fluxJacBNeg, fluxJacBPos;
+
+    int nonZerosCountBeforeComputing = 0;
+    nonZerosCountBeforeComputing = J.nonZeros();
+
+    // near boundary I have be careful because
+    // the jacobian can only be first order for now
+    if (m_recEn == InviscidFluxReconstruction::FirstOrder){
+      velocityAndJacNearBDCellsImplFirstOrder(U, currentTime, V, J,
+					      fluxL, fluxF, fluxR, fluxB,
+					      fluxJacLNeg, fluxJacLPos,
+					      fluxJacFNeg, fluxJacFPos,
+					      fluxJacRNeg, fluxJacRPos,
+					      fluxJacBNeg, fluxJacBPos,
+					      uMinusHalfNeg, uMinusHalfPos,
+					      uPlusHalfNeg,  uPlusHalfPos);
+    }
+    else{
+      velocityAndJacNearBDCellsImplDifferentScheme(U, currentTime, V, J,
+						   fluxL, fluxF, fluxR, fluxB,
+						   fluxJacLNeg, fluxJacLPos,
+						   fluxJacFNeg, fluxJacFPos,
+						   fluxJacRNeg, fluxJacRPos,
+						   fluxJacBNeg, fluxJacBPos,
+						   uMinusHalfNeg, uMinusHalfPos,
+						   uPlusHalfNeg,  uPlusHalfPos);
+    }
+
+    velocityAndJacInnerCellsImpl(U, currentTime, V, J,
+				 fluxL, fluxF, fluxR, fluxB,
+				 fluxJacLNeg, fluxJacLPos,
+				 fluxJacFNeg, fluxJacFPos,
+				 fluxJacRNeg, fluxJacRPos,
+				 fluxJacBNeg, fluxJacBPos,
+				 uMinusHalfNeg, uMinusHalfPos,
+				 uPlusHalfNeg,  uPlusHalfPos);
+
+    assert(J.nonZeros() == nonZerosCountBeforeComputing);
   }
 
   template<class U_t, class V_t>
@@ -355,6 +412,9 @@ private:
 		    );
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
     {
       const auto smPt = graphRows[it];
@@ -394,16 +454,19 @@ private:
     // if here, then the scheme for velocity matches
     // the one for Jacobian so we can use same functors
 
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+
     using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_recEn),
 				   U, m_meshObj, m_ghostLeft, m_ghostRight,
-				   m_stencilVals, xAxis);
+				   stencilVals, xAxis);
 
     stencil_filler_t FillStencilY(reconstructionTypeToStencilSize(m_recEn),
 				   U, m_meshObj, m_ghostBack, m_ghostFront,
-				   m_stencilVals, yAxis);
+				   stencilVals, yAxis);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
@@ -423,7 +486,7 @@ private:
 		       m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
 		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		       /* end args for flux */
-		       toReconstructionScheme(m_recEn), m_stencilVals,
+		       toReconstructionScheme(m_recEn), stencilVals,
 		       uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 		       /* end args for reconstructor */
 		       );
@@ -435,7 +498,7 @@ private:
 		       m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
 		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		       /* end args for flux */
-		       toReconstructionScheme(m_recEn), m_stencilVals,
+		       toReconstructionScheme(m_recEn), stencilVals,
 		       uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 		       /* end args for reconstructor */
 		       );
@@ -448,7 +511,11 @@ private:
     bdCellJacFactorsY[2] = static_cast<scalar_type>(-1);
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
-    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
+    {
       const auto smPt = graphRows[it];
 
       FillStencilX(smPt, it);
@@ -495,12 +562,15 @@ private:
     // *****************************
     // *** functors for velocity ***
     // *****************************
+    const auto stencilSizeForV = reconstructionTypeToStencilSize(m_recEn);
+    stencil_container_type stencilValsForV(numDofPerCell*stencilSizeForV);
+
     stencil_filler_t FillStencilVeloX(reconstructionTypeToStencilSize(m_recEn),
 				      U, m_meshObj, m_ghostLeft, m_ghostRight,
-				      m_stencilVals, xAxis);
+				      stencilValsForV, xAxis);
     stencil_filler_t FillStencilVeloY(reconstructionTypeToStencilSize(m_recEn),
 				      U, m_meshObj, m_ghostBack, m_ghostFront,
-				      m_stencilVals, yAxis);
+				      stencilValsForV, yAxis);
 
     using velo_functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
@@ -515,7 +585,7 @@ private:
 				/* end args for velo */
 				m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
 				/* end args for flux */
-				toReconstructionScheme(m_recEn), m_stencilVals,
+				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 				/* end args for reconstructor */
 				);
@@ -524,7 +594,7 @@ private:
 				/* end args for velo */
 				m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
 				/* end args for flux */
-				toReconstructionScheme(m_recEn), m_stencilVals,
+				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 				/* end args for reconstructor */
 				);
@@ -582,7 +652,11 @@ private:
     // loop
     // ************
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
-    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
+    {
       const auto smPt = graphRows[it];
       FillStencilVeloX(smPt, it);
       funcVeloX(smPt);
@@ -615,16 +689,19 @@ private:
     constexpr int xAxis = 1;
     constexpr int yAxis = 2;
 
+    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
+    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+
     using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, numDofPerCell, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_recEn),
 				  U, m_meshObj, m_ghostLeft, m_ghostRight,
-				  m_stencilVals, xAxis);
+				  stencilVals, xAxis);
 
     stencil_filler_t FillStencilY(reconstructionTypeToStencilSize(m_recEn),
 				  U, m_meshObj, m_ghostBack, m_ghostFront,
-				  m_stencilVals, yAxis);
+				  stencilVals, yAxis);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
@@ -639,7 +716,7 @@ private:
 		    /* end args for velo */
 		    m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
 		    /* end args for flux */
-		    toReconstructionScheme(m_recEn), m_stencilVals,
+		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
@@ -648,12 +725,15 @@ private:
 		    /* end args for velo */
 		    m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
 		    /* end args for flux */
-		    toReconstructionScheme(m_recEn), m_stencilVals,
+		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       FillStencilX(smPt, it);
@@ -709,6 +789,9 @@ private:
 		    );
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       Fx(smPt);
@@ -757,15 +840,6 @@ private:
     ::pressiodemoapps::resize(m_ghostBack, s1, numGhostValues);
   }
 
-  void allocateStencilValuesContainer()
-  {
-    // the stencil size needed is determined by the desired reconstruction
-    // kind NOT from the mesh. THis is important because for example
-    // the mesh can have a wider connectivity that what is needed.
-    const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
-    ::pressiodemoapps::resize(m_stencilVals, numDofPerCell*stencilSizeNeeded);
-  }
-
 protected:
   const int m_icIdentifier;
   const scalar_type m_gravity  = static_cast<scalar_type>(9.8);
@@ -777,7 +851,6 @@ protected:
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
 
   const MeshType & m_meshObj;
-  mutable stencil_container_type m_stencilVals;
 
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
@@ -790,6 +863,9 @@ protected:
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
 };
+
+template<class MeshType> constexpr int EigenSwe2dApp<MeshType>::numDofPerCell;
+template<class MeshType> constexpr int EigenSwe2dApp<MeshType>::dimensionality;
 
 }}//end namespace
 #endif

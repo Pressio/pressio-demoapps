@@ -35,8 +35,8 @@ public:
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
-  static constexpr int	   dimensionality{2};
-  static constexpr index_t numDofPerCell{4};
+  static constexpr int dimensionality{2};
+  static constexpr int numDofPerCell{4};
 
 private:
   using ghost_container_type      = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -73,7 +73,6 @@ protected:
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
-
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
@@ -110,6 +109,12 @@ protected:
     flux_type fluxL, fluxF;
     flux_type fluxR, fluxB;
 
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+    ::pressiodemoapps::set_zero_omp(V);
+#else
+    ::pressiodemoapps::set_zero(V);
+#endif
+
     if (J){
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
       ::pressiodemoapps::set_zero_omp(*J);
@@ -117,12 +122,6 @@ protected:
       ::pressiodemoapps::set_zero(*J);
 #endif
     }
-
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
-    ::pressiodemoapps::set_zero_omp(V);
-#else
-    ::pressiodemoapps::set_zero(V);
-#endif
 
     fillGhosts(U, currentTime);
 
@@ -134,10 +133,12 @@ protected:
     }
 
     else{
-      velocityOnlyNearBdCellsImpl(U, currentTime, V,
-				  fluxL, fluxF, fluxR, fluxB,
-				  uMinusHalfNeg, uMinusHalfPos,
-				  uPlusHalfNeg,  uPlusHalfPos);
+      if (!m_meshObj.isPeriodic()){
+	velocityOnlyNearBdCellsImpl(U, currentTime, V,
+				    fluxL, fluxF, fluxR, fluxB,
+				    uMinusHalfNeg, uMinusHalfPos,
+				    uPlusHalfNeg,  uPlusHalfPos);
+      }
 
       velocityOnlyInnerCellsImpl(U, currentTime, V,
 				 fluxL, fluxF, fluxR, fluxB,
@@ -176,9 +177,11 @@ private:
 	}
 
 	// wrt neighbors: this depends on the advection scheme
-	const auto numNeighbors =
+	const int numNeighbors =
 	  (m_recEn == InviscidFluxReconstruction::FirstOrder) ? 4
-	    : (m_recEn == InviscidFluxReconstruction::Weno3) ? 8 : 12;
+	  : (m_recEn == InviscidFluxReconstruction::Weno3) ? 8
+	  : (m_recEn == InviscidFluxReconstruction::Weno5) ? 12 : -1;
+	assert(numNeighbors != -1);
 
  	for (int i=1; i<=numNeighbors; ++i){
 	  const auto ci = graph(smPt, i)*numDofPerCell;
@@ -1049,6 +1052,9 @@ protected:
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
 };
+
+template<class MeshType> constexpr int EigenEuler2dApp<MeshType>::numDofPerCell;
+template<class MeshType> constexpr int EigenEuler2dApp<MeshType>::dimensionality;
 
 }}}//end namespace
 #endif

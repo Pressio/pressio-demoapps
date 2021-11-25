@@ -36,7 +36,15 @@ void set_zero(Eigen::SparseMatrix<value_type, Eigen::ColMajor, IntType> & M)
   }
 }
 
-template<class value_type, class IntType>
+template<class value_type>
+void set_zero(Eigen::Ref<Eigen::Matrix<value_type, -1, 1>> & a)
+{
+  for (int i=0; i<a.rows(); ++i){
+    a(i) = static_cast<value_type>(0);
+  }
+}
+
+template<class value_type>
 void set_zero(Eigen::Ref<Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor>> & a)
 {
   for (int i=0; i<a.rows(); ++i){
@@ -46,7 +54,7 @@ void set_zero(Eigen::Ref<Eigen::Matrix<value_type, -1, -1, Eigen::ColMajor>> & a
   }
 }
 
-template<class value_type, class IntType>
+template<class value_type>
 void set_zero(Eigen::Ref<Eigen::Matrix<value_type, -1, -1, Eigen::RowMajor>> & a)
 {
   for (int i=0; i<a.rows(); ++i){

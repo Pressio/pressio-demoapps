@@ -58,7 +58,7 @@ public:
     switch(m_stencilSize){
     case 3:
       {
-	assert(::pressiodemoapps::extent(m_stencilVals) == 3);
+	assert(::pressiodemoapps::extent(m_stencilVals, 0) == 3);
 	m_stencilVals(0) = (w0==-1) ? m_ghostLeft(ghostRow, 0)  : m_state(w0i);
 	m_stencilVals(1) = m_state(uIndex);
 	m_stencilVals(2) = (e0==-1) ? m_ghostRight(ghostRow, 0) : m_state(e0i);
@@ -67,7 +67,7 @@ public:
 
     case 5:
       {
-	assert(::pressiodemoapps::extent(m_stencilVals) == 5);
+	assert(::pressiodemoapps::extent(m_stencilVals, 0) == 5);
 	const auto w1 = graph(smPt, 3);
 	const auto e1 = graph(smPt, 4);
 	const auto w1i = w1*numDofPerCell;
@@ -83,7 +83,7 @@ public:
 
     case 7:
       {
-	assert(::pressiodemoapps::extent(m_stencilVals) == 7);
+	assert(::pressiodemoapps::extent(m_stencilVals, 0) == 7);
 	const auto w1 = graph(smPt, 3);
 	const auto e1 = graph(smPt, 4);
 	const auto w2 = graph(smPt, 5);

@@ -51,13 +51,16 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
     ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tpls/pybind11)
 
+  if(PRESSIODEMOAPPS_ENABLE_OPENMP)
+    link_libraries(OpenMP::OpenMP_CXX)
+  endif()
+
   set(modulename _pressiodemoappsimpl)
   pybind11_add_module(${modulename} ${CMAKE_CURRENT_SOURCE_DIR}/src_py/main_binder.cc)
   target_compile_definitions(${modulename} PRIVATE MODNAME=${modulename})
   target_compile_definitions(${modulename} PRIVATE PRESSIODEMOAPPS_ENABLE_BINDINGS)
   if(PRESSIODEMOAPPS_ENABLE_OPENMP)
     target_compile_definitions(${modulename} PRIVATE PRESSIODEMOAPPS_ENABLE_OPENMP)
-    target_link_libraries(${modulename} OpenMP::OpenMP_CXX)
   endif()
 
 else()
