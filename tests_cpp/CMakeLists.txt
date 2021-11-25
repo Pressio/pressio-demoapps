@@ -9,8 +9,8 @@ add_subdirectory(eigen_mesh_ccu_special_cells_list)
 add_subdirectory(weno3)
 add_subdirectory(weno5)
 add_subdirectory(rankine_hugoniot)
-add_subdirectory(eigen_euler_rusanov_flux_jacobians)
-add_subdirectory(eigen_swe_rusanov_flux_jacobians)
+add_subdirectory(eigen_rusanov_flux_jacobians_euler)
+add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
 # ---------------------------------------------------------
 # test jacobians, compare against FD or complex step
@@ -56,7 +56,7 @@ add_subdirectory(eigen_2d_euler_sedov_symmetry_implicit)
 add_subdirectory(eigen_2d_euler_sample_mesh_test1)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_explicit)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
-add_subdirectory(eigen_2d_kelvin_helmholtz_explicit)
+add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 
