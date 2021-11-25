@@ -34,7 +34,7 @@ public:
     constexpr int numDofPerCell = 3;
 
     const auto & graph = m_meshObj.graph();
-    assert(::pressiodemoapps::extent(graph, 0) >= 5);
+    assert(::pressiodemoapps::extent(graph, 1) >= 5);
     const auto cellGID = graph(smPt, 0);
     const auto uIndex  = cellGID*numDofPerCell;
 
@@ -78,7 +78,7 @@ public:
 
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
-    assert(::pressiodemoapps::extent(graph, 0) >= 9);
+    assert(::pressiodemoapps::extent(graph, 1) >= 9);
 
     this->template operator()<3, index_t>(smPt, gRow);
     const auto left0 = graph(smPt, 1);
@@ -125,7 +125,7 @@ public:
   {
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
-    assert(::pressiodemoapps::extent(graph, 0) >= 13);
+    assert(::pressiodemoapps::extent(graph, 1) >= 13);
 
     this->template operator()<5, index_t>(smPt, gRow);
     const auto left1  = graph(smPt, 5);

@@ -8,6 +8,7 @@ from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install as _install
 
 topdir = os.path.abspath(os.path.dirname(__file__))
+enableOpenMP = None
 
 # ----------------------------------------------
 # Metadata
@@ -38,7 +39,6 @@ class install(_install):
     _install.finalize_options(self)
 
   def run(self):
-    global enableOpenMP
     enableOpenMP = self.enable_openmp
     _install.run(self)
 
@@ -51,6 +51,11 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
   def build_extension(self, ext):
+    # print(build_ext.user_options)
+    # user_options = build_ext.user_options + [
+    #   ('enable-openmp=', None, "Enable OpenMP")
+    # ]
+
     extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
     if not extdir.endswith(os.path.sep): extdir += os.path.sep
     print("self.extdir ",extdir)
@@ -74,8 +79,8 @@ class CMakeBuild(build_ext):
     # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
     # from Python.
     ompstring = "Off"
-    if (enableOpenMP):
-      print("ENableing OMP")
+    if (enableOpenMP == True):
+      print("Enabling OMP")
       ompstring = "On"
 
     cmake_args = [
@@ -84,7 +89,7 @@ class CMakeBuild(build_ext):
       "-DCMAKE_BUILD_TYPE={}".format(buildMode),
       "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
       "-DCMAKE_VERBOSE_MAKEFILE=On",
-      "-DPRESSIODEMOAPPS_ENABLE_OPENMP=On"
+      "-DPRESSIODEMOAPPS_ENABLE_OPENMP={}".format(ompstring)
       #"-DVERSION_INFO={}".format(self.distribution.get_version()),
     ]
     build_args = []
