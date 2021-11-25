@@ -140,7 +140,7 @@ def run_setup():
               "install"  : install},
     #cmdclass={"build_ext": CMakeBuild},
 
-    install_requires=["numpy", "scipy", "matplotlib", "sklearn"],
+    install_requires=["numpy", "scipy", "matplotlib"],
     zip_safe=False,
 
     python_requires='>=3',
