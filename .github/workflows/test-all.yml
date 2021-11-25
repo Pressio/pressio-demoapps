@@ -29,6 +29,7 @@ jobs:
       matrix:
         config:
           - { cxx: clang++, mode: Release }
+          - { cxx: clang++, mode: Debug }
           #- { cxx: g++,     mode: Release }
 
     env: # environment variables available to all steps
@@ -91,10 +92,10 @@ jobs:
           sudo -E python setup.py build
           sudo -E python setup.py install --skip-build
 
-      - name: Run Python tests
-        run: |
-          cd $DEMOAPPS_HOME
-          pytest -s
+      # - name: Run Python tests
+      #   run: |
+      #     cd $DEMOAPPS_HOME
+      #     pytest -s
 
       - name: Configure C++ tests
         run: |
