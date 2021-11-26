@@ -1,5 +1,4 @@
 
-set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
-
-### 2d problems ###
-add_subdirectory(eigen_2d_euler_periodic)
+set(exename  perf_exe)
+add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/main.cc)
+configure_file(drive.py drive.py COPYONLY)
