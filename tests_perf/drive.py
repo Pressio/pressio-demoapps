@@ -76,10 +76,11 @@ if __name__== "__main__":
 
   meshExeDir = args.repoDir + '/meshing_scripts'
 
-  numTrials = 10 # how many times to run loop in exe
-  meshList = [128, 256, 512, 1024]
+  numTrials = 50 # how many times to run loop in exe
+  meshList = [1024] #128, 256, 512, 1024]
   threads  = [1, 2, 4, 8]
-  schemes = ["FirstOrder", "Weno3", "Weno5"]
+  #schemes = ["FirstOrder", "Weno3", "Weno5"]
+  schemes = ["Weno5"]
   problem = "euler2dsmooth"
 
   owd = os.getcwd()
