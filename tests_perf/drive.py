@@ -28,17 +28,22 @@ def generateMesh(meshExeDir, outDir, N, s, prob):
   os.chdir(owd)
 
 #=======================================================
-def runExe(meshDir, loopCount, scheme, nThreads):
+def runExe(meshDir, loopCount, scheme, nThreads, doingPython):
   my_env = os.environ.copy()
   my_env["OMP_NUM_THREADS"] = str(nThreads)
   #my_env["OMP_PLACES"]="{0}"
   my_env["OMP_PROC_BIND"]="true"
 
-  args = ("./perf_exe",
-          "-m", meshDir,
-          "-n", str(loopCount),
-          "-s", scheme
-          )
+  if doingPython==1:
+    args = ("python", "main.py",
+            "-m", meshDir, \
+            "-n", str(loopCount), \
+            "-s", scheme)
+  else:
+    args = ("./perf_exe",
+            "-m", meshDir,
+            "-n", str(loopCount),
+            "-s", scheme)
 
   # launch subprocess
   print("Running: {} ".format(args))
@@ -69,18 +74,18 @@ def schemeToInteger(scheme):
 if __name__== "__main__":
 ###############################
   parser = ArgumentParser()
-  parser.add_argument("-repoDir", "--repoDir",
-                      dest="repoDir", default="empty")
+  parser.add_argument("-repoDir", "--repoDir", dest="repoDir", default="empty")
+  parser.add_argument("-i", dest="doingPython", default=0, type=int)
   args = parser.parse_args()
   assert(args.repoDir != "empty")
 
   meshExeDir = args.repoDir + '/meshing_scripts'
 
-  numTrials = 50 # how many times to run loop in exe
-  meshList = [1024] #128, 256, 512, 1024]
+  numTrials = 5 # how many times to run loop in exe
+  meshList = [128] #128, 256, 512, 1024]
   threads  = [1, 2, 4, 8]
-  #schemes = ["FirstOrder", "Weno3", "Weno5"]
-  schemes = ["Weno5"]
+  schemes = ["FirstOrder"]#, "Weno3", "Weno5"]
+  #schemes = ["Weno5"]
   problem = "euler2dsmooth"
 
   owd = os.getcwd()
@@ -96,7 +101,7 @@ if __name__== "__main__":
         generateMesh(meshExeDir, meshDir, N, s, problem+"_s"+str(s))
 
       for numThreads in threads:
-        currTime = runExe(meshDir, numTrials, iSch, numThreads)
+        currTime = runExe(meshDir, numTrials, iSch, numThreads, args.doingPython)
         data.append([schemeToInteger(iSch), N, numThreads, currTime])
 
   print(data)
