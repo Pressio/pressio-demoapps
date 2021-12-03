@@ -8,7 +8,6 @@ from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install as _install
 
 topdir = os.path.abspath(os.path.dirname(__file__))
-enableOpenMP = None
 
 # ----------------------------------------------
 # Metadata
@@ -39,7 +38,9 @@ class install(_install):
     _install.finalize_options(self)
 
   def run(self):
+    global enableOpenMP
     enableOpenMP = self.enable_openmp
+    print("GIGI = ", self.enable_openmp)
     _install.run(self)
 
 # ----------------------------------------------
@@ -79,7 +80,7 @@ class CMakeBuild(build_ext):
     # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
     # from Python.
     ompstring = "Off"
-    if (enableOpenMP == True):
+    if enableOpenMP:
       print("Enabling OMP")
       ompstring = "On"
 
