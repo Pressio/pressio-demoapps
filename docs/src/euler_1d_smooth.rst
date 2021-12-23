@@ -25,9 +25,11 @@ Mesh
 
 .. code-block:: shell
 
-   python create_full_mesh_for.py --problem euler1dsmooth_s<stencilSize> -n <N> --outDir ...
+   cd pressio-demoapps/meshing_scripts
+   python create_full_mesh_for.py --problem euler1dsmooth_s<stencilSize> -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``.
+where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``, 
+and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
 ------------

@@ -237,11 +237,9 @@ appearing on the top-right corner.</p>
 <h2>Step 1: Prepare<a class="headerlink" href="#step-1-prepare" title="Permalink to this headline">¶</a></h2>
 <p>You need CMake &gt; 3.18.0.
 Let’s make a directory to run things and export the C++ compiler:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">MYTEST</span><span class="o">=</span>/home/myDemoTest
-mkdir <span class="nv">$MYTEST</span>
-<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
-
-<span class="nb">cd</span> <span class="nv">$MYTEST</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
+<span class="nb">export</span> <span class="nv">MYTEST</span><span class="o">=</span>/home/myDemoTest
+mkdir <span class="nv">$MYTEST</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="nv">$MYTEST</span>
 git clone --recursive git@github.com:Pressio/pressio-demoapps.git
 <span class="nb">cd</span> pressio-demoapps
 python setup.py install
@@ -251,11 +249,8 @@ python setup.py install
 </div>
 <div class="section" id="step-2-generate-the-mesh-for-sod1d">
 <h2>Step 2: Generate the mesh for Sod1D<a class="headerlink" href="#step-2-generate-the-mesh-for-sod1d" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MYTEST</span>
-python ./pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-             --problem sod1d_s7 <span class="se">\</span>
-             --outdir <span class="si">${</span><span class="nv">MYTEST</span><span class="si">}</span>/mesh <span class="se">\</span>
-             -n <span class="m">500</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MYTEST</span>/meshing_scripts
+python create_full_mesh_for.py --problem sod1d_s7 --outdir <span class="si">${</span><span class="nv">MYTEST</span><span class="si">}</span>/mesh -n <span class="m">500</span>
 </pre></div>
 </div>
 <p>where the string <code class="docutils literal notranslate"><span class="pre">sod1d_s7</span></code> indicates the target problem
@@ -264,7 +259,11 @@ The mesh files are generated inside <code class="docutils literal notranslate"><
 </div>
 <div class="section" id="step-3-main-file-and-run">
 <h2>Step 3: Main file and run<a class="headerlink" href="#step-3-main-file-and-run" title="Permalink to this headline">¶</a></h2>
-<p>Make a <code class="docutils literal notranslate"><span class="pre">main.py</span></code> and copy the following code in it:</p>
+<p>Create a <code class="docutils literal notranslate"><span class="pre">main.py</span></code> as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>touch <span class="nv">$MYTEST</span>/main.py
+</pre></div>
+</div>
+<p>and copy the following code in it:</p>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pathlib</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
@@ -285,9 +284,18 @@ The mesh files are generated inside <code class="docutils literal notranslate"><
   <span class="n">x</span> <span class="o">=</span> <span class="n">meshObj</span><span class="o">.</span><span class="n">viewX</span><span class="p">()</span>
   <span class="c1"># plot only density</span>
   <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+  <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x coordinate"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+  <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Density"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
   <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>And finally run it:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MYTEST</span>
+python main.py
+</pre></div>
+</div>
+<p>which should generate the following figure:</p>
+<a class="reference internal image-reference" href="_images/doc_sod1d_endtoend_py.png"><img alt="Alternative text" class="align-center" src="_images/doc_sod1d_endtoend_py.png" style="width: 65%;"/></a>
 </div>
 </div>
 
@@ -320,7 +328,7 @@ The mesh files are generated inside <code class="docutils literal notranslate"><
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
+            Last updated on Dec 23, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s

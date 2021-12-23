@@ -226,16 +226,18 @@
 <h1>1D Linear Advection<a class="headerlink" href="#d-linear-advection" title="Permalink to this headline">¶</a></h1>
 <p>This problem solves the <em>1D linear advection</em>.</p>
 <ul class="simple">
-<li><p>IC: <span class="math notranslate nohighlight">\(\phi(x, 0) = sin(\pi x)\)</span></p></li>
+<li><p>IC: <span class="math notranslate nohighlight">\(\phi(x, 0) = \sin(\pi x)\)</span></p></li>
 <li><p>Domain is [-1,1] with periodic BC</p></li>
 <li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 2k)\)</span> where k is 1 or 2 or 3 …</p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh_for.py --problem linadv1d_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir ...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps/meshing_scripts
+python create_full_mesh_for.py --problem linadv1d_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
@@ -288,7 +290,7 @@
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
+            Last updated on Dec 23, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s

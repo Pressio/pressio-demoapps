@@ -234,12 +234,12 @@ Below, we describe the scripts in more details.</p>
 <div class="section" id="script-usage">
 <h2>Script Usage<a class="headerlink" href="#script-usage" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh.py <span class="se">\</span>
-             --outDir &lt;path-to-desired-output&gt; <span class="se">\</span>
+             --outDir &lt;path-to-where-you-want-mesh-to-be-generated&gt; <span class="se">\</span>
              -n Nx <span class="o">[</span>Ny Nz<span class="o">]</span> <span class="se">\</span>
-             --bounds xMin, xMax <span class="o">[</span>,yMin, yMax, zMin, zMaz<span class="o">]</span> <span class="se">\</span>
-             -s stencilSize <span class="c1"># valid choices are 3,5,7 \</span>
+             --bounds xMin xMax <span class="o">[</span>yMin yMax zMin zMaz<span class="o">]</span> <span class="se">\</span>
+             -s stencilSize        <span class="c1"># valid choices are 3,5,7 \</span>
              --periodic true/false <span class="c1"># default=false \</span>
-             --debug true/false <span class="c1"># default=false</span>
+             --debug true/false    <span class="c1"># default=false</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -289,7 +289,7 @@ If you pass two values, script assumes 2d. If you pass three values, assumes 3d;
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
+            Last updated on Dec 23, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s

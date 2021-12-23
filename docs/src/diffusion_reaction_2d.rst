@@ -29,10 +29,11 @@ Mesh
 
 .. code-block:: shell
 
-   python create_full_mesh_for.py --problem diffreac2d -n Nx Ny --outDir ...
+   cd pressio-demoapps/meshing_scripts
+   python create_full_mesh_for.py --problem diffreac2d -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` is the number of cells you want along x and y.
-
+where ``Nx, Ny`` is the number of cells you want along x and y, 
+and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
 ------------
@@ -40,27 +41,30 @@ C++ synopsis
 .. code-block:: c++
 
    namespace pda = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto probId = pda::DiffusionReaction2d::ProblemA;
-   const auto scheme = pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
+   const auto scheme = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
    {
      auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
-   // B. setting custom coefficients, you can do
+   // B. setting custom coefficients
    {
-     using scalar_type = typename decltype(problem)::scalar_type;
-     const scalar_type diffCoeff = 0.5;
-     const scalar_type reacCoeff = 0.2;
+     using scalar_type = typename decltype(meshObj)::scalar_t;
+     const auto diffCoeff = static_cast<scalar_type(0.5);
+     const auto reacCoeff = static_cast<scalar_type(0.2);
      auto problem      = pda::create_problem_eigen(meshObj, probId, scheme, diffCoeff, reacCoeff);
    }
 
-   // C. setting custom coefficients and custom source function, you can do
+   // C. setting custom coefficients and custom source function
    {
-     using scalar_type = typename decltype(problem)::scalar_type;
-     const scalar_type diffCoeff = 0.5;
-     const scalar_type reacCoeff = 0.2;
+     using scalar_type = typename decltype(meshObj)::scalar_t;
+     const auto diffCoeff = static_cast<scalar_type(0.5);
+     const auto reacCoeff = static_cast<scalar_type(0.2);
 
      auto mySource = [](const scalar_type & x,
 			const scalar_type & y,
@@ -87,11 +91,11 @@ Python synopsis
    # A. constructor for problem using default values
    problem = pda.create_problem(meshObj, probId, scheme)
 
-   # B. setting custom coefficients, you can do
+   # B. setting custom coefficients
    myD, myK = 0.2, 0.001
    problem = pda.create_problem(meshObj, probId, scheme, myD, myK)
 
-   # C. setting custom coefficients and custom source function, you can do
+   # C. setting custom coefficients and custom source function
    mysource = lambda x, y, time : np.sin(math.pi*x) + y * x + time # or whatever
    problem = pda.create_problem(meshObj, probId, scheme, mysource, 0.2, 0.001)
 

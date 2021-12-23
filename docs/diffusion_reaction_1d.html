@@ -242,35 +242,39 @@
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh_for.py --problem diffreac1d -n &lt;N&gt; --outDir ...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps/meshing_scripts
+python create_full_mesh_for.py --problem diffreac1d -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want, and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
+
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">DiffusionReaction1d</span><span class="o">::</span><span class="n">ProblemA</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
 
 <span class="c1">// A. constructor for problem using default values</span>
 <span class="p">{</span>
   <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="c1">// B. setting custom coefficients, you can do</span>
+<span class="c1">// B. setting custom coefficients</span>
 <span class="p">{</span>
-  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_type</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">diffCoeff</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">reacCoeff</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">;</span>
+  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">diffCoeff</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">scalar_type</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">reacCoeff</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">scalar_type</span><span class="p">(</span><span class="mf">0.2</span><span class="p">);</span>
   <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">diffCoeff</span><span class="p">,</span> <span class="n">reacCoeff</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="c1">// C. setting custom coefficients and custom source function, you can do</span>
+<span class="c1">// C. setting custom coefficients and custom source function</span>
 <span class="p">{</span>
-  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_type</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">diffCoeff</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">reacCoeff</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">;</span>
+  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">diffCoeff</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">scalar_type</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">reacCoeff</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">scalar_type</span><span class="p">(</span><span class="mf">0.2</span><span class="p">);</span>
 
   <span class="k">auto</span> <span class="n">mySource</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">scalar_type</span> <span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span>
                      <span class="k">const</span> <span class="n">scalar_type</span> <span class="o">&amp;</span> <span class="n">t</span><span class="p">,</span>
@@ -294,11 +298,11 @@
 <span class="c1"># A. constructor for problem using default values</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
 
-<span class="c1"># B. setting custom coefficients, you can do</span>
+<span class="c1"># B. setting custom coefficients</span>
 <span class="n">myD</span><span class="p">,</span> <span class="n">myK</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.001</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">myD</span><span class="p">,</span> <span class="n">myK</span><span class="p">)</span>
 
-<span class="c1"># C. setting custom coefficients and custom source function, you can do</span>
+<span class="c1"># C. setting custom coefficients and custom source function</span>
 <span class="n">mysource</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">time</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">*</span> <span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">4.</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">mysource</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
@@ -344,7 +348,7 @@ reconstruction, which leads to a second-order scheme.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
+            Last updated on Dec 23, 2021. |
             Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
               and
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s

@@ -20,11 +20,9 @@ Let's make a directory to run things and export the C++ compiler:
 
 .. code-block:: shell
 
-  export MYTEST=/home/myDemoTest
-  mkdir $MYTEST
   export CXX=<path-to-your-CXX-compiler> #must support C++14
-
-  cd $MYTEST
+  export MYTEST=/home/myDemoTest
+  mkdir $MYTEST && cd $MYTEST
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
   cd pressio-demoapps
   python setup.py install
@@ -38,11 +36,8 @@ Step 2: Generate the mesh for Sod1D
 
 .. code-block:: shell
 
-   cd $MYTEST
-   python ./pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
-		--problem sod1d_s7 \
-		--outdir ${MYTEST}/mesh \
-		-n 500
+   cd $MYTEST/meshing_scripts
+   python create_full_mesh_for.py --problem sod1d_s7 --outdir ${MYTEST}/mesh -n 500
 
 where the string ``sod1d_s7`` indicates the target problem
 and that we want a 7-point stencil, ``500`` is the number of cells we want.
@@ -52,7 +47,13 @@ The mesh files are generated inside ``${MYTEST}/mesh``.
 Step 3: Main file and run
 -------------------------
 
-Make a ``main.py`` and copy the following code in it:
+Create a ``main.py`` as follows:
+
+.. code-block:: shell
+
+   touch $MYTEST/main.py
+
+and copy the following code in it:
 
 .. code-block:: py
 
@@ -76,4 +77,20 @@ Make a ``main.py`` and copy the following code in it:
      x = meshObj.viewX()
      # plot only density
      plt.plot(x, yn[0:-1:3])
+     plt.xlabel("x coordinate", fontsize=12)
+     plt.ylabel("Density", fontsize=12)
      plt.show()
+
+And finally run it:
+
+.. code-block:: shell
+
+   cd $MYTEST
+   python main.py
+
+which should generate the following figure:
+
+.. image:: ../../figures/doc_sod1d_endtoend_py.png
+  :width: 65 %
+  :align: center
+  :alt: Alternative text
