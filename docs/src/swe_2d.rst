@@ -14,7 +14,8 @@ Mesh
 
 .. code-block:: bash
 
-   python create_full_mesh_for.py --problem swe2dSlipWall_s{3,5,7} -n Nx Ny --outDir ...
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+           --problem swe2dSlipWall_s{3,5,7} -n Nx Ny --outDir ...
 
 where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``.
 
@@ -52,3 +53,4 @@ using a 65x65 mesh with Weno5 and RK4 time integration:
 .. image:: ../../figures/wiki_2dswe_height.png
   :width: 60 %
   :alt: Alternative text
+  :align: center

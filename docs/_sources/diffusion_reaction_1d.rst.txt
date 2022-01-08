@@ -1,18 +1,18 @@
-1D Diffusion Reaction
-=====================
+1D single-species reaction diffusion
+====================================
 
 This problem focuses on the following 1d diffusion reaction PDE:
 
 .. math::
 
-   \frac{\partial s}{\partial t} = D \frac{\partial^2 s}{\partial x^2} + k s^2 + u(x, t)
+   \frac{\partial y}{\partial t} = D \frac{\partial^2 y}{\partial x^2} + k y^2 + u(x, t)
 
 
 * Adapted from `this paper <https://arxiv.org/abs/1910.03193>`_
 
 * ``D, k, u(x, t)`` can be provided to the problem constructor (more below)
 
-* IC: :math:`s(x, 0) = 0`
+* IC: :math:`y(x, 0) = 0`
 
 * Default settings:
 
@@ -30,8 +30,8 @@ Mesh
 
 .. code-block:: shell
 
-   cd pressio-demoapps/meshing_scripts
-   python create_full_mesh_for.py --problem diffreac1d -n <N> --outDir <destination-path>
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+	  --problem diffreac1d -n <N> --outDir <destination-path>
 
 where ``N`` is the number of cells you want, and ``<destination-path>`` is where you want the mesh files to be generated.
 
@@ -105,6 +105,6 @@ Notes:
 
 .. important::
 
-   Note that this problem does not have advection, so inviscid schemes are not applicable
-   but only viscous schemes are. Currently, we only support a first order viscous flux
+   Note that this problem does not have advection, so only viscous schemes are applicable.
+   Currently, we only support a first order viscous flux
    reconstruction, which leads to a second-order scheme.

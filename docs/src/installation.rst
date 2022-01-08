@@ -19,7 +19,10 @@ To use it, you need a C++14 compiler and you have to:
 
 3. specify the CMake option ``-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON`` while building your code.
 
-If you want to build the C++ tests, you need CMake > 3.18.0::
+Building the test suite
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want to build the C++ tests, you need CMake > 3.18.0 and then do::
 
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
   export CXX=<path-to-your-CXX-compiler> #must support C++14
@@ -32,9 +35,7 @@ If you want to build the C++ tests, you need CMake > 3.18.0::
 Python library
 --------------
 
-Requires:
-
-* CMake > 3.18.0 and C++ compiler with C++14 support
+It requires: CMake > 3.18.0 and C++ compiler with C++14 support
 
 Should be as easy as::
 

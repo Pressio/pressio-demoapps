@@ -23,7 +23,7 @@ C++ API
 
    .. cpp:type:: jacobian_type
 
-      Data structure type to store the Jacobian: currently, this is an Eigen sparse CSR matrix.
+      Data structure type to store the Jacobian: currently, this is an Eigen sparse CRS matrix.
 
    .. cpp:function:: auto totalDofSampleMesh()
 
@@ -61,7 +61,10 @@ C++ API
       Given a state :class:`y` and time :class:`time`,
       evaluates the Jacobian of the RHS and stores it into :class:`J`.
 
-   .. cpp:function:: void velocityAndJacobian(const state_type & y, scalar_type time, velocity_type & v, jacobian_type & J)
+   .. cpp:function:: void velocityAndJacobian(const state_type & y, \
+		                              scalar_type time, \
+					      velocity_type & v, \
+					      jacobian_type & J)
 
       Given a state :class:`y` and time :class:`time`,
       evaluates the RHS and its Jacobian.
@@ -135,7 +138,3 @@ Python API
    Note how the Python interface only supports the Jacobian **action**.
    The main reason behind this is that Pybind11 does not yet allow view semantics for
    Python sparse matrices.
-
-
-
-**!! to do: finish**

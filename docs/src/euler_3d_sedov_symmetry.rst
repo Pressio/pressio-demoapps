@@ -20,10 +20,10 @@ Mesh
 
 .. code-block:: shell
 
-   cd pressio-demoapps/meshing_scripts
-   python create_full_mesh_for.py --problem sedov3dsym_s{3,5} -n Nx Ny Nz --outDir <destination-path>
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+           --problem sedov3dsym_s{3,5} -n Nx Ny Nz --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5``, 
+where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 
