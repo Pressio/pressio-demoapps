@@ -3,6 +3,7 @@ set(testname eigen_1d_lax_weno5_explicit)
 set(exename  ${testname}_exe)
 
 configure_file(../compare.py compare.py COPYONLY)
+configure_file(../plot.py plot.py COPYONLY)
 configure_file(gold.txt gold.txt COPYONLY)
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
 target_compile_definitions(${exename} PUBLIC -DUSE_WENO5)

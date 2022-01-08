@@ -31,9 +31,13 @@ if __name__== "__main__":
 
   fig = plt.figure(1)
   y0 = np.reshape(data[0,:], (nx, 1))[:,0]
-  y1 = np.reshape(data[int(nt/3),:], (nx, 1))[:,0]
+  y1 = np.reshape(data[int(nt/2),:], (nx, 1))[:,0]
   y2 = np.reshape(data[nt-1,:], (nx, 1))[:,0]
-  plt.plot(x_fom, y0, '-r')
-  plt.plot(x_fom, y1, '-g')
-  plt.plot(x_fom, y2, '-b')
+  plt.plot(x_fom, y0, '-r', label='Initial condition')
+  plt.plot(x_fom, y1, '-g', label='Half simulation time')
+  plt.plot(x_fom[0::8], y2[0::8], 'ob', label='Final time')
+  plt.xlabel("x", fontsize=12)
+  plt.ylabel("Solution", fontsize=12)
+  plt.legend()
+  fig.savefig("solution.png", format="png", bbox_inches='tight', dpi=450)
   plt.show()

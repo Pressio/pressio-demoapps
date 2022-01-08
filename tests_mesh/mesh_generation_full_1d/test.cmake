@@ -1,7 +1,7 @@
 include(FindUnixCommands)
 
 # generate the mesh
-set(CMD "python ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${ss} --bounds 0.0 1.0 --periodic ${PER}")
+set(CMD "python3 ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${ss} --bounds 0.0 1.0 --periodic ${PER}")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")
@@ -10,7 +10,7 @@ else()
 endif()
 
 # use python script to make comparison
-set(CMD "python compare_mesh_files.py 1e-10")
+set(CMD "python3 compare_mesh_files.py 1e-10")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Diff failed")
