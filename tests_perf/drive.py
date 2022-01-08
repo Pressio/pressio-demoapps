@@ -35,7 +35,7 @@ def runExe(meshDir, loopCount, scheme, nThreads, doingPython):
   my_env["OMP_PROC_BIND"]="true"
 
   if doingPython==1:
-    args = ("python", "main.py",
+    args = ("python3", "main.py",
             "-m", meshDir, \
             "-n", str(loopCount), \
             "-s", scheme)

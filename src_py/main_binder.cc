@@ -75,7 +75,8 @@ void bindProblemEnums(pybind11::module & mParent)
     .value("ProblemA", pda::DiffusionReaction1d::ProblemA);
 
   pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
-    .value("ProblemA", pda::DiffusionReaction2d::ProblemA);
+    .value("ProblemA", pda::DiffusionReaction2d::ProblemA)
+    .value("GrayScott", pda::DiffusionReaction2d::GrayScott);
 
   pybind11::enum_<pda::Euler1d>(mParent, "Euler1d")
     .value("PeriodicSmooth", pda::Euler1d::PeriodicSmooth)
@@ -239,6 +240,11 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 
   mTopLevel.def("create_problem",
 		&pda::impldiffreac::create_problem_for_pyC2d<ccumesh_t, diffreac_2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("create_problem",
+		&pda::impldiffreac::create_problem_for_pyD<
+		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
 		pybind11::return_value_policy::take_ownership);
 
   // -----------------------

@@ -3,11 +3,11 @@ Step-by-step in Python
 
 This page shows how to setup, run and visualize your first problem using Python.
 
-For demonstration purposes, we show how to run the **1D Sod** problem.
-The *same* process applies to *every* other problem.
+For demonstration purposes, we show how to run the **1D Sod** problem,
+but the *same* process applies to *every* other problem.
 
 .. Hint::
-   You can copy each snippet below by simply moving your mouse over
+   You can copy each snippet below by moving your mouse over
    the snippet's box, and clicking the copy icon
    appearing on the top-right corner.
 
@@ -25,22 +25,22 @@ Let's make a directory to run things and export the C++ compiler:
   mkdir $MYTEST && cd $MYTEST
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
   cd pressio-demoapps
-  python setup.py install
+  python3 setup.py install
 
 
-After this step, you should have demoapps installed.
+After this step, `pressio-demoapps` should be installed in your Python distribution.
 
 
-Step 2: Generate the mesh for Sod1D
--------------------------------------
+Step 2: Generate the mesh
+-------------------------
 
 .. code-block:: shell
 
-   cd $MYTEST/meshing_scripts
-   python create_full_mesh_for.py --problem sod1d_s7 --outdir ${MYTEST}/mesh -n 500
+   python3 $MYTEST/pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+           --problem sod1d_s7 --outdir ${MYTEST}/mesh -n 500
 
-where the string ``sod1d_s7`` indicates the target problem
-and that we want a 7-point stencil, ``500`` is the number of cells we want.
+where via ``sod1d_s7`` we specified that we want Sod1d and
+a 7-point stencil, and ``500`` is the number of cells.
 The mesh files are generated inside ``${MYTEST}/mesh``.
 
 
@@ -72,6 +72,7 @@ and copy the following code in it:
      yn = appObj.initialCondition()
      dt = 0.001
      Nsteps = 200
+     # here we use the built-in time stepping with Runge-Kutta4
      pda.advanceRK4(appObj, yn, dt, Nsteps)
 
      x = meshObj.viewX()
@@ -81,14 +82,14 @@ and copy the following code in it:
      plt.ylabel("Density", fontsize=12)
      plt.show()
 
-And finally run it:
+And run it:
 
 .. code-block:: shell
 
    cd $MYTEST
    python main.py
 
-which should generate the following figure:
+which should display the following figure:
 
 .. image:: ../../figures/doc_sod1d_endtoend_py.png
   :width: 65 %

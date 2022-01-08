@@ -7,10 +7,11 @@ import numpy as np
 from numpy import linalg as LA
 import pressiodemoapps as pda
 
+probId   = pda.DiffusionReaction2d.ProblemA
+
 def test_default_coefficients():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
-  probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
   appObj   = pda.create_problem(meshO, probId, scheme)
 
@@ -27,7 +28,6 @@ def test_default_coefficients():
 def test_custom_diffusion_and_reaction():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
-  probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
   appObj   = pda.create_problem(meshO, probId, scheme, 0.01, 0.005)
 
@@ -46,7 +46,6 @@ def test_custom_source_diffusion_and_reaction():
 
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
-  probId   = pda.DiffusionReaction2d.ProblemA
   scheme = pda.ViscousFluxReconstruction.FirstOrder
   appObj   = pda.create_problem(meshO, probId, scheme, mysource, 0.01, 0.01)
 

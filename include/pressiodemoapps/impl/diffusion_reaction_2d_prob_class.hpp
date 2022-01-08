@@ -37,13 +37,13 @@ public:
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
   static constexpr int dimensionality{2};
-  static constexpr int numDofPerCell{1};
 
 private:
   using ghost_container_type   = Eigen::Matrix<scalar_type,Eigen::Dynamic,Eigen::Dynamic, Eigen::RowMajor>;
   using stencil_container_type = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
 
 public:
+  // constructor valid for ProblemA only
   template<class SourceT>
   EigenDiffReac2dApp(const MeshType & meshObj,
 		     ::pressiodemoapps::DiffusionReaction2d probEnum,
@@ -51,22 +51,20 @@ public:
 		     SourceT sf,
 		     scalar_type diffusionCoeff,
 		     scalar_type reactionCoeff)
-    : m_meshObj(meshObj),
-      m_numDofStencilMesh(m_meshObj.stencilMeshSize()*numDofPerCell),
-      m_numDofSampleMesh(m_meshObj.sampleMeshSize()*numDofPerCell),
-      m_probEn(probEnum),
-      m_recEn(recEnum)
+    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
   {
     if (m_meshObj.stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction2d currently, only supports 3-pt stencil");
     }
 
-    m_sourceFunctor = sf;
-    m_diffusionCoeff = diffusionCoeff;
-    m_reactionCoeff = reactionCoeff;
-    allocateGhosts();
+    if (m_probEn != ::pressiodemoapps::DiffusionReaction2d::ProblemA){
+      throw std::runtime_error("EigenDiffReac2dApp: constructor valid for ProblemA only");
+    }
+
+    setupForProblemA(sf, diffusionCoeff, reactionCoeff);
   }
 
+  // constructor valid for ProblemA only
   EigenDiffReac2dApp(const MeshType & meshObj,
 		     ::pressiodemoapps::DiffusionReaction2d probEnum,
 		     ::pressiodemoapps::ViscousFluxReconstruction recEnum,
@@ -77,22 +75,69 @@ public:
 			 diffusionCoeff, reactionCoeff)
   {}
 
+  // constructor valid for GrayScott
+  EigenDiffReac2dApp(const MeshType & meshObj,
+		     ::pressiodemoapps::DiffusionReaction2d probEnum,
+		     ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+		     scalar_type diffusion_u,
+		     scalar_type diffusion_v,
+		     scalar_type feedRate,
+		     scalar_type killRate)
+    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
+  {
+    if (m_probEn != ::pressiodemoapps::DiffusionReaction2d::GrayScott){
+      throw std::runtime_error("EigenDiffReac2dApp: constructor valid for GrayScott only");
+    }
+
+    setupForGrayScott(diffusion_u, diffusion_v, feedRate, killRate);
+  }
+
+  // constructor valid for both ProblemA and GrayScott
+  // sets all parameters to default
   EigenDiffReac2dApp(const MeshType & meshObj,
 		     ::pressiodemoapps::DiffusionReaction2d probEnum,
 		     ::pressiodemoapps::ViscousFluxReconstruction recEnum)
-    : EigenDiffReac2dApp(meshObj, probEnum, recEnum,
-			 DefaultSourceF2d<scalar_type>(),
-			 0.01, 0.01)
-  {}
+    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum)
+  {
+    if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
+      setupForProblemA(DefaultSourceF2d<scalar_type>(), 0.01, 0.01);
+    }
+    else if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::GrayScott){
+      setupForGrayScott(0.0002, 0.0002/4., 0.042, 0.062);
+    }
+  }
 
   state_type initialCondition() const
   {
     state_type ic(m_numDofStencilMesh);
+
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
       for (int i=0; i<::pressiodemoapps::extent(ic,0); ++i){
 	ic(i) = scalar_type(0);
       }
     }
+
+    if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::GrayScott)
+    {
+      const auto &x= m_meshObj.viewX();
+      const auto &y= m_meshObj.viewY();
+
+      for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
+	{
+	  const auto ind = i*m_numDofPerCell;
+	  if (std::abs(x(i)) < 0.1 &&
+	      std::abs(y(i)) < 0.1)
+	  {
+	    ic(ind)   = 0.5;   // u
+	    ic(ind+1) = 0.25;  // v
+	  }
+	  else{
+	    ic(ind)   = 1.; // u
+	    ic(ind+1) = 0.; // v
+	  }
+	}
+    }
+
     return ic;
   }
 
@@ -104,19 +149,31 @@ protected:
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
-    const scalar_type val0 = 0;
+    const scalar_type zero = {0};
     const auto & graph = m_meshObj.graph();
-    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
+    for (index_t smPt=0; smPt<m_meshObj.sampleMeshSize(); ++smPt)
       {
-	const auto ci   = graph(cell, 0)*numDofPerCell;
-	trList.push_back( Tr(cell, ci, val0) );
+	const auto jacRowOfCurrCellFirstDof = smPt*m_numDofPerCell;
+	const auto jacColOfCurrCellFirstDof = graph(smPt, 0)*m_numDofPerCell;
 
-	for (index_t i=1; i<=4; ++i){
-	  const auto neighID = graph(cell, i);
-	  if( neighID != -1){
-	    trList.push_back( Tr(cell, neighID*numDofPerCell, val0) );
+	for (int k=0; k<m_numDofPerCell; ++k){
+	  for (int j=0; j<m_numDofPerCell; ++j){
+	    trList.push_back( Tr(jacRowOfCurrCellFirstDof+k, jacColOfCurrCellFirstDof+j, zero) );
 	  }
 	}
+
+	for (index_t i=1; i<=4; ++i){
+	  const auto neighID = graph(smPt, i);
+	  if( neighID != -1){
+	    const auto ci = neighID*m_numDofPerCell;
+	    for (int k=0; k<m_numDofPerCell; ++k){
+	      for (int j=0; j<m_numDofPerCell; ++j){
+		trList.push_back( Tr(jacRowOfCurrCellFirstDof+k, ci+j, zero) );
+	      }
+	    }
+	  }
+	}
+
       }
 
     J.setFromTriplets(trList.begin(), trList.end());
@@ -162,8 +219,14 @@ protected:
       nonZerosCountBeforeComputing = J->nonZeros();
     }
 
-    velocityAndOptionalJacobianNearBd(U, currentTime, V, J);
-    velocityAndOptionalJacobianInnerCells(U, currentTime, V, J);
+    if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
+      velocityAndOptionalJacobianNearBdProblemA(U, currentTime, V, J);
+      velocityAndOptionalJacobianInnerCellsProblemA(U, currentTime, V, J);
+    }
+    else if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::GrayScott){
+      // for GrayScott we have periodic BC so no special treatment needed at boundaries
+      velocityAndOptionalJacobianGrayScott(U, currentTime, V, J);
+    }
 
     if (J){
       assert(nonZerosCountBeforeComputing == J->nonZeros());
@@ -176,6 +239,36 @@ protected:
   }
 
 private:
+  template<class SourceT>
+  void setupForProblemA(SourceT sf,
+			scalar_type diffusionCoeff,
+			scalar_type reactionCoeff)
+  {
+
+    m_numDofPerCell = 1;
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize()*m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*m_numDofPerCell;
+    m_sourceFunctor  = sf;
+    m_diffusionCoeff = diffusionCoeff;
+    m_reactionCoeff  = reactionCoeff;
+    allocateGhosts();
+  }
+
+  void setupForGrayScott(scalar_type diffusionCoeff_u,
+			 scalar_type diffusionCoeff_v,
+			 scalar_type feedRate,
+			 scalar_type killRate)
+  {
+
+    m_numDofPerCell = 2;
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize()*m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*m_numDofPerCell;
+    m_diffusionCoeff_u = diffusionCoeff_u;
+    m_diffusionCoeff_v = diffusionCoeff_v;
+    m_feedRate = feedRate;
+    m_killRate = killRate;
+  }
+
   template<class U_t>
   void fillGhostsIfNeeded(const U_t & U) const
   {
@@ -200,22 +293,22 @@ private:
   // note that here we MUST use a template because when doing
   // bindings, this gets deduced to be a Ref
   template<class U_t, class V_t>
-  void velocityAndOptionalJacobianNearBd(const U_t & U,
-					 const scalar_type currentTime,
-					 V_t & V,
-					 jacobian_type * J) const
+  void velocityAndOptionalJacobianNearBdProblemA(const U_t & U,
+						 const scalar_type currentTime,
+						 V_t & V,
+						 jacobian_type * J) const
   {
-    // note that numDofPerCell == 1, so we omit it below
+    // note that m_numDofPerCell == 1, so we omit it below
     constexpr int xAxis = 1;
     constexpr int yAxis = 2;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
-    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+    stencil_container_type stencilVals(stencilSize);
 
     // stencil filler needed because we are doing cells near boundaries
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
-      dimensionality, numDofPerCell,
-      stencil_container_type, U_t, MeshType, ghost_container_type>;
+      dimensionality, 1, stencil_container_type, U_t,
+      MeshType, ghost_container_type>;
 
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
 			     m_ghostLeft, m_ghostRight,
@@ -266,7 +359,7 @@ private:
 					    -two*stencilVals(1)
 					    +stencilVals(0) );
 
-      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA && J)
+      if (J)
       {
 	auto selfValue = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*stencilVals(1);
 
@@ -301,12 +394,12 @@ private:
   }
 
   template<class U_t, class V_t>
-  void velocityAndOptionalJacobianInnerCells(const U_t & U,
-					     const scalar_type currentTime,
-					     V_t & V,
-					     jacobian_type * J) const
+  void velocityAndOptionalJacobianInnerCellsProblemA(const U_t & U,
+						     const scalar_type currentTime,
+						     V_t & V,
+						     jacobian_type * J) const
   {
-    // note that numDofPerCell == 1, so we omit it below
+    // note that for ProblemA, m_numDofPerCell == 1, so we omit it below
 
     const auto & x      = m_meshObj.viewX();
     const auto & y      = m_meshObj.viewY();
@@ -343,8 +436,7 @@ private:
       // ADD to V x diffusion contribution
       V(smPt) += dyInvSq*m_diffusionCoeff*( U(uIndexFront) - two*U(uIndex) + U(uIndexBack) );
 
-      if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA && J)
-      {
+      if (J){
 	const auto jvalueself = -two*diffDxInvSq -two*diffDyInvSq + twoReacCoeff*U(uIndex);
 	(*J).coeffRef(smPt, uIndex)      += jvalueself;
 	(*J).coeffRef(smPt, uIndexLeft)  += diffDxInvSq;
@@ -355,10 +447,87 @@ private:
     }
   }
 
+  template<class U_t, class V_t>
+  void velocityAndOptionalJacobianGrayScott(const U_t & U,
+					    const scalar_type currentTime,
+					    V_t & V,
+					    jacobian_type * J) const
+  {
+    const auto & x      = m_meshObj.viewX();
+    const auto & y      = m_meshObj.viewY();
+
+    constexpr auto one  = static_cast<scalar_type>(1);
+    constexpr auto two  = static_cast<scalar_type>(2);
+
+    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
+    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto u_diffDxInvSq  = m_diffusionCoeff_u*dxInvSq;
+    const auto u_diffDyInvSq  = m_diffusionCoeff_u*dyInvSq;
+    const auto v_diffDxInvSq  = m_diffusionCoeff_v*dxInvSq;
+    const auto v_diffDyInvSq  = m_diffusionCoeff_v*dyInvSq;
+
+    const auto & graph  = m_meshObj.graph();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+
+    for (index_t smPt=0; smPt<m_meshObj.sampleMeshSize(); ++smPt)
+    {
+      const auto vIndexCurrentCellFirstDof = smPt*m_numDofPerCell;
+
+      const auto stateIndex	  = graph(smPt, 0)*m_numDofPerCell;
+      const auto stateIndexLeft   = graph(smPt, 1)*m_numDofPerCell;
+      const auto stateIndexFront  = graph(smPt, 2)*m_numDofPerCell;
+      const auto stateIndexRight  = graph(smPt, 3)*m_numDofPerCell;
+      const auto stateIndexBack   = graph(smPt, 4)*m_numDofPerCell;
+
+      const auto thisCell_u = U(stateIndex);
+      const auto thisCell_v = U(stateIndex+1);
+      const auto uvSquared = thisCell_u * thisCell_v * thisCell_v;
+
+      V(vIndexCurrentCellFirstDof) = m_feedRate * (one - thisCell_u)
+	- uvSquared
+	+ u_diffDxInvSq*( U(stateIndexRight) - two*U(stateIndex) + U(stateIndexLeft) )
+	+ u_diffDyInvSq*( U(stateIndexBack)  - two*U(stateIndex) + U(stateIndexFront) );
+
+      V(vIndexCurrentCellFirstDof+1) = -(m_feedRate+ m_killRate) * thisCell_v
+	+ uvSquared
+	+ v_diffDxInvSq*( U(stateIndexRight+1) - two*U(stateIndex+1) + U(stateIndexLeft+1) )
+	+ v_diffDyInvSq*( U(stateIndexBack+1)  - two*U(stateIndex+1) + U(stateIndexFront+1) );
+
+      if(J){
+	// \partial f_1/\partial u
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndex) +=
+	  -two*u_diffDxInvSq - two*u_diffDyInvSq - thisCell_v * thisCell_v - m_feedRate;
+
+	// \partial f_1/\partial v
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndex+1) -= two*thisCell_u * thisCell_v;
+
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndexLeft)  += u_diffDxInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndexFront) += u_diffDyInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndexRight) += u_diffDxInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof, stateIndexBack)  += u_diffDyInvSq;
+
+	// \partial f_2/\partial u
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndex) += thisCell_v * thisCell_v;
+
+	// \partial f_2/\partial v
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndex+1) +=
+	  -two*v_diffDxInvSq -two*v_diffDyInvSq + two * thisCell_u * thisCell_v - (m_feedRate+m_killRate);
+
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndexLeft+1)  += v_diffDxInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndexFront+1) += v_diffDyInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndexRight+1) += v_diffDxInvSq;
+	(*J).coeffRef(vIndexCurrentCellFirstDof+1, stateIndexBack+1)  += v_diffDyInvSq;
+      }
+    }
+  }
+
+
   void allocateGhosts()
   {
     const auto stencilSize    = reconstructionTypeToStencilSize(m_recEn);
-    const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
+    const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
 
     const index_t s1 = m_meshObj.numCellsBd();
     ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
@@ -368,30 +537,33 @@ private:
   }
 
 protected:
-  const std::array<scalar_type, 2> normalX_{1, 0};
-  const std::array<scalar_type, 2> normalY_{0, 1};
-
   const MeshType & m_meshObj;
-  index_t m_numDofStencilMesh = {};
-  index_t m_numDofSampleMesh  = {};
-
   ::pressiodemoapps::DiffusionReaction2d m_probEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_recEn;
 
+  int m_numDofPerCell         = {};
+  index_t m_numDofStencilMesh = {};
+  index_t m_numDofSampleMesh  = {};
+
+  // members needed for problemA
   std::function<void(const scalar_type & /*x*/,
 		     const scalar_type & /*y*/,
 		     const scalar_type & /*time*/,
 		     scalar_type &)> m_sourceFunctor;
   scalar_type m_diffusionCoeff = {};
   scalar_type m_reactionCoeff = {};
-
   mutable ghost_container_type m_ghostLeft;
   mutable ghost_container_type m_ghostFront;
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
+
+  // members needed for Gray-Scott
+  scalar_type m_diffusionCoeff_u = {};
+  scalar_type m_diffusionCoeff_v = {};
+  scalar_type m_feedRate = {};
+  scalar_type m_killRate = {};
 };
 
-template<class MeshType> constexpr int EigenDiffReac2dApp<MeshType>::numDofPerCell;
 template<class MeshType> constexpr int EigenDiffReac2dApp<MeshType>::dimensionality;
 
 }}

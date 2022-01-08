@@ -2,14 +2,14 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="Installation" href="installation.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Problem class API" href="api.html" /><link rel="prev" title="Installation" href="installation.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
         <title>How to use it in 3 steps! - pressio-demoapps 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
     
     
 
@@ -157,22 +157,23 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How to use it in 3 steps!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -224,69 +225,109 @@
         <article role="main">
           <div class="section" id="how-to-use-it-in-3-steps">
 <h1>How to use it in 3 steps!<a class="headerlink" href="#how-to-use-it-in-3-steps" title="Permalink to this headline">¶</a></h1>
-<p>To use <em>any</em> of the problems supported, you need three steps:
-generate the mesh, instantiate the problem object, and solve.</p>
-<p>For demonstration purposes, let’s say we are interested
-in exploring the Euler1d Sod problem.
-We show below to handle this problem but the same steps are applicable to any other.</p>
+<p>To use <em>any</em> of the problems supported, you should always keep
+in mind that there are three steps involved: <em>generate</em> the mesh,
+<em>instantiate</em> the problem, and <em>use the problem object</em>.</p>
+<p>For demonstration purposes, let’s say we are interested in the Euler1d Sod problem.
+We show below how to use it but similar steps are applicable to any other problem.
+So after reading this page, you should be able to understand how to use any problem.</p>
 <div class="section" id="step-1-generating-the-mesh">
 <h2>Step 1: Generating the Mesh<a class="headerlink" href="#step-1-generating-the-mesh" title="Permalink to this headline">¶</a></h2>
-<p>We provide a meshing script that works as follows</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># assuming we are inside the pressio-demoapps dir</span>
-python ./meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-             --problem sod1d_s7 <span class="se">\</span>
-             --outdir <span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/myTest <span class="se">\</span>
-             -n <span class="m">100</span>
+<p>To generate the mesh, you should rely on the meshing script as follows</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
+        --outdir <span class="nv">$HOME</span>/myTestMesh <span class="se">\</span>
+        --problem sod1d_s7 <span class="se">\</span>
+        -n <span class="m">100</span>
 </pre></div>
 </div>
-<p>where the string <code class="docutils literal notranslate"><span class="pre">sod1d_s7</span></code> is composed of two parts: <code class="docutils literal notranslate"><span class="pre">sod1d</span></code> indicates the target problem,
-and <code class="docutils literal notranslate"><span class="pre">s7</span></code> indicates the stencil size to use, in this case we want a 7-point stencil
-(the supported choices are discussed later); <code class="docutils literal notranslate"><span class="pre">${HOME}/myTest</span></code> is where all the mesh files
-are generated, and <code class="docutils literal notranslate"><span class="pre">-n=100</span></code> specifies how many cells we want.</p>
+<p>where we specify the things:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--outdir</span></code>: full path to where you want all the mesh files to be generated.
+Here we use <code class="docutils literal notranslate"><span class="pre">$HOME/myTestMesh</span></code> but you can obviously set whatever you want.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--problem</span></code>: we pass the string <code class="docutils literal notranslate"><span class="pre">sod1d_s7</span></code> which has two parts:
+<code class="docutils literal notranslate"><span class="pre">sod1d</span></code> indicates the problem name, and <code class="docutils literal notranslate"><span class="pre">s7</span></code> indicates
+the stencil size to use, in this case we want a 7-point stencil.
+So if you want a mesh for Sod1d with 3-point stencil then you do <code class="docutils literal notranslate"><span class="pre">sod1d_s3</span></code>.
+Refer to each problem page for the supported choices.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-n=100</span></code> specifies how many cells to use for the spatial discretization</p></li>
+</ul>
 <p>The advantage of this script is that any information about the problem domain
-and other details are encoded in the script, so it only exposes the minimal set of parameters
+and other details are encoded in the script, so it only exposes a minimal set of parameters
 (e.g. number of cells) to set.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For the correct syntax to create the mesh for any problem, refer to each problem page.</p>
+</div>
+<div class="line-block">
+<div class="line"><br/></div>
+</div>
 </div>
 <div class="section" id="step-2-creating-a-problem-instance">
 <h2>Step 2: Creating a problem instance<a class="headerlink" href="#step-2-creating-a-problem-instance" title="Permalink to this headline">¶</a></h2>
-<p>This second step uses the mesh generated above and creates an instance of the Sod1d problem.&lt;br&gt;
-We now show what this step 2 looks like in C++ and Python.</p>
-<div class="section" id="c-synopsis">
-<h3>C++ Synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h3>
+<p>After generating a mesh, we need to create an instance of the Sod1d problem.
+We now show what this step 2 looks like in both C++ and Python.</p>
+<div class="section" id="c-synopsis-to-create-a-problem">
+<h3>C++ Synopsis to create a problem<a class="headerlink" href="#c-synopsis-to-create-a-problem" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#import &lt;pressiodemoapps/euler1d.hpp&gt;</span>
 <span class="c1">// ...</span>
-<span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span>   <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"/home/myTest"</span><span class="p">);</span>
-<span class="k">constexpr</span> <span class="k">auto</span> <span class="n">order</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">Weno5</span><span class="p">;</span>
-<span class="k">auto</span> <span class="n">problem</span>         <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">state</span>           <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
+<span class="k">namespace</span> <span class="n">pda</span>         <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span>    <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"/home/myTestMesh"</span><span class="p">);</span>
+<span class="k">constexpr</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">Weno5</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">problem</span>          <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">state</span>            <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
 <span class="c1">// ...</span>
 </pre></div>
 </div>
 <p>This creates an instance of the Sod1d problem using Eigen data types, and selects
-the 5-th order WENO for the inviscid flux edge reconstruction (more details on the schemes
-and stencils are given below). Note that here we explicitly ask for an instance
+the 5-th order WENO scheme for the inviscid flux reconstruction (to know more details
+about which schemes and stencils a problem supports, see the target problem’s webpage).
+Note that here we explicitly ask for an instance
 of the problem that is based on Eigen data types. Eigen is currently the main backend
 supported, but other ones, e.g., Kokkos, will be added later.</p>
 </div>
-<div class="section" id="python-synopsis">
-<h3>Python Synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="python-synopsis-to-create-a-problem">
+<h3>Python Synopsis to create a problem<a class="headerlink" href="#python-synopsis-to-create-a-problem" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
 <span class="c1"># ...</span>
-<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">"/home/myTest"</span><span class="p">)</span>
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">"/home/myTestMesh"</span><span class="p">)</span>
 <span class="n">order</span>   <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">Weno5</span><span class="p">;</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler1d</span><span class="o">.</span><span class="n">Sod</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
 <span class="n">state</span>   <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">initialCondition</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>In Python, this creates a problem based on <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.
-We remark that we aimed for the Python code to be readable as similarly as possible to the C++.</p>
+<p>This creates a problem that uses <code class="docutils literal notranslate"><span class="pre">numpy</span></code> data structures.
+Note how the Python code reads like the C++ one.</p>
+<div class="line-block">
+<div class="line"><br/></div>
 </div>
 </div>
-<div class="section" id="step-3-solving-the-problem">
-<h2>Step 3: Solving the problem<a class="headerlink" href="#step-3-solving-the-problem" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="step-3-using-the-problem">
+<h2>Step 3: Using the problem<a class="headerlink" href="#step-3-using-the-problem" title="Permalink to this headline">¶</a></h2>
 <p>To use a problem instance, you need to know that all <em>pressio-demoapps</em>
 problem instances meet a specific API as described in <a class="reference internal" href="api.html"><span class="doc">this page</span></a>.</p>
+<p>Assuming you read that API page, then it should be clear that the
+problem API is complete enough so that you can query all operators
+and do something with them.
+Here we show some things you can do using the C++ as an example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// ...</span>
+<span class="k">auto</span> <span class="n">problem</span>          <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">state</span>            <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
+
+<span class="c1">// now that we have the problem and initial condition we can</span>
+<span class="c1">// create the RHS</span>
+<span class="k">auto</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">createVelocity</span><span class="p">()</span>
+<span class="c1">// compute the rhs of the discrete system at time=0.0</span>
+<span class="n">problem</span><span class="p">.</span><span class="n">velocity</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">rhs</span><span class="p">);</span>
+
+<span class="c1">// create the Jacobian</span>
+<span class="k">auto</span> <span class="n">J</span> <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">createJacobian</span><span class="p">()</span>
+<span class="c1">// compute J at time=0.0</span>
+<span class="n">problem</span><span class="p">.</span><span class="n">velocityAndJacobian</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">rhs</span><span class="p">,</span> <span class="n">J</span><span class="p">);</span>
+<span class="c1">// or we can compute just the Jacobian</span>
+<span class="n">problem</span><span class="p">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">J</span><span class="p">);</span>
+</pre></div>
+</div>
 <p><strong>!! to do: finish</strong></p>
 </div>
 </div>
@@ -296,12 +337,12 @@ problem instances meet a specific API as described in <a class="reference intern
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="your_first_problem.html">
+          <a class="next-page" href="api.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Run your first problem!</div>
+                <div class="title">Problem class API</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -320,12 +361,10 @@ problem instances meet a specific API as described in <a class="reference intern
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
-            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-              and
-              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-              <a href="https://github.com/pradyunsg/furo">Furo theme</a>. |
-            <a class="muted-link" href="_sources/howtouse.rst.txt"
+            Last updated on Jan 08, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/howtouse.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -348,11 +387,11 @@ problem instances meet a specific API as described in <a class="reference intern
 <li><a class="reference internal" href="#">How to use it in 3 steps!</a><ul>
 <li><a class="reference internal" href="#step-1-generating-the-mesh">Step 1: Generating the Mesh</a></li>
 <li><a class="reference internal" href="#step-2-creating-a-problem-instance">Step 2: Creating a problem instance</a><ul>
-<li><a class="reference internal" href="#c-synopsis">C++ Synopsis</a></li>
-<li><a class="reference internal" href="#python-synopsis">Python Synopsis</a></li>
+<li><a class="reference internal" href="#c-synopsis-to-create-a-problem">C++ Synopsis to create a problem</a></li>
+<li><a class="reference internal" href="#python-synopsis-to-create-a-problem">Python Synopsis to create a problem</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#step-3-solving-the-problem">Step 3: Solving the problem</a></li>
+<li><a class="reference internal" href="#step-3-using-the-problem">Step 3: Using the problem</a></li>
 </ul>
 </li>
 </ul>
@@ -368,7 +407,7 @@ problem instances meet a specific API as described in <a class="reference intern
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/scripts/main.js"></script>
+    <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     </body>

@@ -40,7 +40,6 @@ class install(_install):
   def run(self):
     global enableOpenMP
     enableOpenMP = self.enable_openmp
-    print("GIGI = ", self.enable_openmp)
     _install.run(self)
 
 # ----------------------------------------------

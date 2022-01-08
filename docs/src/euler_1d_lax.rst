@@ -21,10 +21,10 @@ Mesh
 
 .. code-block:: shell
 
-   cd pressio-demoapps/meshing_scripts
-   python create_full_mesh_for.py --problem lax1d_s<stencilSize> -n <N> --outDir <destination-path>
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+           --problem lax1d_s<stencilSize> -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``, 
+where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
@@ -32,7 +32,7 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler1d::Lax;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -48,3 +48,16 @@ Python synopsis
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
    state   = problem.initialCondition()
+
+
+
+Sample Solution
+---------------
+
+Representative plot for total simulation time `T=1.3` showing density at `t=0, 0.65, 1.3`
+obtained using `dt = 0.0001`, Weno5, SSPRK3 integration with a mesh of 1000 cells.
+
+.. image:: ../../figures/wiki_lax1d_0.0001_1.3_1000_weno5_ssp3.png
+  :width: 60 %
+  :align: center
+  :alt: Alternative text

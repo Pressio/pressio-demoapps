@@ -3,7 +3,7 @@ include(FindUnixCommands)
 #------------------
 # compute full mesh
 #------------------
-set(CMD "python ${FMESHDRIVER} -n 10 10 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 1.0 0.0 1.0 --periodic false")
+set(CMD "python3 ${FMESHDRIVER} -n 10 10 --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 1.0 0.0 1.0 --periodic false")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")
@@ -45,7 +45,7 @@ execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 #------------------
 # generate sample mesh
 #------------------
-set(CMD "python ${SMESHDRIVER} --outdir ${OUTDIR} --fullMeshDir ${OUTDIR}/full")
+set(CMD "python3 ${SMESHDRIVER} --outdir ${OUTDIR} --fullMeshDir ${OUTDIR}/full")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")
@@ -66,7 +66,7 @@ endif()
 #------------------
 # check things are right
 #------------------
-set(CMD "python compare.py")
+set(CMD "python3 compare.py")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "comparison failed")

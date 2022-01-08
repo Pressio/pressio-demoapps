@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="1D Euler Smooth" href="euler_1d_smooth.html" /><link rel="prev" title="1D Linear Advection" href="advection_1d.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
-        <title>1D Diffusion Reaction - pressio-demoapps 0.1.0 documentation</title>
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
+        <title>1D single-species reaction diffusion - pressio-demoapps 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
     
     
 
@@ -157,22 +157,23 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1D Diffusion Reaction</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -222,15 +223,15 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="d-diffusion-reaction">
-<h1>1D Diffusion Reaction<a class="headerlink" href="#d-diffusion-reaction" title="Permalink to this headline">¶</a></h1>
+          <div class="section" id="d-single-species-reaction-diffusion">
+<h1>1D single-species reaction diffusion<a class="headerlink" href="#d-single-species-reaction-diffusion" title="Permalink to this headline">¶</a></h1>
 <p>This problem focuses on the following 1d diffusion reaction PDE:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[\frac{\partial s}{\partial t} = D \frac{\partial^2 s}{\partial x^2} + k s^2 + u(x, t)\]</div></div>
+\[\frac{\partial y}{\partial t} = D \frac{\partial^2 y}{\partial x^2} + k y^2 + u(x, t)\]</div></div>
 <ul class="simple">
 <li><p>Adapted from <a class="reference external" href="https://arxiv.org/abs/1910.03193">this paper</a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">D,</span> <span class="pre">k,</span> <span class="pre">u(x,</span> <span class="pre">t)</span></code> can be provided to the problem constructor (more below)</p></li>
-<li><p>IC: <span class="math notranslate nohighlight">\(s(x, 0) = 0\)</span></p></li>
+<li><p>IC: <span class="math notranslate nohighlight">\(y(x, 0) = 0\)</span></p></li>
 <li><p>Default settings:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">D</span> <span class="pre">=</span> <span class="pre">0.01</span></code></p></li>
@@ -242,8 +243,8 @@
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps/meshing_scripts
-python create_full_mesh_for.py --problem diffreac1d -n &lt;N&gt; --outDir &lt;destination-path&gt;
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
+       --problem diffreac1d -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want, and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
@@ -312,8 +313,8 @@ python create_full_mesh_for.py --problem diffreac1d -n &lt;N&gt; --outDir &lt;de
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Note that this problem does not have advection, so inviscid schemes are not applicable
-but only viscous schemes are. Currently, we only support a first order viscous flux
+<p>Note that this problem does not have advection, so only viscous schemes are applicable.
+Currently, we only support a first order viscous flux
 reconstruction, which leads to a second-order scheme.</p>
 </div>
 </div>
@@ -348,12 +349,10 @@ reconstruction, which leads to a second-order scheme.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Dec 23, 2021. |
-            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-              and
-              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-              <a href="https://github.com/pradyunsg/furo">Furo theme</a>. |
-            <a class="muted-link" href="_sources/diffusion_reaction_1d.rst.txt"
+            Last updated on Jan 08, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/diffusion_reaction_1d.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -373,7 +372,7 @@ reconstruction, which leads to a second-order scheme.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">1D Diffusion Reaction</a><ul>
+<li><a class="reference internal" href="#">1D single-species reaction diffusion</a><ul>
 <li><a class="reference internal" href="#mesh">Mesh</a></li>
 <li><a class="reference internal" href="#c-synopsis">C++ synopsis</a></li>
 <li><a class="reference internal" href="#python-synopsis">Python synopsis</a></li>
@@ -393,7 +392,7 @@ reconstruction, which leads to a second-order scheme.</p>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/scripts/main.js"></script>
+    <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
