@@ -2,6 +2,7 @@
 import sys, os, time, subprocess
 import numpy as np
 from argparse import ArgumentParser
+from pathlib import Path
 
 valid = ["linadv1d_s3", \
          "linadv1d_s5", \
@@ -26,6 +27,8 @@ valid = ["linadv1d_s3", \
          ##############
          #
          "diffreac2d", \
+         #
+         "grayscott2d", \
          #
          "euler2dsmooth_s3", \
          "euler2dsmooth_s5", \
@@ -99,11 +102,12 @@ if __name__== "__main__":
   pName = args.problemName
   print(pName)
 
-  fullMeshScript = "create_full_mesh.py"
+  # we need to do this so that the file is always run properly
+  fullMeshScript = str(Path(__file__).parent.absolute())+"/create_full_mesh.py"
 
   if ("linadv1d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -112,7 +116,7 @@ if __name__== "__main__":
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("diffreac1d" in pName):
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(3),
@@ -122,7 +126,7 @@ if __name__== "__main__":
 
   elif ("euler1dsmooth" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -132,7 +136,7 @@ if __name__== "__main__":
 
   elif ("sod1d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -142,7 +146,7 @@ if __name__== "__main__":
 
   elif ("lax1d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -151,7 +155,7 @@ if __name__== "__main__":
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("diffreac2d" in pName):
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(3),
@@ -159,9 +163,18 @@ if __name__== "__main__":
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
+  elif ("grayscott2d" in pName):
+    args = ("python3", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(3),
+            "--bounds", str(-1.25), str(1.25), str(-1.25), str(1.25),
+            "--periodic", "true")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
   elif ("euler2dsmooth" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -171,7 +184,7 @@ if __name__== "__main__":
 
   elif ("euler2dKelvinHelmholtz" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -181,7 +194,7 @@ if __name__== "__main__":
 
   elif ("normalshock2d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -191,7 +204,7 @@ if __name__== "__main__":
 
   elif ("sedov2d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -201,7 +214,7 @@ if __name__== "__main__":
 
   elif ("sedov2dsym" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -211,7 +224,7 @@ if __name__== "__main__":
 
   elif ("riemann2d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -221,7 +234,7 @@ if __name__== "__main__":
 
   elif ("doublemach2d" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -231,7 +244,7 @@ if __name__== "__main__":
 
   elif ("swe2dSlipWall" in pName or "swe2dslipwall" in pName):
     s = int(pName[-1])
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -244,7 +257,7 @@ if __name__== "__main__":
     if (s!=3 or s!=5):
       print("3D currently only supports 1st order or Weno3, use _s3 or _s5")
       sys.exit(1)
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]), str(args.numCells[2]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
@@ -257,7 +270,7 @@ if __name__== "__main__":
     if (s!=3 or s!=5):
       print("3D currently only supports 1st order or Weno3, use _s3 or _s5")
       sys.exit(1)
-    args = ("python", fullMeshScript,
+    args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]), str(args.numCells[2]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),

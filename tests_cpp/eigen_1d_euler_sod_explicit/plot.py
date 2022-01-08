@@ -31,9 +31,14 @@ if __name__== "__main__":
 
   fig = plt.figure(1)
   rho0 = np.reshape(fomTestD[0,:], (nx, 3))[:,0]
-  rho1 = np.reshape(fomTestD[int(nt/3),:], (nx, 3))[:,0]
+  rho1 = np.reshape(fomTestD[int(nt/2),:], (nx, 3))[:,0]
   rho2 = np.reshape(fomTestD[nt-1,:], (nx, 3))[:,0]
-  plt.plot(x_fom, rho0, '-r')
-  plt.plot(x_fom, rho1, '-g')
-  plt.plot(x_fom, rho2, '-b')
+  plt.plot(x_fom, rho0, '-r', label='density at t=0')
+  plt.plot(x_fom, rho1, '-g', label='density at t=T/2')
+  plt.plot(x_fom, rho2, '-b', label='density at t=T')
+
+  plt.xlabel("x", fontsize=12)
+  plt.ylabel("Solution", fontsize=12)
+  plt.legend()
+  fig.savefig("solution.png", format="png", bbox_inches='tight', dpi=450)
   plt.show()

@@ -2,14 +2,14 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="1D Euler Sod" href="euler_1d_sod.html" /><link rel="prev" title="1D Diffusion Reaction" href="diffusion_reaction_1d.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="1D Euler Sod" href="euler_1d_sod.html" /><link rel="prev" title="1D single-species reaction diffusion" href="diffusion_reaction_1d.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
         <title>1D Euler Smooth - pressio-demoapps 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
     
     
 
@@ -157,22 +157,23 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -240,8 +241,8 @@
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps/meshing_scripts
-python create_full_mesh_for.py --problem euler1dsmooth_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir &lt;destination-path&gt;
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
+       --problem euler1dsmooth_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
@@ -249,7 +250,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">PeriodicSmooth</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
 <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
@@ -290,7 +291,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">1D Diffusion Reaction</div>
+                <div class="title">1D single-species reaction diffusion</div>
                 
               </div>
             </a>
@@ -298,12 +299,10 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Dec 23, 2021. |
-            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-              and
-              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-              <a href="https://github.com/pradyunsg/furo">Furo theme</a>. |
-            <a class="muted-link" href="_sources/euler_1d_smooth.rst.txt"
+            Last updated on Jan 08, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/euler_1d_smooth.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -342,7 +341,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/scripts/main.js"></script>
+    <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

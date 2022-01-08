@@ -46,12 +46,36 @@ enum class DiffusionReaction2d{
     u(x, y, t) = std::sin(M_PI*x*(y-0.2)) * 4.*std::sin(4.*M_PI*y*x);
 
    */
-  ProblemA
+  ProblemA,
+
+  /*
+    two species:
+    du/dt = Laplacian(u) + F(1-u) - u*v^2
+    dv/dt = Laplacian(v) + (F+k)v + u*v^2
+
+    where F is feeding rate, k is kill rate
+    periodic BC
+
+   */
+  GrayScott
 };
+
+// enum class DiffusionReaction3d{
+//     // two species:
+//     // du/dt = Laplacian(u) + F(1-u) - u*v^2
+//     // dv/dt = Laplacian(v) + (F+k)v + u*v^2
+
+//     // where F is feeding rate, k is kill rate
+//     // periodic BC
+
+//   GrayScott
+// };
+
 }//end namespace pressiodemoapps
 
 #include "./impl/diffusion_reaction_1d_prob_class.hpp"
 #include "./impl/diffusion_reaction_2d_prob_class.hpp"
+// #include "./impl/diffusion_reaction_3d_prob_class.hpp"
 
 namespace pressiodemoapps{
 namespace impldiffreac{
@@ -71,8 +95,8 @@ void check_stencil_admissibility(const mesh_t & meshObj,
 #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T, class ProbType>
 T create_problem_for_pyA(const mesh_t & meshObj,
-		      ProbType probEnum,
-		      ::pressiodemoapps::ViscousFluxReconstruction recEnum)
+			 ProbType probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum)
 {
   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   return T(meshObj, probEnum, recEnum);
@@ -80,10 +104,10 @@ T create_problem_for_pyA(const mesh_t & meshObj,
 
 template<class mesh_t, class T, class ProbType>
 T create_problem_for_pyB(const mesh_t & meshObj,
-		      ProbType probEnum,
-		      ::pressiodemoapps::ViscousFluxReconstruction recEnum,
-		      typename mesh_t::scalar_t diffusionCoeff,
-		      typename mesh_t::scalar_t reactionCoeff)
+			 ProbType probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			 typename mesh_t::scalar_t diffusionCoeff,
+			 typename mesh_t::scalar_t reactionCoeff)
 {
   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   return T(meshObj, probEnum, recEnum, diffusionCoeff, reactionCoeff);
@@ -91,11 +115,12 @@ T create_problem_for_pyB(const mesh_t & meshObj,
 
 template<class mesh_t, class T>
 T create_problem_for_pyC1d(const mesh_t & meshObj,
-			::pressiodemoapps::DiffusionReaction1d probEnum,
-			::pressiodemoapps::ViscousFluxReconstruction recEnum,
-			pybind11::object pyFunctor,
-			typename mesh_t::scalar_t diffusionCoeff,
-			typename mesh_t::scalar_t reactionCoeff)
+			   ::pressiodemoapps::DiffusionReaction1d probEnum,
+			   ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			   // source term is passed as a Python functor
+			   pybind11::object pyFunctor,
+			   typename mesh_t::scalar_t diffusionCoeff,
+			   typename mesh_t::scalar_t reactionCoeff)
 {
   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using scalar_t = typename mesh_t::scalar_t;
@@ -108,11 +133,12 @@ T create_problem_for_pyC1d(const mesh_t & meshObj,
 
 template<class mesh_t, class T>
 T create_problem_for_pyC2d(const mesh_t & meshObj,
-			::pressiodemoapps::DiffusionReaction2d probEnum,
-			::pressiodemoapps::ViscousFluxReconstruction recEnum,
-			pybind11::object pyFunctor,
-			typename mesh_t::scalar_t diffusionCoeff,
-			typename mesh_t::scalar_t reactionCoeff)
+			   ::pressiodemoapps::DiffusionReaction2d probEnum,
+			   ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			   // source term is passed as a Python functor
+			   pybind11::object pyFunctor,
+			   typename mesh_t::scalar_t diffusionCoeff,
+			   typename mesh_t::scalar_t reactionCoeff)
 {
   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
   using scalar_t = typename mesh_t::scalar_t;
@@ -125,6 +151,20 @@ T create_problem_for_pyC2d(const mesh_t & meshObj,
 
   return T(meshObj, probEnum, recEnum, sourceWrapper, diffusionCoeff, reactionCoeff);
 }
+
+template<class mesh_t, class T, class ProbType>
+T create_problem_for_pyD(const mesh_t & meshObj,
+			 ProbType probEnum,
+			 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
+			 typename mesh_t::scalar_t Da,
+			 typename mesh_t::scalar_t Db,
+			 typename mesh_t::scalar_t feedRate,
+			 typename mesh_t::scalar_t killRate)
+{
+  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
+  return T(meshObj, probEnum, recEnum, Da, Db, feedRate, killRate);
+}
+
 #endif
 } //end namespace impldiffreac
 
@@ -151,6 +191,17 @@ auto create_problem_eigen(const mesh_t & meshObj,
   using RetType = PublicProblemMixinCpp<impldiffreac::EigenDiffReac2dApp<mesh_t>>;
   return RetType(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
 }
+
+// template<class mesh_t, class ...Args>
+// auto create_problem_eigen(const mesh_t & meshObj,
+// 			::pressiodemoapps::DiffusionReaction3d probEnum,
+// 			::pressiodemoapps::ViscousFluxReconstruction recEnum,
+// 			Args && ... args)
+// {
+//   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
+//   using RetType = PublicProblemMixinCpp<impldiffreac::EigenDiffReac3dApp<mesh_t>>;
+//   return RetType(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
+// }
 #endif
 
 } //end namespace pressiodemoapps

@@ -3,7 +3,7 @@ include(FindUnixCommands)
 set(MYLIST "10;20;40;80")
 foreach(nx ${MYLIST})
 
-  set(CMD "python ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${SSTEN} --bounds -1.0 1.0 --periodic true")
+  set(CMD "python3 ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${SSTEN} --bounds -1.0 1.0 --periodic true")
   execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
   if(RES)
     message(FATAL_ERROR "Mesh generation failed")
@@ -25,7 +25,7 @@ foreach(nx ${MYLIST})
 endforeach()
 
 # check convergence
-set(CMD "python conv.py")
+set(CMD "python3 conv.py")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "test failed")

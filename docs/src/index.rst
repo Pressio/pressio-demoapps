@@ -3,18 +3,18 @@ Overview
 
 
 pressio-demoapps is a collection of 1D, 2D and 3D problems
-of varying complexity (from linear advection, to diffusion and compressible Euler)
+of varying complexity (from linear advection, to reaction-diffusion and compressible Euler)
 that can be used for a variety of purposes.
 
-Is this *another* physics PDE solver?
--------------------------------------
+Is this *another* physics solver?
+---------------------------------
 
-No! This will **not** become a full solver, since its scope is and will stay limited.
+No! This will **not** become a full solver. The scope is and will stay limited.
 
 .. Important::
    The main distinguishing feature from other codes is the built-in support
    to handle a sample mesh (which, in brief, is the capability of evaluating
-   the residual at a disjoint subset of the mesh cells. More on this below),
+   the residual at a disjoint subset of the mesh cells),
    and the focus on providing self-contained and well-defined *problems* to study.
 
 This code, in fact, was originally started as part of the Pressio project
@@ -42,7 +42,7 @@ Some features of this work include:
 Enough text, show me some code!
 -------------------------------
 
-In C++, a representative snippet showing our idea of a *problem*:
+A C++ representative snippet showing our idea of a *problem*:
 
 .. code-block:: c++
 
@@ -57,7 +57,7 @@ In C++, a representative snippet showing our idea of a *problem*:
    }
 
 
-You don't want to use C++? We have Python bindings too!
+If you prefer, you can use directly Python:
 
 .. code-block:: py
 
@@ -67,6 +67,8 @@ You don't want to use C++? We have Python bindings too!
    scheme    = pda.InviscidFluxReconstruction.Weno5
    problemId = pda.Euler1d.Sod
    problem   = pda.create_problem(mesh, problemId, scheme)
+
+Read more on `how to use a problem instance <howtouse>`_ or checkout what `public API a problem meets <api>`_.
 
 
 Core development principles
@@ -96,8 +98,8 @@ Contents
 
     installation
     howtouse
-    your_first_problem
     api
+    your_first_problem
     problems_1d
     problems_2d
     problems_3d

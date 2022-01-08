@@ -1,5 +1,5 @@
-2D Diffusion Reaction
-=====================
+2D single-species reaction diffusion
+====================================
 
 This problem focuses on the following 2d diffusion reaction PDE:
 
@@ -29,10 +29,10 @@ Mesh
 
 .. code-block:: shell
 
-   cd pressio-demoapps/meshing_scripts
-   python create_full_mesh_for.py --problem diffreac2d -n Nx Ny --outDir <destination-path>
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+           --problem diffreac2d -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` is the number of cells you want along x and y, 
+where ``Nx, Ny`` is the number of cells you want along x and y,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis

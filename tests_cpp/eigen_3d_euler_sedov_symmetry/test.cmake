@@ -1,6 +1,6 @@
 include(FindUnixCommands)
 
-set(CMD "python ${MESHDRIVER} -n ${NX} ${NY} ${NZ} --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 0.4 0.0 0.4 0.0 0.4 --periodic false")
+set(CMD "python3 ${MESHDRIVER} -n ${NX} ${NY} ${NZ} --outDir ${OUTDIR} -s ${STENCILVAL} --bounds 0.0 0.4 0.0 0.4 0.0 0.4 --periodic false")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")
@@ -15,7 +15,7 @@ else()
   message("run succeeded!")
 endif()
 
-set(CMD "python compare.py")
+set(CMD "python3 compare.py")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "comparison failed")

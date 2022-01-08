@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to use it in 3 steps!" href="howtouse.html" /><link rel="prev" title="Overview" href="index.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2021.10.09"/>
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
         <title>Installation - pressio-demoapps 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=0254c309f5cadf746f1a613e7677379ac9c8cdcd" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=16fb25fabf47304eee183a5e9af80b1ba98259b1" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
     
     
 
@@ -157,22 +157,23 @@
   <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D Diffusion Reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_kelvin_helmholtz.html">2D Euler Kelvin-Helmholtz</a></li>
@@ -234,7 +235,9 @@
 <li><p>include the Eigen library (whose headers you can find inside <code class="docutils literal notranslate"><span class="pre">pressiodemoapps/tpls</span></code>).</p></li>
 <li><p>specify the CMake option <code class="docutils literal notranslate"><span class="pre">-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON</span></code> while building your code.</p></li>
 </ol>
-<p>If you want to build the C++ tests, you need CMake &gt; 3.18.0:</p>
+<div class="section" id="building-the-test-suite">
+<h3>Building the test suite<a class="headerlink" href="#building-the-test-suite" title="Permalink to this headline">¶</a></h3>
+<p>If you want to build the C++ tests, you need CMake &gt; 3.18.0 and then do:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
 <span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
 <span class="nb">cd</span> pressio-demoapps <span class="o">&amp;&amp;</span> mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
@@ -244,12 +247,10 @@ ctest -j4
 </pre></div>
 </div>
 </div>
+</div>
 <div class="section" id="python-library">
 <h2>Python library<a class="headerlink" href="#python-library" title="Permalink to this headline">¶</a></h2>
-<p>Requires:</p>
-<ul class="simple">
-<li><p>CMake &gt; 3.18.0 and C++ compiler with C++14 support</p></li>
-</ul>
+<p>It requires: CMake &gt; 3.18.0 and C++ compiler with C++14 support</p>
 <p>Should be as easy as:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
 <span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
@@ -294,12 +295,10 @@ pytest -s
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Nov 21, 2021. |
-            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-              and
-              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-              <a href="https://github.com/pradyunsg/furo">Furo theme</a>. |
-            <a class="muted-link" href="_sources/installation.rst.txt"
+            Last updated on Jan 08, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/installation.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -320,7 +319,10 @@ pytest -s
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#c-library">C++ library</a></li>
+<li><a class="reference internal" href="#c-library">C++ library</a><ul>
+<li><a class="reference internal" href="#building-the-test-suite">Building the test suite</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#python-library">Python library</a></li>
 </ul>
 </li>
@@ -337,7 +339,7 @@ pytest -s
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/scripts/main.js"></script>
+    <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     </body>

@@ -25,10 +25,10 @@ Mesh
 
 .. code-block:: shell
 
-   cd pressio-demoapps/meshing_scripts
-   python create_full_mesh_for.py --problem euler1dsmooth_s<stencilSize> -n <N> --outDir <destination-path>
+   python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
+          --problem euler1dsmooth_s<stencilSize> -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``, 
+where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
@@ -36,7 +36,7 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler1d::PeriodicSmooth;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
