@@ -68,8 +68,7 @@ If you prefer, you can use directly Python:
    problemId = pda.Euler1d.Sod
    problem   = pda.create_problem(mesh, problemId, scheme)
 
-Read more on `how to use a problem instance <howtouse>`_ or
-checkout what `public API a problem meets <api>`_.
+Read more on `how to use a problem instance <howtouse>`_ or checkout what `public API a problem meets <api>`_.
 
 
 Core development principles

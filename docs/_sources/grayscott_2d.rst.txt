@@ -30,8 +30,7 @@ This problem focuses on the following 2d diffusion reaction PDE:
 
 * Domain is ``[-1.25,1.25]^2`` with periodic BCs
 
-* See the following references: `link1 <https://itp.uni-frankfurt.de/~gros/StudentProjects/Projects_2020/projekt_schulz_kaefer/>`_,
-`link2 <https://groups.csail.mit.edu/mac/projects/amorphous/GrayScott/>`_.
+* See the following references: `link1 <https://itp.uni-frankfurt.de/~gros/StudentProjects/Projects_2020/projekt_schulz_kaefer/>`_, `link2 <https://groups.csail.mit.edu/mac/projects/amorphous/GrayScott/>`_.
 
 
 Mesh
