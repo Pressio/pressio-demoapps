@@ -66,14 +66,15 @@ and generate the new (reduced) mesh.
 
    python create_sample_mesh.py \
 		--fullMeshDir        <path-to-the-FULL-mesh-dir-to-start-from> \
-		--targetCellIndices  <path-to-ascii-file-with-desired-cell-indices-list> \
+		--sampleMeshIndices  <path-to-ascii-file-with-desired-cell-indices-list> \
 		--outDir <path-to-where-to-output-new-mesh> \
 		--debug  true/false # default=false
 
 where:
+
 - ``--fullMeshDir``: full path to a FULL mesh directory; this dir should contain mesh files as generated using the ``create_full_mesh.py`` script of pressio-demoapps.
 
-- ``--targetCellIndices``: full path to ASCII file with list of indices identifying the subset of cells you want to use a **sample** mesh cells. Note that this list must contain indices valid wrt the full mesh provided in ``fullMeshDir``.
+- ``--sampleMeshIndices``: full path to ASCII file with list of indices identifying the subset of cells you want to use a **sample** mesh cells. Note that this list must contain indices valid wrt the full mesh provided in ``fullMeshDir``.
 
 - ``--workDir``: full path to directory such that:
   - this dir contains where you want all **new** mesh files to be generated;

@@ -66,7 +66,7 @@ C++ synopsis
    {
      using scalar_type = typename decltype(meshObj)::scalar_t;
      const scalar_type Da       = /*some_value*/;
-     const scalar_type Da       = /*some_value*/;
+     const scalar_type Db       = /*some_value*/;
      const scalar_type feedRate = /*some_value*/;
      const scalar_type killRate = /*some_value*/;
      auto problem      = pda::create_problem_eigen(meshObj, probId, scheme,
