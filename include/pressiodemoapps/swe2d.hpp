@@ -19,12 +19,12 @@ enum class Swe2d{
 namespace pressiodemoapps{
 namespace implswe2d{
 
-template<class mesh_t, class T>
+template<class mesh_t, class T, class ...Args>
 T createSwe2dImpl(const mesh_t & meshObj,
-		 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		 ::pressiodemoapps::Swe2d probEnum,
-		 ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-		  const int icId)
+		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		  ::pressiodemoapps::Swe2d probEnum,
+		  ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+		  Args && ... args)
 {
 
   const auto stencilSize = meshObj.stencilSize();
@@ -34,52 +34,59 @@ T createSwe2dImpl(const mesh_t & meshObj,
       ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
   }
 
-  return T(meshObj, probEnum, recEnum, fluxEnum,icId);
+  return T(meshObj, probEnum, recEnum, fluxEnum, std::forward<Args>(args)...);
 }
 
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
 T create_problem_for_pyA(const mesh_t & meshObj,
-		      ::pressiodemoapps::Swe2d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+			 ::pressiodemoapps::Swe2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-					  InviscidFluxScheme::Rusanov, 1);
+				    InviscidFluxScheme::Rusanov, 1);
 }
 
 template<class mesh_t, class T>
 T create_problem_for_pyB(const mesh_t & meshObj,
-		      ::pressiodemoapps::Swe2d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		      const int ic)
+			 ::pressiodemoapps::Swe2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			 typename mesh_t::scalar_t gravity,
+			 typename mesh_t::scalar_t coriolis)
 {
   return createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
-				   InviscidFluxScheme::Rusanov, ic);
+				    InviscidFluxScheme::Rusanov,
+				    gravity, coriolis);
+}
+
+template<class mesh_t, class T>
+T create_problem_for_pyC(const mesh_t & meshObj,
+			 ::pressiodemoapps::Swe2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			 typename mesh_t::scalar_t gravity,
+			 typename mesh_t::scalar_t coriolis,
+			 typename mesh_t::scalar_t pulseMagnitude)
+{
+  return createSwe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
+				    InviscidFluxScheme::Rusanov,
+				    gravity, coriolis, pulseMagnitude);
 }
 #endif
 
 } //end pressiodemoapps::impl
 
-template<class mesh_t>
+template<class mesh_t, class ...Args>
 auto create_problem_eigen(const mesh_t & meshObj,
-			::pressiodemoapps::Swe2d probEnum,
-			::pressiodemoapps::InviscidFluxReconstruction recEnum,
-			::pressiodemoapps::InviscidFluxScheme fluxEnum,
-			int icId)
+			  ::pressiodemoapps::Swe2d probEnum,
+			  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			  Args && ... args)
 {
+
   using p_t = ::pressiodemoapps::implswe::EigenSwe2dApp<mesh_t>;
   using RetType = PublicProblemMixinCpp<p_t>;
-  return implswe2d::createSwe2dImpl<mesh_t, RetType>(meshObj, recEnum,
-						     probEnum, fluxEnum, icId);
-}
-
-template<class mesh_t>
-auto create_problem_eigen(const mesh_t & meshObj,
-			::pressiodemoapps::Swe2d probEnum,
-			::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return create_problem_eigen(meshObj, probEnum, recEnum,
-				    InviscidFluxScheme::Rusanov, 1);
+  return implswe2d::createSwe2dImpl<mesh_t, RetType>(meshObj, recEnum, probEnum,
+						     InviscidFluxScheme::Rusanov,
+						     std::forward<Args>(args)...);
 }
 
 }//end namespace pressiodemoapps

@@ -62,6 +62,8 @@ add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
+add_subdirectory(eigen_2d_diffusion_reaction_sample_mesh_test)
+
 
 ### 3d problems ###
 add_subdirectory(eigen_3d_euler_smooth)
