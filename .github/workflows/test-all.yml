@@ -35,7 +35,7 @@ jobs:
     env: # environment variables available to all steps
       CXX: ${{ matrix.config.cxx }}
       APT_PACKAGES: python3 pip python-is-python3 g++ clang gpg wget
-      PIP_PACKAGES: pytest numpy scipy matplotlib
+      PIP_PACKAGES: pytest build numpy scipy matplotlib
       DEMOAPPS_HOME: /home/runner/work/pressio-demoapps/pressio-demoapps
       BUILD_DIR: /home/runner/work/build/pressio-demoapps
 
@@ -109,7 +109,8 @@ jobs:
       - name: Install Python package
         run: |
           cd $DEMOAPPS_HOME
-          sudo -E python setup.py install
+          python scripts/cmake_build.py
+          pip install .
 
       - name: Run Python tests
         run: |
