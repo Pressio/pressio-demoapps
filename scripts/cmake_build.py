@@ -17,6 +17,7 @@ import subprocess
 
 
 class CMakeBuild:
+    """ Class responsible fo building library for pressiodemoapps. """
     def __init__(self, build_mode: str = 'Release', enable_omp: bool = False, build_args: list = None):
         # Options
         self.build_mode = build_mode
@@ -38,6 +39,7 @@ class CMakeBuild:
         self._print_info()
 
     def _cli(self):
+        """ Support for common line arguments. """
         parser = argparse.ArgumentParser()
         parser.add_argument("--openmp", action="store_true", help="Enables OpenMP if given")
         parser.add_argument("--build_mode", help="Defines build mode: Release or Debug")
@@ -51,15 +53,18 @@ class CMakeBuild:
 
     @staticmethod
     def _check_and_create_dir(directory: str):
+        """ Checks if directory exists. If it does not, creates the path recursively"""
         if not os.path.exists(directory):
             os.makedirs(directory)
 
     def _copy_init_file_to_package(self):
+        """ Copy init file to the library directory """
         file_src = os.path.join(project_path, 'pressiodemoapps', '__init__.py')
         file_dst = os.path.join(self.library, '__init__.py')
         shutil.copyfile(file_src, file_dst)
 
     def _print_info(self):
+        """ Prints information regarding paths and options. """
         print('\n')
         print('======> PROJECT DIRECTORIES <======')
         print(f'===> Project path: {project_path}')
@@ -73,6 +78,7 @@ class CMakeBuild:
         print('\n')
 
     def _check_os_env_vars(self):
+        """ Checks environment variables. """
         if "CXX" not in os.environ:
             if platform.system() != 'Windows':
                 compiler = subprocess.run(['which', 'g++'], capture_output=True)
@@ -89,6 +95,8 @@ class CMakeBuild:
             self.build_args.append('-j4')
 
     def build(self):
+        """ Builds library with Cmake. """
+        self._check_os_env_vars()
         cmake_args = [f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={self.library}", f"-DPYTHON_EXECUTABLE={sys.executable}",
                       f"-DCMAKE_BUILD_TYPE={self.build_mode}", "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
                       "-DCMAKE_VERBOSE_MAKEFILE=On", f"-DPRESSIODEMOAPPS_ENABLE_OPENMP={self.enable_omp}"]
