@@ -42,7 +42,17 @@ Should be as easy as::
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
   export CXX=<path-to-your-CXX-compiler> #must support C++14
   cd pressio-demoapps
-  python setup.py install
+  # Build `pressiodemoapps` library
+  # Below e.g. (default OpenMP=OFF and build_mode=Release)
+  python scripts/cmake_build.py
+  # Below e.g. OpenMP=ON and build_mode=Debug
+  python scripts/cmake_build.py --openmp --build_mode=Debug
+  # Install dependencies
+  pip install build pytest numpy scipy matplotlib
+  # Build and install package pressiodemoapps
+  pip install .
+  # Just build a package
+  python -m build
 
 You can run the tests to verify things::
 
