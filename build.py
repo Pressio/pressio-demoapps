@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
+# This script builds pressiodemoapps library with use of cmake as a subprocess.
+# Script can take command line arguments to setup OpenMP(--openmp, True when given, False when not given) default OFF
+# and BuildMode (--build_mode=Release or --build_mode=Debug) default Release
+# Script creates directory in main project directory (<PROJECT_DIR>/build/pressiodemoapps) where library is build and
+# where __init__.py file is copied. Based on that pressiodemoapps package is created later with build.
+
 import os
 import sys
 try:
-    project_path = f"{os.sep}".join(os.path.abspath(__file__).split(os.sep)[:-2])
+    project_path = f"{os.sep}".join(os.path.abspath(__file__).split(os.sep)[:-1])
     sys.path.append(project_path)
     print(f"Project path was added to sys.path: {project_path}")
 except Exception as e:
