@@ -1,6 +1,7 @@
 3D Euler Sedov (with symmetry)
 ==============================
 
+This problem solves the *3D Euler equations* in conserative form.
 
 - IC involves a small spherical region of radius :math:`R = 3. * min(dx, dy)` with high pressure
 
@@ -32,7 +33,9 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/euler3d.hpp"
+   // ...
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler3d::SedovSymmetry;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -44,6 +47,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler3d.SedovSymmetry
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3
    problem = pda.create_problem(meshObj, probId, scheme)

@@ -1,7 +1,7 @@
 2D Euler Smooth
 ===============
 
-This problem solves the *2D Euler equations* for a smooth field.
+This problem solves the *2D convervative Euler equations* for a smooth field.
 
 - IC: :math:`\rho = 1 + 0.2*sin(\pi (x+y)), u = 1, v = 1, p = 1`
 
@@ -28,7 +28,9 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/euler2d.hpp"
+   // ...
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler2d::PeriodicSmooth;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -40,6 +42,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler2d.PeriodicSmooth
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
@@ -49,7 +52,8 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *density* field at ``t=2`` using a 100x100 mesh with Weno3 and RK4 time integration:
+Representative *density* field at ``t=2`` using a 100x100 mesh with ``Weno3``
+and RK4 time integration:
 
 .. image:: ../../figures/wiki_2d_smooth_density.png
   :width: 60 %

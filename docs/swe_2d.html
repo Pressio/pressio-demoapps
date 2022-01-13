@@ -235,14 +235,14 @@
 <ul class="simple">
 <li><p>Default settings:</p>
 <ul>
+<li><p><span class="math notranslate nohighlight">\(\alpha = 1/8\)</span> (initial pulse magnitude)</p></li>
 <li><p><span class="math notranslate nohighlight">\(g = 9.8\)</span> (gravity parameter)</p></li>
 <li><p><span class="math notranslate nohighlight">\(\mu = -3.0\)</span> (Coriolis parameter)</p></li>
-<li><p><span class="math notranslate nohighlight">\(\alpha = 1/8\)</span> (initial pulse magnitude)</p></li>
 </ul>
 </li>
 </ul>
 <ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(g\)</span>, <span class="math notranslate nohighlight">\(\mu\)</span>, <span class="math notranslate nohighlight">\(\alpha\)</span> can be provided to the problem constructor (more below)</p></li>
+<li><p><span class="math notranslate nohighlight">\(g, \mu, \alpha\)</span> can be provided to the problem constructor (more below)</p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -254,7 +254,10 @@
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/swe2d.hpp"</span><span class="cp"></span>
+<span class="c1">// ...</span>
+
+<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Swe2d</span><span class="o">::</span><span class="n">SlipWall</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
 
@@ -290,6 +293,8 @@
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
+<span class="c1"># ...</span>
+
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Swe2d</span><span class="p">::</span><span class="n">SlipWall</span><span class="p">;</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
 
@@ -313,8 +318,8 @@
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>height</em> plot as a function of time at <cite>x=y=0</cite>
-using a 65x65 mesh with Weno5 and RK4 time integration:</p>
+<p>Representative plot of the height <code class="docutils literal notranslate"><span class="pre">h(t)</span></code> as a function of time at <code class="docutils literal notranslate"><span class="pre">x=y=0</span></code>
+using default physical parameters, a 65x65 mesh with <code class="docutils literal notranslate"><span class="pre">Weno5</span></code> and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2dswe_height.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2dswe_height.png" style="width: 60%;"/></a>
 </div>
 </div>
@@ -348,7 +353,7 @@ using a 65x65 mesh with Weno5 and RK4 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 12, 2022. |
+            Last updated on Jan 13, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/swe_2d.rst.txt"

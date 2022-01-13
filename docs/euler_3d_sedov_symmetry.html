@@ -225,6 +225,7 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-with-symmetry">
 <h1>3D Euler Sedov (with symmetry)<a class="headerlink" href="#d-euler-sedov-with-symmetry" title="Permalink to this headline">¶</a></h1>
+<p>This problem solves the <em>3D Euler equations</em> in conserative form.</p>
 <ul class="simple">
 <li><p>IC involves a small spherical region of radius <span class="math notranslate nohighlight">\(R = 3. * min(dx, dy)\)</span> with high pressure</p>
 <ul>
@@ -250,7 +251,9 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/euler3d.hpp"</span><span class="cp"></span>
+<span class="c1">// ...</span>
+<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler3d</span><span class="o">::</span><span class="n">SedovSymmetry</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3</span>
 <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
@@ -261,6 +264,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
+<span class="c1"># ...</span>
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler3d</span><span class="o">.</span><span class="n">SedovSymmetry</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
@@ -299,7 +303,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 12, 2022. |
+            Last updated on Jan 13, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_3d_sedov_symmetry.rst.txt"

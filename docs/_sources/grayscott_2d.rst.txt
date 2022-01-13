@@ -50,16 +50,17 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/diffusion_reaction.hpp"
+   // ...
 
+   namespace pda      = pressiodemoapps;
    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
-
-   const auto probId = pda::DiffusionReaction2d::GrayScott;
-   const auto scheme = pda::ViscousFluxReconstruction::FirstOrder;
+   const auto probId  = pda::DiffusionReaction2d::GrayScott;
+   const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
    {
-     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
    // B. setting custom coefficients
@@ -80,6 +81,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.DiffusionReaction2d.GrayScott
    scheme  = pda.ViscousFluxReconstruction.FirstOrder
 

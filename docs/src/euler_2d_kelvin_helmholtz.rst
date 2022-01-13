@@ -1,6 +1,8 @@
 2D Euler Kelvin-Helmholtz
 =========================
 
+This problem solves the *2D convervative Euler equations*.
+
 - Domain is :math:`\Omega = \Omega_1 \cup \Omega_2 = [-5,5]^2` with periodic BC where:
 
   - :math:`\Omega_1 = [-5,5] \times [-2 + \cos( 0.8 \pi x) , 2 + \cos(0.8 \pi x)]`
@@ -38,7 +40,9 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/euler2d.hpp"
+   // ...
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler2d::KelvinHelmholtz;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -50,6 +54,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler2d.KelvinHelmholtz
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
@@ -59,7 +64,8 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *density* field at ``t=50`` using a 256x256 mesh with Weno5 and RK4 time integration:
+Representative *density* field at ``t=50`` using a 256x256 mesh with ``Weno5``
+and RK4 time integration:
 
 .. image:: ../../figures/wiki_2d_kelvin_helmholtz_density.png
   :width: 60 %
