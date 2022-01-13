@@ -46,10 +46,65 @@ public:
   EigenSwe2dApp(const MeshType & meshObj,
 		::pressiodemoapps::Swe2d probEn,
 		::pressiodemoapps::InviscidFluxReconstruction recEn,
+		::pressiodemoapps::InviscidFluxScheme fluxEnum)
+    : m_probEn(probEn),
+      m_recEn(recEn),
+      m_fluxEn(fluxEnum),
+      m_meshObj(meshObj)
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+  EigenSwe2dApp(const MeshType & meshObj,
+		::pressiodemoapps::Swe2d probEn,
+		::pressiodemoapps::InviscidFluxReconstruction recEn,
 		::pressiodemoapps::InviscidFluxScheme fluxEnum,
 		int icIdentifier)
-    : m_icIdentifier(icIdentifier), m_probEn(probEn), m_recEn(recEn),
-      m_fluxEn(fluxEnum), m_meshObj(meshObj)
+    : m_icIdentifier(icIdentifier),
+      m_probEn(probEn),
+      m_recEn(recEn),
+      m_fluxEn(fluxEnum),
+      m_meshObj(meshObj)
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+  EigenSwe2dApp(const MeshType & meshObj,
+		::pressiodemoapps::Swe2d probEn,
+		::pressiodemoapps::InviscidFluxReconstruction recEn,
+		::pressiodemoapps::InviscidFluxScheme fluxEnum,
+		scalar_type gravity,
+		scalar_type coriolis)
+    : m_gravity(gravity),
+      m_coriolis(coriolis),
+      m_probEn(probEn),
+      m_recEn(recEn),
+      m_fluxEn(fluxEnum),
+      m_meshObj(meshObj)
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+  EigenSwe2dApp(const MeshType & meshObj,
+		::pressiodemoapps::Swe2d probEn,
+		::pressiodemoapps::InviscidFluxReconstruction recEn,
+		::pressiodemoapps::InviscidFluxScheme fluxEnum,
+		scalar_type gravity,
+		scalar_type coriolis,
+		scalar_type initialPulseMag)
+    : m_gravity(gravity),
+      m_coriolis(coriolis),
+      m_initialPulseMagnitude(initialPulseMag),
+      m_probEn(probEn),
+      m_recEn(recEn),
+      m_fluxEn(fluxEnum),
+      m_meshObj(meshObj)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -841,7 +896,7 @@ private:
   }
 
 protected:
-  const int m_icIdentifier;
+  const int m_icIdentifier = 1;
   const scalar_type m_gravity  = static_cast<scalar_type>(9.8);
   const scalar_type m_coriolis = static_cast<scalar_type>(-3.0);
   const scalar_type m_initialPulseMagnitude = static_cast<scalar_type>(0.125);
@@ -851,7 +906,6 @@ protected:
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
 
   const MeshType & m_meshObj;
-
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
