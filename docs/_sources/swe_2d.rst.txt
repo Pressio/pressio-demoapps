@@ -18,13 +18,14 @@ Simulates the 2D shallow water equations with conservative variables.
 
 * Default settings:
 
+  - :math:`\alpha = 1/8` (initial pulse magnitude)
+
   - :math:`g = 9.8` (gravity parameter)
 
   - :math:`\mu = -3.0` (Coriolis parameter)
 
-  - :math:`\alpha = 1/8` (initial pulse magnitude)
 
-- :math:`g`, :math:`\mu`, :math:`\alpha` can be provided to the problem constructor (more below)
+- :math:`g, \mu, \alpha` can be provided to the problem constructor (more below)
 
 
 Mesh
@@ -43,7 +44,10 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/swe2d.hpp"
+   // ...
+
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Swe2d::SlipWall;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
 
@@ -80,6 +84,8 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
+
    probId  = pda.Swe2d::SlipWall;
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
 
@@ -104,8 +110,8 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *height* plot as a function of time at `x=y=0`
-using a 65x65 mesh with Weno5 and RK4 time integration:
+Representative plot of the height ``h(t)`` as a function of time at ``x=y=0``
+using default physical parameters, a 65x65 mesh with ``Weno5`` and RK4 time integration:
 
 .. image:: ../../figures/wiki_2dswe_height.png
   :width: 60 %

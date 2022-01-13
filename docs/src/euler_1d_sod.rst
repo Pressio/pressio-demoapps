@@ -1,7 +1,7 @@
 1D Euler Sod
 ============
 
-This problem solves the *1D Sod problem* for the Euler equations.
+This problem solves the *1D Euler conservative equations* for the Sod1d problem.
 
 * `Reference paper <https://iopscience.iop.org/article/10.1086/317361>`_
 
@@ -33,6 +33,8 @@ C++ synopsis
 
 .. code-block:: c++
 
+   #include "pressiodemoapps/euler1d.hpp"
+   // ...
    namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler1d::Sod;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
@@ -45,6 +47,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler1d.Sod
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
@@ -54,8 +57,8 @@ Python synopsis
 Sample Solution
 ---------------
 
-Representative plot for total simulation time `T=0.2` showing density at `t=0, 0.1, 0.2`
-obtained using `dt = 0.0001`, Weno5, Runge-Kutta4 integration with a mesh of 1000 cells.
+Representative plot for total simulation time ``T=0.2`` showing density at ``t=0, 0.1, 0.2``
+obtained using ``dt = 0.0001``, ``Weno5``, Runge-Kutta4 integration with a mesh of 1000 cells.
 
 .. image:: ../../figures/wiki_sod1d_0.0001_0.2_1000_weno5_rk4.png
   :width: 60 %

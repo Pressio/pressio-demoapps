@@ -24,6 +24,8 @@ C++ synopsis
 
 .. code-block:: c++
 
+   #include "pressiodemoapps/advection.hpp"
+   // ...
    namespace pda     = pressiodemoapps;
    const auto probId = pda::Advection1d::PeriodicLinear;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
@@ -36,6 +38,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Advection1d.PeriodicLinear
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)

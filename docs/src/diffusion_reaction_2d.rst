@@ -40,16 +40,16 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
-
+   #include "pressiodemoapps/diffusion_reaction.hpp"
+   // ...
+   namespace pda      = pressiodemoapps;
    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
-
-   const auto probId = pda::DiffusionReaction2d::ProblemA;
-   const auto scheme = pda::ViscousFluxReconstruction::FirstOrder;
+   const auto probId  = pda::DiffusionReaction2d::ProblemA;
+   const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
    {
-     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
    // B. setting custom coefficients
@@ -57,7 +57,7 @@ C++ synopsis
      using scalar_type = typename decltype(meshObj)::scalar_t;
      const auto diffCoeff = static_cast<scalar_type(0.5);
      const auto reacCoeff = static_cast<scalar_type(0.2);
-     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme, diffCoeff, reacCoeff);
+     auto problem = pda::create_problem_eigen(meshObj, probId, scheme, diffCoeff, reacCoeff);
    }
 
    // C. setting custom coefficients and custom source function
@@ -85,6 +85,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.DiffusionReaction2d.ProblemA
    scheme  = pda.ViscousFluxReconstruction.FirstOrder
 

@@ -1,7 +1,7 @@
 1D Euler Lax
 ============
 
-This problem solves the *1D Lax problem* for the Euler equations.
+This problem solves the *1D Euler conservative equations* for the 1d Lax problem.
 
 * `Reference paper <https://www.researchgate.net/publication/274407416_Finite_Difference_Hermite_WENO_Schemes_for_Hyperbolic_Conservation_Laws>`_
 
@@ -32,6 +32,8 @@ C++ synopsis
 
 .. code-block:: c++
 
+   #include "pressiodemoapps/euler1d.hpp"
+   // ...
    namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler1d::Lax;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
@@ -44,6 +46,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler1d.Lax
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
@@ -54,8 +57,8 @@ Python synopsis
 Sample Solution
 ---------------
 
-Representative plot for total simulation time `T=1.3` showing density at `t=0, 0.65, 1.3`
-obtained using `dt = 0.0001`, Weno5, SSPRK3 integration with a mesh of 1000 cells.
+Representative plot for total simulation time ``T=1.3`` showing density at ``t=0, 0.65, 1.3``
+obtained using ``dt = 0.0001``, ``Weno5``, SSPRK3 integration with a mesh of 1000 cells.
 
 .. image:: ../../figures/wiki_lax1d_0.0001_1.3_1000_weno5_ssp3.png
   :width: 60 %
