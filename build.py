@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+# Below are reasons why `setup.py` was replaced with PEP 517, 518, compatible build system:
+# 1. The setuptools project has stopped maintaining all direct invocations of setup.py years ago, and distutils is
+# deprecated. There are undoubtedly many ways that your setup.py-based system is broken today, even if it's not failing
+# loudly or obviously.
+# 2. Direct invocations of setup.py cannot bootstrap their own dependencies, and so some CLI is necessary for dependency
+# management
+# 3. The setuptools project no longer wants to provide any public CLI, and will be actively removing the existing
+# interface (though the time scale for this is long).
+# 4. PEP 517, 518 and other standards-based packaging are the future of the Python ecosystem and a lot of progress has
+# been made on making this upgrade seamless.
+
 # This script builds pressiodemoapps library with use of cmake as a subprocess.
 # Script can take command line arguments to setup OpenMP(--openmp, True when given, False when not given) default OFF
 # and BuildMode (--build_mode=Release or --build_mode=Debug) default Release
