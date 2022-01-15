@@ -284,6 +284,10 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
 		pybind11::return_value_policy::take_ownership);
 
+  mTopLevel.def("create_problem",
+		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
   // -----------------------
   // Euler 3d
   // -----------------------

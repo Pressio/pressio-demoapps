@@ -28,7 +28,7 @@ add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
 add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
 
 # ---------------------------------------------------------
-### 1d problems ###
+# 1d problems
 # ---------------------------------------------------------
 add_subdirectory(eigen_1d_linear_advection_explicit)
 add_subdirectory(eigen_1d_linear_advection_implicit)
@@ -43,8 +43,11 @@ add_subdirectory(eigen_1d_euler_sod_explicit)
 add_subdirectory(eigen_1d_euler_sod_implicit)
 add_subdirectory(eigen_1d_euler_lax_explicit)
 
-### 2d problems ###
+# ---------------------------------------------------------
+# 2d problems
+# ---------------------------------------------------------
 add_subdirectory(eigen_2d_diffusion_reaction_explicit)
+add_subdirectory(eigen_2d_diffusion_reaction_sample_mesh_test)
 add_subdirectory(eigen_2d_euler_smooth_explicit)
 add_subdirectory(eigen_2d_euler_smooth_implicit)
 add_subdirectory(eigen_2d_euler_normal_shock_explicit)
@@ -63,6 +66,8 @@ add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 
-### 3d problems ###
+# ---------------------------------------------------------
+# 3d problems
+# ---------------------------------------------------------
 add_subdirectory(eigen_3d_euler_smooth)
 add_subdirectory(eigen_3d_euler_sedov_symmetry)

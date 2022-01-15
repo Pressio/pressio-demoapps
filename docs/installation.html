@@ -250,14 +250,24 @@ ctest -j4
 </div>
 <div class="section" id="python-library">
 <h2>Python library<a class="headerlink" href="#python-library" title="Permalink to this headline">¶</a></h2>
-<p>It requires: CMake &gt; 3.18.0 and C++ compiler with C++14 support</p>
-<p>Should be as easy as:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
-<span class="nb">cd</span> pressio-demoapps
-python setup.py install
+<p>To build/install the bindings, you need:</p>
+<ul>
+<li><p>CMake &gt; 3.18.0 and a C++ compiler with C++14 support</p></li>
+<li><p>You also need these packages:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3 install build pytest numpy scipy matplotlib
 </pre></div>
 </div>
+</li>
+</ul>
+<p>Then, you can do:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
+<span class="nb">cd</span> pressio-demoapps
+python3 build.py
+pip3 install .
+</pre></div>
+</div>
+<p>This builds/installs pressiodemoapps with default options (build_mode=Release).</p>
 <p>You can run the tests to verify things:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps
 pytest -s
@@ -295,7 +305,7 @@ pytest -s
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 10, 2022. |
+            Last updated on Jan 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/installation.rst.txt"

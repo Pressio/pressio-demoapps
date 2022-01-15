@@ -2,7 +2,7 @@
 set(testname eigen_1d_linear_adv_sample_mesh_testA_weno5)
 set(exename  ${testname}_exe)
 
-configure_file(../compare.py compare.py COPYONLY)
+configure_file(../../sample_mesh_compare.py sample_mesh_compare.py COPYONLY)
 configure_file(../sample_mesh_gids.dat sample_mesh_gids.dat COPYONLY)
 
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)

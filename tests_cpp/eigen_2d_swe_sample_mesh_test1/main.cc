@@ -8,11 +8,24 @@ std::mt19937 gen(2195884);
 std::uniform_real_distribution<double> distrib(1.1, 2.0);
 
 template<class T>
-void writeToFile(const T& obj, const std::string & fileName)
+void writeToFileRank1(const T & obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.size(); i++){
+  for (size_t i=0; i<obj.rows(); i++){
     file << std::setprecision(14) << obj(i) << " \n";
+  }
+  file.close();
+}
+
+template<class T>
+void writeToFileSparseMat(const T & obj, const std::string & fileName)
+{
+  std::ofstream file; file.open(fileName);
+  for (size_t i=0; i<obj.rows(); i++){
+    for (size_t j=0; j<obj.cols(); j++){
+      file << std::setprecision(14) << obj.coeff(i,j) << " ";
+    }
+    file << " \n";
   }
   file.close();
 }
@@ -53,9 +66,11 @@ int main(int argc, char *argv[])
 
   auto time = 0.0;
   auto velo = appObj.createVelocity();
-  appObj.velocity(state, time, velo);
-  writeToFile(velo,  "velo.txt");
-  writeToFile(state, "state.txt");
+  auto jac  = appObj.createJacobian();
 
+  appObj.velocityAndJacobian(state, time, velo, jac);
+  writeToFileRank1(state,   "state.txt");
+  writeToFileRank1(velo,    "velo.txt");
+  writeToFileSparseMat(jac, "jacobian.txt");
   return 0;
 }

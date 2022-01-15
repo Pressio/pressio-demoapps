@@ -35,14 +35,38 @@ If you want to build the C++ tests, you need CMake > 3.18.0 and then do::
 Python library
 --------------
 
-It requires: CMake > 3.18.0 and C++ compiler with C++14 support
+To build/install the bindings, you need:
 
-Should be as easy as::
+- CMake > 3.18.0 and a C++ compiler with C++14 support
 
-  git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-  export CXX=<path-to-your-CXX-compiler> #must support C++14
-  cd pressio-demoapps
-  python setup.py install
+- You also need these packages::
+
+    pip3 install build pytest numpy scipy matplotlib
+
+Then, you can do:
+
+.. code-block:: shell
+
+   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+   export CXX=<path-to-your-CXX-compiler> #must support C++14
+   cd pressio-demoapps
+   python3 build.py
+   pip3 install .
+
+
+This builds/installs pressiodemoapps with default options (build_mode=Release).
+
+
+
+..
+   To build/install pressiodemoapps with OpenMP and Release mode:
+   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+   export CXX=<path-to-your-CXX-compiler> #must support C++14
+   python3 build.py --openmp
+   pip3 install .
+   # to just build do
+   python -m build
+
 
 You can run the tests to verify things::
 

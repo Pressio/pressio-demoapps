@@ -1,6 +1,8 @@
 2D Euler Sedov Full
 ===================
 
+This problem solves the *2D convervative Euler equations*.
+
 * `Reference paper <https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics>`_
 
 - IC is a high pressure concentrated small spherical region of radius ``R = 2. * min(dx, dy)``
@@ -37,7 +39,9 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/euler2d.hpp"
+   // ...
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler2d::SedovFull;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -49,6 +53,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler2d.SedovFull
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
@@ -58,7 +63,8 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *pressure* plot at `t=0.2` using a 200x200 mesh with Weno3 and SSPRK3 time integration:
+Representative *pressure* plot at ``t=0.2`` using a 200x200 mesh with ``Weno3``
+and SSPRK3 time integration:
 
 .. image:: ../../figures/wiki_2d_sedov_pressure.png
   :width: 60 %

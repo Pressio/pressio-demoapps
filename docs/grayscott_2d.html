@@ -260,23 +260,24 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/diffusion_reaction.hpp"</span><span class="cp"></span>
+<span class="c1">// ...</span>
 
+<span class="k">namespace</span> <span class="n">pda</span>      <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
-
-<span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">DiffusionReaction2d</span><span class="o">::</span><span class="n">GrayScott</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">DiffusionReaction2d</span><span class="o">::</span><span class="n">GrayScott</span><span class="p">;</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
 
 <span class="c1">// A. constructor for problem using default values</span>
 <span class="p">{</span>
-  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
+  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="c1">// B. setting custom coefficients</span>
 <span class="p">{</span>
   <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Da</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Db</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Da</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">feedRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">killRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
   <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
@@ -288,6 +289,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
+<span class="c1"># ...</span>
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">DiffusionReaction2d</span><span class="o">.</span><span class="n">GrayScott</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">ViscousFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span>
 
@@ -346,7 +348,7 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 10, 2022. |
+            Last updated on Jan 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/grayscott_2d.rst.txt"

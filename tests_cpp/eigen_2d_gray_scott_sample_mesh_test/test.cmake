@@ -69,7 +69,7 @@ endif()
 #------------------
 # check things are right
 #------------------
-set(CMD "python3 compare.py")
+set(CMD "python3 sample_mesh_compare.py --numdofspercell 2")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "comparison failed")

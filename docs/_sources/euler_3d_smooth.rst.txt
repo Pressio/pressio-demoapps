@@ -1,12 +1,17 @@
 3D Euler Smooth
 ===============
 
-This problem solves the *3D Euler equations* for a smooth field.
+This problem solves the *3D Euler equations* in conserative form for a smooth field.
 
-- `Reference source <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
-  note that in the original paper, they used v = -0.5, while we use v = 1 (see IC below)
+- `Reference paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
+  in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1` (see below)
 
-- IC: :math:`\rho = 1 + 0.2*sin(\pi (x+y+z)), u = 1, v = 1, w = 1, p = 1`
+- IC (primitive variables):
+
+  - :math:`\rho = 1 + 0.2*sin(\pi (x+y+z))`
+
+  - :math:`u = 1, v = 1, w = 1, p = 1`
+
 
 - Domain is ``[-1, 1]^3`` with periodic BC
 
@@ -35,7 +40,9 @@ C++ synopsis
 
 .. code-block:: c++
 
-   namespace pda = pressiodemoapps;
+   #include "pressiodemoapps/euler3d.hpp"
+   // ...
+   namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler3d::PeriodicSmooth;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
@@ -47,6 +54,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+   # ...
    probId  = pda.Euler3d.PeriodicSmooth
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3
    problem = pda.create_problem(meshObj, probId, scheme)
