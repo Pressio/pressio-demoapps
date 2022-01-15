@@ -271,15 +271,15 @@ Specifically, this script accepts a path to a full mesh and a list of cell indic
 and generate the new (reduced) mesh.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python create_sample_mesh.py <span class="se">\</span>
              --fullMeshDir        &lt;path-to-the-FULL-mesh-dir-to-start-from&gt; <span class="se">\</span>
-             --targetCellIndices  &lt;path-to-ascii-file-with-desired-cell-indices-list&gt; <span class="se">\</span>
+             --sampleMeshIndices  &lt;path-to-ascii-file-with-desired-cell-indices-list&gt; <span class="se">\</span>
              --outDir &lt;path-to-where-to-output-new-mesh&gt; <span class="se">\</span>
              --debug  true/false <span class="c1"># default=false</span>
 </pre></div>
 </div>
-<p>where:
-- <code class="docutils literal notranslate"><span class="pre">--fullMeshDir</span></code>: full path to a FULL mesh directory; this dir should contain mesh files as generated using the <code class="docutils literal notranslate"><span class="pre">create_full_mesh.py</span></code> script of pressio-demoapps.</p>
+<p>where:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--targetCellIndices</span></code>: full path to ASCII file with list of indices identifying the subset of cells you want to use a <strong>sample</strong> mesh cells. Note that this list must contain indices valid wrt the full mesh provided in <code class="docutils literal notranslate"><span class="pre">fullMeshDir</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--fullMeshDir</span></code>: full path to a FULL mesh directory; this dir should contain mesh files as generated using the <code class="docutils literal notranslate"><span class="pre">create_full_mesh.py</span></code> script of pressio-demoapps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--sampleMeshIndices</span></code>: full path to ASCII file with list of indices identifying the subset of cells you want to use a <strong>sample</strong> mesh cells. Note that this list must contain indices valid wrt the full mesh provided in <code class="docutils literal notranslate"><span class="pre">fullMeshDir</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--workDir</span></code>: full path to directory such that:
 - this dir contains where you want all <strong>new</strong> mesh files to be generated;</p></li>
 </ul>
