@@ -29,15 +29,17 @@ void modify_state(state_type & state,
       const mesh_t & meshObj)
 {
   UnifDist randObj(0.1, 0.9);
+
   using scalar_type = typename mesh_t::scalar_t;
   const auto & x = meshObj.viewX();
   const auto & y = meshObj.viewY();
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
     const auto ind = i*3;
-    // const auto pert = 0.001*std::sin(8.*M_PI*x(i)*y(i));
-    state(ind)   = 1. + randObj();
+    // const auto pert = 20.*std::sin(x(i)*y(i));
+    // std::cout << x(i) << " " << y(i) << " " << pert << '\n';
+    state(ind)   = 1.0 + randObj();
     state(ind+1) = 1.5 + randObj();
-    state(ind+2) = 2. + randObj();
+    state(ind+2) = 2.0 + randObj();
   }
 }
 
@@ -46,7 +48,14 @@ int main(int argc, char *argv[])
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
 
-  constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
+#ifdef USE_WENO5
+  const auto order   = pda::InviscidFluxReconstruction::Weno5;
+#elif defined USE_WENO3
+  const auto order   = pda::InviscidFluxReconstruction::Weno3;
+#else
+  const auto order   = pda::InviscidFluxReconstruction::FirstOrder;
+#endif
+
   const auto probId  = pda::Swe2d::SlipWall;
   auto appObj = pda::create_problem_eigen(meshObj, probId, order);
   using app_t = decltype(appObj);
@@ -80,13 +89,13 @@ int main(int argc, char *argv[])
     {
       const auto diff = std::abs(Ja(i)- Ja_fd(i));
       if (loop == 0){
-	printf(" i=%2d J(i)=%16.12f J_fd(i)=%16.12f diff=%e \n",
+	       printf(" i=%2d J(i)=%16.12f J_fd(i)=%16.12f diff=%e \n",
 	       i, Ja(i), Ja_fd(i), diff);
       }
 
-      if (diff > 1e-4){
-	std::puts("FAILED");
-	//return 0;
+      if (diff > 1e-5){
+	       std::puts("FAILED");
+	       //return 0;
       }
     }
 
@@ -101,9 +110,9 @@ int main(int argc, char *argv[])
     	printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n", i, Ja(i), Ja_fd(i), diff);
       }
 
-      if (diff > 1e-6){
-    	std::puts("FAILED");
-    	return 0;
+      if (diff > 1e-5){
+    	  std::puts("FAILED");
+    	  return 0;
       }
     }
 
