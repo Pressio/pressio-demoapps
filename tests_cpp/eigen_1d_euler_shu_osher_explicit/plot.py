@@ -39,6 +39,7 @@ if __name__== "__main__":
 
   plt.xlabel("x", fontsize=12)
   plt.ylabel("Solution", fontsize=12)
-  plt.legend()
+  plt.legend(loc='upper right', fontsize=9, ncol=3)
+  plt.ylim((0.5, 5.25))
   fig.savefig("solution.png", format="png", bbox_inches='tight', dpi=450)
   plt.show()
