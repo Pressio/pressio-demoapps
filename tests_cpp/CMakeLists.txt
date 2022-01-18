@@ -42,6 +42,7 @@ add_subdirectory(eigen_1d_euler_convergence)
 add_subdirectory(eigen_1d_euler_sod_explicit)
 add_subdirectory(eigen_1d_euler_sod_implicit)
 add_subdirectory(eigen_1d_euler_lax_explicit)
+add_subdirectory(eigen_1d_euler_shu_osher_explicit)
 
 # ---------------------------------------------------------
 # 2d problems
