@@ -15,7 +15,7 @@ def test_run():
   yn = appObj.initialCondition()
   dt = 0.001
   Nsteps = int(1.8/dt)
-  pda.advanceRK4(appObj, yn, dt, Nsteps)
+  pda.advanceSSP3(appObj, yn, dt, Nsteps)
   goldD = np.loadtxt(str(file_path)+"/gold.txt")
 
   assert(np.allclose(yn.shape, goldD.shape))
