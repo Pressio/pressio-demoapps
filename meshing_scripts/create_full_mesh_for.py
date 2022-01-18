@@ -22,6 +22,10 @@ valid = ["linadv1d_s3", \
          "lax1d_s5", \
          "lax1d_s7", \
          #
+         "shuOsher1d_s3", \
+         "shuOsher1d_s5", \
+         "shuOsher1d_s7", \
+         #
          ##############
          ##### 2d #####
          ##############
@@ -141,6 +145,16 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-0.5), str(0.5),
+            "--periodic", "false")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("shuOsher1d" in pName):
+    s = int(pName[-1])
+    args = ("python3", fullMeshScript,
+            "-n", str(args.numCells[0]), str(1),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(-5.0), str(5.0),
             "--periodic", "false")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 

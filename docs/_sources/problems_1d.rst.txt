@@ -9,3 +9,4 @@
     euler_1d_smooth
     euler_1d_sod
     euler_1d_lax
+    euler_1d_shu_osher

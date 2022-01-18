@@ -70,6 +70,9 @@ public:
     else if (m_probEn == ::pressiodemoapps::Euler1d::Lax){
       ::pressiodemoapps::impl::lax1dInitialCondition(res, m_meshObj, m_gamma);
     }
+    else if (m_probEn == ::pressiodemoapps::Euler1d::ShuOsher){
+      ::pressiodemoapps::impl::shuOsherInitialCondition(res, m_meshObj, m_gamma);
+    }
     else{
       //nothing
     }
@@ -249,7 +252,9 @@ private:
 
     const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_recEn);
     // only need ghosts for specific problems
-    if (m_probEn == pda::Euler1d::Sod or m_probEn == pda::Euler1d::Lax)
+    if (m_probEn == pda::Euler1d::Sod or
+	m_probEn == pda::Euler1d::Lax or
+	m_probEn == pda::Euler1d::ShuOsher)
     {
       using ghost_filler_t  = pda::impl::Ghost1dNeumannFiller<
 	numDofPerCell, U_t, MeshType, ghost_container_type>;
