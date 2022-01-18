@@ -3,7 +3,7 @@
 
 This problem solves the *1D Euler conservative equations* for the Shu-Osher 1d problem.
 
-* `Reference paper <file:///Users/fnrizzi/Downloads/Numerical_simulations_of_compressible_mixing_layer.pdf>`_
+* `Reference paper <https://www.researchgate.net/publication/226065267_Numerical_simulations_of_compressible_mixing_layers_with_a_discontinuous_Galerkin_method>`_
 
 - IC:
 
