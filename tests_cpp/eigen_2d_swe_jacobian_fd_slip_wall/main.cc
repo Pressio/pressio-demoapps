@@ -2,6 +2,7 @@
 #include "pressio/type_traits.hpp"
 #include "pressiodemoapps/swe2d.hpp"
 #include <iomanip>
+#include <random>
 
 template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
@@ -13,20 +14,30 @@ void writeToFile(const T& obj, const std::string & fileName)
   file.close();
 }
 
+struct UnifDist{
+  using dist_type = std::uniform_real_distribution<double>;
+  std::random_device rd;
+  std::mt19937 m_gen{rd()};
+  dist_type m_dist;
+
+  UnifDist(const double a, const double b) : m_dist(a, b){}
+  double operator()() { return m_dist(m_gen); }
+};
+
 template<class state_type, class mesh_t>
 void modify_state(state_type & state,
       const mesh_t & meshObj)
 {
-
+  UnifDist randObj(0.1, 0.9);
   using scalar_type = typename mesh_t::scalar_t;
   const auto & x = meshObj.viewX();
   const auto & y = meshObj.viewY();
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
     const auto ind = i*3;
-    const auto pert = 0.001*std::sin(8.*M_PI*x(i)*y(i));
-    state(ind)   = 1. + pert;
-    state(ind+1) = 1.5 + pert;
-    state(ind+2) = 2. + pert;
+    // const auto pert = 0.001*std::sin(8.*M_PI*x(i)*y(i));
+    state(ind)   = 1. + randObj();
+    state(ind+1) = 1.5 + randObj();
+    state(ind+2) = 2. + randObj();
   }
 }
 
@@ -51,7 +62,7 @@ int main(int argc, char *argv[])
 
   // make sure repeated evaluations work
   // not just a single time
-  for (int loop=0; loop<1; ++loop)
+  for (int loop=0; loop<5; ++loop)
   {
     appObj.velocity(state, 0., velo);
     appObj.jacobian(state, 0., J);
@@ -79,22 +90,22 @@ int main(int argc, char *argv[])
       }
     }
 
-    // // second order
-    // auto state3 = state-eps*a;
-    // decltype(velo) velo3(velo.size());
-    // appObj.velocity(state3, 0., velo3);
-    // auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
-    // for (int i=0; i<Ja.size(); ++i){
-    //   const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
-    //   if (loop == 0){
-    // 	printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n", i, Ja(i), Ja_fd(i), diff);
-    //   }
+    // second order
+    auto state3 = state-eps*a;
+    decltype(velo) velo3(velo.size());
+    appObj.velocity(state3, 0., velo3);
+    auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
+    for (int i=0; i<Ja.size(); ++i){
+      const auto diff = std::abs(Ja(i)- Ja_fd_2(i));
+      if (loop == 0){
+    	printf(" i=%2d J(i)=%10.6f J_fd(i)=%10.6f diff=%e \n", i, Ja(i), Ja_fd(i), diff);
+      }
 
-    //   if (diff > 1e-6){
-    // 	std::puts("FAILED");
-    // 	return 0;
-    //   }
-    // }
+      if (diff > 1e-6){
+    	std::puts("FAILED");
+    	return 0;
+      }
+    }
 
   }
 

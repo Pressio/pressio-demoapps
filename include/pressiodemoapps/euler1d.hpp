@@ -13,7 +13,8 @@ namespace pressiodemoapps{
 enum class Euler1d{
   PeriodicSmooth,
   Sod,
-  Lax
+  Lax,
+  ShuOsher
 };
 }//end namespace pressiodemoapps
 

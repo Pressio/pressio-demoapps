@@ -42,6 +42,7 @@ add_subdirectory(eigen_1d_euler_convergence)
 add_subdirectory(eigen_1d_euler_sod_explicit)
 add_subdirectory(eigen_1d_euler_sod_implicit)
 add_subdirectory(eigen_1d_euler_lax_explicit)
+add_subdirectory(eigen_1d_euler_shu_osher_explicit)
 
 # ---------------------------------------------------------
 # 2d problems
@@ -63,6 +64,7 @@ add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
 add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
+add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 

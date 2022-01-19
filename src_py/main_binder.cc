@@ -81,7 +81,8 @@ void bindProblemEnums(pybind11::module & mParent)
   pybind11::enum_<pda::Euler1d>(mParent, "Euler1d")
     .value("PeriodicSmooth", pda::Euler1d::PeriodicSmooth)
     .value("Sod",	     pda::Euler1d::Sod)
-    .value("Lax",	     pda::Euler1d::Lax);
+    .value("Lax",	     pda::Euler1d::Lax)
+    .value("ShuOsher",	     pda::Euler1d::ShuOsher);
 
   pybind11::enum_<pda::Euler2d>(mParent, "Euler2d")
     .value("PeriodicSmooth", pda::Euler2d::PeriodicSmooth)
