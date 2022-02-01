@@ -15,6 +15,6 @@ COMMAND ${CMAKE_COMMAND}
 -Dnx=5
 -Dny=6
 -Dss=3
--DPER=false
+-DPER=none
 -P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
 )

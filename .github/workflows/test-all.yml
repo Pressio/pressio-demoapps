@@ -30,7 +30,8 @@ jobs:
         config:
           - { cxx: clang++, mode: Release }
           - { cxx: clang++, mode: Debug }
-          #- { cxx: g++,     mode: Release }
+          - { cxx: g++,     mode: Release }
+          - { cxx: g++,     mode: Debug }
 
     env: # environment variables available to all steps
       CXX: ${{ matrix.config.cxx }}
@@ -88,9 +89,9 @@ jobs:
       - name: Configure C++ tests
         run: |
           cmake \
+            -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=${{ matrix.config.mode }} \
             -DPRESSIODEMOAPPS_ENABLE_TESTS:BOOL=ON \
-            -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN:BOOL=ON \
             -DPRESSIODEMOAPPS_ENABLE_BINDINGS:BOOL=OFF \
             -B $BUILD_DIR -S $DEMOAPPS_HOME
 

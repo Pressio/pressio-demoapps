@@ -169,6 +169,7 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_sod.html">1D Euler Sod</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_lax.html">1D Euler Lax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euler_1d_shu_osher.html">1D Euler Shu-Osher</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -243,8 +244,7 @@ function approximation: given samples of the residual collected
 at the sample mesh, one can use these to reconstruct the residual
 on the full mesh.</p>
 <p>Several methods exist to determine which cells to include, e.g., random sampling,
-the <a class="reference external" href="https://doi.org/10.1137/090766498">discrete empirical interpolation method (DEIM)</a>,
-and <a class="reference external" href="https://doi.org/10.1016/j.jcp.2013.02.028">Gauss-Newton with approximate tensors (GNAT)</a>.</p>
+and the <a class="reference external" href="https://doi.org/10.1137/090766498">discrete empirical interpolation method (DEIM)</a>.</p>
 <p>While the sample mesh strictly speaking refers to the collection of cells
 where we compute the residual and Jacobian, a related concept is what we refer to as <strong>stencil mesh</strong>.
 We refer to <strong>stencil mesh</strong> the collection of cells that are needed to compute
@@ -260,16 +260,16 @@ the cell-centered values at that target cell.</p>
 a sample and a stencil mesh for a first order cell-centered finite volume scheme.
 The stencil mesh is the set of <strong>all cells</strong> shown, while the sample mesh
 is the subset color-coded yellow.</p>
-<a class="reference internal image-reference" href="_images/readme_2dmesh.png"><img alt="Alternative text" src="_images/readme_2dmesh.png" style="width: 75%;"/></a>
+<a class="reference internal image-reference" href="_images/readme_2dmesh.png"><img alt="Alternative text" class="align-center" src="_images/readme_2dmesh.png" style="width: 75%;"/></a>
 <p>The following is an example in three dimensions.</p>
-<a class="reference internal image-reference" href="_images/readme_3dmesh.png"><img alt="Alternative text" src="_images/readme_3dmesh.png" style="width: 75%;"/></a>
+<a class="reference internal image-reference" href="_images/readme_3dmesh.png"><img alt="Alternative text" class="align-center" src="_images/readme_3dmesh.png" style="width: 75%;"/></a>
 </div>
 <div class="section" id="how-to-do-all-this-in-pressio-demoapps">
 <h2>How to do all this in pressio-demoapps?<a class="headerlink" href="#how-to-do-all-this-in-pressio-demoapps" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pressio-demoapps/meshing/create_sample_mesh.py</span></code> is the script we use for this.
-Specifically, this script accepts a path to a full mesh and a list of cell indices,
-and generate the new (reduced) mesh.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python create_sample_mesh.py <span class="se">\</span>
+This script accepts a path to a full mesh and a list of cell indices,
+and generates the new (reduced) mesh.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 create_sample_mesh.py <span class="se">\</span>
              --fullMeshDir        &lt;path-to-the-FULL-mesh-dir-to-start-from&gt; <span class="se">\</span>
              --sampleMeshIndices  &lt;path-to-ascii-file-with-desired-cell-indices-list&gt; <span class="se">\</span>
              --outDir &lt;path-to-where-to-output-new-mesh&gt; <span class="se">\</span>
@@ -296,10 +296,10 @@ and visualizing the sample mesh.</p>
 </div>
 <div class="section" id="a-generate-full-mesh">
 <h3>(A) Generate full mesh<a class="headerlink" href="#a-generate-full-mesh" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_full_mesh.py <span class="se">\</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_full_mesh.py <span class="se">\</span>
              -n <span class="m">10</span> <span class="m">8</span> --outDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
              --bounds <span class="m">0</span>.0 <span class="m">1</span>.2 <span class="m">0</span>.0 <span class="m">1</span>.0 <span class="se">\</span>
-             --periodic <span class="nb">false</span> -s <span class="m">5</span>
+             -s <span class="m">5</span>
 </pre></div>
 </div>
 <p>This creates the mesh files inside <code class="docutils literal notranslate"><span class="pre">${WORKDIR}/full_mesh</span></code>
@@ -313,13 +313,13 @@ If you look inside <code class="docutils literal notranslate"><span class="pre">
 y [in second column] coordinates for each <em>cell center</em></p></li>
 </ul>
 <p>If we then do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/full_mesh -p show <span class="m">9</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/full_mesh -p show <span class="m">9</span>
 </pre></div>
 </div>
 <p>where we use <cite>show</cite> to specify we want the figure plotted,
 and 9 is the font size to use to print the global ID of each cell.
 You should see this plot:</p>
-<a class="reference internal image-reference" href="_images/docs_meshing_sample_1.png"><img alt="Alternative text" src="_images/docs_meshing_sample_1.png" style="width: 60%;"/></a>
+<a class="reference internal image-reference" href="_images/docs_meshing_sample_1.png"><img alt="Alternative text" class="align-center" src="_images/docs_meshing_sample_1.png" style="width: 60%;"/></a>
 </div>
 <div class="section" id="b-select-subset-of-cells-and-generate-sample-mesh">
 <h3>(B) Select subset of cells, and generate sample mesh<a class="headerlink" href="#b-select-subset-of-cells-and-generate-sample-mesh" title="Permalink to this headline">¶</a></h3>
@@ -327,7 +327,7 @@ You should see this plot:</p>
 to comprise cells 1, 26, 36, 52, 67.
 We can do:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="m">1</span> <span class="m">26</span> <span class="m">36</span> <span class="m">52</span> <span class="m">67</span> &gt;&gt; <span class="si">${</span><span class="nv">WORKDIR</span><span class="si">}</span>/sample_gids.txt
-python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_sample_mesh.py <span class="se">\</span>
+python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_sample_mesh.py <span class="se">\</span>
              --outDir <span class="nv">$WORKDIR</span>/sample_mesh <span class="se">\</span>
              --fullMeshDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
              --sampleMeshIndices <span class="nv">$WORKDIR</span>/sample_gids.txt
@@ -336,11 +336,11 @@ python <span class="si">${</span><span class="nv">REPODIR</span><span class="si"
 <p>this will generate, inside <code class="docutils literal notranslate"><span class="pre">$WORKDIR/sample_mesh</span></code>,
 the mesh files for this “reduced” mesh.</p>
 <p>Let’s visualize this reduced mesh:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/sample_mesh -p show <span class="m">9</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/sample_mesh -p show <span class="m">9</span>
 </pre></div>
 </div>
 <p>You should see this plot:</p>
-<a class="reference internal image-reference" href="_images/docs_meshing_sample_2.png"><img alt="_images/docs_meshing_sample_2.png" src="_images/docs_meshing_sample_2.png" style="width: 60%;"/></a>
+<a class="reference internal image-reference" href="_images/docs_meshing_sample_2.png"><img alt="_images/docs_meshing_sample_2.png" class="align-center" src="_images/docs_meshing_sample_2.png" style="width: 60%;"/></a>
 <p>In the figure above, the yellow cells are the “sample mesh cells”,
 which are those we wanted. All the remaining uniflled cells make
 up the “stencil mesh”. Note that the sample mesh script
@@ -387,7 +387,7 @@ This is because this new mesh is effectively a new, self-contained mesh.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 18, 2022. |
+            Last updated on Feb 01, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/meshsample.rst.txt"
