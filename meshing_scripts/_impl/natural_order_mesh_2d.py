@@ -14,8 +14,9 @@ from scipy.sparse.csgraph import reverse_cuthill_mckee
 
 class NatOrdMeshRow2d:
   def __init__(self, Nx, Ny, dx, dy, \
-               xL, xR, yL, yR,
-               stencilSize, enablePeriodicBc):
+               xL, xR, yL, yR, stencilSize,\
+               periodicX, periodicY):
+
     self.stSize_ = stencilSize
     self.numNeighbors_ = int((stencilSize-1))
     self.Nx_ = Nx
@@ -30,7 +31,7 @@ class NatOrdMeshRow2d:
     self.gids_ = np.zeros(self.numCells_)
     self.G_ = {}
     self.createFullGrid()
-    self.buildGraph(enablePeriodicBc)
+    self.buildGraph(periodicX, periodicY)
     #self.spMat_ = convertGraphDicToSparseMatrix(self.G_)
 
   def getTotCells(self):
@@ -66,48 +67,48 @@ class NatOrdMeshRow2d:
       self.y_[i] = oy + gj * self.dy_
       self.gids_[i] = i
 
-  def buildGraph(self, enablePeriodicBc):
+  def buildGraph(self, periodicX, periodicY):
     if self.numNeighbors_ == 2:
-      self._buildGraphStencil3(enablePeriodicBc)
+      self._buildGraphStencil3(periodicX, periodicY)
     elif self.numNeighbors_ == 4:
-      self._buildGraphStencil5(enablePeriodicBc)
+      self._buildGraphStencil5(periodicX, periodicY)
     elif self.numNeighbors_ == 6:
-      self._buildGraphStencil7(enablePeriodicBc)
+      self._buildGraphStencil7(periodicX, periodicY)
 
-  def _buildGraphStencil3(self, pBc):
-    # neighbors are listed as left, front, right, bottom
+  def _buildGraphStencil3(self, pBcX, pBcY):
     for iPt in range(self.numCells_):
+
       [gi, gj] = self.globalIDToGiGj(iPt)
       tmpList = np.zeros(4, dtype=np.int64)
 
       # left
       if gi==0:
-        tmpList[0]=iPt+self.Nx_-1 if pBc else -1
+        tmpList[0]=iPt+self.Nx_-1 if pBcX else -1
       if gi>0:
         tmpList[0]=iPt-1
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=iPt-self.Nx_*(self.Ny_-1) if pBc else -1
+        tmpList[1]=iPt-self.Nx_*(self.Ny_-1) if pBcY else -1
       if gj<self.Ny_-1:
         tmpList[1]=iPt+self.Nx_
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=iPt-self.Nx_+1 if pBc else -1
+        tmpList[2]=iPt-self.Nx_+1 if pBcX else -1
       if gi<self.Nx_-1:
         tmpList[2]=iPt+1
 
       # back
       if gj==0:
-        tmpList[3]=iPt+self.Nx_*(self.Ny_-1) if pBc else -1
+        tmpList[3]=iPt+self.Nx_*(self.Ny_-1) if pBcY else -1
       if gj>0:
         tmpList[3]=iPt-self.Nx_
 
       # store currrent neighboring list
       self.G_[iPt] = tmpList
 
-  def _buildGraphStencil5(self, pBc):
+  def _buildGraphStencil5(self, pBcX, pBcY):
     '''
     left0 front0 right0 back0 left1 front1 right1 back1
       0     1      2      3     4    5       6      7
@@ -121,44 +122,44 @@ class NatOrdMeshRow2d:
 
       # left
       if gi==0:
-        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
+        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBcX else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBcX else -1
       elif gi==1:
         tmpList[0]=self.gigjToGlobalID(0,          gj)
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBcX else -1
       elif gi>1:
         tmpList[0]=self.gigjToGlobalID(gi-1,       gj)
         tmpList[4]=self.gigjToGlobalID(gi-2,       gj)
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else -1
-        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else -1
+        tmpList[1]=self.gigjToGlobalID(gi, 0)          if pBcY else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 1)          if pBcY else -1
       if gj==self.Ny_-2:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 0)          if pBcY else -1
       if gj<self.Ny_-2:
         tmpList[1]=self.gigjToGlobalID(gi, gj+1)
         tmpList[5]=self.gigjToGlobalID(gi, gj+2)
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else -1
-        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else -1
+        tmpList[2]=self.gigjToGlobalID(0, gj)          if pBcX else -1
+        tmpList[6]=self.gigjToGlobalID(1, gj)          if pBcX else -1
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[6]=self.gigjToGlobalID(0,          gj) if pBc else -1
+        tmpList[6]=self.gigjToGlobalID(0,          gj) if pBcX else -1
       if gi<self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(gi+1, gj)
         tmpList[6]=self.gigjToGlobalID(gi+2, gj)
 
       # back
       if gj==0:
-        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
+        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBcY else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBcY else -1
       if gj==1:
         tmpList[3]=self.gigjToGlobalID(gi, 0)
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBcY else -1
       if gj>1:
         tmpList[3]=self.gigjToGlobalID(gi,  gj-1)
         tmpList[7]=self.gigjToGlobalID(gi,  gj-2)
@@ -166,7 +167,7 @@ class NatOrdMeshRow2d:
       # store currrent neighboring list
       self.G_[iPt] = tmpList
 
-  def _buildGraphStencil7(self, pBc):
+  def _buildGraphStencil7(self, pBcX, pBcY):
     '''
     neighbors are listed as:
     l0,f0,r0,b0, l1,f1,r1,b1, l2,f2,r2,b2
@@ -183,17 +184,17 @@ class NatOrdMeshRow2d:
 
       # left
       if gi==0:
-        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj) if pBc else -1
+        tmpList[0]=self.gigjToGlobalID(self.Nx_-1, gj) if pBcX else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-2, gj) if pBcX else -1
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-3, gj) if pBcX else -1
       elif gi==1:
         tmpList[0]=self.gigjToGlobalID(0, gj)
-        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj) if pBc else -1
+        tmpList[4]=self.gigjToGlobalID(self.Nx_-1, gj) if pBcX else -1
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-2, gj) if pBcX else -1
       elif gi==2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
-        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj) if pBc else -1
+        tmpList[8]=self.gigjToGlobalID(self.Nx_-1, gj) if pBcX else -1
       elif gi>2:
         tmpList[0]=self.gigjToGlobalID(gi-1, gj)
         tmpList[4]=self.gigjToGlobalID(gi-2, gj)
@@ -201,17 +202,17 @@ class NatOrdMeshRow2d:
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBc else -1
-        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBc else -1
-        tmpList[9]=self.gigjToGlobalID(gi, 2) if pBc else -1
+        tmpList[1]=self.gigjToGlobalID(gi, 0) if pBcY else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 1) if pBcY else -1
+        tmpList[9]=self.gigjToGlobalID(gi, 2) if pBcY else -1
       if gj==self.Ny_-2:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBc else -1
-        tmpList[9]=self.gigjToGlobalID(gi, 1) if pBc else -1
+        tmpList[5]=self.gigjToGlobalID(gi, 0) if pBcY else -1
+        tmpList[9]=self.gigjToGlobalID(gi, 1) if pBcY else -1
       if gj==self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, self.Ny_-2)
         tmpList[5]=self.gigjToGlobalID(gi, self.Ny_-1)
-        tmpList[9]=self.gigjToGlobalID(gi, 0) if pBc else -1
+        tmpList[9]=self.gigjToGlobalID(gi, 0) if pBcY else -1
       if gj<self.Ny_-3:
         tmpList[1]=self.gigjToGlobalID(gi, gj+1)
         tmpList[5]=self.gigjToGlobalID(gi, gj+2)
@@ -219,17 +220,17 @@ class NatOrdMeshRow2d:
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjToGlobalID(0, gj) if pBc else -1
-        tmpList[6]=self.gigjToGlobalID(1, gj) if pBc else -1
-        tmpList[10]=self.gigjToGlobalID(2, gj) if pBc else -1
+        tmpList[2]=self.gigjToGlobalID(0, gj)           if pBcX else -1
+        tmpList[6]=self.gigjToGlobalID(1, gj)           if pBcX else -1
+        tmpList[10]=self.gigjToGlobalID(2, gj)          if pBcX else -1
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[6]=self.gigjToGlobalID(0, gj) if pBc else -1
-        tmpList[10]=self.gigjToGlobalID(1, gj) if pBc else -1
+        tmpList[6]=self.gigjToGlobalID(0, gj)           if pBcX else -1
+        tmpList[10]=self.gigjToGlobalID(1, gj)          if pBcX else -1
       if gi==self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(self.Nx_-2, gj)
         tmpList[6]=self.gigjToGlobalID(self.Nx_-1, gj)
-        tmpList[10]=self.gigjToGlobalID(0, gj) if pBc else -1
+        tmpList[10]=self.gigjToGlobalID(0, gj)          if pBcX else -1
       if gi<self.Nx_-3:
         tmpList[2]=self.gigjToGlobalID(gi+1, gj)
         tmpList[6]=self.gigjToGlobalID(gi+2, gj)
@@ -237,17 +238,17 @@ class NatOrdMeshRow2d:
 
       # back
       if gj==0:
-        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3) if pBc else -1
+        tmpList[3]=self.gigjToGlobalID(gi, self.Ny_-1)  if pBcY else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-2)  if pBcY else -1
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-3) if pBcY else -1
       if gj==1:
         tmpList[3]=self.gigjToGlobalID(gi, 0)
-        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2) if pBc else -1
+        tmpList[7]=self.gigjToGlobalID(gi, self.Ny_-1)  if pBcY else -1
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-2) if pBcY else -1
       if gj==2:
         tmpList[3]=self.gigjToGlobalID(gi, 1)
         tmpList[7]=self.gigjToGlobalID(gi, 0)
-        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1) if pBc else -1
+        tmpList[11]=self.gigjToGlobalID(gi, self.Ny_-1) if pBcY else -1
       if gj>2:
         tmpList[3]=self.gigjToGlobalID(gi,  gj-1)
         tmpList[7]=self.gigjToGlobalID(gi,  gj-2)

@@ -3,7 +3,7 @@ include(FindUnixCommands)
 #------------------
 # make full mesh
 #------------------
-set(CMD "python3 ${FMESHDRIVER} -n 20 20 --outDir ${CMAKE_CURRENT_BINARY_DIR}/full -s ${STENCILVAL} --bounds -5.0 5.0 -5.0 5.0 --periodic false")
+set(CMD "python3 ${FMESHDRIVER} -n 20 20 --outDir ${CMAKE_CURRENT_BINARY_DIR}/full -s ${STENCILVAL} --bounds -5.0 5.0 -5.0 5.0")
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")

@@ -13,6 +13,6 @@ COMMAND ${CMAKE_COMMAND}
 -Dny=5
 -Dnz=5
 -Dss=3
--DPER=false
+-DPER=none
 -P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
 )

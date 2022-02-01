@@ -3,7 +3,7 @@ include(FindUnixCommands)
 set(MYLIST "80;160;320;640")
 foreach(nx ${MYLIST})
 
-  set(CMD "python3 ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${SSTEN} --bounds -1.0 1.0 --periodic true")
+  set(CMD "python3 ${MESHDRIVER} -n ${nx} 1 --outDir ${OUTDIR} -s ${SSTEN} --bounds -1.0 1.0 --periodic x")
   execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
   if(RES)
     message(FATAL_ERROR "Mesh generation failed")
