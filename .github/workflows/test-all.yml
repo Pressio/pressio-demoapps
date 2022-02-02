@@ -110,7 +110,7 @@ jobs:
       - name: Install Python package
         run: |
           cd $DEMOAPPS_HOME
-          python build.py --build_mode=${{ matrix.config.mode }}
+          python cmake_build.py --build_mode=${{ matrix.config.mode }}
           pip install .
 
       - name: Run Python tests
