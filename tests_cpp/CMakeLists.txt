@@ -67,6 +67,7 @@ add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
+add_subdirectory(eigen_2d_euler_richtmyer_meshkov_explicit)
 
 # ---------------------------------------------------------
 # 3d problems

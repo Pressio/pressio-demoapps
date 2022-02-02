@@ -9,6 +9,7 @@
 #include "functor_ghost_fill_neumann.hpp"
 #include "euler_2d_ghost_filler_sedov2d_sym.hpp"
 #include "euler_2d_ghost_filler_normal_shock.hpp"
+#include "euler_2d_ghost_filler_rmi.hpp"
 #include "euler_2d_ghost_filler_double_mach_reflection.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
@@ -279,9 +280,15 @@ private:
 	return initialState;
       }
 
+      case ::pressiodemoapps::Euler2d::RichtmyerMeshkov:{
+	rmiIC(initialState, m_meshObj, m_gamma);
+	return initialState;
+      }
+
       case ::pressiodemoapps::Euler2d::testingonlyneumann:{
 	return initialState;
       }
+
       };
 
     return initialState;
@@ -301,6 +308,22 @@ private:
       ghost_filler_t ghF(stencilSize, U, m_meshObj,
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::RichtmyerMeshkov)
+    {
+      using ghost_filler_t  = ::pressiodemoapps::impl::RMI2dGhostFiller<
+	U_t, MeshType, ghost_container_type>;
+      ghost_filler_t ghF(stencilSize, U, m_meshObj,
+			 m_ghostLeft, m_ghostRight);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -946,6 +969,14 @@ private:
 	return reflective;
       }
 
+      return neumann;
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::RichtmyerMeshkov)
+    {
+      if (axis == 1 && m_meshObj.hasBdRight2d(graphRow)){
+	return reflective;
+      }
       return neumann;
     }
 

@@ -18,6 +18,7 @@ enum class Euler2d{
   Riemann,
   NormalShock,
   DoubleMachReflection,
+  RichtmyerMeshkov,
   testingonlyneumann
 };
 }//end namespace pressiodemoapps

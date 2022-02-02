@@ -408,5 +408,54 @@ void doubleMachReflection2dIC(state_type & state,
     }
 }
 
+template<class state_type, class mesh_t, class scalar_type>
+void rmiIC(state_type & state,
+	   const mesh_t & meshObj,
+	   const scalar_type gamma)
+{
+  constexpr int numDofPerCell = 4;
+  constexpr auto zero = static_cast<scalar_type>(0);
+  constexpr auto one  = static_cast<scalar_type>(1);
+
+  const auto & x  = meshObj.viewX();
+  const auto & y  = meshObj.viewY();
+  const auto gammaMinusOne = gamma - one;
+  const auto gammaMinusOneInv = one/gammaMinusOne;
+
+  std::array<scalar_type, numDofPerCell> prim;
+  for (int i=0; i<x.size(); ++i)
+    {
+
+      prim[0] = 1.411;
+      prim[1] = 0.39;
+      prim[2] = zero;
+      prim[3] = 1.628;
+
+      if (x(i) > static_cast<scalar_type>(0.5))
+      {
+	prim[0] = one;
+	prim[1] = zero;
+	prim[2] = zero;
+	prim[3] = one;
+      }
+
+      const auto layer_x = 1.1 + 0.1*std::cos(4.*M_PI*(y(i)));
+      if (x(i) > layer_x)
+      {
+	prim[0] = 5.04;
+	prim[1] = zero;
+	prim[2] = zero;
+	prim[3] = one;
+      }
+
+      const auto ind = i*numDofPerCell;
+      state(ind)   = prim[0];
+      state(ind+1) = prim[0]*prim[1];
+      state(ind+2) = prim[0]*prim[2];
+      state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+
+    }
+}
+
 }}//end namespace
 #endif
