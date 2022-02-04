@@ -51,18 +51,22 @@ struct _ReconstructorMembers<ReconstructedValueType, DataType, MeshType>
 			    uPlusHalfNeg, uPlusHalfPos)
   {}
 
-  const ReconstructionScheme reconstructionScheme() const{
+  ReconstructionScheme reconstructionScheme() const{
     return m_recEn;
   }
+
   const ReconstructedValueType & reconstructionLeftNeg() const{
     return m_uMinusHalfNeg;
   }
+
   const ReconstructedValueType & reconstructionLeftPos() const{
     return m_uMinusHalfPos;
   }
+
   const ReconstructedValueType & reconstructionRightNeg() const{
     return m_uPlusHalfNeg;
   }
+
   const ReconstructedValueType & reconstructionRightPos() const{
     return m_uPlusHalfPos;
   }
@@ -136,7 +140,7 @@ struct _ReconstructorMembers<
 			    gradRNeg, gradRPos)
   {}
 
-  const ReconstructionScheme reconstructionScheme() const{
+  ReconstructionScheme reconstructionScheme() const{
     return m_recEn;
   }
 
