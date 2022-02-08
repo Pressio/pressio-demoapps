@@ -62,6 +62,25 @@ public:
     allocateGhosts();
   }
 
+  EigenEuler2dApp(const MeshType & meshObj,
+		  ::pressiodemoapps::Euler2d probEnum,
+		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		  scalar_type gamma,
+		  scalar_type amplitude)
+    : m_meshObj(meshObj),
+      m_probEn(probEnum),
+      m_recEn(recEnum),
+      m_fluxEn(::pressiodemoapps::InviscidFluxScheme::Rusanov),
+      m_gamma(gamma),
+      m_amplitude(amplitude)
+  {
+    // calculate total num of dofs on sample and stencil mesh
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+
   scalar_type gamma() const{
     return m_gamma;
   }
@@ -281,7 +300,7 @@ private:
       }
 
       case ::pressiodemoapps::Euler2d::RichtmyerMeshkov:{
-	rmiIC(initialState, m_meshObj, m_gamma);
+	rmiIC(initialState, m_meshObj, m_gamma, m_amplitude);
 	return initialState;
       }
 
@@ -1082,6 +1101,8 @@ protected:
 
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
+
+  scalar_type m_amplitude = 0.0337;
 };
 
 template<class MeshType> constexpr int EigenEuler2dApp<MeshType>::numDofPerCell;

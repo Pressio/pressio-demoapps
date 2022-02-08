@@ -19,6 +19,7 @@ enum class Euler2d{
   NormalShock,
   DoubleMachReflection,
   RichtmyerMeshkov,
+  RayTay,
   testingonlyneumann
 };
 }//end namespace pressiodemoapps
@@ -123,8 +124,28 @@ auto create_problem_eigen(const mesh_t & meshObj,
 			::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return create_problem_eigen(meshObj, probEnum, recEnum,
-			    InviscidFluxScheme::Rusanov, 1);
+			      InviscidFluxScheme::Rusanov, 1);
 }
+
+// for RMI problem
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  ::pressiodemoapps::Euler2d probEnum,
+			  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			  typename mesh_t::scalar_t gamma,
+			  typename mesh_t::scalar_t amplitude)
+{
+  if (probEnum != ::pressiodemoapps::Euler2d::RichtmyerMeshkov and
+      probEnum != ::pressiodemoapps::Euler2d::RayTay){
+    throw std::runtime_error("constructor valid only for RichtmyerMeshkov or RayTay");
+  }
+
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return RetType(meshObj, probEnum, recEnum,
+		 gamma, amplitude);
+}
+
 #endif
 
 }//end namespace pressiodemoapps

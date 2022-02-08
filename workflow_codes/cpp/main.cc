@@ -2,6 +2,7 @@
 #include "pressiodemoapps/euler1d.hpp"
 #include "pressiodemoapps/diffusion_reaction.hpp"
 #include "pressiodemoapps/swe2d.hpp"
+#include "pressiodemoapps/euler2d.hpp"
 #include "run_fom.hpp"
 #include "run_galerkin.hpp"
 #include "run_lspg.hpp"
@@ -129,6 +130,25 @@ int main(int argc, char *argv[])
     auto appObj = pda::create_problem_eigen(meshObj, probId, scheme,
 					    diffusionA, diffusionB,
 					    feedRate, killRate);
+    dispatch(appObj, parser);
+  }
+
+  if (problem == "2d_rmi")
+  {
+    namespace pda  = pressiodemoapps;
+    ParserTwoDimRichmyerMeshkov<scalar_t> parser(node);
+    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen<scalar_t>(parser.meshDir());
+    const auto probId  = pda::Euler2d::RichtmyerMeshkov;
+    const auto scheme  = (parser.inviscidFluxReconstruction()=="FirstOrder")
+      ? pda::InviscidFluxReconstruction::FirstOrder :
+         (parser.inviscidFluxReconstruction()=="Weno3")
+            ? pda::InviscidFluxReconstruction::Weno3
+               : pda::InviscidFluxReconstruction::Weno5;
+
+    const auto gamma = static_cast<scalar_t>(1.276);
+    const auto amplitude = parser.amplitude();
+    auto appObj = pda::create_problem_eigen(meshObj, probId, scheme,
+					    gamma, amplitude);
     dispatch(appObj, parser);
   }
 

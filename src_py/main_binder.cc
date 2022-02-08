@@ -91,7 +91,8 @@ void bindProblemEnums(pybind11::module & mParent)
     .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
     .value("Riemann",	     pda::Euler2d::Riemann)
     .value("NormalShock",    pda::Euler2d::NormalShock)
-    .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
+    .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection)
+    .value("RichtmyerMeshkov", pda::Euler2d::RichtmyerMeshkov);
 
   pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
     .value("SlipWall", pda::Swe2d::SlipWall);

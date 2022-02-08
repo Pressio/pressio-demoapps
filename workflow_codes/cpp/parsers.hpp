@@ -525,6 +525,69 @@ private:
 };
 
 
+template<class ScalarType>
+class ParserTwoDimRichmyerMeshkov
+  : public ParserCommon<ScalarType>,
+    public ParserFom<ScalarType>,
+    public ParserRom<ScalarType>
+{
+  std::string inviscidFluxRec_ = "";
+  ScalarType amplitude_ = {};
+
+public:
+  ParserTwoDimRichmyerMeshkov() = delete;
+
+  ParserTwoDimRichmyerMeshkov(YAML::Node & parentNode)
+    : ParserCommon<ScalarType>(parentNode),
+      ParserFom<ScalarType>(parentNode),
+      ParserRom<ScalarType>(parentNode)
+  {
+    // check if we are doing FOM or ROM
+    const auto isFom = this->doingFom();
+    const auto isRom = this->doingRom();
+    if (isFom && isRom){
+      throw std::runtime_error("Seems like both FOM and ROM are on, this is not possible");
+    }
+
+    // depending on what is on, find reconstruction
+    {
+      const YAML::Node node = isFom ? parentNode["fom"] : parentNode["rom"] ;
+      if (node["inviscidFluxReconstruction"]){
+	inviscidFluxRec_ = node["inviscidFluxReconstruction"].as<std::string>();
+      }
+      else{
+	throw std::runtime_error("Input: RMI: missing inviscid reconstruction");
+      }
+    }
+
+    // find coefficients
+    {
+      const auto node = parentNode["physicalCoefficients"];
+      if (node)
+	{
+	  auto entry = "amplitude";
+	  if (node[entry]) amplitude_ = node[entry].as<ScalarType>();
+	  else throw std::runtime_error("missing amplitude");
+	}
+      else{
+	throw std::runtime_error("2d RMI: missing coefficients section in yaml input");
+      }
+    }
+
+    this->describe();
+  }
+
+  auto inviscidFluxReconstruction() const{ return inviscidFluxRec_; }
+  auto amplitude() const{ return amplitude_; }
+
+private:
+  void describe() const{
+    std::cout << "\ninviscidFluxReconstruction = " << inviscidFluxRec_ << " \n"
+	      << "\namplitude = " << amplitude_ << " \n";
+  }
+};
+
+
 
 // template<class ScalarType>
 // class ParserTwoDimReacDiff
