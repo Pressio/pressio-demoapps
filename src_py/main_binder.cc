@@ -91,6 +91,7 @@ void bindProblemEnums(pybind11::module & mParent)
     .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
     .value("Riemann",	     pda::Euler2d::Riemann)
     .value("NormalShock",    pda::Euler2d::NormalShock)
+    .value("RayleighTaylor", pda::Euler2d::RayleighTaylor)
     .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
 
   pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
@@ -264,6 +265,10 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 
   mTopLevel.def("create_problem",
 		&pda::implee2d::create_problem_for_pyB<ccumesh_t, euler_2d_t>,
+		pybind11::return_value_policy::take_ownership);
+
+  mTopLevel.def("create_problem",
+		&pda::implee2d::create_problem_for_pyC<ccumesh_t, euler_2d_t>,
 		pybind11::return_value_policy::take_ownership);
 
   // -----------------------

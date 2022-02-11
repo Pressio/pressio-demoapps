@@ -408,5 +408,57 @@ void doubleMachReflection2dIC(state_type & state,
     }
 }
 
+template<class state_type, class mesh_t, class scalar_type>
+void raytayIC(state_type & state,
+	      const mesh_t & meshObj,
+	      const scalar_type gamma,
+	      const scalar_type amplitude)
+{
+  constexpr int numDofPerCell = 4;
+  constexpr auto zero = static_cast<scalar_type>(0);
+  constexpr auto one  = static_cast<scalar_type>(1);
+  constexpr auto two  = static_cast<scalar_type>(2);
+  constexpr auto three= static_cast<scalar_type>(3);
+  constexpr auto eight= static_cast<scalar_type>(8);
+
+  const auto & x  = meshObj.viewX();
+  const auto & y  = meshObj.viewY();
+  const auto gammaMinusOne = gamma - one;
+  const auto gammaMinusOneInv = one/gammaMinusOne;
+
+  const auto eightPi = eight*M_PI;
+  std::array<scalar_type, numDofPerCell> prim;
+  for (int i=0; i<x.size(); ++i)
+  {
+    if (y(i) < one/two){
+      const scalar_type rho = two;
+      const auto p = two*y(i) + one;
+      const auto factor = -amplitude*std::sqrt(gamma*p/rho);
+
+      prim[0] = rho;
+      prim[1] = zero;
+      prim[2] = factor * std::cos(eightPi*x(i));
+      prim[3] = p;
+    }
+
+    if (y(i) >= static_cast<scalar_type>(one/two)){
+      const scalar_type rho = one;
+      const auto p = y(i) + three/two;
+      const auto factor = -amplitude*std::sqrt(gamma*p/rho);
+
+      prim[0] = rho;
+      prim[1] = zero;
+      prim[2] = factor * std::cos(eightPi*x(i));
+      prim[3] = p;
+    }
+
+    const auto ind = i*numDofPerCell;
+    state(ind)   = prim[0];
+    state(ind+1) = prim[0]*prim[1];
+    state(ind+2) = prim[0]*prim[2];
+    state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+  }
+}
+
 }}//end namespace
 #endif

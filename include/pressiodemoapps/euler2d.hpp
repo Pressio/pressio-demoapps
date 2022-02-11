@@ -18,6 +18,7 @@ enum class Euler2d{
   Riemann,
   NormalShock,
   DoubleMachReflection,
+  RayleighTaylor,
   testingonlyneumann
 };
 }//end namespace pressiodemoapps
@@ -72,8 +73,8 @@ T createEe2dImpl(const mesh_t & meshObj,
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class mesh_t, class T>
 T create_problem_for_pyA(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler2d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
+			 ::pressiodemoapps::Euler2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum)
 {
   return implee2d::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
 					     InviscidFluxScheme::Rusanov, 1);
@@ -81,12 +82,21 @@ T create_problem_for_pyA(const mesh_t & meshObj,
 
 template<class mesh_t, class T>
 T create_problem_for_pyB(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler2d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		      const int ic)
+			 ::pressiodemoapps::Euler2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			 const int ic)
 {
   return implee2d::createEe2dImpl<mesh_t, T>(meshObj, recEnum, probEnum,
 					     InviscidFluxScheme::Rusanov, ic);
+}
+
+template<class mesh_t, class T>
+T create_problem_for_pyC(const mesh_t & meshObj,
+			 ::pressiodemoapps::Euler2d probEnum,
+			 ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			 const typename mesh_t::scalar_t amplitude)
+{
+  return T(meshObj, probEnum, recEnum, 5./3., amplitude);
 }
 #endif
 
@@ -123,6 +133,43 @@ auto create_problem_eigen(const mesh_t & meshObj,
 {
   return create_problem_eigen(meshObj, probEnum, recEnum,
 			    InviscidFluxScheme::Rusanov, 1);
+}
+
+// for RTI problem
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  ::pressiodemoapps::Euler2d probEnum,
+			  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			  typename mesh_t::scalar_t amplitude)
+{
+  if (probEnum != ::pressiodemoapps::Euler2d::RayleighTaylor){
+    throw std::runtime_error("constructor valid only for RayleighTaylor");
+  }
+
+  using sc_t = typename mesh_t::scalar_t;
+  const auto gamma = static_cast<sc_t>(5)/static_cast<sc_t>(3);
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return RetType(meshObj, probEnum, recEnum,
+		 gamma, amplitude);
+}
+
+template<class mesh_t>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  ::pressiodemoapps::Euler2d probEnum,
+			  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+			  typename mesh_t::scalar_t gamma,
+			  typename mesh_t::scalar_t amplitude)
+{
+  if (probEnum != ::pressiodemoapps::Euler2d::RayleighTaylor){
+    throw std::runtime_error("constructor valid only for RayleighTaylor");
+  }
+
+  using sc_t = typename mesh_t::scalar_t;
+  using p_t = ::pressiodemoapps::ee::impl::EigenEuler2dApp<mesh_t>;
+  using RetType = PublicProblemMixinCpp<p_t>;
+  return RetType(meshObj, probEnum, recEnum,
+		 gamma, amplitude);
 }
 #endif
 

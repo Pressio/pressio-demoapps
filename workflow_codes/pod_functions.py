@@ -90,7 +90,7 @@ def _compute_rhs_pod_if_needed_dont_split_vars_impl(dryRun, \
                                                     leftSingVecsFile):
   # load
   M = load_rhs_snapshot_matrix_if_present(dryRun, dataDirs, numDofsPerCell)
-  # some dirs don't have data in it, so skip
+  # if some dirs don't have data in it, skip
   if M.any() == None:
     print("Some dirs don't have RHS snapshots, so skipping computing POD for RHS")
 
@@ -110,34 +110,32 @@ def _compute_state_pod_and_ref_state_split_vars_impl(dryRun, \
                                                      numDofsPerCell, \
                                                      dataDirs, \
                                                      singValsFile,\
-                                                     leftSingVecsFile):
-  sys.exit(__file__ + " missing impl")
+                                                     leftSingVecsFile,
+                                                     referenceStateFile):
 
-#   # use first run to find the mesh, and ensure all use the same mesh
-#   fullMeshPath = find_mesh_from_run_directory(dataDirs[0])
-#   for itDir in dataDirs:
-#     assert(fullMeshPath == find_mesh_from_run_directory(itDir))
+  # use first run to find the mesh, and ensure all use the same mesh
+  fullMeshPath = find_mesh_from_run_directory(dataDirs[0])
+  for itDir in dataDirs:
+    assert(fullMeshPath == find_mesh_from_run_directory(itDir))
 
-#   M = load_state_snapshot_matrix(dryRun, dataDirs, module.numDofsPerCell)
-#   # M is such that:
-#   # num of rows = num of state instances that the FOM saved
-#   # num of cols = numCells*numDofsPerCell
-#   numSnaps, totDofs = M.shape[0], M.shape[1]
-#   numCells = np.int64(totDofs/module.numDofsPerCell)
+  M = load_state_snapshot_matrix(dryRun, dataDirs, numDofsPerCell)
+  # M is such that:
+  # num of rows = num of state instances that the FOM saved
+  # num of cols = numCells*numDofsPerCell
+  numSnaps, totDofs = M.shape[0], M.shape[1]
+  numCells = np.int64(totDofs/numDofsPerCell)
 
-#   # write reference state (zero for now)
-#   refStateFile = outDir + "/referenceState"
-#   np.savetxt(refStateFile, np.zeros((totDofs, 1)))
+  # write reference state (zero for now)
+  np.savetxt(referenceStateFile, np.zeros((totDofs, 1)))
 
-#   numVars = module.numDofsPerCell
-#   M = np.reshape(M, (numSnaps, numCells, module.numDofsPerCell))
-#   phiA = [None]*numVars
-#   for i in range(0,numVars):
-#     currS = np.rollaxis(M[:,:,i],1)
-#     singValsFileName = "sva_dof"+str(i)
-#     lsvFileName      = "lsv_dof"+str(i)
-#     do_svd_py(dryRun, currS, outDir, singValsFileName, lsvFileName)
-
+  numVars = numDofsPerCell
+  M = np.reshape(M, (numSnaps, numCells, numVars))
+  phiA = [None]*numVars
+  for i in range(0,numVars):
+    currS = np.rollaxis(M[:,:,i],1)
+    currSingValsFile = singValsFile + "_dof"+str(i)
+    currLeftSingVecsFile = leftSingVecsFile + "_dof"+str(i)
+    do_svd_py(dryRun, currS, currSingValsFile, currLeftSingVecsFile)
 
 
 def _compute_rhs_pod_if_needed_split_vars_impl(dryRun, \
@@ -146,26 +144,24 @@ def _compute_rhs_pod_if_needed_split_vars_impl(dryRun, \
                                                singValsFile,\
                                                leftSingVecsFile):
 
-  sys.exit(__file__ + " missing impl")
+  # load
+  M = load_rhs_snapshot_matrix_if_present(dryRun, dataDirs, numDofsPerCell)
+  # if some dirs don't have data in it, skip
+  if M.any() == None:
+    print("Some dirs don't have RHS snapshots, so skipping computing POD for RHS")
 
-#   # load
-#   M = load_rhs_snapshot_matrix_if_present(dryRun, dataDirs, module.numDofsPerCell)
-#   # some dirs don't have data in it, so skip
-#   if M.any() == None:
-#     print("Some dirs don't have RHS snapshots, so skipping computing POD for RHS")
+  else:
+    # M is such that:
+    # num of rows = num of state instances saved
+    # num of cols = numSampleMeshCells*numDofsPerCell
+    numSnaps, totDofs = M.shape[0], M.shape[1]
+    numCells = np.int64(totDofs/numDofsPerCell)
 
-#   else:
-#     # M is such that:
-#     # num of rows = num of state instances saved
-#     # num of cols = numSampleMeshCells*numDofsPerCell
-#     numSnaps, totDofs = M.shape[0], M.shape[1]
-#     numCells = np.int64(totDofs/module.numDofsPerCell)
-
-#     numVars = module.numDofsPerCell
-#     M = np.reshape(M, (numSnaps, numCells, module.numDofsPerCell))
-#     phiA = [None]*numVars
-#     for i in range(0,numVars):
-#       currS = np.rollaxis(M[:,:,i],1)
-#       singValsFile = "sva_dof"+str(i)
-#       lsvFile      = "lsv_dof"+str(i)
-#       do_svd_py(dryRun, currS, outDir, singValsFile, lsvFile)
+    numVars = numDofsPerCell
+    M = np.reshape(M, (numSnaps, numCells, numVars))
+    phiA = [None]*numVars
+    for i in range(0,numVars):
+      currS = np.rollaxis(M[:,:,i],1)
+      currSingValsFile = singValsFile + "_dof"+str(i)
+      currLeftSingVecsFile = leftSingVecsFile + "_dof"+str(i)
+      do_svd_py(dryRun, currS, currSingValsFile, currLeftSingVecsFile)

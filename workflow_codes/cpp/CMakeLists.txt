@@ -46,7 +46,13 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-yaml-cpp-0.7.0/include
   )
 
+find_package(OpenMP)
+if(NOT OpenMP_CXX_FOUND)
+  message(FATAL_ERROR "You enabled OpenMP but I cannot find it")
+endif()
+
+
 set(exename pdaExeWf)
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/main.cc)
-target_link_libraries(${exename} PRIVATE yaml-cpp)
-
+target_compile_definitions(${exename} PRIVATE PRESSIODEMOAPPS_ENABLE_OPENMP)
+target_link_libraries(${exename} PRIVATE yaml-cpp OpenMP::OpenMP_CXX)

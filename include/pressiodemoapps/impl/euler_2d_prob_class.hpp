@@ -9,6 +9,7 @@
 #include "functor_ghost_fill_neumann.hpp"
 #include "euler_2d_ghost_filler_sedov2d_sym.hpp"
 #include "euler_2d_ghost_filler_normal_shock.hpp"
+#include "euler_2d_ghost_filler_rt.hpp"
 #include "euler_2d_ghost_filler_double_mach_reflection.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
@@ -52,8 +53,34 @@ public:
 		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 		  ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 		  int icIdentifier)
-    : m_meshObj(meshObj), m_probEn(probEnum), m_recEn(recEnum),
-      m_fluxEn(fluxEnum), m_icIdentifier(icIdentifier)
+    : m_meshObj(meshObj),
+      m_probEn(probEnum),
+      m_recEn(recEnum),
+      m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier)
+  {
+    // calculate total num of dofs on sample and stencil mesh
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+
+    if (m_probEn == ::pressiodemoapps::Euler2d::RayleighTaylor){
+      m_gamma = static_cast<scalar_type>(5)/static_cast<scalar_type>(3);
+    }
+  }
+
+  // constructor for RayTay problem
+  EigenEuler2dApp(const MeshType & meshObj,
+		  ::pressiodemoapps::Euler2d probEnum,
+		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+		  scalar_type gamma,
+		  scalar_type amplitude)
+    : m_meshObj(meshObj),
+      m_probEn(probEnum),
+      m_recEn(recEnum),
+      m_fluxEn(::pressiodemoapps::InviscidFluxScheme::Rusanov),
+      m_gamma(gamma),
+      m_rti_amplitude_(amplitude)
   {
     // calculate total num of dofs on sample and stencil mesh
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
@@ -153,7 +180,6 @@ protected:
   }
 
 private:
-
   template<class Tr>
   void initializeJacobianForInnerCells(std::vector<Tr> & trList)
   {
@@ -279,6 +305,11 @@ private:
 	return initialState;
       }
 
+      case ::pressiodemoapps::Euler2d::RayleighTaylor:{
+	raytayIC(initialState, m_meshObj, m_gamma, m_rti_amplitude_);
+	return initialState;
+      }
+
       case ::pressiodemoapps::Euler2d::testingonlyneumann:{
 	return initialState;
       }
@@ -354,6 +385,23 @@ private:
 	U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, U,
 			 currentTime, m_gamma, m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::RayleighTaylor)
+    {
+      using ghost_filler_t  = ::pressiodemoapps::impl::RayTay2dGhostFiller<
+	U_t, MeshType, ghost_container_type>;
+      ghost_filler_t ghF(stencilSize, U, m_meshObj, m_gamma,
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
 
@@ -523,6 +571,9 @@ private:
       const auto smPt = graphRows[it];
       Fx(smPt);
       Fy(smPt);
+
+      // forcing is needed for example when doing Rayleigh-taylor
+      addForcingContributionToVelocityAndJacobianIfNeeded(U, V, J, smPt);
     }
   }
 
@@ -634,6 +685,8 @@ private:
 	const auto & factorsY = (bcTypeY == 1)
 	  ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
 	funcy(smPt, factorsY, bcTypeY);
+
+	addForcingContributionToVelocityAndJacobianIfNeeded(U, V, J, smPt);
       }
   }
 
@@ -785,6 +838,9 @@ private:
       const auto & factorsY = (bcTypeY == 1)
 	? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
       funcJacY(smPt, factorsY, bcTypeY);
+
+      // forcing is needed for example when doing Rayleigh-taylor
+      addForcingContributionToVelocityAndJacobianIfNeeded(U, V, J, smPt);
     }
   }
 
@@ -840,6 +896,9 @@ private:
       const auto smPt = graphRows[it];
       Fx(smPt);
       Fy(smPt);
+
+      // forcing is needed for example when doing Rayleigh-taylor
+      addForcingContributionToVelocityIfNeeded(U, V, smPt);
     }
   }
 
@@ -911,9 +970,11 @@ private:
       Fx(smPt);
       FillStencilY(smPt, it);
       Fy(smPt);
+
+      // forcing is needed for example when doing Rayleigh-taylor
+      addForcingContributionToVelocityIfNeeded(U, V, smPt);
     }
   }
-
 
   int findCellBdType(index_t graphRow, int axis) const
   {
@@ -983,7 +1044,59 @@ private:
       return dirichlet;
     }
 
+    else if (m_probEn == ::pressiodemoapps::Euler2d::RayleighTaylor)
+    {
+      if (axis == 1){
+	return reflective;
+      }
+      else if (axis == 2){
+	return dirichlet;
+      }
+    }
+
     return 0;
+  }
+
+  template<class U_t, class V_t>
+  void addForcingContributionToVelocityIfNeeded(const U_t & U,
+						V_t & V,
+						index_t smPt) const
+  {
+    if (m_probEn == ::pressiodemoapps::Euler2d::RayleighTaylor)
+    {
+      const auto one = static_cast<scalar_type>(1);
+      const auto vIndex = smPt*numDofPerCell;
+      const index_t col_i = m_meshObj.graph()(smPt, 0)*numDofPerCell;
+
+      // add density to RHs of y-mom eq and account in Jacobian
+      V(vIndex+2) += U(col_i);
+      // add rho*v to RHS of energy
+      V(vIndex+3) += U(col_i+2);
+    }
+  }
+
+  template<class U_t, class V_t>
+  void addForcingContributionToVelocityAndJacobianIfNeeded(const U_t & U,
+							   V_t & V,
+							   jacobian_type & J,
+							   index_t smPt) const
+  {
+
+    if (m_probEn == ::pressiodemoapps::Euler2d::RayleighTaylor)
+    {
+      const auto one = static_cast<scalar_type>(1);
+
+      const auto vIndex = smPt*numDofPerCell;
+      const index_t col_i = m_meshObj.graph()(smPt, 0)*numDofPerCell;
+
+      // add density to RHs of y-mom eq and account in Jacobian
+      V(vIndex+2) += U(col_i);
+      J.coeffRef(vIndex+2, col_i) += one;
+
+      // add rho*v to RHS of energy and account in Jacobian
+      V(vIndex+3) += U(col_i+2);
+      J.coeffRef(vIndex+3, col_i+2) += one;
+    }
   }
 
   void allocateGhosts()
@@ -1051,6 +1164,8 @@ protected:
 
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
+
+  const scalar_type m_rti_amplitude_ = 0.025;
 };
 
 template<class MeshType> constexpr int EigenEuler2dApp<MeshType>::numDofPerCell;

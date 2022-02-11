@@ -525,6 +525,74 @@ private:
 };
 
 
+template<class ScalarType>
+class ParserTwoDimRayleighTaylor
+  : public ParserCommon<ScalarType>,
+    public ParserFom<ScalarType>,
+    public ParserRom<ScalarType>
+{
+  std::string inviscidFluxRec_ = "";
+  ScalarType amplitude_ = {};
+  ScalarType gamma_ = static_cast<ScalarType>(1.4);
+
+public:
+  ParserTwoDimRayleighTaylor() = delete;
+
+  ParserTwoDimRayleighTaylor(YAML::Node & parentNode)
+    : ParserCommon<ScalarType>(parentNode),
+      ParserFom<ScalarType>(parentNode),
+      ParserRom<ScalarType>(parentNode)
+  {
+    // check if we are doing FOM or ROM
+    const auto isFom = this->doingFom();
+    const auto isRom = this->doingRom();
+    if (isFom && isRom){
+      throw std::runtime_error("Seems like both FOM and ROM are on, this is not possible");
+    }
+
+    // depending on what is on, find reconstruction
+    {
+      const YAML::Node node = isFom ? parentNode["fom"] : parentNode["rom"] ;
+      if (node["inviscidFluxReconstruction"]){
+	inviscidFluxRec_ = node["inviscidFluxReconstruction"].as<std::string>();
+      }
+      else{
+	throw std::runtime_error("Input: RTI: missing inviscid reconstruction");
+      }
+    }
+
+    // find coefficients
+    {
+      const auto node = parentNode["physicalCoefficients"];
+      if (node)
+	{
+	  auto entry = "amplitude";
+	  if (node[entry]) amplitude_ = node[entry].as<ScalarType>();
+	  else throw std::runtime_error("missing amplitude");
+
+	  entry = "gamma";
+	  if (node[entry]) gamma_ = node[entry].as<ScalarType>();
+	}
+      else{
+	throw std::runtime_error("2d RTI: missing coefficients section in yaml input");
+      }
+    }
+
+    this->describe();
+  }
+
+  auto inviscidFluxReconstruction() const{ return inviscidFluxRec_; }
+  auto amplitude() const{ return amplitude_; }
+  auto gamma() const{ return gamma_; }
+
+private:
+  void describe() const{
+    std::cout << "\ninviscidFluxReconstruction = " << inviscidFluxRec_ << " \n"
+	      << "\namplitude = " << amplitude_ << " \n"
+	      << "\ngamma = " << gamma_ << " \n";
+  }
+};
+
 
 // template<class ScalarType>
 // class ParserTwoDimReacDiff
