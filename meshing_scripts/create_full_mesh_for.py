@@ -58,6 +58,10 @@ valid = ["linadv1d_s3", \
          "riemann2d_s5", \
          "riemann2d_s7", \
          #
+         "rti2d_s3", \
+         "rti2d_s5", \
+         "rti2d_s7", \
+         #
          "doublemach2d_s3", \
          "doublemach2d_s5", \
          #
@@ -253,6 +257,15 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-5.), str(5.), str(-5.), str(5.))
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("rti2d" in pName):
+    s = int(pName[-1])
+    args = ("python3", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(0.0), str(0.25), str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler3dsmooth" in pName):

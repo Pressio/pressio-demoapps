@@ -14,3 +14,4 @@
     euler_2d_riemann
     euler_2d_normal_shock
     euler_2d_double_mach
+    euler_2d_rti
