@@ -84,7 +84,7 @@ def main(workDir, debug, fullMeshDir, tilingDir, smGIDsFile):
   # - value = GID wrt sample mesh
 
   if tilingDir!=None:
-    gidsfiles = glob.glob(tilingDir+"/cell_gids_p_*.txt")
+    gidsfiles = glob.glob(tilingDir+"/cell_gids_wrt_full_mesh_p_*.txt")
 
     # sort based on the ID, so need to extract ID which is last of dir name
     def func(elem): return int(elem.split('_')[-1].split('.')[0])
