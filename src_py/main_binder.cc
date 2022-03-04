@@ -11,8 +11,10 @@
 
 #include "types.hpp"
 #include "pressiodemoapps/mesh.hpp"
-#include "pressiodemoapps/advection.hpp"
-#include "pressiodemoapps/diffusion_reaction.hpp"
+#include "pressiodemoapps/advection1d.hpp"
+#include "pressiodemoapps/advection_diffusion2d.hpp"
+#include "pressiodemoapps/diffusion_reaction1d.hpp"
+#include "pressiodemoapps/diffusion_reaction2d.hpp"
 #include "pressiodemoapps/euler1d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/swe2d.hpp"
@@ -73,6 +75,9 @@ void bindProblemEnums(pybind11::module & mParent)
 
   pybind11::enum_<pda::DiffusionReaction1d>(mParent, "DiffusionReaction1d")
     .value("ProblemA", pda::DiffusionReaction1d::ProblemA);
+
+  pybind11::enum_<pda::AdvectionDiffusion2d>(mParent, "AdvectionDiffusion2d")
+    .value("Burgers", pda::AdvectionDiffusion2d::Burgers);
 
   pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
     .value("ProblemA", pda::DiffusionReaction2d::ProblemA)
@@ -179,133 +184,151 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
 		&pda::impladv::create_problem_for_py<ccumesh_t>,
 		pybind11::return_value_policy::take_ownership);
 
-  // -----------------------
-  // diffusion-reaction 1d
-  // -----------------------
-  using diffreac_impl_1d_t = pda::impldiffreac::EigenDiffReac1dApp<ccumesh_t>;
-
-  using diffreac_1d_t = pda::PublicProblemMixinPy<diffreac_impl_1d_t>;
-  pybind11::class_<diffreac_1d_t> diffReac1dProb(mTopLevel, "DiffusionReaction1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<diffreac_1d_t>(diffReac1dProb);
-
   mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyA<
-		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
+		&pda::impladv::create_problem_for_py_B<ccumesh_t>,
 		pybind11::return_value_policy::take_ownership);
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyB<
-		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
-		pybind11::return_value_policy::take_ownership);
+  // // -----------------------
+  // // advection-diffusion 2d
+  // // -----------------------
+  // using advdiff_impl_2d_t = pda::implburgers::EigenBurgers2dApp<ccumesh_t>;
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyC1d<ccumesh_t, diffreac_1d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // using advdiff_2d_t = pda::PublicProblemMixinPy<advdiff_impl_2d_t>;
+  // pybind11::class_<advdiff_2d_t> advDiff2dProb(mTopLevel, "AdvectionDiffusion2dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<advdiff_2d_t>(advDiff2dProb);
 
-  // -----------------------
-  // Euler 1d
-  // -----------------------
-  using euler_impl_1d_t = pda::implee1d::EigenEuler1dApp<ccumesh_t>;
+  // mTopLevel.def("create_problem",
+  // 		&pda::impladvdiff::create_problem_for_pyA<
+  // 		ccumesh_t, advdiff_2d_t, pda::AdvectionDiffusion2d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  using euler_1d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_1d_t>;
-  pybind11::class_<euler_1d_t> ee1dProb(mTopLevel, "Euler1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_1d_t>(ee1dProb);
-  ee1dProb.def("gamma", &euler_1d_t::gamma);
+  // // -----------------------
+  // // diffusion-reaction 1d
+  // // -----------------------
+  // using diffreac_impl_1d_t = pda::impldiffreac::EigenDiffReac1dApp<ccumesh_t>;
 
-  mTopLevel.def("create_problem",
-		&pda::implee1d::create_problem_for_pyA<ccumesh_t, euler_1d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // using diffreac_1d_t = pda::PublicProblemMixinPy<diffreac_impl_1d_t>;
+  // pybind11::class_<diffreac_1d_t> diffReac1dProb(mTopLevel, "DiffusionReaction1dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<diffreac_1d_t>(diffReac1dProb);
 
-  mTopLevel.def("create_problem",
-		&pda::implee1d::create_problem_for_pyB<ccumesh_t, euler_1d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyA<
+  // 		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  // -----------------------
-  // diffusion-reaction 2d
-  // -----------------------
-  using diffreac_impl_2d_t = pda::impldiffreac::EigenDiffReac2dApp<ccumesh_t>;
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyB<
+  // 		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  using diffreac_2d_t = pda::PublicProblemMixinPy<diffreac_impl_2d_t>;
-  pybind11::class_<diffreac_2d_t> diffReac2dProb(mTopLevel, "DiffusionReaction2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<diffreac_2d_t>(diffReac2dProb);
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyC1d<ccumesh_t, diffreac_1d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyA<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
+  // // -----------------------
+  // // Euler 1d
+  // // -----------------------
+  // using euler_impl_1d_t = pda::implee1d::EigenEuler1dApp<ccumesh_t>;
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyB<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
+  // using euler_1d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_1d_t>;
+  // pybind11::class_<euler_1d_t> ee1dProb(mTopLevel, "Euler1dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<euler_1d_t>(ee1dProb);
+  // ee1dProb.def("gamma", &euler_1d_t::gamma);
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyC2d<ccumesh_t, diffreac_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee1d::create_problem_for_pyA<ccumesh_t, euler_1d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyD<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee1d::create_problem_for_pyB<ccumesh_t, euler_1d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  // -----------------------
-  // Euler 2d
-  // -----------------------
-  using euler_impl_2d_t = pda::ee::impl::EigenEuler2dApp<ccumesh_t>;
+  // // -----------------------
+  // // diffusion-reaction 2d
+  // // -----------------------
+  // using diffreac_impl_2d_t = pda::impldiffreac::EigenDiffReac2dApp<ccumesh_t>;
 
-  using euler_2d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_2d_t>;
-  pybind11::class_<euler_2d_t> ee2dProb(mTopLevel, "Euler2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_2d_t>(ee2dProb);
-  ee2dProb.def("gamma", &euler_2d_t::gamma);
+  // using diffreac_2d_t = pda::PublicProblemMixinPy<diffreac_impl_2d_t>;
+  // pybind11::class_<diffreac_2d_t> diffReac2dProb(mTopLevel, "DiffusionReaction2dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<diffreac_2d_t>(diffReac2dProb);
 
-  mTopLevel.def("create_problem",
-		&pda::implee2d::create_problem_for_pyA<ccumesh_t, euler_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyA<
+  // 		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  mTopLevel.def("create_problem",
-		&pda::implee2d::create_problem_for_pyB<ccumesh_t, euler_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyB<
+  // 		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  // -----------------------
-  // Swe 2d
-  // -----------------------
-  using swe_impl_2d_t = pda::implswe::EigenSwe2dApp<ccumesh_t>;
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyC2d<ccumesh_t, diffreac_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  using swe_2d_t = pressiodemoapps::PublicProblemMixinPy<swe_impl_2d_t>;
-  pybind11::class_<swe_2d_t> swe2dProb(mTopLevel, "Swe2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<swe_2d_t>(swe2dProb);
-  swe2dProb.def("coriolis", &swe_2d_t::coriolis);
-  swe2dProb.def("gravity", &swe_2d_t::gravity);
+  // mTopLevel.def("create_problem",
+  // 		&pda::impldiffreac::create_problem_for_pyD<
+  // 		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyA<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // // -----------------------
+  // // Euler 2d
+  // // -----------------------
+  // using euler_impl_2d_t = pda::ee::impl::EigenEuler2dApp<ccumesh_t>;
 
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // using euler_2d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_2d_t>;
+  // pybind11::class_<euler_2d_t> ee2dProb(mTopLevel, "Euler2dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<euler_2d_t>(ee2dProb);
+  // ee2dProb.def("gamma", &euler_2d_t::gamma);
 
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee2d::create_problem_for_pyA<ccumesh_t, euler_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  // -----------------------
-  // Euler 3d
-  // -----------------------
-  using euler_impl_3d_t = pda::ee::impl::EigenEuler3dApp<ccumesh_t>;
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee2d::create_problem_for_pyB<ccumesh_t, euler_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
-  using euler_3d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_3d_t>;
-  pybind11::class_<euler_3d_t> ee3dProb(mTopLevel, "Euler3dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_3d_t>(ee3dProb);
-  ee3dProb.def("gamma", &euler_3d_t::gamma);
+  // // -----------------------
+  // // Swe 2d
+  // // -----------------------
+  // using swe_impl_2d_t = pda::implswe::EigenSwe2dApp<ccumesh_t>;
 
-  mTopLevel.def("create_problem",
-		&pda::implee3d::create_problem_for_pyA<ccumesh_t, euler_3d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // using swe_2d_t = pressiodemoapps::PublicProblemMixinPy<swe_impl_2d_t>;
+  // pybind11::class_<swe_2d_t> swe2dProb(mTopLevel, "Swe2dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<swe_2d_t>(swe2dProb);
+  // swe2dProb.def("coriolis", &swe_2d_t::coriolis);
+  // swe2dProb.def("gravity", &swe_2d_t::gravity);
 
-  mTopLevel.def("create_problem",
-		&pda::implee3d::create_problem_for_pyB<ccumesh_t, euler_3d_t>,
-		pybind11::return_value_policy::take_ownership);
+  // mTopLevel.def("create_problem",
+  // 		&pda::implswe2d::create_problem_for_pyA<ccumesh_t, swe_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
+
+  // mTopLevel.def("create_problem",
+  // 		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
+
+  // mTopLevel.def("create_problem",
+  // 		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
+
+  // // -----------------------
+  // // Euler 3d
+  // // -----------------------
+  // using euler_impl_3d_t = pda::ee::impl::EigenEuler3dApp<ccumesh_t>;
+
+  // using euler_3d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_3d_t>;
+  // pybind11::class_<euler_3d_t> ee3dProb(mTopLevel, "Euler3dProblem");
+  // pressiodemoappspy::impl::bindCommonApiMethods<euler_3d_t>(ee3dProb);
+  // ee3dProb.def("gamma", &euler_3d_t::gamma);
+
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee3d::create_problem_for_pyA<ccumesh_t, euler_3d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
+
+  // mTopLevel.def("create_problem",
+  // 		&pda::implee3d::create_problem_for_pyB<ccumesh_t, euler_3d_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
 }
 #endif

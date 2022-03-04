@@ -18,6 +18,7 @@ enum class InviscidFluxScheme{ Rusanov };
 enum class ViscousFluxReconstruction{ FirstOrder };
 enum class ViscousFluxScheme{ Central };
 
+
 int reconstructionTypeToStencilSize(InviscidFluxReconstruction enIn){
   switch(enIn){
   case InviscidFluxReconstruction::FirstOrder: return 3;
