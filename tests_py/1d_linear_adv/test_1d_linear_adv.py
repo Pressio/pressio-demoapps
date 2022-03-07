@@ -18,7 +18,7 @@ def test_applyJacobianFirstOrder():
   operand = np.arange(state.size)
   print(operand)
   result = appObj.createApplyJacobianResult(operand)
-  appObj.applyJacobian(state, 0., operand, result)
+  appObj.applyJacobian(state, operand, 0., result)
   assert(result[0] == 19900.)
   for it in result[1:]:
     assert(it == -100.)
