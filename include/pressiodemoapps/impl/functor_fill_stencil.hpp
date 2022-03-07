@@ -1,12 +1,11 @@
 
-#ifndef PRESSIODEMOAPPS_STENCIL_FILLER_HPP_
-#define PRESSIODEMOAPPS_STENCIL_FILLER_HPP_
+#ifndef PRESSIODEMOAPPS_STENCIL_FILLER__HPP_
+#define PRESSIODEMOAPPS_STENCIL_FILLER__HPP_
 
 namespace pressiodemoapps{ namespace impl{
 
 template<
   int dim,
-  int numDofPerCell,
   class StencilDataType,
   class StateType,
   class MeshType,
@@ -15,22 +14,22 @@ template<
 class StencilFiller;
 
 //------------------------------
-// dim=1, 1 dofs/cell
+// dim=1
 //------------------------------
 template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
 class StencilFiller<
-  1, 1, StencilDataType, StateType, MeshType, GhostDataType
+  1, StencilDataType, StateType, MeshType, GhostDataType
   >
 {
 
 public:
   StencilFiller() = delete;
   StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals)
+			   const StateType & stateIn,
+			   const MeshType & meshIn,
+			   const GhostDataType & ghostLeft,
+			   const GhostDataType & ghostRight,
+			   StencilDataType & stencilVals)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_meshObj(meshIn),
@@ -44,7 +43,23 @@ public:
   }
 
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void operator()(const index_t smPt, int ghostRow, int numDofPerCell)
+  {
+    if (numDofPerCell == 1){
+      fillOneDofPerCell(smPt, ghostRow);
+    }
+
+    else if (numDofPerCell == 3){
+      fillThreeDofPerCell(smPt, ghostRow);
+    }
+
+    else{
+      throw std::runtime_error("functor_fill_stensil: invalid numDofPerCell");
+    }
+  }
+
+  template<class index_t>
+  void fillOneDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr int numDofPerCell = 1;
 
@@ -105,47 +120,8 @@ public:
     }
   }
 
-private:
-  const int m_stencilSize;
-  const StateType & m_state;
-  const MeshType & m_meshObj;
-  const GhostDataType & m_ghostLeft;
-  const GhostDataType & m_ghostRight;
-  StencilDataType & m_stencilVals;
-};
-
-
-//------------------------------
-// dim=1, 3 dofs/cell
-//------------------------------
-template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
-class StencilFiller<
-  1, 3, StencilDataType, StateType, MeshType, GhostDataType
-  >
-{
-
-public:
-  StencilFiller() = delete;
-  StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals)
-    : m_stencilSize(stencilSize),
-      m_state(stateIn),
-      m_meshObj(meshIn),
-      m_ghostLeft(ghostLeft),
-      m_ghostRight(ghostRight),
-      m_stencilVals(stencilVals)
-  {}
-
-  const StencilDataType & stencilValues() const{
-    return m_stencilVals;
-  }
-
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void fillThreeDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr int numDofPerCell = 3;
 
@@ -246,23 +222,23 @@ private:
 
 
 //------------------------------
-// dim=2, 1 dofs/cell
+// dim=2
 //------------------------------
 template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
 class StencilFiller<
-  2, 1, StencilDataType, StateType, MeshType, GhostDataType
+  2, StencilDataType, StateType, MeshType, GhostDataType
   >
 {
 
 public:
   StencilFiller() = delete;
   StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals,
-		const int axis)
+			   const StateType & stateIn,
+			   const MeshType & meshIn,
+			   const GhostDataType & ghostLeft,
+			   const GhostDataType & ghostRight,
+			   StencilDataType & stencilVals,
+			   const int axis)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_meshObj(meshIn),
@@ -273,7 +249,28 @@ public:
   {}
 
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void operator()(const index_t smPt, int ghostRow, int numDofPerCell)
+  {
+    if (numDofPerCell == 1){
+      fillOneDofPerCell(smPt, ghostRow);
+    }
+
+    else if (numDofPerCell == 3){
+      fillThreeDofPerCell(smPt, ghostRow);
+    }
+
+    else if (numDofPerCell == 4){
+      fillFourDofPerCell(smPt, ghostRow);
+    }
+
+    else{
+      throw std::runtime_error("functor_fill_stensil: invalid numDofPerCell");
+    }
+  }
+
+private:
+  template<class index_t>
+  void fillOneDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr auto numDofPerCell = 1;
     const auto & graph = m_meshObj.graph();
@@ -302,49 +299,12 @@ public:
 	  m_stencilVals(2)  = m_state(index);
 	}
 	break;
-      } // case 3
+      }
     }
   }
 
-private:
-  const int m_stencilSize;
-  const StateType & m_state;
-  const MeshType & m_meshObj;
-  const GhostDataType & m_ghostLeft;
-  const GhostDataType & m_ghostRight;
-  StencilDataType & m_stencilVals;
-  int m_axis;
-};
-
-//------------------------------
-// dim=2, 3 dofs/cell
-//------------------------------
-template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
-class StencilFiller<
-  2, 3, StencilDataType, StateType, MeshType, GhostDataType
-  >
-{
-
-public:
-  StencilFiller() = delete;
-  StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals,
-		const int axis)
-    : m_stencilSize(stencilSize),
-      m_state(stateIn),
-      m_meshObj(meshIn),
-      m_ghostLeft(ghostLeft),
-      m_ghostRight(ghostRight),
-      m_stencilVals(stencilVals),
-      m_axis(axis)
-  {}
-
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void fillThreeDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr auto numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
@@ -529,46 +489,8 @@ public:
     }
   }
 
-private:
-  const int m_stencilSize;
-  const StateType & m_state;
-  const MeshType & m_meshObj;
-  const GhostDataType & m_ghostLeft;
-  const GhostDataType & m_ghostRight;
-  StencilDataType & m_stencilVals;
-  int m_axis;
-};
-
-
-//------------------------------
-// dim=2, 4 dofs/cell
-//------------------------------
-template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
-class StencilFiller<
-  2, 4, StencilDataType, StateType, MeshType, GhostDataType
-  >
-{
-
-public:
-  StencilFiller() = delete;
-  StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals,
-		const int axis)
-    : m_stencilSize(stencilSize),
-      m_state(stateIn),
-      m_meshObj(meshIn),
-      m_ghostLeft(ghostLeft),
-      m_ghostRight(ghostRight),
-      m_stencilVals(stencilVals),
-      m_axis(axis)
-  {}
-
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void fillFourDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr auto numDofPerCell = 4;
     const auto & graph = m_meshObj.graph();
@@ -791,23 +713,23 @@ private:
 
 
 //------------------------------
-// dim=3, 5 dofs/cell
+// dim=3
 //------------------------------
 template<class StencilDataType, class StateType, class MeshType, class GhostDataType>
 class StencilFiller<
-  3, 5, StencilDataType, StateType, MeshType, GhostDataType
+  3, StencilDataType, StateType, MeshType, GhostDataType
   >
 {
 
 public:
   StencilFiller() = delete;
   StencilFiller(const int stencilSize,
-		const StateType & stateIn,
-		const MeshType & meshIn,
-		const GhostDataType & ghostLeft,
-		const GhostDataType & ghostRight,
-		StencilDataType & stencilVals,
-		const int axis)
+			   const StateType & stateIn,
+			   const MeshType & meshIn,
+			   const GhostDataType & ghostLeft,
+			   const GhostDataType & ghostRight,
+			   StencilDataType & stencilVals,
+			   const int axis)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_meshObj(meshIn),
@@ -818,7 +740,20 @@ public:
   {}
 
   template<class index_t>
-  void operator()(const index_t smPt, int ghostRow)
+  void operator()(const index_t smPt, int ghostRow, int numDofPerCell)
+  {
+    if (numDofPerCell == 5){
+      fillFiveDofPerCell(smPt, ghostRow);
+    }
+
+    else{
+      throw std::runtime_error("functor_fill_stensil: invalid numDofPerCell");
+    }
+  }
+
+private:
+  template<class index_t>
+  void fillFiveDofPerCell(const index_t smPt, int ghostRow)
   {
     constexpr auto numDofPerCell = 5;
     const auto & graph = m_meshObj.graph();

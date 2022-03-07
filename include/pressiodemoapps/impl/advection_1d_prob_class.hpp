@@ -3,10 +3,10 @@
 #define PRESSIODEMOAPPS_LINEAR_ADVECTION_1D_IMPL_HPP_
 
 #include "functor_fill_stencil.hpp"
-#include "functor_reconstruct_from_state_nontemplate.hpp"
+#include "functor_reconstruct_from_state.hpp"
 #include "advection_1d_mixins.hpp"
-#include "mixin_directional_flux_balance_nontemplate.hpp"
-#include "mixin_directional_flux_balance_jacobian_nontemplate.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #include <omp.h>
@@ -179,10 +179,10 @@ private:
     reconstruction_gradient_t gradRPos(m_numDofPerCell, stencilSize-1);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
-	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCellNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
 	  pda::impladvection1d::ComputeDirectionalFluxValuesAndJacobians<
-	    pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, MeshType, jacobian_type>,
@@ -230,9 +230,9 @@ private:
     flux_type fluxR(m_numDofPerCell);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
 	pda::impladvection1d::ComputeDirectionalFluxValues<
-	  pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, MeshType, U_t, edge_rec_type>,
 	  scalar_type, flux_type>,
       V_t, scalar_type

@@ -4,11 +4,11 @@
 
 #include "advection_diffusion_2d_flux_functions.hpp"
 #include "advection_diffusion_2d_initial_condition.hpp"
-#include "functor_fill_stencil_nontemplate.hpp"
-#include "functor_reconstruct_from_state_nontemplate.hpp"
+#include "functor_fill_stencil.hpp"
+#include "functor_reconstruct_from_state.hpp"
 #include "advection_diffusion_2d_flux_mixin.hpp"
-#include "mixin_directional_flux_balance_nontemplate.hpp"
-#include "mixin_directional_flux_balance_jacobian_nontemplate.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -312,10 +312,10 @@ private:
     reconstruction_gradient_t gradBPos(m_numDofPerCell, stencilSize-1);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
-	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCellNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
 	  pda::impladvdiff2d::ComputeDirectionalFluxValuesAndJacobians<
-	    pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, MeshType, jacobian_type>,
@@ -381,9 +381,9 @@ private:
     constexpr int yAxis = 2;
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
 	pda::impladvdiff2d::ComputeDirectionalFluxValues<
-	  pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, MeshType, U_t, edge_rec_type>,
 	  scalar_type, flux_type>,
       V_t, scalar_type

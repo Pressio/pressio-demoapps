@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_DIFF_REACTION_2D_IMPL_HPP_
 #define PRESSIODEMOAPPS_DIFF_REACTION_2D_IMPL_HPP_
 
-#include "functor_fill_stencil_nontemplate.hpp"
+#include "functor_fill_stencil.hpp"
 #include "diffusion_reaction_2d_ghost_filler.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -261,7 +261,7 @@ private:
     stencil_container_type stencilVals(stencilSize);
 
     // stencil filler needed because we are doing cells near boundaries
-    using sfiller_t  = ::pressiodemoapps::impl::StencilFillerNonTemplate<
+    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, stencil_container_type, U_t,  MeshType, ghost_container_type>;
 
     sfiller_t StencilFillerX(stencilSize, U, m_meshObj,

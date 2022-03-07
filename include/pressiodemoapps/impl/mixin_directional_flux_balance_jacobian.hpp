@@ -1,6 +1,6 @@
 
-#ifndef PRESSIODEMOAPPS_DIRECTIONAL_FLUX_BALANCE_JACOBIAN_HPP_
-#define PRESSIODEMOAPPS_DIRECTIONAL_FLUX_BALANCE_JACOBIAN_HPP_
+#ifndef PRESSIODEMOAPPS_DIRECTIONAL_FLUX_BALANCE_JACOBIAN_NTE_HPP_
+#define PRESSIODEMOAPPS_DIRECTIONAL_FLUX_BALANCE_JACOBIAN_NTE_HPP_
 
 namespace pressiodemoapps{ namespace impl{
 
@@ -72,7 +72,7 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
 }
 } // end anonymous namespace
 
-template<class Parent, int dim, int ndpc, class MeshType, class JacobianType>
+template<class Parent, int dim, class MeshType, class JacobianType>
 struct ComputeDirectionalFluxBalanceJacobianOnInteriorCell : Parent
 {
 private:
@@ -84,9 +84,9 @@ private:
 public:
   template<class ...Args>
   ComputeDirectionalFluxBalanceJacobianOnInteriorCell(JacobianType & J,
-						      int axis,
-						      const MeshType & meshObj,
-						      Args && ...args)
+								 int axis,
+								 const MeshType & meshObj,
+								 Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_axis(axis), m_meshObj(meshObj), m_J(J)
   {
@@ -95,9 +95,9 @@ public:
   }
 
   template<class index_t>
-  void operator()(const index_t smPt)
+  void operator()(const index_t smPt, int ndpc)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, ndpc);
 
     const auto & graph = m_meshObj.graph();
     const index_t rowIndex  = smPt*ndpc;
@@ -239,164 +239,7 @@ public:
   }// end operator()
 };
 
-
 template<class Parent, int dim, class MeshType, class JacobianType>
-struct ComputeDirectionalFluxBalanceJacobianOnInteriorCell<Parent, dim, 1, MeshType, JacobianType> : Parent
-{
-private:
-  int m_axis = {};
-  typename MeshType::scalar_t m_hInv = {};
-  const MeshType & m_meshObj;
-  JacobianType & m_J;
-
-public:
-  template<class ...Args>
-  ComputeDirectionalFluxBalanceJacobianOnInteriorCell(JacobianType & J,
-						      int axis,
-						      const MeshType & meshObj,
-						      Args && ...args)
-    : Parent(std::forward<Args>(args)...),
-      m_axis(axis), m_meshObj(meshObj), m_J(J)
-  {
-    m_hInv = (axis == 1) ? meshObj.dxInv()
-      : (axis==2) ? meshObj.dyInv() : meshObj.dzInv();
-  }
-
-  template<class index_t>
-  void operator()(const index_t smPt)
-  {
-    Parent::operator()(smPt);
-
-    const auto & graph = m_meshObj.graph();
-    const index_t rowIndex  = smPt;
-
-    const auto & JLNeg = Parent::fluxJacLNeg();
-    const auto & JLPos = Parent::fluxJacLPos();
-    const auto & JRNeg = Parent::fluxJacRNeg();
-    const auto & JRPos = Parent::fluxJacRPos();
-
-    if (Parent::reconstructionScheme() == ReconstructionScheme::FirstOrder)
-      {
-	index_t l0 = {};
-	index_t r0 = {};
-	_get_left_right_cells_indices<dim>(l0, r0, smPt, graph, m_axis);
-	index_t rowIndex  = smPt;
-	index_t col_im1   = l0;
-	index_t col_i     = graph(smPt, 0);
-	index_t col_ip1   = r0;
-
-	m_J.coeffRef(rowIndex, col_im1) +=  JLNeg*m_hInv;
-	m_J.coeffRef(rowIndex, col_i)   += (JLPos-JRNeg)*m_hInv;
-	m_J.coeffRef(rowIndex, col_ip1) += -JRPos*m_hInv;
-      }
-
-    else if (Parent::reconstructionScheme() == ReconstructionScheme::Weno3)
-    {
-      const auto & JLNeg = Parent::fluxJacLNeg();
-      const auto & JLPos = Parent::fluxJacLPos();
-      const auto & JRNeg = Parent::fluxJacRNeg();
-      const auto & JRPos = Parent::fluxJacRPos();
-      const auto & gradLNeg = Parent::reconstructionGradLeftNeg();
-      const auto & gradLPos = Parent::reconstructionGradLeftPos();
-      const auto & gradRNeg = Parent::reconstructionGradRightNeg();
-      const auto & gradRPos = Parent::reconstructionGradRightPos();
-
-      index_t l0 = {};
-      index_t r0 = {};
-      index_t l1 = {};
-      index_t r1 = {};
-      _get_left_right_cells_indices<dim>(l0, r0, l1, r1,
-					 smPt, graph, m_axis);
-
-      index_t col_im2   = l1;
-      index_t col_im1   = l0;
-      index_t col_i     = graph(smPt, 0);
-      index_t col_ip1   = r0;
-      index_t col_ip2   = r1;
-
-      // sensitivy of flux at i-1/2
-      m_J.coeffRef(rowIndex, col_im2) += JLNeg*gradLNeg(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im2) += JLPos*gradLPos(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) += JLNeg*gradLNeg(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) += JLPos*gradLPos(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   += JLNeg*gradLNeg(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   += JLPos*gradLPos(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) += JLNeg*gradLNeg(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) += JLPos*gradLPos(3)*m_hInv;
-
-      // sensitivy of flux at i+1/2
-      m_J.coeffRef(rowIndex, col_im1) -= JRNeg*gradRNeg(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) -= JRPos*gradRPos(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   -= JRNeg*gradRNeg(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   -= JRPos*gradRPos(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) -= JRNeg*gradRNeg(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) -= JRPos*gradRPos(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) -= JRNeg*gradRNeg(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) -= JRPos*gradRPos(3)*m_hInv;
-    }
-
-    else if (Parent::reconstructionScheme() == ReconstructionScheme::Weno5)
-    {
-      const auto & JLNeg = Parent::fluxJacLNeg();
-      const auto & JLPos = Parent::fluxJacLPos();
-      const auto & JRNeg = Parent::fluxJacRNeg();
-      const auto & JRPos = Parent::fluxJacRPos();
-      const auto & gradLNeg = Parent::reconstructionGradLeftNeg();
-      const auto & gradLPos = Parent::reconstructionGradLeftPos();
-      const auto & gradRNeg = Parent::reconstructionGradRightNeg();
-      const auto & gradRPos = Parent::reconstructionGradRightPos();
-
-      index_t l0 = {};
-      index_t r0 = {};
-      index_t l1 = {};
-      index_t r1 = {};
-      index_t l2 = {};
-      index_t r2 = {};
-      _get_left_right_cells_indices<dim>(l0, r0, l1, r1, l2, r2,
-					 smPt, graph, m_axis);
-
-      index_t col_im3   = l2;
-      index_t col_im2   = l1;
-      index_t col_im1   = l0;
-      index_t col_i     = graph(smPt, 0);
-      index_t col_ip1   = r0;
-      index_t col_ip2   = r1;
-      index_t col_ip3   = r2;
-
-      // sensitivy of flux at i-1/2
-      m_J.coeffRef(rowIndex, col_im3) += JLNeg*gradLNeg(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im3) += JLPos*gradLPos(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im2) += JLNeg*gradLNeg(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im2) += JLPos*gradLPos(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) += JLNeg*gradLNeg(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) += JLPos*gradLPos(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   += JLNeg*gradLNeg(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   += JLPos*gradLPos(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) += JLNeg*gradLNeg(4)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) += JLPos*gradLPos(4)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) += JLNeg*gradLNeg(5)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) += JLPos*gradLPos(5)*m_hInv;
-
-      // sensitivy of flux at i+1/2
-      m_J.coeffRef(rowIndex, col_im2) -= JRNeg*gradRNeg(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im2) -= JRPos*gradRPos(0)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) -= JRNeg*gradRNeg(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_im1) -= JRPos*gradRPos(1)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   -= JRNeg*gradRNeg(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_i)   -= JRPos*gradRPos(2)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) -= JRNeg*gradRNeg(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip1) -= JRPos*gradRPos(3)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) -= JRNeg*gradRNeg(4)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip2) -= JRPos*gradRPos(4)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip3) -= JRNeg*gradRNeg(5)*m_hInv;
-      m_J.coeffRef(rowIndex, col_ip3) -= JRPos*gradRPos(5)*m_hInv;
-    }
-
-  }// end operator()
-};
-
-
-template<class Parent, int dim, int ndpc, class MeshType, class JacobianType>
 struct ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell : Parent
 {
 private:
@@ -410,9 +253,9 @@ private:
 public:
   template<class ...Args>
   ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell(JacobianType & J,
-								int axis,
-								const MeshType & meshObj,
-								Args && ...args)
+									   int axis,
+									   const MeshType & meshObj,
+									   Args && ...args)
     : Parent(std::forward<Args>(args)...),
       m_axis(axis), m_meshObj(meshObj), m_J(J)
   {
@@ -420,12 +263,13 @@ public:
       : (axis==2) ? meshObj.dyInv() : meshObj.dzInv();
   }
 
-  template<class index_t>
+  template<class index_t, class FactorsType>
   void operator()(const index_t smPt,
-		  const std::array<scalar_type, ndpc> & factors,
+		  int ndpc,
+		  const FactorsType & factors,
 		  int bc_type)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, ndpc);
 
     const auto & JLNeg = Parent::fluxJacLNeg();
     const auto & JLPos = Parent::fluxJacLPos();
@@ -488,8 +332,3 @@ public:
 
 }}
 #endif
-
-
-// // ---------------------------------
-// // partial specialize for 1 dof/cell
-// // ---------------------------------

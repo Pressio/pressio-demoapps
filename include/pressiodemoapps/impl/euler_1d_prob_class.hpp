@@ -7,12 +7,12 @@
 #include "euler_rankine_hugoniot.hpp"
 #include "euler_1d_initial_condition.hpp"
 #include "euler_1d_ghost_filler.hpp"
-#include "functor_fill_stencil_nontemplate.hpp"
-#include "functor_reconstruct_from_stencil_nontemplate.hpp"
-#include "functor_reconstruct_from_state_nontemplate.hpp"
+#include "functor_fill_stencil.hpp"
+#include "functor_reconstruct_from_stencil.hpp"
+#include "functor_reconstruct_from_state.hpp"
 #include "euler_flux_mixin.hpp"
-#include "mixin_directional_flux_balance_nontemplate.hpp"
-#include "mixin_directional_flux_balance_jacobian_nontemplate.hpp"
+#include "mixin_directional_flux_balance.hpp"
+#include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -294,9 +294,9 @@ private:
     namespace pda = ::pressiodemoapps;
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
-	  pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	  pda::impl::ReconstructorForDiscreteFunction<
 	    dimensionality, MeshType, U_t, edge_rec_type>,
 	  3, scalar_type, flux_type>,
       V_t, scalar_type
@@ -414,10 +414,10 @@ private:
     reconstruction_gradient_t gradRPos(m_numDofPerCell, stencilSize-1);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
-	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCellNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
 	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
-	    pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
+	    pda::impl::ReconstructorForDiscreteFunction<
 	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    3, scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, MeshType, jacobian_type>,
@@ -463,7 +463,7 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     stencil_container_type stencilVals(m_numDofPerCell*stencilSize);
 
-    using stencil_filler_t  = pda::impl::StencilFillerNonTemplate<
+    using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilF(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
@@ -471,9 +471,9 @@ private:
 				  stencilVals);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
-	  pda::impl::ReconstructorFromStencilNonTemplate<
+	  pda::impl::ReconstructorFromStencil<
 	    edge_rec_type, stencil_container_type>,
 	  3, scalar_type, flux_type>,
       V_t, scalar_type
@@ -522,7 +522,7 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     stencil_container_type stencilVals(m_numDofPerCell*stencilSize);
 
-    using stencil_filler_t  = pda::impl::StencilFillerNonTemplate<
+    using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilF(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
@@ -530,10 +530,10 @@ private:
 				  stencilVals);
 
     using functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
-	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCellNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
 	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
-	    pda::impl::ReconstructorFromStencilNonTemplate<
+	    pda::impl::ReconstructorFromStencil<
 	      edge_rec_type, stencil_container_type>,
 	    3, scalar_type, flux_type, flux_jac_type>,
 	  dimensionality, MeshType, jacobian_type>,
@@ -587,7 +587,7 @@ private:
     // if here, then the velocity must be computed with Weno,
     /// while the jacobian must be computed with first order
 
-    using stencil_filler_t  = pda::impl::StencilFillerNonTemplate<
+    using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
 
@@ -603,9 +603,9 @@ private:
 				     stencilValsV);
 
     using velo_functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
-	  pda::impl::ReconstructorFromStencilNonTemplate<
+	  pda::impl::ReconstructorFromStencil<
 	    edge_rec_type, stencil_container_type>,
 	  3, scalar_type, flux_type>,
       V_t, scalar_type
@@ -631,9 +631,9 @@ private:
 				    stencilValsForJ);
 
     using jac_functor_type =
-      pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCellNonTemplate<
+      pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
 	pda::ee::impl::ComputeDirectionalFluxJacobians<
-	  pda::impl::ReconstructorFromStencilNonTemplate<
+	  pda::impl::ReconstructorFromStencil<
 	    edge_rec_type, stencil_container_type>,
 	  3, scalar_type, flux_jac_type>,
       dimensionality, MeshType, jacobian_type
