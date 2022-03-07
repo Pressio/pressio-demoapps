@@ -259,29 +259,11 @@ private:
 			 m_ghostRight, m_ghostBack);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
-      if (stencilSize==3){
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-	for (int it=0; it<rowsBd.size(); ++it){
-	  ghF.template operator()<3>(rowsBd[it], it);
-	}
-      }
-      else if(stencilSize==5){
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
-#pragma omp for schedule(static)
-#endif
-	for (int it=0; it<rowsBd.size(); ++it){
-	  ghF.template operator()<5>(rowsBd[it], it);
-	}
-      }
-      else{
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
-#pragma omp for schedule(static)
-#endif
-	for (int it=0; it<rowsBd.size(); ++it){
-	  ghF.template operator()<7>(rowsBd[it], it);
-	}
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
       }
     }
 
