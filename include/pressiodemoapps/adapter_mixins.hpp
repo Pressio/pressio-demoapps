@@ -234,8 +234,8 @@ public:
   // It has multiple overloads so it will
   // call the right overload based on the numpy array passed.
   void applyJacobianRank1(const Eigen::Ref<const state_type> & state,
-			  const scalar_type currentTime,
 			  const eigen_ref_const_vec_t & operand,
+			  const scalar_type currentTime,
 			  eigen_ref_vec_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
@@ -244,8 +244,8 @@ public:
   }
 
   void applyJacobianRank2_ll(const Eigen::Ref<const state_type> & state,
-			     const scalar_type currentTime,
 			     const eigen_ref_const_mat_ll_t & operand,
+			     const scalar_type currentTime,
 			     eigen_ref_mat_ll_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
@@ -254,8 +254,8 @@ public:
   }
 
   void applyJacobianRank2_lr(const Eigen::Ref<const state_type> & state,
-			     const scalar_type currentTime,
 			     const eigen_ref_const_mat_lr_t & operand,
+			     const scalar_type currentTime,
 			     eigen_ref_mat_lr_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
