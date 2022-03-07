@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_SWE2D_INVISCID_WALL_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_SWE2D_INVISCID_WALL_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{
+namespace implswe2d{
 
 template<class state_t, class mesh_t, class ghost_t>
 class InviscidWallFiller

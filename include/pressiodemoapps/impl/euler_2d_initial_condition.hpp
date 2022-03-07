@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EULER2D_IC_HPP_
 #define PRESSIODEMOAPPS_EULER2D_IC_HPP_
 
-namespace pressiodemoapps{ namespace ee{
+namespace pressiodemoapps{
+namespace impleuler2d{
 
 template<class state_type, class mesh_t, class scalar_type>
 void sin2dEulerIC(state_type & state,

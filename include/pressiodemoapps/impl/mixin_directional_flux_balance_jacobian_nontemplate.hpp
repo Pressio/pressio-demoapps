@@ -6,7 +6,7 @@ namespace pressiodemoapps{ namespace impl{
 
 namespace{
 template<int dim, class IndexT, class GraphType>
-void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
+void _get_left_right_cells_indices_nontemplate(IndexT & l0, IndexT & r0,
 				   const IndexT & smPt,
 				   const GraphType & graph,
 				   int axis)
@@ -26,13 +26,13 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
 }
 
 template<int dim, class IndexT, class GraphType>
-void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
+void _get_left_right_cells_indices_nontemplate(IndexT & l0, IndexT & r0,
 				   IndexT & l1, IndexT & r1,
 				   const IndexT & smPt,
 				   const GraphType & graph,
 				   int axis)
 {
-  _get_left_right_cells_indices<dim>(l0, r0, smPt, graph, axis);
+  _get_left_right_cells_indices_nontemplate<dim>(l0, r0, smPt, graph, axis);
 
   if (dim == 1){
     l1 = graph(smPt, 3);
@@ -49,14 +49,14 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
 }
 
 template<int dim, class IndexT, class GraphType>
-void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
+void _get_left_right_cells_indices_nontemplate(IndexT & l0, IndexT & r0,
 				   IndexT & l1, IndexT & r1,
 				   IndexT & l2, IndexT & r2,
 				   const IndexT & smPt,
 				   const GraphType & graph,
 				   int axis)
 {
-  _get_left_right_cells_indices<dim>(l0, r0, l1, r1, smPt, graph, axis);
+  _get_left_right_cells_indices_nontemplate<dim>(l0, r0, l1, r1, smPt, graph, axis);
 
   if (dim == 1){
     l2 = graph(smPt, 5);
@@ -111,7 +111,7 @@ public:
       {
 	index_t l0 = {};
 	index_t r0 = {};
-	_get_left_right_cells_indices<dim>(l0, r0, smPt, graph, m_axis);
+	_get_left_right_cells_indices_nontemplate<dim>(l0, r0, smPt, graph, m_axis);
 	index_t rowIndex  = smPt*ndpc;
 	index_t col_im1   = l0*ndpc;
 	index_t col_i     = graph(smPt, 0)*ndpc;
@@ -140,7 +140,7 @@ public:
       index_t r0 = {};
       index_t l1 = {};
       index_t r1 = {};
-      _get_left_right_cells_indices<dim>(l0, r0, l1, r1,
+      _get_left_right_cells_indices_nontemplate<dim>(l0, r0, l1, r1,
 					 smPt, graph, m_axis);
 
       index_t col_im2   = l1*ndpc;
@@ -192,7 +192,7 @@ public:
       index_t r1 = {};
       index_t l2 = {};
       index_t r2 = {};
-      _get_left_right_cells_indices<dim>(l0, r0, l1, r1, l2, r2,
+      _get_left_right_cells_indices_nontemplate<dim>(l0, r0, l1, r1, l2, r2,
 					 smPt, graph, m_axis);
 
       index_t col_im3   = l2*ndpc;
@@ -279,7 +279,7 @@ public:
     const auto & graph = m_meshObj.graph();
     index_t l0 = {};
     index_t r0 = {};
-    _get_left_right_cells_indices<dim>(l0, r0, smPt, graph, m_axis);
+    _get_left_right_cells_indices_nontemplate<dim>(l0, r0, smPt, graph, m_axis);
 
     auto rowIndex  = smPt*ndpc;
     auto col_i     = graph(smPt, 0)*ndpc;

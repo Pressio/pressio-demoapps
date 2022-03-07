@@ -5,17 +5,14 @@
 #include "functor_fill_stencil_nontemplate.hpp"
 #include "diffusion_reaction_1d_ghost_filler.hpp"
 
-namespace pressiodemoapps{ namespace impldiffreac1d{
+namespace pressiodemoapps{
+namespace impldiffusionreaction1d{
 
 // tags are used inside he public create function: create_problem_...()
 // to dispatch to the proper problem
 // so add new ones if a new problem is added
 struct TagProblemA{};
 
-
-/////////////////////////
-// eigen class
-/////////////////////////
 template<class MeshType>
 class EigenApp
 {
@@ -38,12 +35,12 @@ private:
 
 public:
   template<class SourceT>
-  EigenApp(const MeshType & meshObj,
+  EigenApp(TagProblemA /*tag*/,
+	   const MeshType & meshObj,
 	   ::pressiodemoapps::ViscousFluxReconstruction recEnum,
 	   SourceT sourceFunctor,
 	   scalar_type diffusionCoeff,
-	   scalar_type reactionCoeff,
-	   TagProblemA /*tag*/)
+	   scalar_type reactionCoeff)
     : m_numDofPerCell(1),
       m_probEn(::pressiodemoapps::DiffusionReaction1d::ProblemA),
       m_viscousFluxRecEn(recEnum),

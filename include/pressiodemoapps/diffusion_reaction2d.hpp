@@ -2,10 +2,6 @@
 #ifndef PRESSIODEMOAPPS_DIFFUSION_REACTION_HPP_
 #define PRESSIODEMOAPPS_DIFFUSION_REACTION_HPP_
 
-/*
-  diffusion-reaction enumerations and public APIs
-*/
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
@@ -14,7 +10,12 @@
 
 namespace pressiodemoapps{
 
-enum class DiffusionReaction2d{
+// ----------------------------------------------------------
+// enums identifying the problems
+// ----------------------------------------------------------
+enum class DiffusionReaction2d
+{
+  ProblemA,
   /*
     ds/dt = D (d^2s/d^2x + d^2s/d^2y) + k*s^2 + u(x, y, t)
 
@@ -32,48 +33,165 @@ enum class DiffusionReaction2d{
     u(x, y, t) = std::sin(M_PI*x*(y-0.2)) * 4.*std::sin(4.*M_PI*y*x);
 
    */
-  ProblemA,
 
+  GrayScott
   /*
     two species:
-    du/dt = Laplacian(u) + F(1-u) - u*v^2
-    dv/dt = Laplacian(v) + (F+k)v + u*v^2
+    da/dt = Da Laplacian(a) + F(1-a) - a*b^2
+    db/dt = Db Laplacian(v) + (F+k)b + a*b^2
 
-    where F is feeding rate, k is kill rate
+    F = feeding rate, k = kill rate
+    Da, Db = diffusion coeffs
     periodic BC
-
    */
-  GrayScott
 };
 
+// ----------------------------------------------------------
+// default source terms
+// ----------------------------------------------------------
+namespace impldiffusionreaction2d{
+template<class scalar_type>
+struct DefaultSourceProblemA
+{
+  void operator()(const scalar_type & x,
+		  const scalar_type & y,
+		  const scalar_type & evaltime,
+		  scalar_type & value)
+  {
+    (void) evaltime;
+    value = std::sin(M_PI*x*(y-0.2)) * 4.*std::sin(4.*M_PI*y*x);
+  }
+};
+}//end namespace impldiffusionreaction1d
 }//end namespace pressiodemoapps
+
 
 // this include is here because needs visiblity of the enums above
 #include "./impl/diffusion_reaction_2d_prob_class.hpp"
 
+
 namespace pressiodemoapps{
 
-#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class ...Args>
-auto create_problem_eigen(const mesh_t & meshObj,
-			::pressiodemoapps::DiffusionReaction2d probEnum,
-			::pressiodemoapps::ViscousFluxReconstruction recEnum,
-			Args && ... args)
+// ----------------------------------------------------------
+// create default problem
+// ----------------------------------------------------------
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  >
+RetType
+// bindings need unique naming or we get error associated with overloads
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+create_diffreac2d_problem_ov1
+#else
+create_problem_eigen
+#endif
+(const mesh_t & meshObj,
+ DiffusionReaction2d problemEnum,
+ ViscousFluxReconstruction viscRecEn)
 {
-  impldiffreac::check_stencil_admissibility(meshObj, recEnum);
-  using RetType = PublicProblemMixinCpp<impldiffreac::EigenDiffReac2dApp<mesh_t>>;
-  return RetType(meshObj, probEnum, recEnum, std::forward<Args>(args)...);
+
+  using scalar_t = typename mesh_t::scalar_t;
+  if (problemEnum == DiffusionReaction2d::ProblemA)
+  {
+    return RetType(impldiffusionreaction2d::TagProblemA{},
+		   meshObj,
+		   viscRecEn,
+		   impldiffusionreaction2d::DefaultSourceProblemA<scalar_t>(),
+		   0.01, 0.01);
+  }
+
+  else if (problemEnum == DiffusionReaction2d::GrayScott)
+  {
+    return RetType(impldiffusionreaction2d::TagProblemGrayScott{},
+		   meshObj,
+		   viscRecEn,
+		   0.0002, 0.00005, 0.042, 0.062);
+  }
+
+  else{
+    throw std::runtime_error("2D diffusion-reaction: invalid problem enum");
+  }
 }
 
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  >
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+RetType create_diffreac2d_problem_ov2(const mesh_t & meshObj,
+				      DiffusionReaction2d problemEnum)
+{
+  return create_diffreac2d_problem_ov1(meshObj, problemEnum,
+				       ViscousFluxReconstruction::FirstOrder);
+}
+#else
+RetType create_problem_eigen(const mesh_t & meshObj,
+			     DiffusionReaction2d problemEnum)
+{
+  return create_problem_eigen(meshObj, problemEnum, ViscousFluxReconstruction::FirstOrder);
+}
 #endif
+
+
+// ----------------------------------------------------------
+// create problem A with custom diffusion/reaction coeffs
+// ----------------------------------------------------------
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  >
+RetType
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+create_diffreac2d_problem_A_eigen_ov1
+#else
+create_diffusion_reaction_2d_problem_A_eigen
+#endif
+(const mesh_t & meshObj,
+ ViscousFluxReconstruction viscFluxRecEnum,
+ typename mesh_t::scalar_t diffusion,
+ typename mesh_t::scalar_t reaction)
+{
+  using scalar_t = typename mesh_t::scalar_t;
+  return RetType(impldiffusionreaction2d::TagProblemA{},
+		 meshObj,
+		 viscFluxRecEnum,
+		 impldiffusionreaction2d::DefaultSourceProblemA<scalar_t>(),
+		 diffusion, reaction);
+}
+
+// ----------------------------------------------------------
+// create gray-scott with custom diffusion/reaction coeffs
+// ----------------------------------------------------------
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  >
+RetType
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+create_diffreac2d_problem_grayscott_eigen_ov1
+#else
+create_gray_scott_2d_problem_eigen
+#endif
+(const mesh_t & meshObj,
+ ViscousFluxReconstruction viscFluxRecEnum,
+ typename mesh_t::scalar_t diffusion_u,
+ typename mesh_t::scalar_t diffusion_v,
+ typename mesh_t::scalar_t feedRate,
+ typename mesh_t::scalar_t killRate)
+{
+  using scalar_t = typename mesh_t::scalar_t;
+  return RetType(impldiffusionreaction2d::TagProblemGrayScott{},
+		 meshObj,
+		 viscFluxRecEnum,
+		 impldiffusionreaction2d::DefaultSourceProblemA<scalar_t>(),
+		 diffusion_u, diffusion_v, feedRate, killRate);
+}
 
 } //end namespace pressiodemoapps
 #endif
 
 
-
-
-// namespace impldiffreac{
 // template<class mesh_t>
 // void check_stencil_admissibility(const mesh_t & meshObj,
 // 			       ::pressiodemoapps::ViscousFluxReconstruction recEnum)
@@ -86,22 +204,6 @@ auto create_problem_eigen(const mesh_t & meshObj,
 //   }
 // }
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-// template<class mesh_t, class T, class ProbType>
-// T create_problem_for_pyA(const mesh_t & meshObj,
-// 			 ProbType probEnum,
-// 			 ::pressiodemoapps::ViscousFluxReconstruction recEnum)
-// {
-//   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
-//   return T(meshObj, probEnum, recEnum);
-// }
-
-// template<class mesh_t, class T, class ProbType>
-// T create_problem_for_pyB(const mesh_t & meshObj,
-// 			 ProbType probEnum,
-// 			 ::pressiodemoapps::ViscousFluxReconstruction recEnum,
-// 			 typename mesh_t::scalar_t diffusionCoeff,
-// 			 typename mesh_t::scalar_t reactionCoeff)
 // {
 //   impldiffreac::check_stencil_admissibility(meshObj, recEnum);
 //   return T(meshObj, probEnum, recEnum, diffusionCoeff, reactionCoeff);

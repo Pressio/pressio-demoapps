@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_ADVECTION1d_FLUX_FUNCTOR_HPP_
 #define PRESSIODEMOAPPS_ADVECTION1d_FLUX_FUNCTOR_HPP_
 
-namespace pressiodemoapps{ namespace impladv1d{
+namespace pressiodemoapps{ namespace impladvection1d{
 
 template<class Parent, class scalar_type, class flux_type>
 struct ComputeDirectionalFluxValues : Parent

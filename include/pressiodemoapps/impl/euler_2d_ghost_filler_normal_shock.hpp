@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_EE2D_NORMAL_SHOCK_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_EE2D_NORMAL_SHOCK_HPP_
 
-namespace pressiodemoapps{ namespace impl{
+namespace pressiodemoapps{ namespace impleuler2d{
 
 template<class state_t, class mesh_t, class ghost_t>
 class NormalShock2dGhostFiller

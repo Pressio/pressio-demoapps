@@ -167,26 +167,24 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // -----------------------
   // advection 1d
   // -----------------------
-  using ad1d_t = decltype
-    (
-     pda::impladv::create_problem_for_py
-     (
-      std::declval<const ccumesh_t &>(),
-      std::declval<pda::Advection1d>(),
-      std::declval<pda::InviscidFluxReconstruction>()
-      )
-     );
+  using advection1d_py_problem_type = pressiodemoapps::PublicProblemMixinPy<
+    pressiodemoapps::impladv1d::EigenApp<ccumesh_t>
+    >;
 
-  pybind11::class_<ad1d_t> adv1dProb(mTopLevel, "Advection1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<ad1d_t>(adv1dProb);
+  pybind11::class_<advection1d_py_problem_type> adv1dProb(mTopLevel, "Advection1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<advection1d_py_problem_type>(adv1dProb);
 
   mTopLevel.def("create_problem",
-		&pda::impladv::create_problem_for_py<ccumesh_t>,
+		&pda::create_linear_advection1d_problem_eigen<ccumesh_t, advection1d_py_problem_type>,
 		pybind11::return_value_policy::take_ownership);
 
   mTopLevel.def("create_problem",
-		&pda::impladv::create_problem_for_py_B<ccumesh_t>,
+		&pda::create_linadv1d_problem_ov1<ccumesh_t, advection1d_py_problem_type>,
 		pybind11::return_value_policy::take_ownership);
+
+  // mTopLevel.def("create_problem",
+  // 		&pda::impladv::create_problem_for_py_B<ccumesh_t>,
+  // 		pybind11::return_value_policy::take_ownership);
 
   // // -----------------------
   // // advection-diffusion 2d
@@ -289,28 +287,28 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   // 		&pda::implee2d::create_problem_for_pyB<ccumesh_t, euler_2d_t>,
   // 		pybind11::return_value_policy::take_ownership);
 
-  // // -----------------------
-  // // Swe 2d
-  // // -----------------------
-  // using swe_impl_2d_t = pda::implswe::EigenSwe2dApp<ccumesh_t>;
+  // -----------------------
+  // Swe 2d
+  // -----------------------
+  using swe_impl_2d_t = pda::implswe::EigenSwe2dApp<ccumesh_t>;
 
-  // using swe_2d_t = pressiodemoapps::PublicProblemMixinPy<swe_impl_2d_t>;
-  // pybind11::class_<swe_2d_t> swe2dProb(mTopLevel, "Swe2dProblem");
-  // pressiodemoappspy::impl::bindCommonApiMethods<swe_2d_t>(swe2dProb);
-  // swe2dProb.def("coriolis", &swe_2d_t::coriolis);
-  // swe2dProb.def("gravity", &swe_2d_t::gravity);
+  using swe_2d_t = pressiodemoapps::PublicProblemMixinPy<swe_impl_2d_t>;
+  pybind11::class_<swe_2d_t> swe2dProb(mTopLevel, "Swe2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<swe_2d_t>(swe2dProb);
+  swe2dProb.def("coriolis", &swe_2d_t::coriolis);
+  swe2dProb.def("gravity", &swe_2d_t::gravity);
 
-  // mTopLevel.def("create_problem",
-  // 		&pda::implswe2d::create_problem_for_pyA<ccumesh_t, swe_2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
+  mTopLevel.def("create_problem",
+		&pda::implswe2d::create_problem_for_pyA<ccumesh_t, swe_2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
-  // mTopLevel.def("create_problem",
-  // 		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
+  mTopLevel.def("create_problem",
+		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
-  // mTopLevel.def("create_problem",
-  // 		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
-  // 		pybind11::return_value_policy::take_ownership);
+  mTopLevel.def("create_problem",
+		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
+		pybind11::return_value_policy::take_ownership);
 
   // // -----------------------
   // // Euler 3d

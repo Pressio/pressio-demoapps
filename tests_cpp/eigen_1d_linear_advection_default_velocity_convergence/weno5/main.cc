@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   }
 
   auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
-  FomObserver<state_t> Obs("eigen_1d_linear_adv_convergence_weno5_solution.bin", 10);
+  FomObserver<state_t> Obs("eigen_1d_linear_adv_default_velo_convergence_weno5_solution.bin", 10);
 
   const auto dt = 0.001;
   const auto Nsteps = 2./dt;

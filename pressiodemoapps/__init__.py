@@ -22,9 +22,10 @@ try:
   from ._pressiodemoappsimpl import \
     InviscidFluxReconstruction, InviscidFluxScheme, \
     ViscousFluxReconstruction, ViscousFluxScheme, \
-    Advection1d, AdvectionDiffusion2d, \
-    DiffusionReaction1d, Euler1d, \
-    DiffusionReaction2d, Euler2d, Swe2d, Euler3d
+    Advection1d, Swe2d
+    #, AdvectionDiffusion2d, \
+    #    DiffusionReaction1d, Euler1d, \
+    #DiffusionReaction2d, Euler2d, Euler3d
 except ImportError:
   raise ImportError("Unable to import enums from _pressiodemoappsimpl")
 
@@ -34,23 +35,23 @@ try:
 except ImportError:
   raise ImportError("Unable to import Advection classes from _pressiodemoappsimpl")
 
-# import advection-diffusion problems
-try:
-  from ._pressiodemoappsimpl import AdvectionDiffusion2dProblem
-except ImportError:
-  raise ImportError("Unable to import AdvectionDiffusion classes from _pressiodemoappsimpl")
+# # import advection-diffusion problems
+# try:
+#   from ._pressiodemoappsimpl import AdvectionDiffusion2dProblem
+# except ImportError:
+#   raise ImportError("Unable to import AdvectionDiffusion classes from _pressiodemoappsimpl")
 
-# import diffusion-reaction problems
-try:
-  from ._pressiodemoappsimpl import DiffusionReaction1dProblem, DiffusionReaction2dProblem
-except ImportError:
-  raise ImportError("Unable to import DiffusionReaction classes from _pressiodemoappsimpl")
+# # import diffusion-reaction problems
+# try:
+#   from ._pressiodemoappsimpl import DiffusionReaction1dProblem, DiffusionReaction2dProblem
+# except ImportError:
+#   raise ImportError("Unable to import DiffusionReaction classes from _pressiodemoappsimpl")
 
-# import euler problems
-try:
-  from ._pressiodemoappsimpl import Euler1dProblem, Euler2dProblem, Euler3dProblem
-except ImportError:
-  raise ImportError("Unable to import Euler classes from _pressiodemoappsimpl")
+# # import euler problems
+# try:
+#   from ._pressiodemoappsimpl import Euler1dProblem, Euler2dProblem, Euler3dProblem
+# except ImportError:
+#   raise ImportError("Unable to import Euler classes from _pressiodemoappsimpl")
 
 # import shallow-water problem
   from ._pressiodemoappsimpl import Swe2dProblem

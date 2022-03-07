@@ -27,7 +27,7 @@ if __name__== "__main__":
 
   errors = []
   for nx in meshes:
-    D = np.fromfile("eigen_1d_linear_adv_convergence_weno3_sol"+str(nx)+".bin")
+    D = np.fromfile("eigen_1d_linear_adv_default_velo_convergence_weno3_sol"+str(nx)+".bin")
     nt = int(np.size(D)/nx)
     print("fomTest: nt = ", nt)
     D = np.reshape(D, (nt, nx))

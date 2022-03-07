@@ -46,9 +46,9 @@ private:
 
 public:
   EigenApp(const MeshType & meshObj,
-		  ::pressiodemoapps::Euler1d probEnum,
-		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		  ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+	   ::pressiodemoapps::Euler1d probEnum,
+	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	   ::pressiodemoapps::InviscidFluxScheme fluxEnum)
     : m_numDofPerCell(3),
       m_probEn(probEnum),
       m_inviscidFluxRecEn(recEnum),
@@ -69,16 +69,16 @@ public:
     state_type initialState(m_numDofStencilMesh);
 
     if (m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth){
-      ::pressiodemoapps::impl::euler1dsineInitialCondition(initialState, m_meshObj, m_gamma);
+      euler1dsineInitialCondition(initialState, m_meshObj, m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::Sod){
-      ::pressiodemoapps::impl::sod1dInitialCondition(initialState, m_meshObj, m_gamma);
+      sod1dInitialCondition(initialState, m_meshObj, m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::Lax){
-      ::pressiodemoapps::impl::lax1dInitialCondition(initialState, m_meshObj, m_gamma);
+      lax1dInitialCondition(initialState, m_meshObj, m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::ShuOsher){
-      ::pressiodemoapps::impl::shuOsherInitialCondition(initialState, m_meshObj, m_gamma);
+      shuOsherInitialCondition(initialState, m_meshObj, m_gamma);
     }
     else{
       //nothing

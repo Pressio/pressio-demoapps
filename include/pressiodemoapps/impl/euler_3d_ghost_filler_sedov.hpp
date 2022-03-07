@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_EE3D_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_EE3D_HPP_
 
-namespace pressiodemoapps{ namespace ee{ namespace impl{
+namespace pressiodemoapps{
+namespace impleuler3d{
 
 template<class state_t, class mesh_t, class ghost_t>
 class Ghost3dSedov
@@ -207,5 +208,5 @@ private:
   ghost_t & m_ghostTop;
 };
 
-}}}
+}}
 #endif

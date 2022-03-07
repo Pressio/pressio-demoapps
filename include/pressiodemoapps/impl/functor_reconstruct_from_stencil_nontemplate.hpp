@@ -7,10 +7,10 @@ namespace pressiodemoapps{ namespace impl{
 namespace
 {
 template<class ReconstructedValueType, class StencilDataType>
-struct _ReconstructorFromStencilMembers
+struct _ReconstructorFromStencilMembersNonTemplate
 {
-  _ReconstructorFromStencilMembers() = delete;
-  _ReconstructorFromStencilMembers(ReconstructionScheme recEn,
+  _ReconstructorFromStencilMembersNonTemplate() = delete;
+  _ReconstructorFromStencilMembersNonTemplate(ReconstructionScheme recEn,
 				   const StencilDataType & stencilVals,
 				   ReconstructedValueType & uMinusHalfNeg,
 				   ReconstructedValueType & uMinusHalfPos,
@@ -36,7 +36,7 @@ struct _ReconstructorFromStencilMembers
 template<class ReconstructedValueType, class StencilDataType>
 class ReconstructorFromStencilNonTemplate
 {
-  using members_t = _ReconstructorFromStencilMembers<ReconstructedValueType, StencilDataType>;
+  using members_t = _ReconstructorFromStencilMembersNonTemplate<ReconstructedValueType, StencilDataType>;
   members_t m_memb;
 
 public:
@@ -66,8 +66,17 @@ public:
     if (ndpc == 1){
       oneDofPerCellImpl();
     }
+
     else if (ndpc == 3){
       threeDofPerCellImpl();
+    }
+
+    else if (ndpc == 4){
+      fourDofPerCellImpl();
+    }
+
+    else if (ndpc == 5){
+      fiveDofPerCellImpl();
     }
   }
 
@@ -202,7 +211,7 @@ private:
       }
   }
 
-  void fourDofPerCell()
+  void fourDofPerCellImpl()
   {
     switch(m_memb.m_recEn)
       {
@@ -325,9 +334,8 @@ private:
       }
   }
 
-  void fiveDofPerCell()
+  void fiveDofPerCellImpl()
   {
-
     switch(m_memb.m_recEn){
     case ::pressiodemoapps::ReconstructionScheme::FirstOrder:{
       m_memb.m_uMinusHalfNeg(0) = m_memb.m_stencilVals(0);

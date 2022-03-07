@@ -2,10 +2,6 @@
 #ifndef PRESSIODEMOAPPS_ADVECTION_DIFFUSION_2D_HPP_
 #define PRESSIODEMOAPPS_ADVECTION_DIFFUSION_2D_HPP_
 
-/*
-  2D advection-diffusion enumerations and public APIs
-*/
-
 #include "./predicates/all.hpp"
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
@@ -14,9 +10,11 @@
 
 namespace pressiodemoapps{
 
+// ----------------------------------------------------------
+// enums identifying the problems
+// ----------------------------------------------------------
 enum class AdvectionDiffusion2d{
   Burgers
-  // add more if needed
 };
 
 }//end namespace pressiodemoapps
@@ -25,45 +23,23 @@ enum class AdvectionDiffusion2d{
 #include "./impl/advection_diffusion_2d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace impladvdiff2d{
 
-// #ifdef PRESSIODEMOAPPS_ENABLE_BINDINGS
-// template<class mesh_t, class T, class ProbType>
-// T create_problem_for_pyA(const mesh_t & meshObj,
-// 			 ProbType probEnum,
-// 			 ::pressiodemoapps::InviscidFluxReconstruction invFluxRecEnum,
-// 			 typename mesh_t::scalar_t icPulseMagnitude,
-// 			 typename mesh_t::scalar_t icPulseSpread,
-// 			 typename mesh_t::scalar_t diffusionCoeff,
-// 			 typename mesh_t::scalar_t x0,
-// 			 typename mesh_t::scalar_t y0)
-// {
-//   return T(meshObj, probEnum, invFluxRecEnum,
-// 	   ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder,
-// 	   icPulseMagnitude, icPulseSpread, diffusionCoeff, x0, y0);
-// }
-// #endif
-
-} //end namespace impladvdiff2d
-
-
-//
-// public API for constructing problems
-//
-#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// ----------------------------------------------------------
+// create problem with custom coefficients
+// ----------------------------------------------------------
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
   >
-auto create_burgers2d_problem_eigen(const mesh_t & meshObj,
-				    ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEnum,
-				    ::pressiodemoapps::InviscidFluxScheme inviscidFluxScheme,
-				    ::pressiodemoapps::ViscousFluxReconstruction viscFluxRecEnum,
-				    typename mesh_t::scalar_t icPulseMagnitude,
-				    typename mesh_t::scalar_t icSpread,
-				    typename mesh_t::scalar_t diffusion,
-				    typename mesh_t::scalar_t icCenterX,
-				    typename mesh_t::scalar_t icCenterY)
+RetType create_burgers2d_problem_eigen(const mesh_t & meshObj,
+				       InviscidFluxReconstruction inviscidFluxRecEnum,
+				       InviscidFluxScheme inviscidFluxScheme,
+				       ViscousFluxReconstruction viscFluxRecEnum,
+				       typename mesh_t::scalar_t icPulseMagnitude,
+				       typename mesh_t::scalar_t icSpread,
+				       typename mesh_t::scalar_t diffusion,
+				       typename mesh_t::scalar_t icCenterX,
+				       typename mesh_t::scalar_t icCenterY)
 {
 
   return RetType(meshObj,
@@ -75,14 +51,24 @@ auto create_burgers2d_problem_eigen(const mesh_t & meshObj,
 		 impladvdiff2d::TagBurgers{});
 }
 
+// ----------------------------------------------------------
+// create default problem
+// ----------------------------------------------------------
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
   >
-RetType create_problem_eigen(const mesh_t & meshObj,
-			     ::pressiodemoapps::AdvectionDiffusion2d problemEnum,
-			     ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEnum,
-			     ::pressiodemoapps::ViscousFluxReconstruction viscFluxRecEnum)
+RetType
+// bindings need unique naming or we get error associated with overloads
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+create_advecdiffusion2d_problem_ov1
+#else
+create_problem_eigen
+#endif
+(const mesh_t & meshObj,
+ AdvectionDiffusion2d problemEnum,
+ InviscidFluxReconstruction inviscidFluxRecEnum,
+ ViscousFluxReconstruction viscFluxRecEnum)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
@@ -97,17 +83,17 @@ RetType create_problem_eigen(const mesh_t & meshObj,
 
     return create_burgers2d_problem_eigen<mesh_t, RetType>(meshObj,
 							   inviscidFluxRecEnum,
-							   ::pressiodemoapps::InviscidFluxScheme::Rusanov,
+							   InviscidFluxScheme::Rusanov,
 							   viscFluxRecEnum,
 							   icPulseMagnitude,
 							   icSpread, diffusion,
 							   icCenterX, icCenterY);
   }
   else{
-    throw std::runtime_error("advection-diffusion: invalid problem enum");
+    throw std::runtime_error("advection-diffusion2d: invalid problem enum");
   }
 }
-#endif
+
 
 } //end namespace pressiodemoapps
 #endif

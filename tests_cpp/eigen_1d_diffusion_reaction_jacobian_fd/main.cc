@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   const auto scheme = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
-  auto appObj     = pda::create_diffusion_reaction_A_problem_eigen(meshObj, scheme, 0.01, 0.005);
+  auto appObj     = pda::create_diffusion_reaction_2d_problem_A_eigen(meshObj, scheme, 0.01, 0.005);
   using app_t = decltype(appObj);
   using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;

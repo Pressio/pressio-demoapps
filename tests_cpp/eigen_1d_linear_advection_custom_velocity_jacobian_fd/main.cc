@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 #endif
 
   const auto probid = pda::Advection1d::PeriodicLinear;
-  auto appObj       = pda::create_linear_advection1d_problem_eigen(
+  auto appObj       = pda::create_linear_advection_1d_problem_eigen(
     meshObj, order, pda::InviscidFluxScheme::Rusanov, 2.0);
 
   using app_t = decltype(appObj);

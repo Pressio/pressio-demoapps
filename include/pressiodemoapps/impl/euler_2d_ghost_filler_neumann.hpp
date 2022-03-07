@@ -2,23 +2,17 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_EE2D_NEUMANN_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_EE2D_NEUMANN_HPP_
 
-namespace pressiodemoapps{ namespace impl{
-
-template<
-  int numDofPerCell,
-  class state_t,
-  class mesh_t,
-  class ghost_t
-  >
-class Ghost2dNeumannFiller;
+namespace pressiodemoapps{
+namespace impleuler2d{
 
 template<class state_t, class mesh_t, class ghost_t>
-class Ghost2dNeumannFiller<4, state_t, mesh_t, ghost_t>
+class Ghost2dNeumannFiller
 {
 
 public:
   Ghost2dNeumannFiller() = delete;
   Ghost2dNeumannFiller(const int stencilSize,
+		       int numDofPerCell,
 		       const state_t & stateIn,
 		       const mesh_t & meshIn,
 		       ghost_t & ghostLeft,
@@ -26,6 +20,7 @@ public:
 		       ghost_t & ghostRight,
 		       ghost_t & ghostBack)
     : m_stencilSize(stencilSize),
+      m_numDofPerCell(numDofPerCell),
       m_state(stateIn),
       m_meshObj(meshIn),
       m_ghostLeft(ghostLeft),
@@ -37,11 +32,19 @@ public:
   template<class index_t>
   void operator()(index_t smPt, int gRow)
   {
-    constexpr int numDofPerCell = 4;
+    if (m_numDofPerCell == 4){
+      fourDofImpl(smPt, gRow);
+    }
+  }
 
+private:
+
+  template<class index_t>
+  void fourDofImpl(index_t smPt, int gRow)
+  {
     const auto & graph = m_meshObj.graph();
     const auto cellGID = graph(smPt, 0);
-    const auto uIndex  = cellGID*numDofPerCell;
+    const auto uIndex  = cellGID*m_numDofPerCell;
 
     const auto left0  = graph(smPt, 1);
     const auto front0 = graph(smPt, 2);
@@ -87,7 +90,7 @@ public:
       const auto back1  = graph(smPt, 8);
 
       if (left1 == -1){
-	const auto ind = right0*numDofPerCell;
+	const auto ind = right0*m_numDofPerCell;
 	m_ghostLeft(gRow, 4) = m_state(ind);
 	m_ghostLeft(gRow, 5) = m_state(ind+1);
 	m_ghostLeft(gRow, 6) = m_state(ind+2);
@@ -95,7 +98,7 @@ public:
       }
 
       if (front1 == -1){
-	const auto ind = back0*numDofPerCell;
+	const auto ind = back0*m_numDofPerCell;
 	m_ghostFront(gRow, 4) = m_state(ind);
 	m_ghostFront(gRow, 5) = m_state(ind+1);
 	m_ghostFront(gRow, 6) = m_state(ind+2);
@@ -103,7 +106,7 @@ public:
       }
 
       if (right1 == -1){
-	const auto ind = left0*numDofPerCell;
+	const auto ind = left0*m_numDofPerCell;
 	m_ghostRight(gRow, 4) = m_state(ind);
 	m_ghostRight(gRow, 5) = m_state(ind+1);
 	m_ghostRight(gRow, 6) = m_state(ind+2);
@@ -111,7 +114,7 @@ public:
       }
 
       if (back1 == -1){
-	const auto ind = front0*numDofPerCell;
+	const auto ind = front0*m_numDofPerCell;
 	m_ghostBack(gRow, 4) = m_state(ind);
 	m_ghostBack(gRow, 5) = m_state(ind+1);
 	m_ghostBack(gRow, 6) = m_state(ind+2);
@@ -130,7 +133,7 @@ public:
       const auto back2  = graph(smPt, 12);
 
       if (left1 == -1){
-	const auto ind = right0*numDofPerCell;
+	const auto ind = right0*m_numDofPerCell;
 	m_ghostLeft(gRow, 4) = m_state(ind);
 	m_ghostLeft(gRow, 5) = m_state(ind+1);
 	m_ghostLeft(gRow, 6) = m_state(ind+2);
@@ -138,7 +141,7 @@ public:
       }
 
       if (front1 == -1){
-	const auto ind = back0*numDofPerCell;
+	const auto ind = back0*m_numDofPerCell;
 	m_ghostFront(gRow, 4) = m_state(ind);
 	m_ghostFront(gRow, 5) = m_state(ind+1);
 	m_ghostFront(gRow, 6) = m_state(ind+2);
@@ -146,7 +149,7 @@ public:
       }
 
       if (right1 == -1){
-	const auto ind = left0*numDofPerCell;
+	const auto ind = left0*m_numDofPerCell;
 	m_ghostRight(gRow, 4) = m_state(ind);
 	m_ghostRight(gRow, 5) = m_state(ind+1);
 	m_ghostRight(gRow, 6) = m_state(ind+2);
@@ -154,7 +157,7 @@ public:
       }
 
       if (back1 == -1){
-	const auto ind = front0*numDofPerCell;
+	const auto ind = front0*m_numDofPerCell;
 	m_ghostBack(gRow, 4) = m_state(ind);
 	m_ghostBack(gRow, 5) = m_state(ind+1);
 	m_ghostBack(gRow, 6) = m_state(ind+2);
@@ -162,7 +165,7 @@ public:
       }
 
       if (left2 == -1){
-	const auto ind = right1*numDofPerCell;
+	const auto ind = right1*m_numDofPerCell;
 	m_ghostLeft(gRow, 8)  = m_state(ind);
 	m_ghostLeft(gRow, 9)  = m_state(ind+1);
 	m_ghostLeft(gRow, 10) = m_state(ind+2);
@@ -170,7 +173,7 @@ public:
       }
 
       if (front2 == -1){
-	const auto ind = back1*numDofPerCell;
+	const auto ind = back1*m_numDofPerCell;
 	m_ghostFront(gRow, 8) = m_state(ind);
 	m_ghostFront(gRow, 9) = m_state(ind+1);
 	m_ghostFront(gRow, 10) = m_state(ind+2);
@@ -178,7 +181,7 @@ public:
       }
 
       if (right2 == -1){
-	const auto ind = left1*numDofPerCell;
+	const auto ind = left1*m_numDofPerCell;
 	m_ghostRight(gRow, 8) = m_state(ind);
 	m_ghostRight(gRow, 9) = m_state(ind+1);
 	m_ghostRight(gRow, 10) = m_state(ind+2);
@@ -186,7 +189,7 @@ public:
       }
 
       if (back2 == -1){
-	const auto ind = front1*numDofPerCell;
+	const auto ind = front1*m_numDofPerCell;
 	m_ghostBack(gRow, 8) = m_state(ind);
 	m_ghostBack(gRow, 9) = m_state(ind+1);
 	m_ghostBack(gRow, 10) = m_state(ind+2);
@@ -196,7 +199,8 @@ public:
   }
 
 private:
-  const int m_stencilSize;
+  int m_stencilSize;
+  int m_numDofPerCell;
   const state_t & m_state;
   const mesh_t & m_meshObj;
   ghost_t & m_ghostLeft;

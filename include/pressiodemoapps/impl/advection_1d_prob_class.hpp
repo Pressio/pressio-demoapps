@@ -12,16 +12,14 @@
 #include <omp.h>
 #endif
 
-namespace pressiodemoapps{ namespace impladv1d{
+namespace pressiodemoapps{
+namespace impladvection1d{
 
 // tags are used inside he public create function: create_problem_...()
 // to dispatch to the proper problem
 // so add new ones if a new problem is added
 struct TagLinearAdvection{};
 
-/////////////////////////
-// eigen class
-/////////////////////////
 template<class MeshType>
 class EigenApp
 {
@@ -36,19 +34,17 @@ public:
 
 private:
   static constexpr int dimensionality{1};
-
   using flux_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using edge_rec_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using flux_jac_type             = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
-  // constructor for LinearAdvection1d
-  EigenApp(const MeshType & meshObj,
+  EigenApp(TagLinearAdvection /*tag*/,
+	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
-	   scalar_type velocity,
-	   TagLinearAdvection /*tag*/)
+	   scalar_type velocity)
     : m_numDofPerCell(1),
       m_probEn(::pressiodemoapps::Advection1d::PeriodicLinear),
       m_inviscidFluxRecEn(inviscidFluxRecEn),
@@ -185,7 +181,7 @@ private:
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
 	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCellNonTemplate<
-	  pda::impladv1d::ComputeDirectionalFluxValuesAndJacobians<
+	  pda::impladvection1d::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
 	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
 	    scalar_type, flux_type, flux_jac_type>,
@@ -235,7 +231,7 @@ private:
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalanceNonTemplate<
-	pda::impladv1d::ComputeDirectionalFluxValues<
+	pda::impladvection1d::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunctionNonTemplate<
 	    dimensionality, MeshType, U_t, edge_rec_type>,
 	  scalar_type, flux_type>,

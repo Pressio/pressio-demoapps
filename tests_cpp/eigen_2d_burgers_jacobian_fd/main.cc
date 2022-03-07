@@ -1,5 +1,5 @@
 
-#include "pressiodemoapps/advection_diffusion.hpp"
+#include "pressiodemoapps/advection_diffusion2d.hpp"
 #include <iomanip>
 
 template<class T>

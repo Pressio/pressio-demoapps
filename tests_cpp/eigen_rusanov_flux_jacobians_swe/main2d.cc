@@ -42,13 +42,13 @@ int main()
   Eigen::Matrix<scalar_t,-1,-1> JR(nVars,nVars);
   Eigen::Matrix<scalar_t,-1,-1> JL_FD(nVars,nVars);
   Eigen::Matrix<scalar_t,-1,-1> JR_FD(nVars,nVars);
-  pressiodemoapps::implswe::swe_rusanov_flux_jacobian_three_dof(JL,JR,UL,UR,normals,g);
-  pressiodemoapps::implswe::swe_rusanov_flux_three_dof(fluxBase,UL,UR,normals,g);
+  pressiodemoapps::implswe2d::swe_rusanov_flux_jacobian_three_dof(JL,JR,UL,UR,normals,g);
+  pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(fluxBase,UL,UR,normals,g);
 
   const scalar_t oneJ(0.0,eps);
   for (int i = 0;i < nVars; i++){
     UL(i) += oneJ;
-    pressiodemoapps::implswe::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
+    pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
     for (int j = 0 ; j < nVars;j++){
       JL_FD(j,i) = 1./eps*(std::imag(flux(j)));
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -56,7 +56,7 @@ int main()
     UL(i) -= oneJ;
 
     UR(i) += oneJ;
-    pressiodemoapps::implswe::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
+    pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
     for (int j = 0 ; j < nVars;j++){
       JR_FD(j,i) = 1./eps*std::imag(flux(j) );
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";
@@ -66,11 +66,11 @@ int main()
 
   normals[0] = 0;
   normals[1] = 1;
-  pressiodemoapps::implswe::swe_rusanov_flux_jacobian_three_dof(JL,JR,UL,UR,normals,g);
-  pressiodemoapps::implswe::swe_rusanov_flux_three_dof(fluxBase,UL,UR,normals,g);
+  pressiodemoapps::implswe2d::swe_rusanov_flux_jacobian_three_dof(JL,JR,UL,UR,normals,g);
+  pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(fluxBase,UL,UR,normals,g);
   for (int i = 0;i < nVars; i++){
     UL(i) += oneJ;
-    pressiodemoapps::implswe::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
+    pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
     for (int j = 0 ; j < nVars;j++){
       JL_FD(j,i) = 1./eps*std::imag(flux(j) );
       if (std::abs( JL_FD(j,i) - JL(j,i) ) > tol) passedString = "FAILED";
@@ -78,7 +78,7 @@ int main()
     UL(i) -= oneJ;
 
     UR(i) += oneJ;
-    pressiodemoapps::implswe::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
+    pressiodemoapps::implswe2d::swe_rusanov_flux_three_dof(flux,UL,UR,normals,g);
     for (int j = 0 ; j < nVars;j++){
       JR_FD(j,i) = 1./eps*std::imag(flux(j));
       if (std::abs( JR_FD(j,i) - JR(j,i) ) > tol) passedString = "FAILED";

@@ -1,7 +1,7 @@
 
 #include "pressio/ode_steppers_explicit.hpp"
 #include "pressio/ode_advancers.hpp"
-#include "pressiodemoapps/advection_diffusion.hpp"
+#include "pressiodemoapps/advection_diffusion2d.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
