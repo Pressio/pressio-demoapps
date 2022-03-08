@@ -1,7 +1,7 @@
 
 #include "pressio/ode_steppers_explicit.hpp"
 #include "pressio/ode_advancers.hpp"
-#include "pressiodemoapps/diffusion_reaction.hpp"
+#include "pressiodemoapps/diffusion_reaction2d.hpp"
 #include "../observer.hpp"
 
 int main(int argc, char *argv[])
@@ -9,9 +9,9 @@ int main(int argc, char *argv[])
 
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
-  const auto order   = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probId  = pda::DiffusionReaction2d::ProblemA;
-  auto appObj        = pda::create_problem_eigen(meshObj, probId, order);
+  const auto recEn   = pda::ViscousFluxReconstruction::FirstOrder;
+  auto appObj        = pda::create_problem_eigen(meshObj, probId, recEn);
   const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);

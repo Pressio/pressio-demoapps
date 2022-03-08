@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Shallow water equations" href="swe_2d.html" /><link rel="prev" title="2D single-species reaction diffusion" href="diffusion_reaction_2d.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Shallow water equations" href="swe_2d.html" /><link rel="prev" title="2D Burgers" href="burgers_2d.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>2D Gray Scott reaction-diffusion - pressio-demoapps 0.1.0 documentation</title>
+        <title>2D Gray Scott reaction-diffusion - pressio-demoapps 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps 0.1.0 documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -174,6 +174,7 @@
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d.html">2D Burgers</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -261,16 +262,15 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/diffusion_reaction.hpp"</span><span class="cp"></span>
-<span class="c1">// ...</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/diffusion_reaction2d.hpp"</span><span class="cp"></span>
 
 <span class="k">namespace</span> <span class="n">pda</span>      <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">DiffusionReaction2d</span><span class="o">::</span><span class="n">GrayScott</span><span class="p">;</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
 
 <span class="c1">// A. constructor for problem using default values</span>
 <span class="p">{</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">DiffusionReaction2d</span><span class="o">::</span><span class="n">GrayScott</span><span class="p">;</span>
   <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -281,8 +281,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Db</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">feedRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
   <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">killRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
-                                                <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">feedRate</span><span class="p">,</span> <span class="n">killRate</span><span class="p">);</span>
+  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
+                                                         <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">feedRate</span><span class="p">,</span> <span class="n">killRate</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -290,16 +290,16 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
-<span class="c1"># ...</span>
-<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">DiffusionReaction2d</span><span class="o">.</span><span class="n">GrayScott</span>
+
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">ViscousFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span>
 
 <span class="c1"># A. constructor for problem using default values</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">DiffusionReaction2d</span><span class="o">.</span><span class="n">GrayScott</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
 
 <span class="c1"># B. setting custom coefficients</span>
 <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -334,14 +334,14 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="diffusion_reaction_2d.html">
+          <a class="prev-page" href="burgers_2d.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">2D single-species reaction diffusion</div>
+                <div class="title">2D Burgers</div>
                 
               </div>
             </a>
@@ -349,7 +349,7 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Feb 08, 2022. |
+            Last updated on Mar 08, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/grayscott_2d.rst.txt"

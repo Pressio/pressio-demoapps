@@ -37,12 +37,11 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/euler1d.hpp"
-   // ...
+
    namespace pda     = pressiodemoapps;
    const auto probId = pda::Euler1d::PeriodicSmooth;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
-   auto state	     = problem.initialCondition();
 
 Python synopsis
 ---------------
@@ -50,8 +49,7 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
    probId  = pda.Euler1d.PeriodicSmooth
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)
-   state   = problem.initialCondition()

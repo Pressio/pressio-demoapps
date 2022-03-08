@@ -37,14 +37,12 @@ if __name__ == '__main__':
   B = np.ones((len(yn), 25), order='F')
   AJ = appObj.createApplyJacobianResult(B)
   # warmup
-  appObj.applyJacobian(yn, 0., B, AJ)
-  #appObj.velocity(yn, 0., V)
+  appObj.applyJacobian(yn, B, 0., AJ)
 
   print("starting loop")
   start = time.time()
   for i in range(args.loopCount):
-    #appObj.velocity(yn, 0., V)
-    appObj.applyJacobian(yn, 0., B, AJ)
+    appObj.applyJacobian(yn, B, 0., AJ)
 
   end = time.time()
   print("elapsed ", end - start)

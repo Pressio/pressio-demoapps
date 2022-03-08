@@ -1,7 +1,6 @@
 Overview
 ========
 
-
 pressio-demoapps is a collection of 1D, 2D and 3D problems
 of varying complexity (from linear advection, to reaction-diffusion and compressible Euler)
 that can be used for a variety of purposes.

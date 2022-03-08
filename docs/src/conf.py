@@ -57,7 +57,7 @@ copyright = u"2021, National Technology & Engineering Solutions of Sandia, LLC (
 #         "exec"), conf)
 #     return conf["version"]
 
-version = "0.1.0" #get_version()
+version = "0.2.0" #get_version()
 
 # The full version, including alpha/beta/rc tags.
 release = version

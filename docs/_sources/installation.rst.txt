@@ -3,8 +3,6 @@
 Installation
 ============
 
-This page walks you through the process of installing pressio-demoapps for both C++ and Python.
-
 
 C++ library
 -----------

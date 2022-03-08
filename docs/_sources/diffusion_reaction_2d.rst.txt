@@ -40,15 +40,15 @@ C++ synopsis
 
 .. code-block:: c++
 
-   #include "pressiodemoapps/diffusion_reaction.hpp"
+   #include "pressiodemoapps/diffusion_reaction2d.hpp"
    // ...
    namespace pda      = pressiodemoapps;
    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
-   const auto probId  = pda::DiffusionReaction2d::ProblemA;
    const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
    {
+     const auto probId  = pda::DiffusionReaction2d::ProblemA;
      auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
@@ -57,7 +57,8 @@ C++ synopsis
      using scalar_type = typename decltype(meshObj)::scalar_t;
      const auto diffCoeff = static_cast<scalar_type(0.5);
      const auto reacCoeff = static_cast<scalar_type(0.2);
-     auto problem = pda::create_problem_eigen(meshObj, probId, scheme, diffCoeff, reacCoeff);
+     auto problem = pda::create_diffusion_reaction_2d_problem_A_eigen(meshObj, scheme,
+								      diffCoeff, reacCoeff);
    }
 
    // C. setting custom coefficients and custom source function
@@ -75,7 +76,9 @@ C++ synopsis
        result = /* do whatever you want */;
      };
 
-     auto problem = pda::create_problem_eigen(meshObj, probId, scheme, mySource, diffCoeff, reacCoeff);
+     auto problem = pda::create_diffusion_reaction_2d_problem_A_eigen(meshObj, scheme,
+								      mySource, diffCoeff,
+								      reacCoeff);
    }
 
 
@@ -86,19 +89,19 @@ Python synopsis
 
    import pressiodemoapps as pda
    # ...
-   probId  = pda.DiffusionReaction2d.ProblemA
    scheme  = pda.ViscousFluxReconstruction.FirstOrder
 
    # A. constructor for problem using default values
+   probId  = pda.DiffusionReaction2d.ProblemA
    problem = pda.create_problem(meshObj, probId, scheme)
 
    # B. setting custom coefficients
    myD, myK = 0.2, 0.001
-   problem = pda.create_problem(meshObj, probId, scheme, myD, myK)
+   problem = pda.create_diffusion_reaction_2d_problem_A(meshObj, scheme, myD, myK)
 
    # C. setting custom coefficients and custom source function
    mysource = lambda x, y, time : np.sin(math.pi*x) + y * x + time # or whatever
-   problem = pda.create_problem(meshObj, probId, scheme, mysource, 0.2, 0.001)
+   problem = pda.create_diffusion_reaction_2d_problem_A(meshObj, scheme, mysource, 0.2, 0.001)
 
 
 Notes:

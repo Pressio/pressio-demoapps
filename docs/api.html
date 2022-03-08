@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>Problem class API - pressio-demoapps 0.1.0 documentation</title>
+        <title>Problem class API - pressio-demoapps 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps 0.1.0 documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -174,6 +174,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d.html">2D Burgers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -384,16 +385,16 @@ evaluates the RHS of the system and stores it into <code class="xref py py-class
 </dl>
 </dd></dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="Problem.applyJacobianResult">
-<span class="sig-name descname"><span class="pre">applyJacobianResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Problem.applyJacobianResult" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="Problem.applyJacobian">
+<span class="sig-name descname"><span class="pre">applyJacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Problem.applyJacobian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
 this computes the action of the Jacobian applied to <code class="xref py py-class docutils literal notranslate"><span class="pre">operand</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>numpy.array</em>) – state vector</p></li>
-<li><p><strong>time</strong> (<em>float</em>) – evaluation time</p></li>
 <li><p><strong>operand</strong> (<em>numpy.array</em>) – rank-1 or rank-2 operand to apply the Jacobian to.</p></li>
+<li><p><strong>time</strong> (<em>float</em>) – evaluation time</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -440,7 +441,7 @@ Python sparse matrices.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Feb 08, 2022. |
+            Last updated on Mar 08, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/api.rst.txt"

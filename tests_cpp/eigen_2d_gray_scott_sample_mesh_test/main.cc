@@ -1,7 +1,7 @@
 
 #include "pressio/ode_steppers_explicit.hpp"
 #include "pressio/ode_advancers.hpp"
-#include "pressiodemoapps/diffusion_reaction.hpp"
+#include "pressiodemoapps/diffusion_reaction2d.hpp"
 #include "../observer.hpp"
 
 template<class T>

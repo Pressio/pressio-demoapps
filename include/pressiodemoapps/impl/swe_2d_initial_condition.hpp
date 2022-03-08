@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_SWE2D_IC_HPP_
 #define PRESSIODEMOAPPS_SWE2D_IC_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{
+namespace implswe2d{
 
 template<class state_type, class mesh_t, class scalar_type>
 void GaussianPulse(state_type & state,

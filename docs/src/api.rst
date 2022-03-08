@@ -124,14 +124,14 @@ Python API
       :param float time: evaluation time
       :param numpy.array v: velocity to overwrite
 
-   .. py:method:: applyJacobianResult(y, time, operand, result)
+   .. py:method:: applyJacobian(y, operand, time, result)
 
       Given a state :class:`y` and time :class:`time`,
       this computes the action of the Jacobian applied to :class:`operand`.
 
       :param numpy.array y: state vector
-      :param float time: evaluation time
       :param numpy.array operand: rank-1 or rank-2 operand to apply the Jacobian to.
+      :param float time: evaluation time
       :rtype: numpy.array
 
 .. note::

@@ -6,8 +6,7 @@
 #include "euler_rusanov_flux_values_function.hpp"
 #include "euler_rusanov_flux_jacobian_function.hpp"
 #include "euler_3d_initial_condition.hpp"
-#include "functor_ghost_fill_neumann.hpp"
-#include "euler_3d_ghost_filler.hpp"
+#include "euler_3d_ghost_filler_sedov.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -19,10 +18,11 @@
 #include <omp.h>
 #endif
 
-namespace pressiodemoapps{ namespace ee{ namespace impl{
+namespace pressiodemoapps{
+namespace impleuler3d{
 
 template<class MeshType>
-class EigenEuler3dApp
+class EigenApp
 {
 
 public:
@@ -44,14 +44,15 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
-  EigenEuler3dApp(const MeshType & meshObj,
-		  ::pressiodemoapps::Euler3d probEnum,
-		  ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		  ::pressiodemoapps::InviscidFluxScheme fluxEnum)
-    : m_meshObj(meshObj), m_probEn(probEnum),
-      m_recEn(recEnum), m_fluxEn(fluxEnum)
+  EigenApp(const MeshType & meshObj,
+	   ::pressiodemoapps::Euler3d probEnum,
+	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	   ::pressiodemoapps::InviscidFluxScheme fluxEnum)
+    : m_meshObj(meshObj),
+      m_probEn(probEnum),
+      m_recEn(recEnum),
+      m_fluxEn(fluxEnum)
   {
-    // calculate total num of dofs on sample and stencil mesh
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
     allocateGhosts();
@@ -244,8 +245,7 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
     if (m_probEn == ::pressiodemoapps::Euler3d::SedovSymmetry)
     {
-      using ghost_filler_t  = ::pressiodemoapps::ee::impl::Ghost3dSedov<
-	U_t, MeshType, ghost_container_type>;
+      using ghost_filler_t  = Ghost3dSedov<U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, U, m_meshObj,
 			 m_ghostLeft, m_ghostRight,
 			 m_ghostBack, m_ghostFront,
@@ -411,10 +411,10 @@ private:
 	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
 	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunction<
-	      dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
-	    numDofPerCell, scalar_type, flux_type, flux_jac_type>,
-	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      numDofPerCell, V_t, scalar_type
+	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
+	  numDofPerCell, scalar_type, flux_type, flux_jac_type>,
+	dimensionality, MeshType, jacobian_type>,
+      V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),
@@ -462,9 +462,9 @@ private:
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      Fx(smPt);
-      Fy(smPt);
-      Fz(smPt);
+      Fx(smPt, numDofPerCell);
+      Fy(smPt, numDofPerCell);
+      Fz(smPt, numDofPerCell);
     }
   }
 
@@ -509,8 +509,7 @@ private:
     // the one for Jacobian so we can use same functors
 
     using stencil_filler_t  = pda::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_container_type,
-      U_t, MeshType, ghost_container_type>;
+      dimensionality, stencil_container_type, U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_recEn),
 				   U, m_meshObj, m_ghostLeft, m_ghostRight,
 				  stencilVals, xAxis);
@@ -528,10 +527,10 @@ private:
 	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
 	  pda::ee::impl::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorFromStencil<
-	      numDofPerCell, edge_rec_type, stencil_container_type>,
+	      edge_rec_type, stencil_container_type>,
 	    numDofPerCell, scalar_type, flux_type, flux_jac_type>,
-	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      numDofPerCell, V_t, scalar_type
+	  dimensionality, MeshType, jacobian_type>,
+      V_t, scalar_type
       >;
 
     functor_type funcx(V, m_meshObj.dxInv(),
@@ -592,23 +591,23 @@ private:
     {
       const auto smPt = graphRows[it];
 
-      FillStencilX(smPt, it);
+      FillStencilX(smPt, it, numDofPerCell);
       auto bcTypeX = findCellBdType(smPt, xAxis);
       const auto & factorsX = (bcTypeX == 1)
 	? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcx(smPt, factorsX, bcTypeX);
+      funcx(smPt, numDofPerCell, factorsX, bcTypeX);
 
-      FillStencilY(smPt, it);
+      FillStencilY(smPt, it, numDofPerCell);
       auto bcTypeY = findCellBdType(smPt, yAxis);
       const auto & factorsY = (bcTypeY == 1)
 	? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcy(smPt, factorsY, bcTypeY);
+      funcy(smPt, numDofPerCell, factorsY, bcTypeY);
 
-      FillStencilZ(smPt, it);
+      FillStencilZ(smPt, it, numDofPerCell);
       auto bcTypeZ = findCellBdType(smPt, zAxis);
       const auto & factorsZ = (bcTypeZ == 1)
 	? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
-      funcz(smPt, factorsZ, bcTypeZ);
+      funcz(smPt, numDofPerCell, factorsZ, bcTypeZ);
     }
   }
 
@@ -649,7 +648,7 @@ private:
     /// while the jacobian must be computed with first order
 
     using stencil_filler_t  = pda::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_container_type,
+      dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
 
     // *****************************
@@ -672,9 +671,9 @@ private:
       pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
-	    numDofPerCell, edge_rec_type, stencil_container_type>,
+	    edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_type>,
-      numDofPerCell, V_t, scalar_type
+      V_t, scalar_type
       >;
 
     velo_functor_type funcVeloX(V, m_meshObj.dxInv(),
@@ -724,9 +723,9 @@ private:
       pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
 	pda::ee::impl::ComputeDirectionalFluxJacobians<
 	  pda::impl::ReconstructorFromStencil<
-	    numDofPerCell, edge_rec_type, stencil_container_type>,
+	    edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_jac_type>,
-      dimensionality, numDofPerCell, MeshType, jacobian_type
+      dimensionality, MeshType, jacobian_type
       >;
 
     jac_functor_type funcJacX(J, xAxis, m_meshObj,
@@ -781,26 +780,26 @@ private:
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      FillStencilVeloX(smPt, it);
-      funcVeloX(smPt);
-      FillStencilJacX(smPt, it);
+      FillStencilVeloX(smPt, it, numDofPerCell);
+      funcVeloX(smPt, numDofPerCell);
+      FillStencilJacX(smPt, it, numDofPerCell);
       auto bcTypeX = findCellBdType(smPt, xAxis);
       const auto & factorsX = (bcTypeX == 1) ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcJacX(smPt, factorsX, bcTypeX);
+      funcJacX(smPt, numDofPerCell, factorsX, bcTypeX);
 
-      FillStencilVeloY(smPt, it);
-      funcVeloY(smPt);
-      FillStencilJacY(smPt, it);
+      FillStencilVeloY(smPt, it, numDofPerCell);
+      funcVeloY(smPt, numDofPerCell);
+      FillStencilJacY(smPt, it, numDofPerCell);
       auto bcTypeY = findCellBdType(smPt, yAxis);
       const auto & factorsY = (bcTypeY == 1) ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcJacY(smPt, factorsY, bcTypeY);
+      funcJacY(smPt, numDofPerCell, factorsY, bcTypeY);
 
-      FillStencilVeloZ(smPt, it);
-      funcVeloZ(smPt);
-      FillStencilJacZ(smPt, it);
+      FillStencilVeloZ(smPt, it, numDofPerCell);
+      funcVeloZ(smPt, numDofPerCell);
+      FillStencilJacZ(smPt, it, numDofPerCell);
       auto bcTypeZ = findCellBdType(smPt, zAxis);
       const auto & factorsZ = (bcTypeZ == 1) ? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
-      funcJacZ(smPt, factorsZ, bcTypeZ);
+      funcJacZ(smPt, numDofPerCell, factorsZ, bcTypeZ);
 
     }
   }
@@ -829,9 +828,9 @@ private:
       pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunction<
-	    dimensionality, numDofPerCell, MeshType, U_t, edge_rec_type>,
+	    dimensionality, MeshType, U_t, edge_rec_type>,
 	  numDofPerCell, scalar_type, flux_type>,
-      numDofPerCell, V_t, scalar_type
+      V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),
@@ -867,9 +866,9 @@ private:
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      Fx(smPt);
-      Fy(smPt);
-      Fz(smPt);
+      Fx(smPt, numDofPerCell);
+      Fy(smPt, numDofPerCell);
+      Fz(smPt, numDofPerCell);
     }
   }
 
@@ -897,8 +896,7 @@ private:
     stencil_container_type stencilVals(numDofPerCell*stencilSize);
 
     using stencil_filler_t  = pda::impl::StencilFiller<
-      dimensionality, numDofPerCell, stencil_container_type,
-      U_t, MeshType, ghost_container_type>;
+      dimensionality, stencil_container_type, U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_recEn),
 				  U, m_meshObj, m_ghostLeft, m_ghostRight,
 				  stencilVals, xAxis);
@@ -915,9 +913,9 @@ private:
       pda::impl::ComputeDirectionalFluxBalance<
 	pda::ee::impl::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorFromStencil<
-	    numDofPerCell, edge_rec_type, stencil_container_type>,
+	    edge_rec_type, stencil_container_type>,
 	  numDofPerCell, scalar_type, flux_type>,
-      numDofPerCell, V_t, scalar_type
+      V_t, scalar_type
       >;
 
     functor_type Fx(V, m_meshObj.dxInv(),
@@ -953,12 +951,12 @@ private:
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      FillStencilX(smPt, it);
-      Fx(smPt);
-      FillStencilY(smPt, it);
-      Fy(smPt);
-      FillStencilZ(smPt, it);
-      Fz(smPt);
+      FillStencilX(smPt, it, numDofPerCell);
+      Fx(smPt, numDofPerCell);
+      FillStencilY(smPt, it, numDofPerCell);
+      Fy(smPt, numDofPerCell);
+      FillStencilZ(smPt, it, numDofPerCell);
+      Fz(smPt, numDofPerCell);
     }
   }
 
@@ -1031,8 +1029,8 @@ protected:
   const std::array<scalar_type, dimensionality> normalZ_{0, 0, 1};
 };
 
-template<class MeshType> constexpr int EigenEuler3dApp<MeshType>::numDofPerCell;
-template<class MeshType> constexpr int EigenEuler3dApp<MeshType>::dimensionality;
+template<class MeshType> constexpr int EigenApp<MeshType>::numDofPerCell;
+template<class MeshType> constexpr int EigenApp<MeshType>::dimensionality;
 
-}}}//end namespace pressiodemoapps::ee::impl
+}}//end namespace pressiodemoapps::ee::impl
 #endif

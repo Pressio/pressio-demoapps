@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_SWE2D_FLUX_FUNCTOR_HPP_
 #define PRESSIODEMOAPPS_SWE2D_FLUX_FUNCTOR_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{
+namespace implswe2d{
 
 template<class Parent, class scalar_type, class flux_type>
 struct ComputeDirectionalFluxValues : Parent
@@ -32,10 +33,10 @@ public:
   const flux_type & fluxLeft()  const { return m_fluxL; }
   const flux_type & fluxRight() const { return m_fluxR; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt)
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, std::forward<Args>(args)...);
 
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
@@ -89,10 +90,10 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt)
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, std::forward<Args>(args)...);
 
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
@@ -155,10 +156,10 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt)
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, std::forward<Args>(args)...);
 
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();

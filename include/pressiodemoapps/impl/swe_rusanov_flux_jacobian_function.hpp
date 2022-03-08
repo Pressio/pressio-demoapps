@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_SWE_JACOBIANS_HPP_
 #define PRESSIODEMOAPPS_SWE_JACOBIANS_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{ namespace implswe2d{
 
 template<class T, typename T2, typename sc_t, typename normal_t>
 void swe_rusanov_flux_jacobian_three_dof(T & JL,

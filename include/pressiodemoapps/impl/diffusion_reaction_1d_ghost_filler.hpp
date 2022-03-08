@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_DIFFREAC_1D_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_DIFFREAC_1D_HPP_
 
-namespace pressiodemoapps{ namespace impldiffreac{
+namespace pressiodemoapps{
+namespace impldiffusionreaction1d{
 
 template<class state_t, class mesh_t, class ghost_t>
 class GhostFillerProblemA1d

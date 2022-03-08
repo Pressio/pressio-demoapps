@@ -32,10 +32,11 @@ public:
   const flux_type & fluxLeft()  const { return m_fluxL; }
   const flux_type & fluxRight() const { return m_fluxR; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt)
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
   {
-    Parent::operator()(smPt);
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -73,9 +74,11 @@ public:
   const flux_type & fluxLeft()  const { return m_fluxL; }
   const flux_type & fluxRight() const { return m_fluxR; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -90,7 +93,6 @@ public:
     }
   }
 };
-
 
 // for 5 dofs, so Euler 3d
 template<class Parent, class scalar_type, class flux_type>
@@ -116,9 +118,11 @@ public:
   const flux_type & fluxLeft()  const { return m_fluxL; }
   const flux_type & fluxRight() const { return m_fluxR; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -174,9 +178,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -228,9 +234,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -282,9 +290,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -350,9 +360,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -418,9 +430,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
@@ -486,9 +500,11 @@ public:
   const flux_jac_type & fluxJacRNeg()  const { return m_fluxJacRNeg; }
   const flux_jac_type & fluxJacRPos()  const { return m_fluxJacRPos; }
 
-  template<class IndexType>
-  void operator()(IndexType smPt){
-    Parent::operator()(smPt);
+  template<class IndexType, class ...Args>
+  void operator()(IndexType smPt, Args && ... args)
+  {
+    Parent::operator()(smPt, std::forward<Args>(args)...);
+
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
     const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();

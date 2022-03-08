@@ -1,5 +1,5 @@
 
-#include "pressiodemoapps/diffusion_reaction.hpp"
+#include "pressiodemoapps/diffusion_reaction2d.hpp"
 #include <iomanip>
 
 template<class T>
