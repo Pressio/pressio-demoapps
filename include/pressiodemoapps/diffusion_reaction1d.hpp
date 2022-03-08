@@ -56,9 +56,11 @@ struct DefaultSourceProblemA{
 
 
 namespace pressiodemoapps{
+
 // ----------------------------------------------------------
 // create default problem
 // ----------------------------------------------------------
+
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
@@ -66,7 +68,7 @@ template<
 RetType
 // bindings need unique naming or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-create_diffreac1d_problem_ov1
+create_diffusion_reaction_1d_problem_default_for_py
 #else
 create_problem_eigen
 #endif
@@ -91,25 +93,26 @@ create_problem_eigen
 // ----------------------------------------------------------
 // create problem A with custom diffusion/reaction coeffs
 // ----------------------------------------------------------
+
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-create_diffreac1d_problem_A_eigen_ov1
+create_diffusion_reaction_1d_problem_A_ov1_for_py
 #else
-create_diffusion_reaction_2d_problem_A_eigen
+create_diffusion_reaction_1d_problem_A_eigen
 #endif
 (const mesh_t & meshObj,
- ViscousFluxReconstruction viscFluxRecEnum,
  typename mesh_t::scalar_t diffusion,
  typename mesh_t::scalar_t reaction)
 {
+
   using scalar_t = typename mesh_t::scalar_t;
   return RetType(impldiffusionreaction1d::TagProblemA{},
 		 meshObj,
-		 viscFluxRecEnum,
+		 ViscousFluxReconstruction::FirstOrder,
 		 impldiffusionreaction1d::DefaultSourceProblemA<scalar_t>(),
 		 diffusion, reaction);
 }
@@ -122,23 +125,21 @@ template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
-RetType create_diffreac1d_problem_A_eigen_ov2(const mesh_t & meshObj,
-					      ViscousFluxReconstruction viscFluxRecEnum,
-					      // source term is passed as a Python functor
-					      pybind11::object pyFunctor,
-					      typename mesh_t::scalar_t diffusion,
-					      typename mesh_t::scalar_t reaction)
+RetType create_diffusion_reaction_1d_problem_A_ov2_for_py(const mesh_t & meshObj,
+							  // source term is passed as a Python functor
+							  pybind11::object pyFunctor,
+							  typename mesh_t::scalar_t diffusion,
+							  typename mesh_t::scalar_t reaction)
 {
   using scalar_t = typename mesh_t::scalar_t;
   auto sourceWrapper = [=](const scalar_t & x,
 			   const scalar_t & evaltime,
-			   scalar_t & value)
-  {
+			   scalar_t & value){
     value = pyFunctor.attr("__call__")(x, evaltime).template cast<scalar_t>();
   };
 
   return RetType(impldiffusionreaction1d::TagProblemA{},
-		 meshObj, viscFluxRecEnum,
+		 meshObj, ViscousFluxReconstruction::FirstOrder,
 		 sourceWrapper, diffusion, reaction);
 }
 
@@ -149,7 +150,7 @@ template<
   class SourceType,
   class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
-RetType create_diffusion_reaction_2d_problem_A_eigen(const mesh_t & meshObj,
+RetType create_diffusion_reaction_1d_problem_A_eigen(const mesh_t & meshObj,
 						     ViscousFluxReconstruction viscFluxRecEnum,
 						     SourceType sourceF,
 						     typename mesh_t::scalar_t diffusion,

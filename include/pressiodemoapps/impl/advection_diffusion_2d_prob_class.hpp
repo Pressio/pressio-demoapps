@@ -54,7 +54,8 @@ private:
 public:
 
   // constructor for Burgers2d
-  EigenApp(const MeshType & meshObj,
+  EigenApp(TagBurgers /*tag*/,
+	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
 	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
@@ -62,8 +63,7 @@ public:
 	   scalar_type icSpread,
 	   scalar_type diffusionCoeff,
 	   scalar_type x0,
-	   scalar_type y0,
-	   TagBurgers /*tag*/)
+	   scalar_type y0)
     : m_numDofPerCell(1),
       m_probEn(::pressiodemoapps::AdvectionDiffusion2d::Burgers),
       m_inviscidFluxRecEn(inviscidFluxRecEn),

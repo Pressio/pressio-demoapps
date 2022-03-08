@@ -45,38 +45,28 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/swe2d.hpp"
-   // ...
 
    namespace pda     = pressiodemoapps;
-   const auto probId = pda::Swe2d::SlipWall;
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
 
    // A. constructor for problem using default values
    {
+     const auto probId = pda::Swe2d::SlipWall;
      auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
-   // B. constructor for problem specifying two out of three coefficients
-   {
-     using scalar_type = typename decltype(meshObj)::scalar_t;
-     const scalar_type gravity = /* some value */;
-     const scalar_type coriolis = /* some value */;
-
-     auto problem = pda::create_problem_eigen(meshObj, probId, scheme, gravity, coriolis);
-   }
-
-   // C. constructor for problem specifying all coefficients
+   // B. constructor for problem specifying all coefficients
    {
      using scalar_type   = typename decltype(meshObj)::scalar_t;
      const scalar_type gravity = /* some value */;
      const scalar_type coriolis = /* some value */;
      const scalar_type initPulseMagnitude = /* some value */;
 
-     auto problem = pda::create_problem_eigen(meshObj, probId, scheme,
-					      gravity, coriolis, initPulseMagnitude);
+     auto problem = pda::create_slip_wall_swe_2d_problem_eigen(meshObj, scheme,
+					                       gravity, coriolis,
+							       initPulseMagnitude);
    }
 
-   auto state = problem.initialCondition();
 
 Python synopsis
 ---------------
@@ -92,19 +82,13 @@ Python synopsis
    # A. constructor for problem using default values
    problem = pda.create_problem(meshObj, probId, scheme)
 
-   # B. constructor for problem specifying two out of three coefficients
-   gravity  = ...
-   coriolis = ...
-   problem = pda.create_problem(meshObj, probId, scheme, gravity, coriolis)
-
-   # C. constructor for problem specifying all coefficients
+   # B. constructor for problem specifying all coefficients
    gravity  = ...
    coriolis = ...
    initPulseMagnitude = ...
-   problem = pda.create_problem(meshObj, probId, scheme, gravity, coriolis, initPulseMagnitude)
-
-   state   = problem.initialCondition()
-
+   problem = pda.create_slip_wall_swe_2d_problem(meshObj, scheme,
+                                                 gravity, coriolis,
+						 initPulseMagnitude)
 
 
 Sample Plot

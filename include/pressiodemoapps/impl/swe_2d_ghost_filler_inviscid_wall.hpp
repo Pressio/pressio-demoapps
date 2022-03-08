@@ -98,7 +98,7 @@ private:
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 9);
 
-    this->operator()(smPt, gRow);
+    stencilThreeImpl(smPt, gRow);
     const auto left0 = graph(smPt, 1);
     const auto front0 = graph(smPt, 2);
     const auto right0 = graph(smPt, 3);
@@ -144,7 +144,7 @@ private:
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 13);
 
-    this->operator()(smPt, gRow);
+    stencilFiveImpl(smPt, gRow);
     const auto left1  = graph(smPt, 5);
     const auto front1 = graph(smPt, 6);
     const auto right1 = graph(smPt, 7);

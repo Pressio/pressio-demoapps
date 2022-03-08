@@ -50,16 +50,15 @@ C++ synopsis
 
 .. code-block:: c++
 
-   #include "pressiodemoapps/diffusion_reaction.hpp"
-   // ...
+   #include "pressiodemoapps/diffusion_reaction2d.hpp"
 
    namespace pda      = pressiodemoapps;
    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
-   const auto probId  = pda::DiffusionReaction2d::GrayScott;
    const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
    {
+     const auto probId  = pda::DiffusionReaction2d::GrayScott;
      auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
    }
 
@@ -70,8 +69,8 @@ C++ synopsis
      const scalar_type Db       = /*some_value*/;
      const scalar_type feedRate = /*some_value*/;
      const scalar_type killRate = /*some_value*/;
-     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme,
-						   Da, Db, feedRate, killRate);
+     auto problem      = pda::create_gray_scott_2d_problem(meshObj, scheme,
+						            Da, Db, feedRate, killRate);
    }
 
 
@@ -81,16 +80,16 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
-   probId  = pda.DiffusionReaction2d.GrayScott
+
    scheme  = pda.ViscousFluxReconstruction.FirstOrder
 
    # A. constructor for problem using default values
+   probId  = pda.DiffusionReaction2d.GrayScott
    problem = pda.create_problem(meshObj, probId, scheme)
 
    # B. setting custom coefficients
    Da, Db, F, K = ...
-   problem = pda.create_problem(meshObj, probId, scheme, Da, Db, F, K)
+   problem = pda.create_gray_scott_2d_problem(meshObj, scheme, Da, Db, F, K)
 
 
 Notes:

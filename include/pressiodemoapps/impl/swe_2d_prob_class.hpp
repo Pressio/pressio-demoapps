@@ -57,16 +57,14 @@ public:
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   scalar_type gravity,
 	   scalar_type coriolis,
-	   scalar_type initialPulseMag,
-	   int icIdentifier)
+	   scalar_type initialPulseMag)
     : m_probEn(::pressiodemoapps::Swe2d::SlipWall),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
       m_meshObj(meshObj),
       m_gravity(gravity),
       m_coriolis(coriolis),
-      m_initialPulseMagnitude(initialPulseMag),
-      m_icIdentifier(icIdentifier)
+      m_initialPulseMagnitude(initialPulseMag)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -81,12 +79,7 @@ public:
     state_type initialState(m_numDofStencilMesh);
     switch(m_probEn){
     case ::pressiodemoapps::Swe2d::SlipWall:{
-      if( m_icIdentifier == 1){
-	GaussianPulse(initialState, m_meshObj, m_initialPulseMagnitude);
-      }
-      else{
-	throw std::runtime_error("invalid IC");
-      }
+      GaussianPulse(initialState, m_meshObj, m_initialPulseMagnitude);
     }
     };
 
@@ -839,8 +832,6 @@ private:
   }
 
 protected:
-  int m_icIdentifier = 1;
-
   ::pressiodemoapps::Swe2d m_probEn;
   ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;

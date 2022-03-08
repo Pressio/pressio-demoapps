@@ -26,8 +26,9 @@ enum class Euler3d{
 namespace pressiodemoapps{
 
 // ----------------------------------------------------------
-// create a default problem with specific initial condition
+// create a default problem
 // ----------------------------------------------------------
+
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impleuler3d::EigenApp<mesh_t>>
@@ -35,22 +36,23 @@ template<
 RetType
 // bindings need unique nameing or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-create_euler3d_problem_ov1
+  create_euler_3d_problem_default_for_py
 #else
-create_problem_eigen
+  create_problem_eigen
 #endif
 (const mesh_t & meshObj,
  Euler3d problemEnum,
- InviscidFluxReconstruction recEnum,
- int icId)
+ InviscidFluxReconstruction recEnum)
 {
+
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov);
 }
 
 // ----------------------------------------------------------
-// create a default problem
+// create a default problem with specific initial condition
 // ----------------------------------------------------------
+
 template<
   class mesh_t,
   class RetType = PublicProblemMixinCpp<impleuler3d::EigenApp<mesh_t>>
@@ -58,13 +60,14 @@ template<
 RetType
 // bindings need unique nameing or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-create_euler3d_problem_default
+  create_euler_3d_problem_ov1_for_py
 #else
-create_problem_eigen
+  create_problem_eigen
 #endif
 (const mesh_t & meshObj,
  Euler3d problemEnum,
- InviscidFluxReconstruction recEnum)
+ InviscidFluxReconstruction recEnum,
+ int icId)
 {
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov);

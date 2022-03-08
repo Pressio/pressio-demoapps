@@ -40,13 +40,11 @@ def make_plot(state):
   # plt.pause(0.001)
   plt.show()
 
-probId   = pda.DiffusionReaction2d.GrayScott
-
 def test_default_coefficients():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
-  scheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.create_problem(meshO, probId, scheme)
+  probId   = pda.DiffusionReaction2d.GrayScott
+  appObj   = pda.create_problem(meshO, probId)
 
   yn = appObj.initialCondition()
   dt = 0.8
@@ -63,7 +61,7 @@ def test_custom_coefficients():
   meshPath = str(file_path)+"/mesh"
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   scheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.create_problem(meshO, probId, scheme, 0.0005, 0.0001, 0.045, 0.065)
+  appObj   = pda.create_gray_scott_2d_problem(meshO, scheme, 0.0005, 0.0001, 0.045, 0.065)
 
   yn = appObj.initialCondition()
   dt = 0.8

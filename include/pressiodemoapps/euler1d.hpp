@@ -38,7 +38,7 @@ template<
 RetType
 // bindings need unique nameing or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-create_euler1d_problem_ov1
+create_euler_1d_py_problem_default
 #else
 create_problem_eigen
 #endif
@@ -46,7 +46,8 @@ create_problem_eigen
  Euler1d problemEnum,
  InviscidFluxReconstruction recEnum)
 {
-  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov);
+  return RetType(meshObj, problemEnum, recEnum,
+		 InviscidFluxScheme::Rusanov);
 }
 
 }//end namespace pressiodemoapps
