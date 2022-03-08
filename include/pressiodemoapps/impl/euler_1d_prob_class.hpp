@@ -128,8 +128,8 @@ protected:
       edge_rec_type uPlusHalfNeg(m_numDofPerCell);
       edge_rec_type uPlusHalfPos(m_numDofPerCell);
       // fluxes
-      flux_type fluxL(m_numDofPerCell, m_numDofPerCell);
-      flux_type fluxR(m_numDofPerCell, m_numDofPerCell);
+      flux_type fluxL(m_numDofPerCell);
+      flux_type fluxR(m_numDofPerCell);
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
       ::pressiodemoapps::set_zero_omp(V);
