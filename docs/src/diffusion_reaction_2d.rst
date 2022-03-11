@@ -1,7 +1,7 @@
 2D single-species reaction diffusion
 ====================================
 
-This problem focuses on the following 2d diffusion reaction PDE:
+This problem focuses on the following 2D reaction diffusion PDE:
 
 .. math::
 
@@ -11,7 +11,7 @@ This problem focuses on the following 2d diffusion reaction PDE:
 
 * ``D, k, u(x, y, t)`` can be provided to the problem constructor (more below)
 
-* IC: :math:`s(x, y, 0) = 0`
+* Initial conditions: :math:`s(x, y, 0) = 0`
 
 * Default settings:
 
@@ -19,9 +19,9 @@ This problem focuses on the following 2d diffusion reaction PDE:
 
   - ``k = 0.01``
 
-  - :math:`u(x, y, t) = 4 \sin(4 \pi x y) \sin(\pi x (y-0.2))`
+  - :math:`u(x, y, t) = 4 \sin(4 \pi x y) \sin(\pi x (y-2/10))`
 
-* Domain is ``[0,1]^2`` with homogenous Dirichlet BC
+* Domain is unit square :math:`[0,1]^2` with homogenous Dirichlet BC
 
 
 Mesh
@@ -32,7 +32,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem diffreac2d -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` is the number of cells you want along x and y,
+where ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
@@ -101,7 +101,7 @@ Python synopsis
 
    # C. setting custom coefficients and custom source function
    mysource = lambda x, y, time : np.sin(math.pi*x) + y * x + time # or whatever
-   problem = pda.create_diffusion_reaction_2d_problem_A(meshObj, scheme, mysource, 0.2, 0.001)
+   problem = pda.create_diffusion_reaction_2d_problem_A(meshObj, scheme, mysource, myD, myK)
 
 
 Notes:

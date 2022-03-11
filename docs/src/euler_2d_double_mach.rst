@@ -1,15 +1,15 @@
 2D Euler Double Mach Reflection
 ===============================
 
-This problem solves the *2D convervative Euler equations*.
+This problem solves the *2D conservative Euler equations*.
 
-- `Reference paper <http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010116000000000000000>`_
+- The problem is adopted from `this paper <http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010116000000000000000>`_
 
-- IC is a Mach 10 shock in air tilted by an angle, see paper above.
+- Initial condition is a Mach 10 shock in air tilted by an angle, see reference paper above.
 
-- Domain is [0.0, 4.0]x[0.0, 1.0]; for BC see link above.
+- Domain is :math:`[0, 4]\times[0, 1]`. For BC see link above.
 
-- Typically, integration is performed for `t \in (0, 0.25)`.
+- Typically, integration is performed for :math:`t \in (0, 0.25)`.
 
 
 .. Caution::
@@ -24,7 +24,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem doublemach2d_s{3,5} -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``,
+where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 
@@ -57,7 +57,7 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *density* plot at ``t=0.25`` using a 600x150 mesh with ``Weno3``
+Representative *density* plot at :math:`t=0.25` using a ``600x150`` mesh with Weno3
 and SSPRK3 time integration:
 
 .. image:: ../../figures/wiki_2d_dmr_density.png

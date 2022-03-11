@@ -1,7 +1,7 @@
 2D Euler Normal Shock
 =====================
 
-This problem solves the *2D convervative Euler equations*.
+This problem solves the *2D conservative Euler equations*.
 
 Mesh
 ----

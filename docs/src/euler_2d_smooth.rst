@@ -1,15 +1,21 @@
 2D Euler Smooth
 ===============
 
-This problem solves the *2D convervative Euler equations* for a smooth field.
+This problem solves the *2D conservative Euler equations* for a smooth field.
 
-- IC: :math:`\rho = 1 + 0.2*sin(\pi (x+y)), u = 1, v = 1, p = 1`
+* The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 
-- Domain is ``[-1, 1]^2`` with periodic BC
+* Initial conditions: 
+  
+  - :math:`\rho = 1 + 0.2\sin(\pi (x+y))`
+  
+  - :math:`u = 1, v = 1, p = 1`
+  
+* Domain is :math:`[-1, 1]^2` with periodic BC
 
-- Analytical density at time `t`: :math:`\rho = 1 + 0.2*sin(\pi (x+y - 2 t))`
+* Analytical density as function of time is given as :math:`\rho(t) = 1 + 0.2\sin(\pi (x+y - 2 t))`
 
-- Typically, integration is performed for :math:`t \in (0, 2.)`.
+* Typically, integration is performed for :math:`t \in (0, 2)`
 
 
 Mesh
@@ -20,7 +26,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem euler2dsmooth_s{3,5,7} -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``,
+where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis
@@ -52,7 +58,7 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *density* field at ``t=2`` using a 100x100 mesh with ``Weno3``
+Representative *density* field at selected time :math:`t=2` using a ``100x100`` mesh with Weno3
 and RK4 time integration:
 
 .. image:: ../../figures/wiki_2d_smooth_density.png
