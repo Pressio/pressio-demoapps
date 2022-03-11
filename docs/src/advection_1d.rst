@@ -1,11 +1,16 @@
 1D Linear Advection
 ===================
 
-This problem solves the *1D linear advection* with variable advecting velocity.
+This problem solves the *1D linear advection* with variable advecting velocity
+
+.. math::
+   \frac{\partial y}{\partial t} + a \frac{\partial y}{\partial x} = 0
+
+for quantity to be transported :math:`y` (e.g. the density) and advection velocity :math:`a`.
 
 * Initial condition: :math:`y(x, 0) = \sin(\pi x)`
-* Domain is :math:`-1 \leq x \leq 1` with periodic BC
-* Integration is typically performed over :math:`t \in (0, 2k)` where k is 1 or 2 or 3 ...
+* Domain is :math:`[-1,1]` with periodic BC
+* Integration is typically performed over :math:`t \in (0, 2k)` where :math:`k \in \mathbb{Z}`
 * Default: use a unitary velocity
 
 Mesh
@@ -59,9 +64,9 @@ Python synopsis
 Sample Solution
 ---------------
 
-Representative plot showing initial condition and solution at `t=1.` and `t=2`,
-obtained with default velocity, using `dt = 0.001`, Weno5, Runge-Kutta4 integration
-with a mesh of 250 cells.
+Representative plot showing initial condition and solution at :math:`t=1` and :math:`t=2`,
+obtained using :math:`dt = 10^{-3}`, Weno5, Runge-Kutta4 integration with a mesh of :math:`N=250` cells.
+
 
 .. image:: ../../figures/wiki_advection_0.001_2_250_weno5_rk4.png
   :width: 60 %

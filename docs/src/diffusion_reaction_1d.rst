@@ -1,18 +1,18 @@
 1D single-species reaction diffusion
 ====================================
 
-This problem focuses on the following 1d diffusion reaction PDE:
+This problem focuses on the following 1D diffusion reaction PDE:
 
 .. math::
 
    \frac{\partial y}{\partial t} = D \frac{\partial^2 y}{\partial x^2} + k y^2 + u(x, t)
 
 
-* Adapted from `this paper <https://arxiv.org/abs/1910.03193>`_
+* The problem is adapted from `this paper <https://arxiv.org/abs/1910.03193>`_
 
 * ``D, k, u(x, t)`` can be provided to the problem constructor (more below)
 
-* IC: :math:`y(x, 0) = 0`
+* Initial condition: :math:`y(x, 0) = 0`
 
 * Default settings:
 
@@ -20,9 +20,10 @@ This problem focuses on the following 1d diffusion reaction PDE:
 
   - ``k = 0.01``
 
-  - :math:`u(x, t) = \sin(\pi x) x^2 4 \cos(4 \pi x)`
+  - :math:`u(x, t) = 4 x^2\sin(\pi x) \cos(4 \pi x)`
 
-* Domain is ``[0,1]`` with homogenous Dirichlet BC
+* Domain is :math:`[0,1]` with homogenous Dirichlet BC
+
 
 
 Mesh
@@ -96,7 +97,7 @@ Python synopsis
 
    # C. setting custom coefficients and custom source function
    mysource = lambda x, time : np.sin(math.pi*x) *x*x * 4.*np.cos(4.*math.pi*x)
-   problem = pda.create_diffusion_reaction_1d_problem_A(meshObj, mysource, 0.2, 0.001)
+   problem = pda.create_problem(meshObj, probId, scheme, mysource, myD, myK)
 
 
 Notes:

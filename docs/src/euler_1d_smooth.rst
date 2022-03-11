@@ -3,9 +3,9 @@
 
 This problem solves the *1D convervative Euler equations* for a smooth field.
 
-* `Reference paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
+* The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 
-* IC:
+* Initial conditions:
 
   - :math:`\rho(x, 0) = 1 + 0.2 \sin(\pi x)`
 
@@ -13,11 +13,11 @@ This problem solves the *1D convervative Euler equations* for a smooth field.
 
   - :math:`p(x,0) = 1`
 
-* Domain is ``[-1,1]`` with periodic BC
+* Domain is :math:`[-1,1]` with periodic BC
 
-* Analytical density at time `t`: :math:`\rho = 1 + 0.2 \sin(\pi (x-t))`
+* Analytical density as function of time :math:`t` is given as :math:`\rho(t) = 1 + 0.2\sin(\pi (x-t))`
 
-* Typically, integration is performed over :math:`t \in (0, 2)`.
+* Typically, integration is performed over :math:`t \in (0, 2)`
 
 
 Mesh
