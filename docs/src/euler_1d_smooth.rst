@@ -1,7 +1,7 @@
 1D Euler Smooth
 ===============
 
-This problem solves the *1D convervative Euler equations* for a smooth field.
+This problem solves the *1D conservative Euler equations* for a smooth field.
 
 * The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 
