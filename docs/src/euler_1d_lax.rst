@@ -5,14 +5,15 @@ This problem solves the *1D Euler conservative equations* for the 1D Lax problem
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/274407416_Finite_Difference_Hermite_WENO_Schemes_for_Hyperbolic_Conservation_Laws>`_
 
-- Initial conditions:
+- Initial conditions in primivite variables:
 
   - :math:`x<=0 : \quad \rho = 0.445,  u = 0.698, p = 3.528`
 
   - :math:`x>0 : \quad \rho = 0.5, u = 0.0, p = 0.571`
 
-- Domain is :math:`[-5.0, 5.0]` with homogeneous Neumann BC
+  - These are used to create the initial conditions in conservative variables.
 
+- Domain is :math:`[-5.0, 5.0]` with homogeneous Neumann BC
 
 - Time integration is performed over :math:`t \in (0, 1.3)`.
 

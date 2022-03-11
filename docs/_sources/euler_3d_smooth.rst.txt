@@ -1,23 +1,24 @@
 3D Euler Smooth
 ===============
 
-This problem solves the *3D Euler equations* in conserative form for a smooth field.
+This problem solves the *3D Euler equations* in conservative form for a smooth field.
 
-- `Reference paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
-  in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1` (see below)
+- The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
+  
+  - in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1`
 
-- IC (primitive variables):
+- Initial conditions (primitive variables):
 
-  - :math:`\rho = 1 + 0.2*sin(\pi (x+y+z))`
+  - :math:`\rho = 1 + 0.2\sin(\pi (x+y+z))`
 
   - :math:`u = 1, v = 1, w = 1, p = 1`
 
 
-- Domain is ``[-1, 1]^3`` with periodic BC
+- Domain is :math:`[-1, 1]^3` with periodic BC
 
-- Analytical density at time `t`: :math:`\rho = 1 + 0.2*sin(\pi (x+y+z - 3 t))`
+- Analytical density as function of time is given as: :math:`\rho(t) = 1 + 0.2\sin(\pi (x+y+z - 3 t))`
 
-- Typically, integration is performed for :math:`t \in (0, 2.)`.
+- Typically, integration is performed for :math:`t \in (0, 2)`
 
 
 .. Caution::
@@ -32,7 +33,7 @@ Mesh
            --problem euler3dsmooth_s{3,5} -n Nx Ny Nz --outDir <destination-path>
 
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5``,
+where ``Nx, Ny, Nz`` are the number of cells you want along :math:`x`, :math:`y` and :math:`z` respectively, and ``<stencilSize> = 3 or 5``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 C++ synopsis

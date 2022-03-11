@@ -9,11 +9,13 @@ This problem solves the *2D conservative Euler equations*.
 
   - :math:`\Omega_2`: Rest of the domain
 
-- Initial conditions:
+* Initial conditions in primitive variables: 
 
   - in :math:`\Omega_1`: :math:`\rho = 2, u = 0.5, v = 0, p = 2.5`
 
   - in :math:`\Omega_2`: :math:`\rho = 1, u = -0.5, v = 0, p = 2.5`
+
+  - This IC is used to create the corresponding initial conditions in conservative variables.
 
 - Time integration performed for 2.5 flow through units, :math:`t \in (0, 50)`
 

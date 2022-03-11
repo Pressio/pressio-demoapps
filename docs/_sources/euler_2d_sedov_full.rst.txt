@@ -1,25 +1,23 @@
 2D Euler Sedov Full
 ===================
 
-This problem solves the *2D convervative Euler equations*.
+This problem solves the *2D conservative Euler equations*.
 
-* `Reference paper <https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics>`_
+* The problem is adapted from `this paper <https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics>`_
 
-- IC is a high pressure concentrated small spherical region of radius ``R = 2. * min(dx, dy)``
+* Initial conditions in primitive variables: 
+  
+  - a high pressure concentrated small spherical region of radius :math:`R = 2\min(dx, dy)`
 
-  - For :math:`r<=R`:
+  - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = (\gamma-1)/(\pi R^2); & r\leq R \\ \rho =1, u = 0, v = 0, p = 5\cdot 10^{-5}; & r>R \end{matrix}\right.`
 
-    - :math:`\rho =1, u = 0, v = 0, p = (\gamma-1)/(pi*R*R)`
+  Here :math:`dx, dy` are the cell widths and the factor of :math:`2` is used to spread the source over 2 cells for numerical reasons, and :math:`r = \sqrt{x^2+y^2}` is the Eucledian distance from the origin.
 
-  - For :math:`r>R`:
+  - This IC is used to create the corresponding initial conditions in conservative variables.
 
-    - :math:`\rho =1, u = 0, v = 0, p = 5e-5`
+- Domain is :math:`[-1.2, 1.2]^2` with homogeneous Neumann BC on all boundaries
 
-  :math:`dx, dy` are the cell widths and the factor of 2 is used to spread the source over 2 cells for numerical reasons, and :math:`r = sqrt(x^2+y^2)` is the distance from the origin.
-
-- Domain is ``[-1.2, 1.2]^2`` with homogeneous Neumann BC on all boundaries
-
-- Typically, integration is performed for :math:`t \in (0, 1.)`.
+- Typically, integration is performed for :math:`t \in (0, 1)`
 
 
 Mesh
@@ -30,7 +28,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem sedov2d_s{3,5,7} -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``,
+where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 
@@ -63,7 +61,7 @@ Python synopsis
 Sample Plot
 -----------
 
-Representative *pressure* plot at ``t=0.2`` using a 200x200 mesh with ``Weno3``
+Representative *pressure* plot at selected time :math:`t=0.2` using a ``200x200`` mesh with Weno3
 and SSPRK3 time integration:
 
 .. image:: ../../figures/wiki_2d_sedov_pressure.png

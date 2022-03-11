@@ -227,12 +227,15 @@
         <article role="main">
           <div class="section" id="d-linear-advection">
 <h1>1D Linear Advection<a class="headerlink" href="#d-linear-advection" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>1D linear advection</em> with variable advecting velocity.</p>
+<p>This problem solves the <em>1D linear advection</em> with variable advecting velocity</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[\frac{\partial y}{\partial t} + a \frac{\partial y}{\partial x} = 0\]</div></div>
+<p>for a scalar field <span class="math notranslate nohighlight">\(y\)</span> and advection velocity <span class="math notranslate nohighlight">\(a\)</span>.</p>
 <ul class="simple">
 <li><p>Initial condition: <span class="math notranslate nohighlight">\(y(x, 0) = \sin(\pi x)\)</span></p></li>
-<li><p>Domain is <span class="math notranslate nohighlight">\(-1 \leq x \leq 1\)</span> with periodic BC</p></li>
-<li><p>Integration is typically performed over <span class="math notranslate nohighlight">\(t \in (0, 2k)\)</span> where k is 1 or 2 or 3 …</p></li>
-<li><p>Default: use a unitary velocity</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1,1]\)</span> with periodic BC</p></li>
+<li><p>Integration is typically performed over <span class="math notranslate nohighlight">\(t \in (0, 2k)\)</span> where <span class="math notranslate nohighlight">\(k \in \mathbb{Z}\)</span></p></li>
+<li><p>Default setting uses <span class="math notranslate nohighlight">\(a=1\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -277,9 +280,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-solution">
 <h2>Sample Solution<a class="headerlink" href="#sample-solution" title="Permalink to this headline">¶</a></h2>
-<p>Representative plot showing initial condition and solution at <cite>t=1.</cite> and <cite>t=2</cite>,
-obtained with default velocity, using <cite>dt = 0.001</cite>, Weno5, Runge-Kutta4 integration
-with a mesh of 250 cells.</p>
+<p>Representative plot showing initial condition and solution at <span class="math notranslate nohighlight">\(t=1\)</span> and <span class="math notranslate nohighlight">\(t=2\)</span>,
+obtained using <span class="math notranslate nohighlight">\(dt = 10^{-3}\)</span>, Weno5, Runge-Kutta4 integration with a mesh of <span class="math notranslate nohighlight">\(N=250\)</span> cells.</p>
 <a class="reference internal image-reference" href="_images/wiki_advection_0.001_2_250_weno5_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_advection_0.001_2_250_weno5_rk4.png" style="width: 60%;"/></a>
 </div>
 </div>
@@ -313,7 +315,7 @@ with a mesh of 250 cells.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/advection_1d.rst.txt"

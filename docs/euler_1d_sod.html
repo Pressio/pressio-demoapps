@@ -229,17 +229,18 @@
 <h1>1D Euler Sod<a class="headerlink" href="#d-euler-sod" title="Permalink to this headline">¶</a></h1>
 <p>This problem solves the <em>1D Euler conservative equations</em> for the Sod1d problem.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://iopscience.iop.org/article/10.1086/317361">Reference paper</a></p></li>
+<li><p>The problem is adapted from <a class="reference external" href="https://iopscience.iop.org/article/10.1086/317361">this paper</a></p></li>
 </ul>
 <ul class="simple">
-<li><p>IC:</p>
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(x&lt;=0\)</span>: <span class="math notranslate nohighlight">\(\rho =1, u = 0, p = 1\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;0\)</span>: <span class="math notranslate nohighlight">\(\rho =0.125, u = 0, p = 0.1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x&lt;=0 :\quad \rho =1, u = 0, p = 1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x&gt;0 :\quad \rho =1/8, u = 0, p = 0.1\)</span></p></li>
+<li><p>These are used to create the initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-0.5,</span> <span class="pre">0.5]</span></code> with homogeneous Neumann BC</p></li>
-<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 0.2)\)</span>.</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-0.5, 0.5]\)</span> with homogeneous Neumann BC</p></li>
+<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 0.2)\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -273,8 +274,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-solution">
 <h2>Sample Solution<a class="headerlink" href="#sample-solution" title="Permalink to this headline">¶</a></h2>
-<p>Representative plot for total simulation time <code class="docutils literal notranslate"><span class="pre">T=0.2</span></code> showing density at <code class="docutils literal notranslate"><span class="pre">t=0,</span> <span class="pre">0.1,</span> <span class="pre">0.2</span></code>
-obtained using <code class="docutils literal notranslate"><span class="pre">dt</span> <span class="pre">=</span> <span class="pre">0.0001</span></code>, <code class="docutils literal notranslate"><span class="pre">Weno5</span></code>, Runge-Kutta4 integration with a mesh of 1000 cells.</p>
+<p>Representative plot for total simulation time <span class="math notranslate nohighlight">\(T=0.2\)</span> showing density at selected time steps <span class="math notranslate nohighlight">\(t \in \left \{0, 0.1, 0.2\right \}\)</span>
+obtained using time step <span class="math notranslate nohighlight">\(dt = 10^{-4}\)</span>, Weno5, Runge-Kutta4 integration with a mesh of <span class="math notranslate nohighlight">\(N=1000\)</span> cells.</p>
 <a class="reference internal image-reference" href="_images/wiki_sod1d_0.0001_0.2_1000_weno5_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_sod1d_0.0001_0.2_1000_weno5_rk4.png" style="width: 60%;"/></a>
 </div>
 </div>
@@ -308,7 +309,7 @@ obtained using <code class="docutils literal notranslate"><span class="pre">dt</
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_1d_sod.rst.txt"

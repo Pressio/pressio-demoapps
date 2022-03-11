@@ -227,29 +227,26 @@
         <article role="main">
           <div class="section" id="d-gray-scott-reaction-diffusion">
 <h1>2D Gray Scott reaction-diffusion<a class="headerlink" href="#d-gray-scott-reaction-diffusion" title="Permalink to this headline">¶</a></h1>
-<p>This problem focuses on the following 2d diffusion reaction PDE:</p>
+<p>This problem focuses on the following 2D reaction-diffusion system of PDE:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\frac{\partial A}{\partial t} &amp;=
 D_a \left(\frac{\partial^2 A}{\partial x^2} + \frac{\partial^2 A}{\partial y^2}\right)
 - AB^2 + F(1-A)\\\frac{\partial B}{\partial t} &amp;=
 D_b \left(\frac{\partial^2 B}{\partial x^2} + \frac{\partial^2 B}{\partial y^2}\right)
 + AB^2 - (F+K)B\end{aligned}\end{align} \]</div></div>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(D_a, D_b, F, K\)</span> can be provided to the constructor (more below)</p></li>
-<li><p>IC:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(A=0.5, B=0.25\)</span> if <span class="math notranslate nohighlight">\(|x| &lt; 0.1\)</span> and <span class="math notranslate nohighlight">\(|y|&lt; 0.1\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(A=1, B=0\)</span>, otherwise</p></li>
-</ul>
+<li><p><span class="math notranslate nohighlight">\(D_a, D_b, F, K\)</span> can be provided to the constructor (more below)</p></li>
+<li><p>Initial conditions:</p>
+<p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}A=1/2, B=1/4; &amp; \text{if }|x| &lt; 1/10 \text{ and } |y|&lt; 1/10 \\ A=1, B=0; &amp; \text{otherwise} \end{matrix}\right.\)</span></p>
 </li>
 <li><p>Default settings:</p>
-<ul>
-<li><p><span class="math notranslate nohighlight">\(D_a = 0.0002, D_b = D_a/4\)</span></p></li>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(D_a = 2\cdot 10^{-4}, D_b = D_a/4\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(F=0.042, K=0.062\)</span></p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-1.25,1.25]^2</span></code> with periodic BCs</p></li>
-<li><p>See the following references: <a class="reference external" href="https://itp.uni-frankfurt.de/~gros/StudentProjects/Projects_2020/projekt_schulz_kaefer/">link1</a>, <a class="reference external" href="https://groups.csail.mit.edu/mac/projects/amorphous/GrayScott/">link2</a>.</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-5/4,5/4]^2\)</span> with periodic BCs</p></li>
+<li><p>For more details on the problem, see the following references: <a class="reference external" href="https://itp.uni-frankfurt.de/~gros/StudentProjects/Projects_2020/projekt_schulz_kaefer/">link1</a>, <a class="reference external" href="https://groups.csail.mit.edu/mac/projects/amorphous/GrayScott/">link2</a>.</p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -257,7 +254,7 @@ D_b \left(\frac{\partial^2 B}{\partial x^2} + \frac{\partial^2 B}{\partial y^2}\
         --problem grayscott2d -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along x and y,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -277,12 +274,11 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <span class="c1">// B. setting custom coefficients</span>
 <span class="p">{</span>
   <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Da</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Db</span>       <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">feedRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">killRate</span> <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
-  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
-                                                         <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">feedRate</span><span class="p">,</span> <span class="n">killRate</span><span class="p">);</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Da</span>  <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Db</span>  <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">F</span>   <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">K</span>   <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">K</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -314,8 +310,8 @@ reconstruction, which leads to a second-order scheme.</p>
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative plots at <code class="docutils literal notranslate"><span class="pre">t=1000</span></code> obtained using <code class="docutils literal notranslate"><span class="pre">dt=0.5</span></code>, Runge-Kutta4 integration,
-a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</span></code>, and defaults values for <code class="docutils literal notranslate"><span class="pre">Da,</span> <span class="pre">Db,</span> <span class="pre">F,</span> <span class="pre">K</span></code>.</p>
+<p>Representative plots at selected time <span class="math notranslate nohighlight">\(t=1000\)</span> obtained using time step <span class="math notranslate nohighlight">\(dt=0.5\)</span>, Runge-Kutta4 integration,
+a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</span></code> and default values for <span class="math notranslate nohighlight">\(D_a, D_b, F, K\)</span>.</p>
 <a class="reference internal image-reference" href="_images/wiki_grayscott_2d_0.25_1000_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_grayscott_2d_0.25_1000_rk4.png" style="width: 75%;"/></a>
 </div>
 </div>
@@ -349,7 +345,7 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/grayscott_2d.rst.txt"

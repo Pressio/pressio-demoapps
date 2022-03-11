@@ -6,12 +6,12 @@ This problem solves the *1D linear advection* with variable advecting velocity
 .. math::
    \frac{\partial y}{\partial t} + a \frac{\partial y}{\partial x} = 0
 
-for quantity to be transported :math:`y` (e.g. the density) and advection velocity :math:`a`.
+for a scalar field :math:`y` and advection velocity :math:`a`.
 
 * Initial condition: :math:`y(x, 0) = \sin(\pi x)`
 * Domain is :math:`[-1,1]` with periodic BC
 * Integration is typically performed over :math:`t \in (0, 2k)` where :math:`k \in \mathbb{Z}`
-* Default: use a unitary velocity
+* Default setting uses :math:`a=1`
 
 Mesh
 ----

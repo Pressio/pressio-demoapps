@@ -227,19 +227,20 @@
         <article role="main">
           <div class="section" id="d-euler-smooth">
 <h1>1D Euler Smooth<a class="headerlink" href="#d-euler-smooth" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>1D convervative Euler equations</em> for a smooth field.</p>
+<p>This problem solves the <em>1D conservative Euler equations</em> for a smooth field.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&amp;cbl=2032364">Reference paper</a></p></li>
-<li><p>IC:</p>
+<li><p>The problem is adapted from <a class="reference external" href="https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&amp;cbl=2032364">this paper</a></p></li>
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
 <li><p><span class="math notranslate nohighlight">\(\rho(x, 0) = 1 + 0.2 \sin(\pi x)\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(u(x,0) = 1\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(p(x,0) = 1\)</span></p></li>
+<li><p>These are used to create the initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-1,1]</span></code> with periodic BC</p></li>
-<li><p>Analytical density at time <cite>t</cite>: <span class="math notranslate nohighlight">\(\rho = 1 + 0.2 \sin(\pi (x-t))\)</span></p></li>
-<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 2)\)</span>.</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1,1]\)</span> with periodic BC</p></li>
+<li><p>Analytical density as function of time <span class="math notranslate nohighlight">\(t\)</span> is given as <span class="math notranslate nohighlight">\(\rho(t) = 1 + 0.2\sin(\pi (x-t))\)</span></p></li>
+<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 2)\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -302,7 +303,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_1d_smooth.rst.txt"

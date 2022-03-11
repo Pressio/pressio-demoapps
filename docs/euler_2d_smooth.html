@@ -227,12 +227,19 @@
         <article role="main">
           <div class="section" id="d-euler-smooth">
 <h1>2D Euler Smooth<a class="headerlink" href="#d-euler-smooth" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em> for a smooth field.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em> for a smooth field.</p>
 <ul class="simple">
-<li><p>IC: <span class="math notranslate nohighlight">\(\rho = 1 + 0.2*sin(\pi (x+y)), u = 1, v = 1, p = 1\)</span></p></li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]^2</span></code> with periodic BC</p></li>
-<li><p>Analytical density at time <cite>t</cite>: <span class="math notranslate nohighlight">\(\rho = 1 + 0.2*sin(\pi (x+y - 2 t))\)</span></p></li>
-<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 2.)\)</span>.</p></li>
+<li><p>The problem is adapted from <a class="reference external" href="https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&amp;cbl=2032364">this paper</a></p></li>
+<li><p>Initial conditions in primitive variables:</p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(\rho = 1 + 0.2\sin(\pi (x+y))\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u = 1, v = 1, p = 1\)</span></p></li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
+</ul>
+</li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1, 1]^2\)</span> with periodic BC</p></li>
+<li><p>Analytical density as function of time is given as <span class="math notranslate nohighlight">\(\rho(t) = 1 + 0.2\sin(\pi (x+y - 2 t))\)</span></p></li>
+<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 2)\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -240,7 +247,7 @@
         --problem euler2dsmooth_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -268,7 +275,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>density</em> field at <code class="docutils literal notranslate"><span class="pre">t=2</span></code> using a 100x100 mesh with <code class="docutils literal notranslate"><span class="pre">Weno3</span></code>
+<p>Representative <em>density</em> field at selected time <span class="math notranslate nohighlight">\(t=2\)</span> using a <code class="docutils literal notranslate"><span class="pre">100x100</span></code> mesh with Weno3
 and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_smooth_density.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_smooth_density.png" style="width: 60%;"/></a>
 </div>
@@ -303,7 +310,7 @@ and RK4 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_smooth.rst.txt"

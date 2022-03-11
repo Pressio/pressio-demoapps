@@ -227,21 +227,21 @@
         <article role="main">
           <div class="section" id="d-single-species-reaction-diffusion">
 <h1>2D single-species reaction diffusion<a class="headerlink" href="#d-single-species-reaction-diffusion" title="Permalink to this headline">¶</a></h1>
-<p>This problem focuses on the following 2d diffusion reaction PDE:</p>
+<p>This problem focuses on the following 2D reaction diffusion PDE:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[\frac{\partial s}{\partial t} = D \left(\frac{\partial^2 s}{\partial x^2}
 + \frac{\partial^2 s}{\partial y^2} \right) + k s^2 + u(x, y, t)\]</div></div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">D,</span> <span class="pre">k,</span> <span class="pre">u(x,</span> <span class="pre">y,</span> <span class="pre">t)</span></code> can be provided to the problem constructor (more below)</p></li>
-<li><p>IC: <span class="math notranslate nohighlight">\(s(x, y, 0) = 0\)</span></p></li>
+<li><p>Initial conditions: <span class="math notranslate nohighlight">\(s(x, y, 0) = 0\)</span></p></li>
 <li><p>Default settings:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">D</span> <span class="pre">=</span> <span class="pre">0.01</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">0.01</span></code></p></li>
-<li><p><span class="math notranslate nohighlight">\(u(x, y, t) = 4 \sin(4 \pi x y) \sin(\pi x (y-0.2))\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u(x, y, t) = 4 \sin(4 \pi x y) \sin(\pi x (y-2/10))\)</span></p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[0,1]^2</span></code> with homogenous Dirichlet BC</p></li>
+<li><p>Domain is unit square <span class="math notranslate nohighlight">\([0,1]^2\)</span> with homogenous Dirichlet BC</p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -249,7 +249,7 @@
         --problem diffreac2d -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along x and y,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -313,7 +313,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
 <span class="c1"># C. setting custom coefficients and custom source function</span>
 <span class="n">mysource</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">time</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">time</span> <span class="c1"># or whatever</span>
-<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_diffusion_reaction_2d_problem_A</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">mysource</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_diffusion_reaction_2d_problem_A</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">mysource</span><span class="p">,</span> <span class="n">myD</span><span class="p">,</span> <span class="n">myK</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -357,7 +357,7 @@ reconstruction, which leads to a second-order scheme.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/diffusion_reaction_2d.rst.txt"

@@ -227,29 +227,27 @@
         <article role="main">
           <div class="section" id="d-euler-riemann">
 <h1>2D Euler Riemann<a class="headerlink" href="#d-euler-riemann" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
-<ul class="simple">
-<li><p>Domain is <span class="math notranslate nohighlight">\([0.0, 1.0]^2\)</span> with homogeneous Neumann on all boundaries</p></li>
+<p>This problem solves the <em>2D conservative Euler equations</em>.</p>
+<ul>
+<li><p>Domain is <span class="math notranslate nohighlight">\([0, 1]^2\)</span> with homogeneous Neumann on all boundaries</p></li>
 <li><p>Various initial conditions are supported:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">icId==1</span></code>:</p>
 <ul>
-<li><p>See page 15 of <a class="reference external" href="https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations">paper1</a></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;=0.5, y&gt;=0.5\)</span>: <span class="math notranslate nohighlight">\(\rho = 0.5313, u = 0, v = 0, p = 0.4\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&lt;0.5, y&gt;=0.5\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0.7276., v = 0, p = 1\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&lt;0.5, y&lt;0.5\)</span>: <span class="math notranslate nohighlight">\(\rho = 0.8, u = 0, v = 0., p = 1\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;0.5, y&lt;0.5\)</span>: <span class="math notranslate nohighlight">\(\rho = 1., u = 0, v = 0.7276, p = 1\)</span></p></li>
-<li><p>Time integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 0.2)\)</span>.</p></li>
+<li><p>See page 15 of <a class="reference external" href="https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations">paper1</a></p>
+<p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho = 0.5313, u = 0, v = 0, p = 0.4; &amp; x\geq 1/2, y\geq 1/2\\ \rho = 1, u = 0.7276, v = 0, p = 1; &amp; x&lt;1/2, y\geq 1/2 \\ \rho = 4/5, u = 0, v = 0, p = 1; &amp; x&lt;1/2, y&lt;1/2 \\ \rho = 1, u = 0, v = 0.7276, p = 1;&amp; x&gt;1/2, y&lt;1/2 \end{matrix}\right.\)</span></p>
+</li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
+<li><p>Time integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 1/5)\)</span></p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">icId==2</span></code>:</p>
 <ul>
-<li><p>See configuration 3 of <a class="reference external" href="http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf">paper2</a></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;=0.8, y&gt;=0.8\)</span>: <span class="math notranslate nohighlight">\(\rho = 1.5, u = 0, v = 0, p = 1.5\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&lt;0.8, y&gt;=0.8\)</span>: <span class="math notranslate nohighlight">\(\rho = 0.5323, u = 1.206, v = 0, p = 0.3\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&lt;0.8, y&lt;0.8\)</span>: <span class="math notranslate nohighlight">\(\rho = 0.138, u = 1.206, v = 1.206, p = 0.029\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;0.8, y&lt;0.8\)</span>: <span class="math notranslate nohighlight">\(\rho = 0.5323, u = 0, v = 1.206, p = 0.3\)</span></p></li>
-<li><p>Time integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 0.8)\)</span>.</p></li>
+<li><p>See configuration 3 of <a class="reference external" href="http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf">paper2</a></p>
+<p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; &amp; x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; &amp; x&lt;4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &amp;x&lt;4/5, y&lt;4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;&amp; x&gt;4/5, y&lt;4/5 \end{matrix}\right.\)</span></p>
+</li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
+<li><p>Time integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 4/5)\)</span></p></li>
 </ul>
 </li>
 </ul>
@@ -261,7 +259,7 @@
         --problem riemann2d_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -291,7 +289,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>density</em> plot at <code class="docutils literal notranslate"><span class="pre">t=0.8</span></code> using <code class="docutils literal notranslate"><span class="pre">icId=2</span></code> with <code class="docutils literal notranslate"><span class="pre">Weno5</span></code>,
+<p>Representative <em>density</em> plot at <span class="math notranslate nohighlight">\(t=4/5\)</span> using <code class="docutils literal notranslate"><span class="pre">icId=2</span></code> initial conditions with Weno5,
 SSPRK3 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_riemann_density.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_riemann_density.png" style="width: 60%;"/></a>
 </div>
@@ -326,7 +324,7 @@ SSPRK3 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_riemann.rst.txt"

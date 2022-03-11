@@ -227,15 +227,15 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-with-symmetry">
 <h1>3D Euler Sedov (with symmetry)<a class="headerlink" href="#d-euler-sedov-with-symmetry" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>3D Euler equations</em> in conserative form.</p>
+<p>This problem solves the <em>3D Euler equations</em> in conservative form.</p>
 <ul class="simple">
-<li><p>IC involves a small spherical region of radius <span class="math notranslate nohighlight">\(R = 3. * min(dx, dy)\)</span> with high pressure</p>
+<li><p>Initial conditions:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(r&lt;=R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = (4 (\gamma-1) 0.851072)/(4 pi R^3)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(r&gt;R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = 2.5e-5\)</span></p></li>
+<li><p>a high pressure concentrated small spherical region of radius <span class="math notranslate nohighlight">\(R = 3 \min(dx, dy)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(4 \pi R^3); &amp; r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; &amp; r&gt;R \end{matrix}\right.\)</span></p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[0.0,</span> <span class="pre">1.2]^3</span></code> with reflective BC on <cite>x=y=z=0</cite>, and homogeneous Neumann on the others.</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([0.0, 1.2]^3\)</span> with reflective BC on <span class="math notranslate nohighlight">\(x=y=z=0\)</span> and homogeneous Neumann on others.</p></li>
 <li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 1.)\)</span>.</p></li>
 </ul>
 <div class="admonition caution">
@@ -248,8 +248,7 @@
         --problem sedov3dsym_s<span class="o">{</span><span class="m">3</span>,5<span class="o">}</span> -n Nx Ny Nz --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny,</span> <span class="pre">Nz</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span> and <span class="math notranslate nohighlight">\(z\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
@@ -305,7 +304,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_3d_sedov_symmetry.rst.txt"

@@ -227,20 +227,20 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-with-symmetry">
 <h1>2D Euler Sedov (with symmetry)<a class="headerlink" href="#d-euler-sedov-with-symmetry" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em>.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://reader.elsevier.com/reader/sd/pii/S002199911400477X?token=658F08D28B5C7A6A97E6F4478FD494699F3C8DF23970A256F06E501B7B136F9A6A540EEA749F28AC2AF4A6A7993A8517&amp;originRegion=eu-west-1&amp;originCreation=20210611123033">Reference paper1</a></p></li>
-<li><p><a class="reference external" href="http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010114000000000000000">Reference paper2</a></p></li>
-</ul>
-<ul class="simple">
-<li><p>IC involves a small spherical region of radius <cite>R = 3. * min(dx, dy)</cite> with high pressure</p>
+<li><p>The problem is adapted from <a class="reference external" href="https://reader.elsevier.com/reader/sd/pii/S002199911400477X?token=658F08D28B5C7A6A97E6F4478FD494699F3C8DF23970A256F06E501B7B136F9A6A540EEA749F28AC2AF4A6A7993A8517&amp;originRegion=eu-west-1&amp;originCreation=20210611123033">Reference paper1</a> and <a class="reference external" href="http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010114000000000000000">Reference paper2</a></p></li>
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(r&lt;=R\)</span>: <span class="math notranslate nohighlight">\(\rho =1, u = 0, v = 0, p = ((\gamma-1)*0.851072)/(\pi R^2)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(r&gt;R\)</span>: <span class="math notranslate nohighlight">\(\rho =1, u = 0, v = 0, p = 2.5e-5\)</span></p></li>
+<li><p>a high pressure concentrated small spherical region of radius <span class="math notranslate nohighlight">\(R = 3 \min(dx, dy)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(\pi R^2); &amp; r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; &amp; r&gt;R \end{matrix}\right.\)</span></p></li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Domain is [0.0, 1.2]^2 with reflective BC on <cite>y=0</cite> and <cite>x=0</cite> and homogeneous Neumann for <cite>x=1.2</cite> and <cite>y=1.2</cite></p></li>
-<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 1.)\)</span>.</p></li>
+</ul>
+<ul class="simple">
+<li><p>Domain is <span class="math notranslate nohighlight">\([0.0, 1.2]^2\)</span> with reflective BC on <span class="math notranslate nohighlight">\(y=0\)</span> and <span class="math notranslate nohighlight">\(x=0\)</span> and homogeneous Neumann for <span class="math notranslate nohighlight">\(x=1.2\)</span> and <span class="math notranslate nohighlight">\(y=1.2\)</span></p></li>
+<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 1)\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -248,7 +248,7 @@
         --problem sedov2dsym_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -305,7 +305,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_sedov_symmetry.rst.txt"

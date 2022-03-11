@@ -227,21 +227,26 @@
         <article role="main">
           <div class="section" id="d-euler-kelvin-helmholtz">
 <h1>2D Euler Kelvin-Helmholtz<a class="headerlink" href="#d-euler-kelvin-helmholtz" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em>.</p>
 <ul class="simple">
 <li><p>Domain is <span class="math notranslate nohighlight">\(\Omega = \Omega_1 \cup \Omega_2 = [-5,5]^2\)</span> with periodic BC where:</p>
 <ul>
 <li><p><span class="math notranslate nohighlight">\(\Omega_1 = [-5,5] \times [-2 + \cos( 0.8 \pi x) , 2 + \cos(0.8 \pi x)]\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: Rest of domain</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: Rest of the domain</p></li>
 </ul>
 </li>
-<li><p>IC is as follows:</p>
+</ul>
+<ul class="simple">
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(\Omega_1\)</span>: <span class="math notranslate nohighlight">\(\rho = 2, u = 0.5, v = 0, p = 2.5\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = -0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>in <span class="math notranslate nohighlight">\(\Omega_1\)</span>: <span class="math notranslate nohighlight">\(\rho = 2, u = 0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>in <span class="math notranslate nohighlight">\(\Omega_2\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = -0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Time integration performed for 2.5 flow through units, <cite>t in (0, 50)</cite>.</p></li>
+</ul>
+<ul class="simple">
+<li><p>Time integration performed for 2.5 flow through units, <span class="math notranslate nohighlight">\(t \in (0, 50)\)</span></p></li>
 <li><p>Mach number in <span class="math notranslate nohighlight">\(\Omega_1\)</span> : <span class="math notranslate nohighlight">\(M_{\infty} = 0.377964\)</span></p></li>
 <li><p>Mach number in <span class="math notranslate nohighlight">\(\Omega_2\)</span> : <span class="math notranslate nohighlight">\(M_{\infty} = 0.267261\)</span></p></li>
 <li><p>This problem is often <em>unstable</em> for a standard Galerkin ROM</p></li>
@@ -252,7 +257,7 @@
         --problem euler2dKelvinHelmholtz_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -280,7 +285,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>density</em> field at <code class="docutils literal notranslate"><span class="pre">t=50</span></code> using a 256x256 mesh with <code class="docutils literal notranslate"><span class="pre">Weno5</span></code>
+<p>Representative <em>density</em> field at selected time <span class="math notranslate nohighlight">\(t=50\)</span> using a <code class="docutils literal notranslate"><span class="pre">256x256</span></code> mesh with Weno5
 and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_kelvin_helmholtz_density.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_kelvin_helmholtz_density.png" style="width: 60%;"/></a>
 </div>
@@ -315,7 +320,7 @@ and RK4 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_kelvin_helmholtz.rst.txt"

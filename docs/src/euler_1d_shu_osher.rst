@@ -5,11 +5,13 @@ This problem solves the *1D Euler conservative equations* for the Shu-Osher 1D p
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/226065267_Numerical_simulations_of_compressible_mixing_layers_with_a_discontinuous_Galerkin_method>`_
 
-- Initial conditions:
+- Initial conditions in primivite variables:
 
   - :math:`x\leq-4: \quad \rho =27/7, u = 2.629369, p = 31/3`
 
   - :math:`x>-4: \quad \rho =1 + 0.2\sin(5x), u = 0, p = 1`
+
+  - These are used to create the initial conditions in conservative variables.
 
 - Domain is :math:`[-5, 5]` with homogeneous Neumann BC
 

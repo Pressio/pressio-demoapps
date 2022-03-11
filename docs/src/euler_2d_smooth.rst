@@ -5,11 +5,13 @@ This problem solves the *2D conservative Euler equations* for a smooth field.
 
 * The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 
-* Initial conditions: 
+* Initial conditions in primitive variables: 
   
   - :math:`\rho = 1 + 0.2\sin(\pi (x+y))`
   
   - :math:`u = 1, v = 1, p = 1`
+
+  - This IC is used to create the corresponding initial conditions in conservative variables.
   
 * Domain is :math:`[-1, 1]^2` with periodic BC
 

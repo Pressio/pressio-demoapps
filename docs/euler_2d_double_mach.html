@@ -227,12 +227,12 @@
         <article role="main">
           <div class="section" id="d-euler-double-mach-reflection">
 <h1>2D Euler Double Mach Reflection<a class="headerlink" href="#d-euler-double-mach-reflection" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em>.</p>
 <ul class="simple">
-<li><p><a class="reference external" href="http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010116000000000000000">Reference paper</a></p></li>
-<li><p>IC is a Mach 10 shock in air tilted by an angle, see paper above.</p></li>
-<li><p>Domain is [0.0, 4.0]x[0.0, 1.0]; for BC see link above.</p></li>
-<li><p>Typically, integration is performed for <cite>t in (0, 0.25)</cite>.</p></li>
+<li><p>The problem is adopted from <a class="reference external" href="http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010116000000000000000">this paper</a></p></li>
+<li><p>Initial condition is a Mach 10 shock in air tilted by an angle, see reference paper above.</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([0, 4]\times[0, 1]\)</span>. For BC see link above.</p></li>
+<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 0.25)\)</span>.</p></li>
 </ul>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
@@ -244,7 +244,7 @@
         --problem doublemach2d_s<span class="o">{</span><span class="m">3</span>,5<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -272,7 +272,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>density</em> plot at <code class="docutils literal notranslate"><span class="pre">t=0.25</span></code> using a 600x150 mesh with <code class="docutils literal notranslate"><span class="pre">Weno3</span></code>
+<p>Representative <em>density</em> plot at <span class="math notranslate nohighlight">\(t=0.25\)</span> using a <code class="docutils literal notranslate"><span class="pre">600x150</span></code> mesh with Weno3
 and SSPRK3 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_dmr_density.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_dmr_density.png" style="width: 80%;"/></a>
 </div>
@@ -307,7 +307,7 @@ and SSPRK3 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_double_mach.rst.txt"
@@ -353,5 +353,6 @@ and SSPRK3 time integration:</p>
     <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

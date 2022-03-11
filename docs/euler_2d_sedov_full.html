@@ -227,28 +227,23 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-full">
 <h1>2D Euler Sedov Full<a class="headerlink" href="#d-euler-sedov-full" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em>.</p>
+<ul>
+<li><p>The problem is adapted from <a class="reference external" href="https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics">this paper</a></p></li>
+<li><p>Initial conditions in primitive variables:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics">Reference paper</a></p></li>
+<li><p>a high pressure concentrated small spherical region of radius <span class="math notranslate nohighlight">\(R = 2\min(dx, dy)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = (\gamma-1)/(\pi R^2); &amp; r\leq R \\ \rho =1, u = 0, v = 0, p = 5\cdot 10^{-5}; &amp; r&gt;R \end{matrix}\right.\)</span></p></li>
 </ul>
-<ul>
-<li><p>IC is a high pressure concentrated small spherical region of radius <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">2.</span> <span class="pre">*</span> <span class="pre">min(dx,</span> <span class="pre">dy)</span></code></p>
+<p>Here <span class="math notranslate nohighlight">\(dx, dy\)</span> are the cell widths and the factor of <span class="math notranslate nohighlight">\(2\)</span> is used to spread the source over 2 cells for numerical reasons, and <span class="math notranslate nohighlight">\(r = \sqrt{x^2+y^2}\)</span> is the Eucledian distance from the origin.</p>
 <ul class="simple">
-<li><p>For <span class="math notranslate nohighlight">\(r&lt;=R\)</span>:</p>
-<ul>
-<li><p><span class="math notranslate nohighlight">\(\rho =1, u = 0, v = 0, p = (\gamma-1)/(pi*R*R)\)</span></p></li>
-</ul>
-</li>
-<li><p>For <span class="math notranslate nohighlight">\(r&gt;R\)</span>:</p>
-<ul>
-<li><p><span class="math notranslate nohighlight">\(\rho =1, u = 0, v = 0, p = 5e-5\)</span></p></li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
 </ul>
 </li>
 </ul>
-<p><span class="math notranslate nohighlight">\(dx, dy\)</span> are the cell widths and the factor of 2 is used to spread the source over 2 cells for numerical reasons, and <span class="math notranslate nohighlight">\(r = sqrt(x^2+y^2)\)</span> is the distance from the origin.</p>
-</li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-1.2,</span> <span class="pre">1.2]^2</span></code> with homogeneous Neumann BC on all boundaries</p></li>
-<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 1.)\)</span>.</p></li>
+<ul class="simple">
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1.2, 1.2]^2\)</span> with homogeneous Neumann BC on all boundaries</p></li>
+<li><p>Typically, integration is performed for <span class="math notranslate nohighlight">\(t \in (0, 1)\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -256,7 +251,7 @@
         --problem sedov2d_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
+<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
 </div>
 <div class="section" id="c-synopsis">
@@ -284,7 +279,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>pressure</em> plot at <code class="docutils literal notranslate"><span class="pre">t=0.2</span></code> using a 200x200 mesh with <code class="docutils literal notranslate"><span class="pre">Weno3</span></code>
+<p>Representative <em>pressure</em> plot at selected time <span class="math notranslate nohighlight">\(t=0.2\)</span> using a <code class="docutils literal notranslate"><span class="pre">200x200</span></code> mesh with Weno3
 and SSPRK3 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_sedov_pressure.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_sedov_pressure.png" style="width: 60%;"/></a>
 </div>
@@ -319,7 +314,7 @@ and SSPRK3 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 11, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_sedov_full.rst.txt"
