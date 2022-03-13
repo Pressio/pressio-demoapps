@@ -15,11 +15,13 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 * The problem is adapted from `this paper <https://iopscience.iop.org/article/10.1086/317361>`_
 
-- Initial conditions:
+- Initial conditions in primitive variables:
 
   - :math:`x<=0 :\quad \rho =1, u = 0, p = 1`
 
   - :math:`x>0 :\quad \rho =1/8, u = 0, p = 0.1`
+
+  - These are used to create the initial conditions in conservative variables.
 
 - Domain is :math:`[-0.5, 0.5]` with homogeneous Neumann BC
 

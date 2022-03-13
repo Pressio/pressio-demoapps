@@ -16,13 +16,15 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics>`_
 
-- Initial conditions:
+* Initial conditions in primitive variables: 
   
   - a high pressure concentrated small spherical region of radius :math:`R = 2\min(dx, dy)`
 
   - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = (\gamma-1)/(\pi R^2); & r\leq R \\ \rho =1, u = 0, v = 0, p = 5\cdot 10^{-5}; & r>R \end{matrix}\right.`
 
   Here :math:`dx, dy` are the cell widths and the factor of :math:`2` is used to spread the source over 2 cells for numerical reasons, and :math:`r = \sqrt{x^2+y^2}` is the Eucledian distance from the origin.
+
+  - This IC is used to create the corresponding initial conditions in conservative variables.
 
 - Domain is :math:`[-1.2, 1.2]^2` with homogeneous Neumann BC on all boundaries
 

@@ -16,11 +16,13 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 * The problem is adapted from `Reference paper1 <https://reader.elsevier.com/reader/sd/pii/S002199911400477X?token=658F08D28B5C7A6A97E6F4478FD494699F3C8DF23970A256F06E501B7B136F9A6A540EEA749F28AC2AF4A6A7993A8517&originRegion=eu-west-1&originCreation=20210611123033>`_ and `Reference paper2 <http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010114000000000000000>`_
 
-- Initial conditions:
+* Initial conditions in primitive variables: 
     
   - a high pressure concentrated small spherical region of radius :math:`R = 3 \min(dx, dy)`
 
   - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(\pi R^2); & r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; & r>R \end{matrix}\right.`
+
+  - This IC is used to create the corresponding initial conditions in conservative variables.
 
 - Domain is :math:`[0.0, 1.2]^2` with reflective BC on :math:`y=0` and :math:`x=0` and homogeneous Neumann for :math:`x=1.2` and :math:`y=1.2`
 

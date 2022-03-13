@@ -23,6 +23,8 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
       :math:`\left\{\begin{matrix}\rho = 0.5313, u = 0, v = 0, p = 0.4; & x\geq 1/2, y\geq 1/2\\ \rho = 1, u = 0.7276, v = 0, p = 1; & x<1/2, y\geq 1/2 \\ \rho = 4/5, u = 0, v = 0, p = 1; & x<1/2, y<1/2 \\ \rho = 1, u = 0, v = 0.7276, p = 1;& x>1/2, y<1/2 \end{matrix}\right.`
 
+    - This IC is used to create the corresponding initial conditions in conservative variables.
+
     - Time integration is performed for :math:`t \in (0, 1/5)`
 
 
@@ -31,6 +33,8 @@ where the pressure :math:`p` is related to the conserved quantities through the 
     - See configuration 3 of `paper2 <http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf>`_
   
       :math:`\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; & x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; & x<4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &x<4/5, y<4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;& x>4/5, y<4/5 \end{matrix}\right.`
+
+    - This IC is used to create the corresponding initial conditions in conservative variables.
 
     - Time integration is performed for :math:`t \in (0, 4/5)`
 

@@ -1,9 +1,19 @@
 2D Euler Riemann
 ================
 
-This problem solves the *2D convervative Euler equations*.
+This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
 
-- Domain is :math:`[0.0, 1.0]^2` with homogeneous Neumann on all boundaries
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y \\ (E+p)u_x \end{bmatrix} \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ (E+p)u_y \end{bmatrix}= 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+
+- Domain is :math:`[0, 1]^2` with homogeneous Neumann on all boundaries
 
 - Various initial conditions are supported:
 
@@ -11,30 +21,22 @@ This problem solves the *2D convervative Euler equations*.
 
     - See page 15 of `paper1 <https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations>`_
 
-    - :math:`x>=0.5, y>=0.5`: :math:`\rho = 0.5313, u = 0, v = 0, p = 0.4`
+      :math:`\left\{\begin{matrix}\rho = 0.5313, u = 0, v = 0, p = 0.4; & x\geq 1/2, y\geq 1/2\\ \rho = 1, u = 0.7276, v = 0, p = 1; & x<1/2, y\geq 1/2 \\ \rho = 4/5, u = 0, v = 0, p = 1; & x<1/2, y<1/2 \\ \rho = 1, u = 0, v = 0.7276, p = 1;& x>1/2, y<1/2 \end{matrix}\right.`
 
-    - :math:`x<0.5, y>=0.5`: :math:`\rho = 1, u = 0.7276., v = 0, p = 1`
+    - This IC is used to create the corresponding initial conditions in conservative variables.
 
-    - :math:`x<0.5, y<0.5`: :math:`\rho = 0.8, u = 0, v = 0., p = 1`
-
-    - :math:`x>0.5, y<0.5`: :math:`\rho = 1., u = 0, v = 0.7276, p = 1`
-
-    - Time integration is performed for :math:`t \in (0, 0.2)`.
+    - Time integration is performed for :math:`t \in (0, 1/5)`
 
 
   - ``icId==2``:
 
     - See configuration 3 of `paper2 <http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf>`_
+  
+      :math:`\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; & x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; & x<4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &x<4/5, y<4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;& x>4/5, y<4/5 \end{matrix}\right.`
 
-    - :math:`x>=0.8, y>=0.8`: :math:`\rho = 1.5, u = 0, v = 0, p = 1.5`
+    - This IC is used to create the corresponding initial conditions in conservative variables.
 
-    - :math:`x<0.8, y>=0.8`: :math:`\rho = 0.5323, u = 1.206, v = 0, p = 0.3`
-
-    - :math:`x<0.8, y<0.8`: :math:`\rho = 0.138, u = 1.206, v = 1.206, p = 0.029`
-
-    - :math:`x>0.8, y<0.8`: :math:`\rho = 0.5323, u = 0, v = 1.206, p = 0.3`
-
-    - Time integration is performed for :math:`t \in (0, 0.8)`.
+    - Time integration is performed for :math:`t \in (0, 4/5)`
 
 
 Mesh
@@ -45,7 +47,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem riemann2d_s{3,5,7} -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``,
+where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
 and ``<destination-path>`` is where you want the mesh files to be generated.
 
 
@@ -82,7 +84,7 @@ Where the ``icId`` is an integer identifying the initial condition above.
 Sample Plot
 -----------
 
-Representative *density* plot at ``t=0.8`` using ``icId=2`` with ``Weno5``,
+Representative *density* plot at :math:`t=4/5` using ``icId=2`` initial conditions with Weno5,
 SSPRK3 time integration:
 
 .. image:: ../../figures/wiki_2d_riemann_density.png

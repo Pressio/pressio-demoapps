@@ -15,11 +15,13 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/274407416_Finite_Difference_Hermite_WENO_Schemes_for_Hyperbolic_Conservation_Laws>`_
 
-- Initial conditions:
+- Initial conditions in primivite variables:
 
   - :math:`x<=0 : \quad \rho = 0.445,  u = 0.698, p = 3.528`
 
   - :math:`x>0 : \quad \rho = 0.5, u = 0.0, p = 0.571`
+
+  - These are used to create the initial conditions in conservative variables.
 
 - Domain is :math:`[-5.0, 5.0]` with homogeneous Neumann BC
 

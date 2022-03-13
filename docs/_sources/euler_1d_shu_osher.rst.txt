@@ -1,17 +1,29 @@
 1D Euler Shu-Osher
 ==================
 
-This problem solves the *1D Euler conservative equations* for the Shu-Osher 1d problem.
+This problem solves the *1D Euler conservative equations* for the Shu-Osher 1D problem. The gas dynamics is governed by a system of PDE
 
-* `Reference paper <https://www.researchgate.net/publication/226065267_Numerical_simulations_of_compressible_mixing_layers_with_a_discontinuous_Galerkin_method>`_
+.. math::
 
-- IC:
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho v\\ E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho v \\ \rho v^2 +p\\ v(E+p) \end{bmatrix} = 0
 
-  - :math:`x<=-4`: :math:`\rho =27/7, u = 2.629369, p = 31/3`
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
 
-  - :math:`x>-4`: :math:`\rho =1 + 0.2*sin(5x), u = 0, p = 1`
+.. math::
 
-- Domain is ``[-5, 5]`` with homogeneous Neumann BC
+   p=(\gamma -1)(E-\frac{1}{2}\rho v^2).
+
+* The problem is adapted from `this paper <https://www.researchgate.net/publication/226065267_Numerical_simulations_of_compressible_mixing_layers_with_a_discontinuous_Galerkin_method>`_
+
+- Initial conditions in primivite variables:
+
+  - :math:`x\leq-4: \quad \rho =27/7, u = 2.629369, p = 31/3`
+
+  - :math:`x>-4: \quad \rho =1 + 0.2\sin(5x), u = 0, p = 1`
+
+  - These are used to create the initial conditions in conservative variables.
+
+- Domain is :math:`[-5, 5]` with homogeneous Neumann BC
 
 - Typically, integration is performed over :math:`t \in (0, 1.8)`.
 
@@ -54,8 +66,8 @@ Python synopsis
 Sample Solution
 ---------------
 
-Representative plot for total simulation time ``T=1.8`` showing density at ``t=0, 0.9, 1.8``
-obtained using ``dt = 0.001``, ``Weno5``, SSPRK3 integration with a mesh of 500 cells.
+Representative plot for total simulation time :math:`T=1.8` showing density at selected time steps :math:`t\in \left \{ 0, 0.9, 1.8 \right \}``
+obtained using :math:`dt = 10^{-3}`, Weno5, SSPRK3 integration with a mesh of :math:`N=500` cells.
 
 .. image:: ../../figures/wiki_shuosher1d_0.001_1.8_500_weno5_ssprk3.png
   :width: 60 %

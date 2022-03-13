@@ -7,20 +7,20 @@ Simulates the 2D shallow water equations with conservative variables. The proble
 
    \frac{\partial h}{\partial t} + \frac{\partial hu}{\partial x} + \frac{\partial hv}{\partial y} = 0
 
-   \frac{\partial hu}{\partial t} + \frac{\partial }{\partial x} (hu^2 + \frac{1}{2}g h^2) + \frac{\partial huv}{\partial y} = 0
+   \frac{\partial hu}{\partial t} + \frac{\partial }{\partial x} (hu^2 + \frac{1}{2}g h^2) + \frac{\partial huv}{\partial y} = - \mu v
 
-   \frac{\partial hv}{\partial t} + \frac{\partial huv}{\partial x} + \frac{\partial }{\partial y} (hv^2 + \frac{1}{2}g h^2) = 0
+   \frac{\partial hv}{\partial t} + \frac{\partial huv}{\partial x} + \frac{\partial }{\partial y} (hv^2 + \frac{1}{2}g h^2) = \mu u
 
 for fluid column height :math:`h`, gravity :math:`g` and 2D vector :math:`(u, v)` of the fluid's horizontal flow velocity averaged across the vertical column.
 
 - Domain is :math:`[-5,5]^2` with slip-wall BCs
 
-* Initial conditions:  
-  
+* Initial conditions:
+
   - :math:`h = 1 + \alpha \exp( -(x-1)^2 - (y-1)^2)`
-  
+
   - :math:`u = 0`
-  
+
   - :math:`v = 0`
 
 * Default settings:
@@ -65,13 +65,12 @@ C++ synopsis
    // B. constructor for problem specifying all coefficients
    {
      using scalar_type   = typename decltype(meshObj)::scalar_t;
-     const scalar_type gravity = /* some value */;
+     const scalar_type gravity  = /* some value */;
      const scalar_type coriolis = /* some value */;
-     const scalar_type initPulseMagnitude = /* some value */;
+     const scalar_type alpha    = /* some value */;
 
      auto problem = pda::create_slip_wall_swe_2d_problem_eigen(meshObj, scheme,
-					                       gravity, coriolis,
-							       initPulseMagnitude);
+					                       gravity, coriolis, alpha);
    }
 
 
@@ -92,10 +91,8 @@ Python synopsis
    # B. constructor for problem specifying all coefficients
    gravity  = ...
    coriolis = ...
-   initPulseMagnitude = ...
-   problem = pda.create_slip_wall_swe_2d_problem(meshObj, scheme,
-                                                 gravity, coriolis,
-						 initPulseMagnitude)
+   alpha    = ...
+   problem = pda.create_slip_wall_swe_2d_problem(meshObj, scheme, gravity, coriolis, alpha)
 
 
 Sample Plot

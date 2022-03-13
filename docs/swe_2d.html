@@ -2,14 +2,15 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Euler Smooth" href="euler_2d_smooth.html" /><link rel="prev" title="2D Gray Scott reaction-diffusion" href="grayscott_2d.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Euler Smooth" href="euler_2d_smooth.html" /><link rel="prev" title="2D Gray Scott reaction-diffusion" href="grayscott_2d.html" />
 
-    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
+    <meta name="generator" content="sphinx-4.4.0, furo 2022.03.04"/>
         <title>2D Shallow water equations - pressio-demoapps 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=935aa2abcc5c1da4283d1dc201fb1f0add16d23a" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=25ceb02ed1c46dc30f2321ff83e92799f69dfdb9" />
     
     
 
@@ -20,16 +21,18 @@
   --color-code-foreground: black;
   
   }
-  body[data-theme="dark"] {
-    --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
-  
-  }
-  @media (prefers-color-scheme: dark) {
-    body:not([data-theme="light"]) {
+  @media not print {
+    body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
   
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
     }
   }
 </style></head>
@@ -41,17 +44,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="svg-toc" viewBox="0 0 24 24">
     <title>Contents</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" />
-      <line x1="4" y1="6" x2="20" y2="6" />
-      <line x1="10" y1="12" x2="20" y2="12" />
-      <line x1="6" y1="18" x2="20" y2="18" />
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
     </svg>
   </symbol>
   <symbol id="svg-menu" viewBox="0 0 24 24">
     <title>Menu</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -60,14 +59,14 @@
   </symbol>
   <symbol id="svg-arrow-right" viewBox="0 0 24 24">
     <title>Expand</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
       <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
   </symbol>
   <symbol id="svg-sun" viewBox="0 0 24 24">
     <title>Light mode</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
       <circle cx="12" cy="12" r="5"></circle>
       <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -82,7 +81,7 @@
   </symbol>
   <symbol id="svg-moon" viewBox="0 0 24 24">
     <title>Dark mode</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
@@ -90,7 +89,7 @@
   </symbol>
   <symbol id="svg-sun-half" viewBox="0 0 24 24">
     <title>Auto light/dark mode</title>
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <circle cx="12" cy="12" r="9" />
@@ -203,6 +202,7 @@
 
 </div>
 </div>
+
       </div>
       
     </div>
@@ -210,8 +210,13 @@
   <div class="main">
     <div class="content">
       <div class="article-container">
-        <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -225,16 +230,23 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="d-shallow-water-equations">
-<h1>2D Shallow water equations<a class="headerlink" href="#d-shallow-water-equations" title="Permalink to this headline">¶</a></h1>
-<p>Simulates the 2D shallow water equations with conservative variables.</p>
+          <section id="d-shallow-water-equations">
+<h1>2D Shallow water equations<a class="headerlink" href="#d-shallow-water-equations" title="Permalink to this headline">#</a></h1>
+<p>Simulates the 2D shallow water equations with conservative variables. The problem is described with the following system of PDE</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\frac{\partial h}{\partial t} + \frac{\partial hu}{\partial x} + \frac{\partial hv}{\partial y} = 0\\\frac{\partial hu}{\partial t} + \frac{\partial }{\partial x} (hu^2 + 0.5 g h^2) + \frac{\partial hv}{\partial y} = 0\\\frac{\partial hv}{\partial t} + \frac{\partial hu^2}{\partial x} + \frac{\partial }{\partial y} (hv + 0.5 g h^2) = 0\end{aligned}\end{align} \]</div></div>
+\[ \begin{align}\begin{aligned}\frac{\partial h}{\partial t} + \frac{\partial hu}{\partial x} + \frac{\partial hv}{\partial y} = 0\\\frac{\partial hu}{\partial t} + \frac{\partial }{\partial x} (hu^2 + \frac{1}{2}g h^2) + \frac{\partial huv}{\partial y} = - \mu v\\\frac{\partial hv}{\partial t} + \frac{\partial huv}{\partial x} + \frac{\partial }{\partial y} (hv^2 + \frac{1}{2}g h^2) = \mu u\end{aligned}\end{align} \]</div></div>
+<p>for fluid column height <span class="math notranslate nohighlight">\(h\)</span>, gravity <span class="math notranslate nohighlight">\(g\)</span> and 2D vector <span class="math notranslate nohighlight">\((u, v)\)</span> of the fluid’s horizontal flow velocity averaged across the vertical column.</p>
 <ul class="simple">
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-5,5]^2</span></code> with slip-wall BCs</p></li>
-<li><p>IC: <span class="math notranslate nohighlight">\(h = 1 + \alpha \exp( -(x-1)^2 - (y-1)^2), u = v = 0\)</span></p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-5,5]^2\)</span> with slip-wall BCs</p></li>
 </ul>
 <ul class="simple">
+<li><p>Initial conditions:</p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(h = 1 + \alpha \exp( -(x-1)^2 - (y-1)^2)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u = 0\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(v = 0\)</span></p></li>
+</ul>
+</li>
 <li><p>Default settings:</p>
 <ul>
 <li><p><span class="math notranslate nohighlight">\(\alpha = 1/8\)</span> (initial pulse magnitude)</p></li>
@@ -246,43 +258,42 @@
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(g, \mu, \alpha\)</span> can be provided to the problem constructor (more below)</p></li>
 </ul>
-<div class="section" id="mesh">
-<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
+<section id="mesh">
+<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">#</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
         --problem swe2dSlipWall_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir ...
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>.</p>
-</div>
-<div class="section" id="c-synopsis">
-<h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/swe2d.hpp"</span><span class="cp"></span>
+</section>
+<section id="c-synopsis">
+<h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">#</a></h2>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">"pressiodemoapps/swe2d.hpp"</span><span class="cp"></span>
 
-<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span><span class="w"> </span><span class="c1">//or Weno3, Weno5</span>
 
 <span class="c1">// A. constructor for problem using default values</span>
-<span class="p">{</span>
-  <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Swe2d</span><span class="o">::</span><span class="n">SlipWall</span><span class="p">;</span>
-  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">probId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Swe2d</span><span class="o">::</span><span class="n">SlipWall</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
 <span class="c1">// B. constructor for problem specifying all coefficients</span>
-<span class="p">{</span>
-  <span class="k">using</span> <span class="n">scalar_type</span>   <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">gravity</span> <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">coriolis</span> <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">initPulseMagnitude</span> <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">scalar_type</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">gravity</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="cm">/* some value */</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">coriolis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/* some value */</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">alpha</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="cm">/* some value */</span><span class="p">;</span><span class="w"></span>
 
-  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_slip_wall_swe_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
-                                                            <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span>
-                                                            <span class="n">initPulseMagnitude</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_slip_wall_swe_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                                            </span><span class="n">gravity</span><span class="p">,</span><span class="w"> </span><span class="n">coriolis</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="python-synopsis">
-<h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="python-synopsis">
+<h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">#</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
 <span class="c1"># ...</span>
 
@@ -295,20 +306,18 @@
 <span class="c1"># B. constructor for problem specifying all coefficients</span>
 <span class="n">gravity</span>  <span class="o">=</span> <span class="o">...</span>
 <span class="n">coriolis</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">initPulseMagnitude</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_slip_wall_swe_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
-                                              <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span>
-                                              <span class="n">initPulseMagnitude</span><span class="p">)</span>
+<span class="n">alpha</span>    <span class="o">=</span> <span class="o">...</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_slip_wall_swe_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="sample-plot">
-<h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative plot of the height <code class="docutils literal notranslate"><span class="pre">h(t)</span></code> as a function of time at <code class="docutils literal notranslate"><span class="pre">x=y=0</span></code>
-using default physical parameters, a 65x65 mesh with <code class="docutils literal notranslate"><span class="pre">Weno5</span></code> and RK4 time integration:</p>
+</section>
+<section id="sample-plot">
+<h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">#</a></h2>
+<p>Representative plot of the height <span class="math notranslate nohighlight">\(h(t)\)</span> as a function of time at <span class="math notranslate nohighlight">\(x=y=0\)</span>
+using default physical parameters, a <code class="docutils literal notranslate"><span class="pre">65x65</span></code> mesh with Weno5 and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2dswe_height.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2dswe_height.png" style="width: 60%;"/></a>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -336,16 +345,22 @@ using default physical parameters, a 65x65 mesh with <code class="docutils liter
               </div>
             </a>
         </div>
-
-        <div class="related-information">
-              Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
-          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
-            | <a class="muted-link" href="_sources/swe_2d.rst.txt"
-               rel="nofollow">
-              Show Source
-            </a>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS)
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on Mar 13, 2022</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
         </div>
         
       </footer>

@@ -25,7 +25,6 @@ This problem focuses on the following 1D diffusion reaction PDE:
 * Domain is :math:`[0,1]` with homogenous Dirichlet BC
 
 
-
 Mesh
 ----
 
@@ -34,7 +33,20 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	  --problem diffreac1d -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want, and ``<destination-path>`` is where you want the mesh files to be generated.
+where ``N`` is the number of cells you want, and ``<destination-path>`` is
+where you want the mesh files to be generated. Note that
+
+Notes:
+------
+
+.. important::
+
+   For this problem, only viscous schemes are applicable.
+   Note also that the stencil cannot be chosen (yet) because
+   the implementation currently only supports a thee-point stencil
+   that allows a first order viscous flux reconstruction,
+   yielding a second-order scheme.
+   We might relax this in the future if additional scheme are added.
 
 
 C++ synopsis
@@ -96,15 +108,7 @@ Python synopsis
    problem = pda.create_diffusion_reaction_1d_problem_A(meshObj, myD, myK)
 
    # C. setting custom coefficients and custom source function
+   myD, myK = 0.55, 0.002
    mysource = lambda x, time : np.sin(math.pi*x) *x*x * 4.*np.cos(4.*math.pi*x)
-   problem = pda.create_problem(meshObj, probId, scheme, mysource, myD, myK)
-
-
-Notes:
-------
-
-.. important::
-
-   Note that this problem does not have advection, so only viscous schemes are applicable.
-   Currently, we only support a first order viscous flux
-   reconstruction, which leads to a second-order scheme.
+   problem = pda.create_diffusion_reaction_1d_problem_A(meshObj, probId, scheme, \
+							mysource, myD, myK)

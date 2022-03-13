@@ -16,10 +16,10 @@ This problem focuses on the following 2D reaction-diffusion system of PDE:
 
 * :math:`D_a, D_b, F, K` can be provided to the constructor (more below)
 
-* Initial conditions: 
-  
+* Initial conditions:
+
   :math:`\left\{\begin{matrix}A=1/2, B=1/4; & \text{if }|x| < 1/10 \text{ and } |y|< 1/10 \\ A=1, B=0; & \text{otherwise} \end{matrix}\right.`
-  
+
 * Default settings:
 
   - :math:`D_a = 2\cdot 10^{-4}, D_b = D_a/4`
@@ -63,12 +63,11 @@ C++ synopsis
    // B. setting custom coefficients
    {
      using scalar_type = typename decltype(meshObj)::scalar_t;
-     const scalar_type Da       = /*some_value*/;
-     const scalar_type Db       = /*some_value*/;
-     const scalar_type feedRate = /*some_value*/;
-     const scalar_type killRate = /*some_value*/;
-     auto problem      = pda::create_gray_scott_2d_problem(meshObj, scheme,
-						            Da, Db, feedRate, killRate);
+     const scalar_type Da  = /*some_value*/;
+     const scalar_type Db  = /*some_value*/;
+     const scalar_type F   = /*some_value*/;
+     const scalar_type K   = /*some_value*/;
+     auto problem      = pda::create_gray_scott_2d_problem(meshObj, scheme, Da, Db, F, K);
    }
 
 
