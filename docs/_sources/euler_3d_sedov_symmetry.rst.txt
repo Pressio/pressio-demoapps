@@ -1,6 +1,7 @@
 3D Euler Sedov (with symmetry)
 ==============================
 
+<<<<<<< HEAD
 This problem solves the *3D Euler equations* in conservative form. The gas dynamics is governed by a system of PDE
 
 .. math::
@@ -20,6 +21,16 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
   - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(4 \pi R^3); & r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; & r>R \end{matrix}\right.`
 
+=======
+This problem solves the *3D Euler equations* in conservative form.
+
+- Initial conditions:
+    
+  - a high pressure concentrated small spherical region of radius :math:`R = 3 \min(dx, dy)`
+
+  - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(4 \pi R^3); & r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; & r>R \end{matrix}\right.`
+
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 - Domain is :math:`[0.0, 1.2]^3` with reflective BC on :math:`x=y=z=0` and homogeneous Neumann on others.
 
 - Typically, integration is performed over :math:`t \in (0, 1.)`.

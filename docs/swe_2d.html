@@ -230,8 +230,13 @@
           </label>
         </div>
         <article role="main">
+<<<<<<< HEAD
           <section id="d-shallow-water-equations">
 <h1>2D Shallow water equations<a class="headerlink" href="#d-shallow-water-equations" title="Permalink to this headline">#</a></h1>
+=======
+          <div class="section" id="d-shallow-water-equations">
+<h1>2D Shallow water equations<a class="headerlink" href="#d-shallow-water-equations" title="Permalink to this headline">¶</a></h1>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 <p>Simulates the 2D shallow water equations with conservative variables. The problem is described with the following system of PDE</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\frac{\partial h}{\partial t} + \frac{\partial hu}{\partial x} + \frac{\partial hv}{\partial y} = 0\\\frac{\partial hu}{\partial t} + \frac{\partial }{\partial x} (hu^2 + \frac{1}{2}g h^2) + \frac{\partial huv}{\partial y} = - \mu v\\\frac{\partial hv}{\partial t} + \frac{\partial huv}{\partial x} + \frac{\partial }{\partial y} (hv^2 + \frac{1}{2}g h^2) = \mu u\end{aligned}\end{align} \]</div></div>
@@ -280,6 +285,7 @@
 <span class="p">}</span><span class="w"></span>
 
 <span class="c1">// B. constructor for problem specifying all coefficients</span>
+<<<<<<< HEAD
 <span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">scalar_type</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">gravity</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="cm">/* some value */</span><span class="p">;</span><span class="w"></span>
@@ -289,6 +295,17 @@
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_slip_wall_swe_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">,</span><span class="w"></span>
 <span class="w">                                                            </span><span class="n">gravity</span><span class="p">,</span><span class="w"> </span><span class="n">coriolis</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="p">);</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
+=======
+<span class="p">{</span>
+  <span class="k">using</span> <span class="n">scalar_type</span>   <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">gravity</span>  <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">coriolis</span> <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">alpha</span>    <span class="o">=</span> <span class="cm">/* some value */</span><span class="p">;</span>
+
+  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_slip_wall_swe_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span>
+                                                            <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span> <span class="n">alpha</span><span class="p">);</span>
+<span class="p">}</span>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 </pre></div>
 </div>
 </section>
@@ -310,9 +327,15 @@
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_slip_wall_swe_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
 </pre></div>
 </div>
+<<<<<<< HEAD
 </section>
 <section id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">#</a></h2>
+=======
+</div>
+<div class="section" id="sample-plot">
+<h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 <p>Representative plot of the height <span class="math notranslate nohighlight">\(h(t)\)</span> as a function of time at <span class="math notranslate nohighlight">\(x=y=0\)</span>
 using default physical parameters, a <code class="docutils literal notranslate"><span class="pre">65x65</span></code> mesh with Weno5 and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2dswe_height.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2dswe_height.png" style="width: 60%;"/></a>
@@ -345,6 +368,7 @@ using default physical parameters, a <code class="docutils literal notranslate">
               </div>
             </a>
         </div>
+<<<<<<< HEAD
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
@@ -361,6 +385,18 @@ using default physical parameters, a <code class="docutils literal notranslate">
               
             </div>
           </div>
+=======
+
+        <div class="related-information">
+              Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
+            Last updated on Mar 11, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/swe_2d.rst.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
         </div>
         
       </footer>

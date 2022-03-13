@@ -230,8 +230,13 @@
           </label>
         </div>
         <article role="main">
+<<<<<<< HEAD
           <section id="d-gray-scott-reaction-diffusion">
 <h1>2D Gray Scott reaction-diffusion<a class="headerlink" href="#d-gray-scott-reaction-diffusion" title="Permalink to this headline">#</a></h1>
+=======
+          <div class="section" id="d-gray-scott-reaction-diffusion">
+<h1>2D Gray Scott reaction-diffusion<a class="headerlink" href="#d-gray-scott-reaction-diffusion" title="Permalink to this headline">¶</a></h1>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 <p>This problem focuses on the following 2D reaction-diffusion system of PDE:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\frac{\partial A}{\partial t} &amp;=
@@ -277,6 +282,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <span class="p">}</span><span class="w"></span>
 
 <span class="c1">// B. setting custom coefficients</span>
+<<<<<<< HEAD
 <span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">Da</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="cm">/*some_value*/</span><span class="p">;</span><span class="w"></span>
@@ -285,6 +291,16 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">K</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="cm">/*some_value*/</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">,</span><span class="w"> </span><span class="n">Da</span><span class="p">,</span><span class="w"> </span><span class="n">Db</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="p">,</span><span class="w"> </span><span class="n">K</span><span class="p">);</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
+=======
+<span class="p">{</span>
+  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Da</span>  <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">Db</span>  <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">F</span>   <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">scalar_type</span> <span class="n">K</span>   <span class="o">=</span> <span class="cm">/*some_value*/</span><span class="p">;</span>
+  <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_gray_scott_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">Da</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">K</span><span class="p">);</span>
+<span class="p">}</span>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 </pre></div>
 </div>
 </section>
@@ -312,9 +328,15 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 but only viscous schemes are. Currently, we only support a first order viscous flux
 reconstruction, which leads to a second-order scheme.</p>
 </div>
+<<<<<<< HEAD
 </section>
 <section id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">#</a></h2>
+=======
+</div>
+<div class="section" id="sample-plot">
+<h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 <p>Representative plots at selected time <span class="math notranslate nohighlight">\(t=1000\)</span> obtained using time step <span class="math notranslate nohighlight">\(dt=0.5\)</span>, Runge-Kutta4 integration,
 a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</span></code> and default values for <span class="math notranslate nohighlight">\(D_a, D_b, F, K\)</span>.</p>
 <a class="reference internal image-reference" href="_images/wiki_grayscott_2d_0.25_1000_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_grayscott_2d_0.25_1000_rk4.png" style="width: 75%;"/></a>
@@ -347,6 +369,7 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
               </div>
             </a>
         </div>
+<<<<<<< HEAD
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
@@ -363,6 +386,18 @@ a mesh of <code class="docutils literal notranslate"><span class="pre">160x160</
               
             </div>
           </div>
+=======
+
+        <div class="related-information">
+              Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
+            Last updated on Mar 11, 2022. |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/grayscott_2d.rst.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+>>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
         </div>
         
       </footer>
