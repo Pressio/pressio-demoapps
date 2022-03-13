@@ -1,7 +1,18 @@
 3D Euler Smooth
 ===============
 
-This problem solves the *3D Euler equations* in conservative form for a smooth field.
+This problem solves the *3D Euler equations* in conservative form for a smooth field. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y \\ \rho u_z\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y  \\ \rho u_x u_z\\ (\rho E+p)u_x \end{bmatrix} + \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ \rho u_y u_z\\ (\rho E+p)u_y \end{bmatrix} + \frac{\partial }{\partial z} \begin{bmatrix}\rho u_z  \\ \rho u_x u_z  \\ \rho u_y u_z \\ \rho u_z^2 +p\\ (\rho E+p)u_z \end{bmatrix}= 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2 + u_z^2)).
+
 
 - The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
   

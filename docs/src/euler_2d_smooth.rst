@@ -1,7 +1,18 @@
 2D Euler Smooth
 ===============
 
-This problem solves the *2D conservative Euler equations* for a smooth field.
+This problem solves the *2D conservative Euler equations* for a smooth field. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y \\ (E+p)u_x \end{bmatrix} \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ (E+p)u_y \end{bmatrix}= 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+
 
 * The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 

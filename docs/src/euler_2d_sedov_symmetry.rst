@@ -1,7 +1,18 @@
 2D Euler Sedov (with symmetry)
 ==============================
 
-This problem solves the *2D conservative Euler equations*.
+This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y \\ (E+p)u_x \end{bmatrix} \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ (E+p)u_y \end{bmatrix}= 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+
 
 * The problem is adapted from `Reference paper1 <https://reader.elsevier.com/reader/sd/pii/S002199911400477X?token=658F08D28B5C7A6A97E6F4478FD494699F3C8DF23970A256F06E501B7B136F9A6A540EEA749F28AC2AF4A6A7993A8517&originRegion=eu-west-1&originCreation=20210611123033>`_ and `Reference paper2 <http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010114000000000000000>`_
 

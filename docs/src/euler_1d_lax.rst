@@ -1,7 +1,17 @@
 1D Euler Lax
 ============
 
-This problem solves the *1D Euler conservative equations* for the 1D Lax problem.
+This problem solves the *1D Euler conservative equations* for the 1D Lax problem. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho v\\ E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho v \\ \rho v^2 +p\\ v(E+p) \end{bmatrix} = 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho v^2).
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/274407416_Finite_Difference_Hermite_WENO_Schemes_for_Hyperbolic_Conservation_Laws>`_
 
@@ -12,7 +22,6 @@ This problem solves the *1D Euler conservative equations* for the 1D Lax problem
   - :math:`x>0 : \quad \rho = 0.5, u = 0.0, p = 0.571`
 
 - Domain is :math:`[-5.0, 5.0]` with homogeneous Neumann BC
-
 
 - Time integration is performed over :math:`t \in (0, 1.3)`.
 

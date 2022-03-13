@@ -1,7 +1,18 @@
 2D Euler Sedov Full
 ===================
 
-This problem solves the *2D conservative Euler equations*.
+This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y \\ (E+p)u_x \end{bmatrix} \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ (E+p)u_y \end{bmatrix}= 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/260967068_GENASIS_General_Astrophysical_Simulation_System_I_Refinable_Mesh_and_Nonrelativistic_Hydrodynamics>`_
 

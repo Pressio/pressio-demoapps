@@ -1,7 +1,17 @@
 1D Euler Shu-Osher
 ==================
 
-This problem solves the *1D Euler conservative equations* for the Shu-Osher 1D problem.
+This problem solves the *1D Euler conservative equations* for the Shu-Osher 1D problem. The gas dynamics is governed by a system of PDE
+
+.. math::
+
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho v\\ E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho v \\ \rho v^2 +p\\ v(E+p) \end{bmatrix} = 0
+
+where the pressure :math:`p` is related to the conserved quantities through the equation of the state
+
+.. math::
+
+   p=(\gamma -1)(E-\frac{1}{2}\rho v^2).
 
 * The problem is adapted from `this paper <https://www.researchgate.net/publication/226065267_Numerical_simulations_of_compressible_mixing_layers_with_a_discontinuous_Galerkin_method>`_
 
