@@ -1,7 +1,6 @@
 2D Euler Double Mach Reflection
 ===============================
 
-<<<<<<< HEAD
 This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
 
 .. math::
@@ -20,16 +19,6 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 - Domain is :math:`[0, 4]\times[0, 1]`. For BC see link above.
 
-=======
-This problem solves the *2D conservative Euler equations*.
-
-- The problem is adopted from `this paper <http://flash.uchicago.edu/site/flashcode/user_support/flash_ug_devel/node184.html#SECTION010116000000000000000>`_
-
-- Initial condition is a Mach 10 shock in air tilted by an angle, see reference paper above.
-
-- Domain is :math:`[0, 4]\times[0, 1]`. For BC see link above.
-
->>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 - Typically, integration is performed for :math:`t \in (0, 0.25)`.
 
 

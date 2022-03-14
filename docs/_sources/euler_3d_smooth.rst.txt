@@ -1,7 +1,6 @@
 3D Euler Smooth
 ===============
 
-<<<<<<< HEAD
 This problem solves the *3D Euler equations* in conservative form for a smooth field. The gas dynamics is governed by a system of PDE
 
 .. math::
@@ -21,16 +20,6 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 - Initial conditions (primitive variables):
 
-=======
-This problem solves the *3D Euler equations* in conservative form for a smooth field.
-
-- The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
-  
-  - in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1`
-
-- Initial conditions (primitive variables):
-
->>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
   - :math:`\rho = 1 + 0.2\sin(\pi (x+y+z))`
 
   - :math:`u = 1, v = 1, w = 1, p = 1`

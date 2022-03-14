@@ -1,7 +1,6 @@
 2D Euler Normal Shock
 =====================
 
-<<<<<<< HEAD
 This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
 
 .. math::
@@ -13,9 +12,6 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 .. math::
 
    p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
-=======
-This problem solves the *2D conservative Euler equations*.
->>>>>>> cdd90a7b7ed9fb5a4ae7fb40b4ca9318198d3069
 
 Mesh
 ----
