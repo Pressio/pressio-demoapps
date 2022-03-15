@@ -1,7 +1,7 @@
 2D Euler Riemann
 ================
 
-This problem solves the *2D conservative Euler equations*. The gas dynamics is governed by a system of PDE
+This problem solves the *2D conservative Euler equations*
 
 .. math::
 
@@ -11,9 +11,8 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 .. math::
 
-   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+   p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
 
-- Domain is :math:`[0, 1]^2` with homogeneous Neumann on all boundaries
 
 - Various initial conditions are supported:
 
@@ -31,12 +30,17 @@ where the pressure :math:`p` is related to the conserved quantities through the 
   - ``icId==2``:
 
     - See configuration 3 of `paper2 <http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf>`_
-  
+
       :math:`\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; & x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; & x<4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &x<4/5, y<4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;& x>4/5, y<4/5 \end{matrix}\right.`
 
     - This IC is used to create the corresponding initial conditions in conservative variables.
 
     - Time integration is performed for :math:`t \in (0, 4/5)`
+
+
+- By default, :math:`\gamma = 1.4`
+
+- Domain is :math:`[0, 1]^2` with homogeneous Neumann on all boundaries
 
 
 Mesh
@@ -45,10 +49,27 @@ Mesh
 .. code-block:: shell
 
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
-           --problem riemann2d_s{3,5,7} -n Nx Ny --outDir <destination-path>
+           --problem riemann2d_s<stencilSize> -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+where 
+
+- ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively
+
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>`` is where you want the mesh files to be generated.
+  The script creates the directory if it does not exist.
+
+
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+  
+  - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
 C++ synopsis
@@ -57,10 +78,13 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/euler2d.hpp"
-   // ...
+
    namespace pda     = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto probId = pda::Euler2d::Riemann;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
+   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId]);
    auto state	     = problem.initialCondition();
 
@@ -72,7 +96,9 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+
    probId  = pda.Euler2d.Riemann
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme [, icId])

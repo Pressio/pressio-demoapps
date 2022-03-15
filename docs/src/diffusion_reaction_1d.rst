@@ -5,14 +5,14 @@ This problem focuses on the following 1D diffusion reaction PDE:
 
 .. math::
 
-   \frac{\partial y}{\partial t} = D \frac{\partial^2 y}{\partial x^2} + k y^2 + u(x, t)
+   \frac{\partial \phi}{\partial t} = D \frac{\partial^2 \phi}{\partial x^2} + k \phi^2 + u(x, t)
 
 
 * The problem is adapted from `this paper <https://arxiv.org/abs/1910.03193>`_
 
 * ``D, k, u(x, t)`` can be provided to the problem constructor (more below)
 
-* Initial condition: :math:`y(x, 0) = 0`
+* Initial condition: :math:`\phi(x, 0) = 0`
 
 * Default settings:
 
@@ -33,8 +33,13 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	  --problem diffreac1d -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want, and ``<destination-path>`` is
-where you want the mesh files to be generated. Note that
+where: 
+
+- ``N`` is the number of cells you want
+
+- ``<destination-path>`` is where you want the mesh files to be generated.
+  The script creates the directory if it does not exist.
+
 
 Notes:
 ------
@@ -42,11 +47,11 @@ Notes:
 .. important::
 
    For this problem, only viscous schemes are applicable.
-   Note also that the stencil cannot be chosen (yet) because
+   Note also that the stencil cannot be (yet) set because
    the implementation currently only supports a thee-point stencil
    that allows a first order viscous flux reconstruction,
-   yielding a second-order scheme.
-   We might relax this in the future if additional scheme are added.
+   yielding a second-order scheme. We might relax this in 
+   the future if additional scheme are added.
 
 
 C++ synopsis
@@ -98,6 +103,8 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
 
    # A. constructor for problem using default values
    probId  = pda.DiffusionReaction1d.ProblemA

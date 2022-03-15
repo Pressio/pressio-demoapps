@@ -41,9 +41,27 @@ Mesh
 .. code-block:: bash
 
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
-           --problem swe2dSlipWall_s{3,5,7} -n Nx Ny --outDir ...
+           --problem swe2dSlipWall_s<stencilSize> -n Nx Ny --outDir ...
 
-where ``Nx, Ny`` are the number of cells, and ``<stencilSize> = 3 or 5 or 7``.
+where 
+
+- ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively
+
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>`` is where you want the mesh files to be generated.
+  The script creates the directory if it does not exist.
+
+
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+  
+  - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
 C++ synopsis
@@ -53,7 +71,10 @@ C++ synopsis
 
    #include "pressiodemoapps/swe2d.hpp"
 
-   namespace pda     = pressiodemoapps;
+   namespace pda = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
 
    // A. constructor for problem using default values
@@ -80,7 +101,8 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
 
    probId  = pda.Swe2d::SlipWall;
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5

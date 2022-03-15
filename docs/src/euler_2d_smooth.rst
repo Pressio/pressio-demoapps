@@ -1,7 +1,7 @@
 2D Euler Smooth
 ===============
 
-This problem solves the *2D conservative Euler equations* for a smooth field. The gas dynamics is governed by a system of PDE
+This problem solves the *2D conservative Euler equations* 
 
 .. math::
 
@@ -11,24 +11,26 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 .. math::
 
-   p=(\gamma -1)(E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
+   p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
 
 
-* The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
+* Initial conditions in primitive variables:
 
-* Initial conditions in primitive variables: 
-  
   - :math:`\rho = 1 + 0.2\sin(\pi (x+y))`
-  
+
   - :math:`u = 1, v = 1, p = 1`
 
   - This IC is used to create the corresponding initial conditions in conservative variables.
-  
+
+- By default, :math:`\gamma = 1.4`
+
 * Domain is :math:`[-1, 1]^2` with periodic BC
 
 * Analytical density as function of time is given as :math:`\rho(t) = 1 + 0.2\sin(\pi (x+y - 2 t))`
 
 * Typically, integration is performed for :math:`t \in (0, 2)`
+
+* The problem is adapted from `this paper <https://www.proquest.com/openview/ef6ab9a87e7563ad18e56c2f95f624d8/1?pq-origsite=gscholar&cbl=2032364>`_
 
 
 Mesh
@@ -37,10 +39,28 @@ Mesh
 .. code-block:: shell
 
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
-           --problem euler2dsmooth_s{3,5,7} -n Nx Ny --outDir <destination-path>
+           --problem euler2dsmooth_s<stencilSize> -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` are the number of cells you want along :math:`x` and :math:`y` respectively, and ``<stencilSize> = 3 or 5 or 7``,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+where 
+
+- ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively
+
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>`` is where you want the mesh files to be generated.
+  The script creates the directory if it does not exist.
+
+
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+  
+  - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
+
 
 C++ synopsis
 ------------
@@ -48,10 +68,13 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/euler2d.hpp"
-   // ...
+
    namespace pda     = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto probId = pda::Euler2d::PeriodicSmooth;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
+   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
    auto state	     = problem.initialCondition();
 
@@ -61,7 +84,9 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+
    probId  = pda.Euler2d.PeriodicSmooth
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
    problem = pda.create_problem(meshObj, probId, scheme)

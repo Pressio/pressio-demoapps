@@ -1,17 +1,17 @@
 1D Linear Advection
 ===================
 
-This problem solves the *1D linear advection* with variable advecting velocity
+This problem solves the *1D linear advection* 
 
 .. math::
-   \frac{\partial y}{\partial t} + a \frac{\partial y}{\partial x} = 0
+   \frac{\partial \phi}{\partial t} + a \frac{\partial \phi}{\partial x} = 0
 
-for a scalar field :math:`y` and advection velocity :math:`a`.
+for a scalar field :math:`\phi` and advection velocity :math:`a`.
 
-* Initial condition: :math:`y(x, 0) = \sin(\pi x)`
+* Initial condition: :math:`\phi(x, 0) = \sin(\pi x)`
 * Domain is :math:`[-1,1]` with periodic BC
 * Integration is typically performed over :math:`t \in (0, 2k)` where :math:`k \in \mathbb{Z}`
-* Default setting uses :math:`a=1`
+* Default setting: :math:`a=1`
 
 Mesh
 ----
@@ -21,8 +21,26 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	  --problem linadv1d_s<stencilSize> -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+where:  
+
+- ``N`` is the number of cells you want 
+
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+  The script creates the directory if it does not exist.
+
+
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+  
+  - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
+
 
 
 C++ synopsis
@@ -32,7 +50,9 @@ C++ synopsis
 
    #include "pressiodemoapps/advection1d.hpp"
 
-   namespace pda     = pressiodemoapps;
+   namespace pda = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
    // 1. using default velocity
    const auto probId = pda::Advection1d::PeriodicLinear;
@@ -50,6 +70,8 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
 
    # 1. using default velocity
    probId  = pda.Advection1d.PeriodicLinear

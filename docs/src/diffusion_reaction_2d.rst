@@ -5,13 +5,13 @@ This problem focuses on the following 2D reaction diffusion PDE:
 
 .. math::
 
-   \frac{\partial s}{\partial t} = D \left(\frac{\partial^2 s}{\partial x^2}
-   + \frac{\partial^2 s}{\partial y^2} \right) + k s^2 + u(x, y, t)
+   \frac{\partial \phi}{\partial t} = D \left(\frac{\partial^2 \phi}{\partial x^2}
+   + \frac{\partial^2 \phi}{\partial y^2} \right) + k \phi^2 + u(x, y, t)
 
 
 * ``D, k, u(x, y, t)`` can be provided to the problem constructor (more below)
 
-* Initial conditions: :math:`s(x, y, 0) = 0`
+* Initial conditions: :math:`\phi(x, y, 0) = 0`
 
 * Default settings:
 
@@ -32,8 +32,12 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem diffreac2d -n Nx Ny --outDir <destination-path>
 
-where ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+where 
+
+- ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively
+
+- ``<destination-path>`` is where you want the mesh files to be generated
+
 
 C++ synopsis
 ------------
@@ -41,9 +45,11 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/diffusion_reaction2d.hpp"
-   // ...
-   namespace pda      = pressiodemoapps;
+
+   namespace pda = pressiodemoapps;
+
    const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
    // A. constructor for problem using default values
@@ -88,7 +94,9 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+
    scheme  = pda.ViscousFluxReconstruction.FirstOrder
 
    # A. constructor for problem using default values
@@ -109,6 +117,6 @@ Notes:
 
 .. important::
 
-   Note that this problem does not have advection, so inviscid schemes are not applicable
-   but only viscous schemes are. Currently, we only support a first order viscous flux
+   Note that, for this problem, only viscous schemes are applicable.
+   Currently, we only support a first order viscous flux
    reconstruction, which leads to a second-order scheme.

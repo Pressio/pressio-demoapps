@@ -1,19 +1,19 @@
 1D Euler Sod
 ============
 
-This problem solves the *1D Euler conservative equations* for the Sod1d problem. The gas dynamics is governed by a system of PDE
+This problem solves the *1D conservative Euler equations* for the Sod1d problem.
 
 .. math::
 
-   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho v\\ E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho v \\ \rho v^2 +p\\ v(E+p) \end{bmatrix} = 0
+   \frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u \\ \rho u^2 +p\\ u(E+p) \end{bmatrix} = 0
 
 where the pressure :math:`p` is related to the conserved quantities through the equation of the state
 
 .. math::
 
-   p=(\gamma -1)(E-\frac{1}{2}\rho v^2).
+   p=(\gamma -1)(\rho E-\frac{1}{2}\rho u^2).
 
-* The problem is adapted from `this paper <https://iopscience.iop.org/article/10.1086/317361>`_
+
 
 - Initial conditions in primitive variables:
 
@@ -23,9 +23,13 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
   - These are used to create the initial conditions in conservative variables.
 
+- By default, :math:`\gamma = 1.4`
+
 - Domain is :math:`[-0.5, 0.5]` with homogeneous Neumann BC
 
 - Typically, integration is performed over :math:`t \in (0, 0.2)`
+
+* The problem is adapted from `this paper <https://iopscience.iop.org/article/10.1086/317361>`_
 
 
 Mesh
@@ -36,8 +40,25 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	   --problem sod1d_s<stencilSize> -n <N> --outDir <destination-path>
 
-where ``N`` is the number of cells you want and ``<stencilSize> = 3 or 5 or 7``,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+where: 
+
+- ``N`` is the number of cells you want
+
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+  The script creates the directory if it does not exist.
+
+
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+  
+  - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
 C++ synopsis
@@ -47,9 +68,12 @@ C++ synopsis
 
    #include "pressiodemoapps/euler1d.hpp"
 
-   namespace pda     = pressiodemoapps;
+   namespace pda = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto probId = pda::Euler1d::Sod;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
+   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
 
 Python synopsis
@@ -58,6 +82,8 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
 
    probId  = pda.Euler1d.Sod
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5

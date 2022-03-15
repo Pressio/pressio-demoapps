@@ -14,22 +14,25 @@ where the pressure :math:`p` is related to the conserved quantities through the 
    p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2 + u_z^2)).
 
 
-- The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
-  
-  - in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1`
-
 - Initial conditions (primitive variables):
 
   - :math:`\rho = 1 + 0.2\sin(\pi (x+y+z))`
 
   - :math:`u = 1, v = 1, w = 1, p = 1`
 
+  - These are used to create the initial conditions in conservative variables.
+
+- By default, :math:`\gamma = 1.4`
 
 - Domain is :math:`[-1, 1]^3` with periodic BC
 
 - Analytical density as function of time is given as: :math:`\rho(t) = 1 + 0.2\sin(\pi (x+y+z - 3 t))`
 
 - Typically, integration is performed for :math:`t \in (0, 2)`
+
+- The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
+  
+  - in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1`
 
 
 .. Caution::
@@ -41,11 +44,26 @@ Mesh
 .. code-block:: shell
 
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
-           --problem euler3dsmooth_s{3,5} -n Nx Ny Nz --outDir <destination-path>
+           --problem euler3dsmooth_s<stencilSize> -n Nx Ny Nz --outDir <destination-path>
+
+where 
+
+- ``Nx, Ny, Nz`` is the number of cells you want along :math:`x`, :math:`y`, :math:`z` respectively
+
+- ``<stencilSize> = 3 or 5``: defines the neighboring connectivity of each cell 
+
+- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+  The script creates the directory if it does not exist.
 
 
-where ``Nx, Ny, Nz`` are the number of cells you want along :math:`x`, :math:`y` and :math:`z` respectively, and ``<stencilSize> = 3 or 5``,
-and ``<destination-path>`` is where you want the mesh files to be generated.
+.. Important::
+
+  When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
+
+  - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
+ 
+  - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
+
 
 C++ synopsis
 ------------
@@ -53,10 +71,13 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/euler3d.hpp"
-   // ...
-   namespace pda     = pressiodemoapps;
+
+   namespace pda = pressiodemoapps;
+
+   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+
    const auto probId = pda::Euler3d::PeriodicSmooth;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3
+   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3
    auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
    auto state	     = problem.initialCondition();
 
@@ -66,7 +87,9 @@ Python synopsis
 .. code-block:: py
 
    import pressiodemoapps as pda
-   # ...
+
+   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+
    probId  = pda.Euler3d.PeriodicSmooth
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3
    problem = pda.create_problem(meshObj, probId, scheme)
