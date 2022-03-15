@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Problem class: Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -227,19 +228,26 @@
         <article role="main">
           <div class="section" id="d-euler-sod">
 <h1>1D Euler Sod<a class="headerlink" href="#d-euler-sod" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>1D Euler conservative equations</em> for the Sod1d problem.</p>
+<p>This problem solves the <em>1D conservative Euler equations</em> for the Sod1d problem.</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u \\ \rho u^2 +p\\ u(E+p) \end{bmatrix} = 0\end{split}\]</div></div>
+<p>where the pressure <span class="math notranslate nohighlight">\(p\)</span> is related to the conserved quantities through the equation of the state</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[p=(\gamma -1)(\rho E-\frac{1}{2}\rho u^2).\]</div></div>
 <ul class="simple">
-<li><p><a class="reference external" href="https://iopscience.iop.org/article/10.1086/317361">Reference paper</a></p></li>
-</ul>
-<ul class="simple">
-<li><p>IC:</p>
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(x&lt;=0\)</span>: <span class="math notranslate nohighlight">\(\rho =1, u = 0, p = 1\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(x&gt;0\)</span>: <span class="math notranslate nohighlight">\(\rho =0.125, u = 0, p = 0.1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x&lt;=0 :\quad \rho =1, u = 0, p = 1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x&gt;0 :\quad \rho =1/8, u = 0, p = 0.1\)</span></p></li>
+<li><p>These are used to create the initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[-0.5,</span> <span class="pre">0.5]</span></code> with homogeneous Neumann BC</p></li>
-<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 0.2)\)</span>.</p></li>
+<li><p>By default, <span class="math notranslate nohighlight">\(\gamma = 1.4\)</span></p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-0.5, 0.5]\)</span> with homogeneous Neumann BC</p></li>
+<li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 0.2)\)</span></p></li>
+</ul>
+<ul class="simple">
+<li><p>The problem is adapted from <a class="reference external" href="https://iopscience.iop.org/article/10.1086/317361">this paper</a></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -247,16 +255,33 @@
         --problem sod1d_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>: defines the neighboring connectivity of each cell</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code>: full path to where you want the mesh files to be generated.
+The script creates the directory if it does not exist.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When you set the <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span></code>, keep in mind the following constraints (more on this below):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::FirstOrder</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno3</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno5</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">7</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/euler1d.hpp"</span><span class="cp"></span>
 
-<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
+
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
 <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -264,6 +289,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
+
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
 
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler1d</span><span class="o">.</span><span class="n">Sod</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
@@ -273,8 +300,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-solution">
 <h2>Sample Solution<a class="headerlink" href="#sample-solution" title="Permalink to this headline">¶</a></h2>
-<p>Representative plot for total simulation time <code class="docutils literal notranslate"><span class="pre">T=0.2</span></code> showing density at <code class="docutils literal notranslate"><span class="pre">t=0,</span> <span class="pre">0.1,</span> <span class="pre">0.2</span></code>
-obtained using <code class="docutils literal notranslate"><span class="pre">dt</span> <span class="pre">=</span> <span class="pre">0.0001</span></code>, <code class="docutils literal notranslate"><span class="pre">Weno5</span></code>, Runge-Kutta4 integration with a mesh of 1000 cells.</p>
+<p>Representative plot for total simulation time <span class="math notranslate nohighlight">\(T=0.2\)</span> showing density at selected time steps <span class="math notranslate nohighlight">\(t \in \left \{0, 0.1, 0.2\right \}\)</span>
+obtained using time step <span class="math notranslate nohighlight">\(dt = 10^{-4}\)</span>, Weno5, Runge-Kutta4 integration with a mesh of <span class="math notranslate nohighlight">\(N=1000\)</span> cells.</p>
 <a class="reference internal image-reference" href="_images/wiki_sod1d_0.0001_0.2_1000_weno5_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_sod1d_0.0001_0.2_1000_weno5_rk4.png" style="width: 60%;"/></a>
 </div>
 </div>
@@ -308,7 +335,7 @@ obtained using <code class="docutils literal notranslate"><span class="pre">dt</
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_1d_sod.rst.txt"

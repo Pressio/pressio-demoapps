@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Problem class: Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -227,15 +228,22 @@
         <article role="main">
           <div class="section" id="d-euler-sedov-with-symmetry">
 <h1>3D Euler Sedov (with symmetry)<a class="headerlink" href="#d-euler-sedov-with-symmetry" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>3D Euler equations</em> in conserative form.</p>
+<p>This problem solves the <em>3D Euler equations</em> in conservative form. The gas dynamics is governed by a system of PDE</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y \\ \rho u_z\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y  \\ \rho u_x u_z\\ (\rho E+p)u_x \end{bmatrix} + \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ \rho u_y u_z\\ (\rho E+p)u_y \end{bmatrix} + \frac{\partial }{\partial z} \begin{bmatrix}\rho u_z  \\ \rho u_x u_z  \\ \rho u_y u_z \\ \rho u_z^2 +p\\ (\rho E+p)u_z \end{bmatrix}= 0\end{split}\]</div></div>
+<p>where the pressure <span class="math notranslate nohighlight">\(p\)</span> is related to the conserved quantities through the equation of the state</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2 + u_z^2)).\]</div></div>
 <ul class="simple">
-<li><p>IC involves a small spherical region of radius <span class="math notranslate nohighlight">\(R = 3. * min(dx, dy)\)</span> with high pressure</p>
+<li><p>Initial conditions (primitive variables):</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(r&lt;=R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = (4 (\gamma-1) 0.851072)/(4 pi R^3)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(r&gt;R\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = 0, v = 0, p = 2.5e-5\)</span></p></li>
+<li><p>a high pressure concentrated small spherical region of radius <span class="math notranslate nohighlight">\(R = 3 \min(dx, dy)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(4 \pi R^3); &amp; r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; &amp; r&gt;R \end{matrix}\right.\)</span></p></li>
+<li><p>These are used to create the initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[0.0,</span> <span class="pre">1.2]^3</span></code> with reflective BC on <cite>x=y=z=0</cite>, and homogeneous Neumann on the others.</p></li>
+<li><p>By default, <span class="math notranslate nohighlight">\(\gamma = 1.4\)</span></p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([0.0, 1.2]^3\)</span> with reflective BC on <span class="math notranslate nohighlight">\(x=y=z=0\)</span> and homogeneous Neumann on others.</p></li>
 <li><p>Typically, integration is performed over <span class="math notranslate nohighlight">\(t \in (0, 1.)\)</span>.</p></li>
 </ul>
 <div class="admonition caution">
@@ -245,19 +253,34 @@
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-        --problem sedov3dsym_s<span class="o">{</span><span class="m">3</span>,5<span class="o">}</span> -n Nx Ny Nz --outDir &lt;destination-path&gt;
+        --problem sedov3dsym_s&lt;stencilSize&gt; -n Nx Ny Nz --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny,</span> <span class="pre">Nz</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span>, <span class="math notranslate nohighlight">\(z\)</span> respectively</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When you set the <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span></code>, keep in mind the following constraints (more on this below):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::FirstOrder</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno3</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/euler3d.hpp"</span><span class="cp"></span>
-<span class="c1">// ...</span>
-<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
+
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler3d</span><span class="o">::</span><span class="n">SedovSymmetry</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span> <span class="c1">//or Weno3</span>
 <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 <span class="k">auto</span> <span class="n">state</span>        <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
 </pre></div>
@@ -266,7 +289,9 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
-<span class="c1"># ...</span>
+
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
+
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler3d</span><span class="o">.</span><span class="n">SedovSymmetry</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
@@ -305,7 +330,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_3d_sedov_symmetry.rst.txt"

@@ -95,7 +95,7 @@ Step 3: Using the problem
 -------------------------
 
 To use a problem instance, you need to know that all *pressio-demoapps*
-problem instances meet a specific API as described in :doc:`this page <api>`.
+problem instances meet a specific :doc:`C++ API <apicpp>` and :doc:`Python API <apipy>`.
 
 Assuming you read that API page, then it should be clear that the
 problem API is complete enough so that you can query all operators
@@ -105,11 +105,10 @@ Here we show some things you can do using the C++ as an example:
 .. code-block:: c++
 
    // ...
-   auto problem          = pda::create_problem_eigen(meshObj, pda::Euler1d::Sod, scheme);
-   auto state		 = problem.initialCondition();
+   auto problem = pda::create_problem_eigen(meshObj, pda::Euler1d::Sod, scheme);
+   auto state = problem.initialCondition();
 
-   // now that we have the problem and initial condition we can
-   // create the RHS
+   // having the problem and initial condition, create instance of the RHS
    auto rhs = problem.createVelocity()
    // compute the rhs of the discrete system at time=0.0
    problem.velocity(state, 0.0, rhs);

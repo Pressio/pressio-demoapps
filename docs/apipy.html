@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="Problem class: C++ API" href="apicpp.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>Problem class API - pressio-demoapps 0.2.0 documentation</title>
+        <title>Problem class: Python API - pressio-demoapps 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Problem class: Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -225,90 +226,14 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="problem-class-api">
-<h1>Problem class API<a class="headerlink" href="#problem-class-api" title="Permalink to this headline">¶</a></h1>
-<p>A <em>pressio-demoapps</em> problem class meets a specific API as described below.</p>
-<div class="section" id="c-api">
-<h2>C++ API<a class="headerlink" href="#c-api" title="Permalink to this headline">¶</a></h2>
-<dl class="cpp class">
-<dt class="sig sig-object cpp" id="_CPPv47Problem">
-<span id="_CPPv37Problem"></span><span id="_CPPv27Problem"></span><span id="Problem"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Problem</span></span></span><a class="headerlink" href="#_CPPv47Problem" title="Permalink to this definition">¶</a><br/></dt>
-<dd><dl class="cpp type">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem11scalar_typeE">
-<span id="_CPPv3N7Problem11scalar_typeE"></span><span id="_CPPv2N7Problem11scalar_typeE"></span><span id="Problem::scalar_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scalar_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem11scalar_typeE" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>The scalar type: this is by default <code class="docutils literal notranslate"><span class="pre">double</span></code>.</p>
-</dd></dl>
-<dl class="cpp type">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem10state_typeE">
-<span id="_CPPv3N7Problem10state_typeE"></span><span id="_CPPv2N7Problem10state_typeE"></span><span id="Problem::state_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">state_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem10state_typeE" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Data structure type to store the state: currently, this is an Eigen vector.</p>
-</dd></dl>
-<dl class="cpp type">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem13velocity_typeE">
-<span id="_CPPv3N7Problem13velocity_typeE"></span><span id="_CPPv2N7Problem13velocity_typeE"></span><span id="Problem::velocity_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem13velocity_typeE" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Data structure type to store the velocity: currently, this is an Eigen vector.</p>
-</dd></dl>
-<dl class="cpp type">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem13jacobian_typeE">
-<span id="_CPPv3N7Problem13jacobian_typeE"></span><span id="_CPPv2N7Problem13jacobian_typeE"></span><span id="Problem::jacobian_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem13jacobian_typeE" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Data structure type to store the Jacobian: currently, this is an Eigen sparse CRS matrix.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem18totalDofSampleMeshEv">
-<span id="_CPPv3N7Problem18totalDofSampleMeshEv"></span><span id="_CPPv2N7Problem18totalDofSampleMeshEv"></span><span id="Problem::totalDofSampleMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofSampleMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem18totalDofSampleMeshEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>sample</strong> mesh.
-Note that, in general, this is not the same as the number of sample mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem19totalDofStencilMeshEv">
-<span id="_CPPv3N7Problem19totalDofStencilMeshEv"></span><span id="_CPPv2N7Problem19totalDofStencilMeshEv"></span><span id="Problem::totalDofStencilMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofStencilMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19totalDofStencilMeshEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>stencil</strong> mesh.
-Note that, in general, this is not the same as the number of stencil mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem16initialConditionEv">
-<span id="_CPPv3N7Problem16initialConditionEv"></span><span id="_CPPv2N7Problem16initialConditionEv"></span><span id="Problem::initialCondition"></span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">initialCondition</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem16initialConditionEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Constructs and returns an instance of the initial condition for the target problem.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem14createVelocityEv">
-<span id="_CPPv3N7Problem14createVelocityEv"></span><span id="_CPPv2N7Problem14createVelocityEv"></span><span id="Problem::createVelocity"></span><a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createVelocity</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem14createVelocityEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Constructs and returns an instance of the velocity.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem14createJacobianEv">
-<span id="_CPPv3N7Problem14createJacobianEv"></span><span id="_CPPv2N7Problem14createJacobianEv"></span><span id="Problem::createJacobian"></span><a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createJacobian</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem14createJacobianEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Constructs and returns an instance of the jacobian.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type">
-<span id="_CPPv3N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="_CPPv2N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="Problem::velocity__state_typeCR.scalar_type.velocity_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
-evaluates the RHS of the system and overwrites <code class="xref py py-class docutils literal notranslate"><span class="pre">v</span></code>.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type">
-<span id="_CPPv3N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="_CPPv2N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="Problem::jacobian__state_typeCR.scalar_type.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
-evaluates the Jacobian of the RHS and stores it into <code class="xref py py-class docutils literal notranslate"><span class="pre">J</span></code>.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type">
-<span id="_CPPv3N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="_CPPv2N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="Problem::velocityAndJacobian__state_typeCR.scalar_type.velocity_typeR.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocityAndJacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
-evaluates the RHS and its Jacobian.</p>
-</dd></dl>
-</dd></dl>
-</div>
+          <div class="section" id="problem-class-python-api">
+<h1>Problem class: Python API<a class="headerlink" href="#problem-class-python-api" title="Permalink to this headline">¶</a></h1>
+<p>A <em>pressio-demoapps</em> Python problem class meets a specific API as described below.</p>
 <div class="section" id="python-api">
 <h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="id0">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Problem</span></span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="Problem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Problem</span></span><a class="headerlink" href="#Problem" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="Problem.totalDofSampleMesh">
 <span class="sig-name descname"><span class="pre">totalDofSampleMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.totalDofSampleMesh" title="Permalink to this definition">¶</a></dt>
@@ -426,14 +351,14 @@ Python sparse matrices.</p>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="howtouse.html">
+          <a class="prev-page" href="apicpp.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">How to use it in 3 steps!</div>
+                <div class="title">Problem class: C++ API</div>
                 
               </div>
             </a>
@@ -441,10 +366,10 @@ Python sparse matrices.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
-            | <a class="muted-link" href="_sources/api.rst.txt"
+            | <a class="muted-link" href="_sources/apipy.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -464,8 +389,7 @@ Python sparse matrices.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Problem class API</a><ul>
-<li><a class="reference internal" href="#c-api">C++ API</a></li>
+<li><a class="reference internal" href="#">Problem class: Python API</a><ul>
 <li><a class="reference internal" href="#python-api">Python API</a></li>
 </ul>
 </li>

@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Problem class: Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -227,12 +228,15 @@
         <article role="main">
           <div class="section" id="d-linear-advection">
 <h1>1D Linear Advection<a class="headerlink" href="#d-linear-advection" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>1D linear advection</em> with variable advecting velocity.</p>
+<p>This problem solves the <em>1D linear advection</em></p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[\frac{\partial \phi}{\partial t} + a \frac{\partial \phi}{\partial x} = 0\]</div></div>
+<p>for a scalar field <span class="math notranslate nohighlight">\(\phi\)</span> and advection velocity <span class="math notranslate nohighlight">\(a\)</span>.</p>
 <ul class="simple">
-<li><p>Initial condition: <span class="math notranslate nohighlight">\(y(x, 0) = \sin(\pi x)\)</span></p></li>
-<li><p>Domain is <span class="math notranslate nohighlight">\(-1 \leq x \leq 1\)</span> with periodic BC</p></li>
-<li><p>Integration is typically performed over <span class="math notranslate nohighlight">\(t \in (0, 2k)\)</span> where k is 1 or 2 or 3 …</p></li>
-<li><p>Default: use a unitary velocity</p></li>
+<li><p>Initial condition: <span class="math notranslate nohighlight">\(\phi(x, 0) = \sin(\pi x)\)</span></p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1,1]\)</span> with periodic BC</p></li>
+<li><p>Integration is typically performed over <span class="math notranslate nohighlight">\(t \in (0, 2k)\)</span> where <span class="math notranslate nohighlight">\(k \in \mathbb{Z}\)</span></p></li>
+<li><p>Default setting: <span class="math notranslate nohighlight">\(a=1\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
@@ -240,14 +244,30 @@
        --problem linadv1d_s&lt;stencilSize&gt; -n &lt;N&gt; --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of cells you want</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>: defines the neighboring connectivity of each cell</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code>: full path to where you want the mesh files to be generated.
+The script creates the directory if it does not exist.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When you set the <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span></code>, keep in mind the following constraints (more on this below):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::FirstOder</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno3</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno5</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">7</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/advection1d.hpp"</span><span class="cp"></span>
 
-<span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
 
 <span class="c1">// 1. using default velocity</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Advection1d</span><span class="o">::</span><span class="n">PeriodicLinear</span><span class="p">;</span>
@@ -264,6 +284,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
 
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
+
 <span class="c1"># 1. using default velocity</span>
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Advection1d</span><span class="o">.</span><span class="n">PeriodicLinear</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
@@ -277,9 +299,8 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-solution">
 <h2>Sample Solution<a class="headerlink" href="#sample-solution" title="Permalink to this headline">¶</a></h2>
-<p>Representative plot showing initial condition and solution at <cite>t=1.</cite> and <cite>t=2</cite>,
-obtained with default velocity, using <cite>dt = 0.001</cite>, Weno5, Runge-Kutta4 integration
-with a mesh of 250 cells.</p>
+<p>Representative plot showing initial condition and solution at <span class="math notranslate nohighlight">\(t=1\)</span> and <span class="math notranslate nohighlight">\(t=2\)</span>,
+obtained using <span class="math notranslate nohighlight">\(dt = 10^{-3}\)</span>, Weno5, Runge-Kutta4 integration with a mesh of <span class="math notranslate nohighlight">\(N=250\)</span> cells.</p>
 <a class="reference internal image-reference" href="_images/wiki_advection_0.001_2_250_weno5_rk4.png"><img alt="Alternative text" class="align-center" src="_images/wiki_advection_0.001_2_250_weno5_rk4.png" style="width: 60%;"/></a>
 </div>
 </div>
@@ -313,7 +334,7 @@ with a mesh of 250 cells.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/advection_1d.rst.txt"

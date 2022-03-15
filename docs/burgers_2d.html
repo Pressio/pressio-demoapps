@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Problem class: Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -227,40 +228,100 @@
         <article role="main">
           <div class="section" id="d-burgers">
 <h1>2D Burgers<a class="headerlink" href="#d-burgers" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the 2d Burgers equations:</p>
+<p>TODO: Add Initial conditions and parameters. Fix code blocks.</p>
+<p>This problem solves the 2D Burgers equations. We consider a two-dimensional nonlinear viscous Burgers equations</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[\frac{\partial u}{\partial t} ...\]</div></div>
+\[\frac{\partial u}{\partial t} + u \nabla u = D \nabla^2 u\]</div></div>
+<p>with:</p>
 <ul class="simple">
-<li><p>Domain is <code class="docutils literal notranslate"><span class="pre">[0,1]^2</span></code> with periodic BC</p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([0,1]^2\)</span> with periodic BC</p></li>
+<li><p>initial condition is: <span class="math notranslate nohighlight">\(u = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )\)</span></p></li>
+<li><p>Default settings: <span class="math notranslate nohighlight">\(\alpha = 0.5\)</span>, <span class="math notranslate nohighlight">\(\delta = 0.15\)</span>, <span class="math notranslate nohighlight">\(x_0=0, y_0=-0.2\)</span>, <span class="math notranslate nohighlight">\(D = 0.00001\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-        --problem burgers2d -n Nx Ny --outDir &lt;destination-path&gt;
+        --problem burgers2d_s&lt;stencilSize&gt; -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along x and y,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>: defines the neighboring connectivity of each cell</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.
+The script creates the directory if it does not exist.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When you set the <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span></code>, keep in mind the following constraints (more on this below):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::FirstOrder</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno3</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno5</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">7</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/advection_diffusion2d.hpp"</span><span class="cp"></span>
 <span class="c1">// ...</span>
-<span class="k">namespace</span> <span class="n">pda</span>      <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+<span class="k">namespace</span> <span class="n">pda</span> <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
 <span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
 
-<span class="n">FINISH</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">inviscidScheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span> <span class="c1">// or Weno3, Weno5</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">viscousScheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">ViscousFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>  <span class="c1">// must be FirstOrder</span>
+
+<span class="c1">// A. constructor for problem using default values</span>
+<span class="p">{</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">AdvectionDiffusion2d</span><span class="o">::</span><span class="n">Burgers</span><span class="p">;</span>
+  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// B. setting custom coefficients</span>
+<span class="p">{</span>
+  <span class="k">using</span> <span class="n">scalar_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">alpha</span>  <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">delta</span>  <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">D</span>      <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">x0</span>     <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">y0</span>     <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
+  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_burgers_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">,</span>
+                                                      <span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
-<span class="c1"># ...</span>
-<span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span>
 
-<span class="n">FINISH</span>
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
+
+<span class="n">inviscidScheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span><span class="p">;</span> <span class="c1"># or Weno3, Weno5</span>
+<span class="n">viscousScheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">ViscousFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span><span class="p">;</span>  <span class="c1"># must be FirstOrder</span>
+
+<span class="c1"># A. constructor for problem using default values</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">AdvectionDiffusion2d</span><span class="p">::</span><span class="n">Burgers</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+
+<span class="c1"># B. setting custom coefficients</span>
+<span class="n">alpha</span>  <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
+<span class="n">delta</span>  <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
+<span class="n">D</span>      <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
+<span class="n">x0</span>     <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
+<span class="n">y0</span>     <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_burgers_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">,</span>
+                                        <span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Note that we currently support only first order <em>viscous</em>
+flux reconstruction, which leads to a second-order scheme.</p>
 </div>
 </div>
 </div>
@@ -294,7 +355,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 08, 2022. |
+            Last updated on Mar 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/burgers_2d.rst.txt"
@@ -321,6 +382,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <li><a class="reference internal" href="#mesh">Mesh</a></li>
 <li><a class="reference internal" href="#c-synopsis">C++ synopsis</a></li>
 <li><a class="reference internal" href="#python-synopsis">Python synopsis</a></li>
+<li><a class="reference internal" href="#notes">Notes:</a></li>
 </ul>
 </li>
 </ul>

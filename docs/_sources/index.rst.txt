@@ -97,7 +97,8 @@ Contents
 
     installation
     howtouse
-    api
+    apicpp
+    apipy
     your_first_problem
     problems_1d
     problems_2d
