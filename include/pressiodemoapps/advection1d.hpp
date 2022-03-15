@@ -45,11 +45,13 @@ create_problem_eigen
 {
 
   using scalar_t = typename mesh_t::scalar_t;
+  constexpr auto defaultVel = static_cast<scalar_t>(1);
+  constexpr int defaultIc = 1;
   if (problemEnum == ::pressiodemoapps::Advection1d::PeriodicLinear){
     return RetType(impladvection1d::TagLinearAdvection{},
 		   meshObj, inviscidFluxRecEnum,
 		   InviscidFluxScheme::Rusanov,
-		   static_cast<scalar_t>(1));
+		   defaultVel, defaultIc);
   }
   else{
     throw std::runtime_error("advection: invalid problem enum");
@@ -76,9 +78,10 @@ create_linear_advection_1d_problem_eigen
  typename mesh_t::scalar_t velocity)
 {
 
+  constexpr int defaultIc = 1;
   return RetType(impladvection1d::TagLinearAdvection{},
 		 meshObj, inviscidFluxRecEnum,
-		 inviscidFluxScheme, velocity);
+		 inviscidFluxScheme, velocity, defaultIc);
 }
 
 template<
@@ -93,11 +96,13 @@ create_linear_advection_1d_problem_eigen
 #endif
 (const mesh_t & meshObj,
  InviscidFluxReconstruction inviscidFluxRecEnum,
- typename mesh_t::scalar_t velocity)
+ typename mesh_t::scalar_t velocity,
+ int ic=1)
 {
   return RetType(impladvection1d::TagLinearAdvection{},
 		 meshObj, inviscidFluxRecEnum,
-		 InviscidFluxScheme::Rusanov, velocity);
+		 InviscidFluxScheme::Rusanov,
+		 velocity, ic);
 }
 
 }//end namespace pressiodemoapps

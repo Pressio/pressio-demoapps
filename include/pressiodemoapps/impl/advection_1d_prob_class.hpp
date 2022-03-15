@@ -44,13 +44,15 @@ public:
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
-	   scalar_type velocity)
+	   scalar_type velocity,
+	   int icIdentifier)
     : m_numDofPerCell(1),
       m_probEn(::pressiodemoapps::Advection1d::PeriodicLinear),
       m_inviscidFluxRecEn(inviscidFluxRecEn),
       m_inviscidFluxSchemeEn(invFluxSchemeEn),
       m_linear_adv_vel(velocity),
-      m_meshObj(meshObj)
+      m_meshObj(meshObj),
+      m_icIdentifier(icIdentifier)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
@@ -59,8 +61,37 @@ public:
   state_type initialCondition() const{
     state_type res(m_numDofStencilMesh);
     const auto & x = m_meshObj.viewX();
+
     for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
-      res(i) = std::sin(M_PI*x(i));
+      if (m_icIdentifier == 1){
+	res(i) = std::sin(M_PI*x(i));
+      }
+
+      else if (m_icIdentifier == 2){
+	const auto x1= static_cast<scalar_type>(1.2);
+	const auto A1= static_cast<scalar_type>(200.0);
+	const auto delta1 = 16.0;
+	const auto x2= static_cast<scalar_type>(2.5);
+	const auto A2= static_cast<scalar_type>(100.0);
+	const auto delta2 = 36.0;
+
+	const auto dx1Sq = (x(i)-x1)*(x(i)-x1);
+	const auto dx2Sq = (x(i)-x2)*(x(i)-x2);
+        res(i) = 0.8*std::exp(-A1*dx1Sq/delta1) + std::exp(-A2*dx2Sq/delta2);
+      }
+
+      else if (m_icIdentifier == 3){
+	const auto x1= static_cast<scalar_type>(1.5);
+	const auto x2= static_cast<scalar_type>(3.0);
+	const auto delta = 0.5*0.5;
+	const auto dx1Sq = (x(i)-x1)*(x(i)-x1);
+	const auto dx2Sq = (x(i)-x2)*(x(i)-x2);
+        res(i) = std::exp(-dx1Sq/delta) + 0.5*std::exp(-dx2Sq/delta);
+      }
+
+      else{
+	throw std::runtime_error("advection1d: invalid ic");
+      }
     }
     return res;
   }
@@ -263,6 +294,8 @@ protected:
   ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   const MeshType & m_meshObj;
+  int m_icIdentifier = {};
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
