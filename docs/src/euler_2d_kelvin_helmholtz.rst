@@ -91,7 +91,7 @@ Python synopsis
 
    import pressiodemoapps as pda
 
-   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+   meshObj = pda.load_cellcentered_uniform_mesh("path-to-mesh")
 
    probId  = pda.Euler2d.KelvinHelmholtz
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5

@@ -81,12 +81,21 @@ public:
       }
 
       else if (m_icIdentifier == 3){
-	const auto x1= static_cast<scalar_type>(1.5);
+	const auto x1= static_cast<scalar_type>(2.);
 	const auto x2= static_cast<scalar_type>(3.0);
 	const auto delta = 0.5*0.5;
 	const auto dx1Sq = (x(i)-x1)*(x(i)-x1);
 	const auto dx2Sq = (x(i)-x2)*(x(i)-x2);
         res(i) = std::exp(-dx1Sq/delta) + 0.5*std::exp(-dx2Sq/delta);
+      }
+
+      else if (m_icIdentifier == 4){
+	const auto x1= static_cast<scalar_type>(1);
+	const auto x2= static_cast<scalar_type>(3);
+	const auto sf= static_cast<scalar_type>(8);
+	const auto dx1 = (x(i)-x1);
+	const auto dx2 = (x(i)-x2);
+        res(i) = std::tanh(sf*dx1) - std::tanh(sf*dx2);
       }
 
       else{
