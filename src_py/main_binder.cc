@@ -180,10 +180,13 @@ struct CcuMeshBinder
     meshClass.def("graph",	     &mesh_t::graph);
     meshClass.def("dx",		     &mesh_t::dx);
     meshClass.def("dy",		     &mesh_t::dy);
+    meshClass.def("dz",		     &mesh_t::dz);
     meshClass.def("dxInv",	     &mesh_t::dxInv);
     meshClass.def("dyInv",	     &mesh_t::dyInv);
+    meshClass.def("dzInv",	     &mesh_t::dzInv);
     meshClass.def("viewX",	     &mesh_t::viewX);
     meshClass.def("viewY",	     &mesh_t::viewY);
+    meshClass.def("viewZ",	     &mesh_t::viewZ);
 
     // function that constructs the object directly
     mParent.def("load_cellcentered_uniform_mesh",
