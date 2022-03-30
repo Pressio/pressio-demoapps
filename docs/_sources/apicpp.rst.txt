@@ -1,3 +1,7 @@
+.. role:: raw-html-m2r(raw)
+   :format: html
+
+
 Problem class: C++ API
 ======================
 
@@ -15,15 +19,24 @@ C++ API
 
    .. cpp:type:: state_type
 
-      Data structure type to store the state: currently, this is an Eigen vector.
+      Data structure type storing the state: this depends on which specific implementation
+      you use when you instantiate the problem using the ``create_problem_<>`` API
+      (see `Supported Backends And Types`_ for more details about backends and corresponding types).
+      For example, if you use ``create_problem_eigen``, the ``state_type`` will be an Eigen vector.
 
    .. cpp:type:: velocity_type
 
-      Data structure type to store the velocity: currently, this is an Eigen vector.
+      Data structure type to store the velocity (or RHS): this depends on which specific implementation
+      you use when you instantiate the problem using the ``create_problem_<>`` API
+      (see `Supported Backends And Types`_ for more details about backends and corresponding types).
+      For example, if you use ``create_problem_eigen``, the ``velocity_type`` will be an Eigen vector.
 
    .. cpp:type:: jacobian_type
 
-      Data structure type to store the Jacobian: currently, this is an Eigen sparse CRS matrix.
+      Data structure type to store the Jacobian: this depends on which specific implementation
+      you use when you instantiate the problem using the ``create_problem_<>`` API
+      (see `Supported Backends And Types`_ for more details about backends and corresponding types).
+      For example, if you use ``create_problem_eigen``, the ``jacobian_type`` will be an Eigen CRS matrix.
 
    .. cpp:function:: auto totalDofSampleMesh()
 
@@ -68,3 +81,21 @@ C++ API
 
       Given a state :class:`y` and time :class:`time`,
       evaluates the RHS and its Jacobian.
+
+
+
+.. _Supported Backends And Types:
+
+C++ Backends and Corresponding Types
+------------------------------------
+
+.. list-table::
+   :widths: 5 95
+   :header-rows: 1
+   :align: left
+
+   * - Backend
+     - Type alias
+
+   * - Eigen
+     - ``using state_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using velocity_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int32_t>;``

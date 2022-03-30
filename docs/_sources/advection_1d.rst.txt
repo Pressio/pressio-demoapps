@@ -71,7 +71,7 @@ Python synopsis
 
    import pressiodemoapps as pda
 
-   meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
+   meshObj = pda.load_cellcentered_uniform_mesh("path-to-mesh")
 
    # 1. using default velocity
    probId  = pda.Advection1d.PeriodicLinear

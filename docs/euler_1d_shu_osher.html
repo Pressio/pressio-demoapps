@@ -290,7 +290,7 @@ The script creates the directory if it does not exist.</p></li>
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
 
-<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
 
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler1d</span><span class="o">.</span><span class="n">ShuOsher</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
@@ -335,7 +335,7 @@ obtained using <span class="math notranslate nohighlight">\(dt = 10^{-3}\)</span
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 21, 2022. |
+            Last updated on Mar 30, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_1d_shu_osher.rst.txt"
