@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="Problem class: C++ API" href="apicpp.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="C++ API" href="apicpp.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>Problem class: Python API - pressio-demoapps documentation</title>
+        <title>Python API - pressio-demoapps documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -157,8 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apicpp.html">Problem class: C++ API</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Problem class: Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -226,41 +226,15 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="problem-class-python-api">
-<h1>Problem class: Python API<a class="headerlink" href="#problem-class-python-api" title="Permalink to this headline">¶</a></h1>
-<p>A <em>pressio-demoapps</em> Python problem class meets a specific API as described below.</p>
-<div class="section" id="python-api">
-<h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h2>
+          <div class="section" id="python-api">
+<h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h1>
+<p>Basic Python API of the <a class="reference internal" href="#py-problem-api"><span class="std std-ref">Problem Class</span></a> and <a class="reference internal" href="#py-mesh-api"><span class="std std-ref">Cell-Centered Uniform Mesh Class</span></a>.</p>
+<div class="section" id="problem-class">
+<span id="py-problem-api"></span><h2>Problem Class<a class="headerlink" href="#problem-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="Problem">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Problem</span></span><a class="headerlink" href="#Problem" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt class="sig sig-object py" id="Problem.totalDofSampleMesh">
-<span class="sig-name descname"><span class="pre">totalDofSampleMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.totalDofSampleMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>sample</strong> mesh.
-Note that, in general, this is not the same as the number of sample mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>integer</p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="Problem.totalDofStencilMesh">
-<span class="sig-name descname"><span class="pre">totalDofStencilMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.totalDofStencilMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>stencil</strong> mesh.
-Note that, in general, this is not the same as the number of stencil mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>integer</p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
 <dt class="sig sig-object py" id="Problem.initialCondition">
 <span class="sig-name descname"><span class="pre">initialCondition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.initialCondition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs and returns an instance of the initial condition for the target problem.</p>
@@ -320,10 +294,34 @@ this computes the action of the Jacobian applied to <code class="xref py py-clas
 <li><p><strong>y</strong> (<em>numpy.array</em>) – state vector</p></li>
 <li><p><strong>operand</strong> (<em>numpy.array</em>) – rank-1 or rank-2 operand to apply the Jacobian to.</p></li>
 <li><p><strong>time</strong> (<em>float</em>) – evaluation time</p></li>
+<li><p><strong>result</strong> (<em>numpy.array</em>) – rank-1 or rank-2 operand to apply the Jacobian to.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>numpy.array</p>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="Problem.totalDofSampleMesh">
+<span class="sig-name descname"><span class="pre">totalDofSampleMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.totalDofSampleMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of degrees of freedom on the <strong>sample</strong> mesh.
+Note that, in general, this is not the same as the number of sample mesh cells.
+When you have multiple dofs/cell (for example Euler equations),
+then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="Problem.totalDofStencilMesh">
+<span class="sig-name descname"><span class="pre">totalDofStencilMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.totalDofStencilMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of degrees of freedom on the <strong>stencil</strong> mesh.
+Note that, in general, this is not the same as the number of stencil mesh cells.
+When you have multiple dofs/cell (for example Euler equations),
+then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
 </dd>
 </dl>
 </dd></dl>
@@ -334,6 +332,121 @@ this computes the action of the Jacobian applied to <code class="xref py py-clas
 The main reason behind this is that Pybind11 does not yet allow view semantics for
 Python sparse matrices.</p>
 </div>
+</div>
+<div class="section" id="cell-centered-uniform-mesh-class">
+<span id="py-mesh-api"></span><h2>Cell-Centered Uniform Mesh Class<a class="headerlink" href="#cell-centered-uniform-mesh-class" title="Permalink to this headline">¶</a></h2>
+<p>A <em>pressio-demoapps</em> Python cell-centered mesh class meets the following API</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CellCenteredUniformMesh</span></span><a class="headerlink" href="#CellCenteredUniformMesh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.dimensionality">
+<span class="sig-name descname"><span class="pre">dimensionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.dimensionality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the dimensionality of this mesh: returns 1 for 1d problem, 2 for 2d, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.stencilSize">
+<span class="sig-name descname"><span class="pre">stencilSize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.stencilSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the stencil (connectivity) of this mesh object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.stencilMeshSize">
+<span class="sig-name descname"><span class="pre">stencilMeshSize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.stencilMeshSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of <em>stencil</em> cells in the mesh.
+This corresponds to all cells where the state is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.sampleMeshSize">
+<span class="sig-name descname"><span class="pre">sampleMeshSize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.sampleMeshSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of <em>sample</em> cells in the mesh.
+This corresponds to all cells where the velocity (or RHS) is defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cell size along the x axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.dy">
+<span class="sig-name descname"><span class="pre">dy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.dy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cell size along the y axis. This is applicable only
+if the dimensionality is &gt;= 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.dz">
+<span class="sig-name descname"><span class="pre">dz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.dz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cell size along the z axis. This is applicable only
+if the dimensionality is == 3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.viewX">
+<span class="sig-name descname"><span class="pre">viewX</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.viewX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <em>reference</em> to the vector of x-coordinates of all <em>stencil</em> mesh cells.
+The type of container returned by reference depends on the backend used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.viewY">
+<span class="sig-name descname"><span class="pre">viewY</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.viewY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <em>reference</em> to the vector of y-coordinates of all <em>stencil</em> mesh cells
+The type of container returned by reference depends on the backend used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CellCenteredUniformMesh.viewZ">
+<span class="sig-name descname"><span class="pre">viewZ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.viewZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <em>reference</em> to the vector of z-coordinates of all <em>stencil</em> mesh cells
+The type of container returned by reference depends on the backend used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
 </div>
 </div>
 
@@ -358,7 +471,7 @@ Python sparse matrices.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Problem class: C++ API</div>
+                <div class="title">C++ API</div>
                 
               </div>
             </a>
@@ -389,8 +502,9 @@ Python sparse matrices.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Problem class: Python API</a><ul>
-<li><a class="reference internal" href="#python-api">Python API</a></li>
+<li><a class="reference internal" href="#">Python API</a><ul>
+<li><a class="reference internal" href="#problem-class">Problem Class</a></li>
+<li><a class="reference internal" href="#cell-centered-uniform-mesh-class">Cell-Centered Uniform Mesh Class</a></li>
 </ul>
 </li>
 </ul>

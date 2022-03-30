@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Problem class: Python API" href="apipy.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Python API" href="apipy.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>Problem class: C++ API - pressio-demoapps documentation</title>
+        <title>C++ API - pressio-demoapps documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -157,8 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Problem class: C++ API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apipy.html">Problem class: Python API</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -226,11 +226,12 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="problem-class-c-api">
-<h1>Problem class: C++ API<a class="headerlink" href="#problem-class-c-api" title="Permalink to this headline">¶</a></h1>
-<p>A <em>pressio-demoapps</em> C++ problem class meets a specific API as described below.</p>
-<div class="section" id="c-api">
-<h2>C++ API<a class="headerlink" href="#c-api" title="Permalink to this headline">¶</a></h2>
+          <div class="section" id="c-api">
+<h1>C++ API<a class="headerlink" href="#c-api" title="Permalink to this headline">¶</a></h1>
+<p>Basic C++ API of the <a class="reference internal" href="#cpp-problem-api"><span class="std std-ref">Problem Class</span></a> and <a class="reference internal" href="#cpp-mesh-api"><span class="std std-ref">Cell-Centered Uniform Mesh Class</span></a>.</p>
+<div class="section" id="problem-class">
+<span id="cpp-problem-api"></span><h2>Problem Class<a class="headerlink" href="#problem-class" title="Permalink to this headline">¶</a></h2>
+<p>A <em>pressio-demoapps</em> C++ problem class meets the following API</p>
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv47Problem">
 <span id="_CPPv37Problem"></span><span id="_CPPv27Problem"></span><span id="Problem"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Problem</span></span></span><a class="headerlink" href="#_CPPv47Problem" title="Permalink to this definition">¶</a><br/></dt>
@@ -262,22 +263,6 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 you use when you instantiate the problem using the <code class="docutils literal notranslate"><span class="pre">create_problem_&lt;&gt;</span></code> API
 (see <a class="reference internal" href="#supported-backends-and-types">Supported Backends And Types</a> for more details about backends and corresponding types).
 For example, if you use <code class="docutils literal notranslate"><span class="pre">create_problem_eigen</span></code>, the <code class="docutils literal notranslate"><span class="pre">jacobian_type</span></code> will be an Eigen CRS matrix.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem18totalDofSampleMeshEv">
-<span id="_CPPv3N7Problem18totalDofSampleMeshEv"></span><span id="_CPPv2N7Problem18totalDofSampleMeshEv"></span><span id="Problem::totalDofSampleMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofSampleMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem18totalDofSampleMeshEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>sample</strong> mesh.
-Note that, in general, this is not the same as the number of sample mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.</p>
-</dd></dl>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem19totalDofStencilMeshEv">
-<span id="_CPPv3N7Problem19totalDofStencilMeshEv"></span><span id="_CPPv2N7Problem19totalDofStencilMeshEv"></span><span id="Problem::totalDofStencilMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofStencilMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19totalDofStencilMeshEv" title="Permalink to this definition">¶</a><br/></dt>
-<dd><p>Returns the total number of degrees of freedom on the <strong>stencil</strong> mesh.
-Note that, in general, this is not the same as the number of stencil mesh cells.
-When you have multiple dofs/cell (for example Euler equations),
-then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.</p>
 </dd></dl>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem16initialConditionEv">
@@ -312,6 +297,22 @@ evaluates the Jacobian of the RHS and stores it into <code class="xref py py-cla
 <dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
 evaluates the RHS and its Jacobian.</p>
 </dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem18totalDofSampleMeshEv">
+<span id="_CPPv3N7Problem18totalDofSampleMeshEv"></span><span id="_CPPv2N7Problem18totalDofSampleMeshEv"></span><span id="Problem::totalDofSampleMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofSampleMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem18totalDofSampleMeshEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the total number of degrees of freedom on the <strong>sample</strong> mesh.
+Note that, in general, this is not the same as the number of sample mesh cells.
+When you have multiple dofs/cell (for example Euler equations),
+then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem19totalDofStencilMeshEv">
+<span id="_CPPv3N7Problem19totalDofStencilMeshEv"></span><span id="_CPPv2N7Problem19totalDofStencilMeshEv"></span><span id="Problem::totalDofStencilMesh"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">totalDofStencilMesh</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19totalDofStencilMeshEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the total number of degrees of freedom on the <strong>stencil</strong> mesh.
+Note that, in general, this is not the same as the number of stencil mesh cells.
+When you have multiple dofs/cell (for example Euler equations),
+then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.</p>
+</dd></dl>
 </dd></dl>
 </div>
 <div class="section" id="c-backends-and-corresponding-types">
@@ -333,6 +334,82 @@ evaluates the RHS and its Jacobian.</p>
 </tbody>
 </table></div>
 </div>
+<div class="section" id="cell-centered-uniform-mesh-class">
+<span id="cpp-mesh-api"></span><h2>Cell-Centered Uniform Mesh Class<a class="headerlink" href="#cell-centered-uniform-mesh-class" title="Permalink to this headline">¶</a></h2>
+<p>A <em>pressio-demoapps</em> C++ cell-centered mesh class meets the following API</p>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv423CellCenteredUniformMesh">
+<span id="_CPPv323CellCenteredUniformMesh"></span><span id="_CPPv223CellCenteredUniformMesh"></span><span id="CellCenteredUniformMesh"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CellCenteredUniformMesh</span></span></span><a class="headerlink" href="#_CPPv423CellCenteredUniformMesh" title="Permalink to this definition">¶</a><br/></dt>
+<dd><dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N23CellCenteredUniformMesh11scalar_typeE">
+<span id="_CPPv3N23CellCenteredUniformMesh11scalar_typeE"></span><span id="_CPPv2N23CellCenteredUniformMesh11scalar_typeE"></span><span id="CellCenteredUniformMesh::scalar_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scalar_type</span></span></span><a class="headerlink" href="#_CPPv4N23CellCenteredUniformMesh11scalar_typeE" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>This is by default <code class="docutils literal notranslate"><span class="pre">double</span></code>.</p>
+</dd></dl>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N23CellCenteredUniformMesh10index_typeE">
+<span id="_CPPv3N23CellCenteredUniformMesh10index_typeE"></span><span id="_CPPv2N23CellCenteredUniformMesh10index_typeE"></span><span id="CellCenteredUniformMesh::index_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index_type</span></span></span><a class="headerlink" href="#_CPPv4N23CellCenteredUniformMesh10index_typeE" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>This is the type used for all integers for indexing (e.g. cell IDs, etc) so
+basically for all ordinals. Defaults to <code class="docutils literal notranslate"><span class="pre">int32_t</span></code>, which is big enough for most current cases.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh14dimensionalityEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh14dimensionalityEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh14dimensionalityEv"></span><span id="CellCenteredUniformMesh::dimensionalityC"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dimensionality</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh14dimensionalityEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the dimensionality of this mesh: returns 1 for 1d problem, 2 for 2d, etc.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh11stencilSizeEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh11stencilSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh11stencilSizeEv"></span><span id="CellCenteredUniformMesh::stencilSizeC"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stencilSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh11stencilSizeEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the size of the stencil (connectivity) of this mesh object.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh15stencilMeshSizeEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="CellCenteredUniformMesh::stencilMeshSizeC"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stencilMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh15stencilMeshSizeEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the number of <em>stencil</em> cells in the mesh.
+This corresponds to all cells where the state is defined.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="CellCenteredUniformMesh::sampleMeshSizeC"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sampleMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the number of <em>sample</em> cells in the mesh.
+This corresponds to all cells where the velocity (or RHS) is defined.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh2dxEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh2dxEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh2dxEv"></span><span id="CellCenteredUniformMesh::dxC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh11scalar_typeE" title="CellCenteredUniformMesh::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dx</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh2dxEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the cell size along the x axis.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh2dyEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh2dyEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh2dyEv"></span><span id="CellCenteredUniformMesh::dyC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh11scalar_typeE" title="CellCenteredUniformMesh::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dy</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh2dyEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the cell size along the y axis. This is applicable only
+if the dimensionality is &gt;= 2.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh2dzEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh2dzEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh2dzEv"></span><span id="CellCenteredUniformMesh::dzC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh11scalar_typeE" title="CellCenteredUniformMesh::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dz</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh2dzEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns the cell size along the z axis. This is applicable only
+if the dimensionality is == 3.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh5viewXEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh5viewXEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh5viewXEv"></span><span id="CellCenteredUniformMesh::viewXC"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">viewX</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh5viewXEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns a <em>reference</em> to the vector of x-coordinates of all <em>stencil</em> mesh cells.
+The type of container returned by reference depends on the backend used.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh5viewYEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh5viewYEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh5viewYEv"></span><span id="CellCenteredUniformMesh::viewYC"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">viewY</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh5viewYEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns a <em>reference</em> to the vector of y-coordinates of all <em>stencil</em> mesh cells
+The type of container returned by reference depends on the backend used.</p>
+</dd></dl>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh5viewZEv">
+<span id="_CPPv3NK23CellCenteredUniformMesh5viewZEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh5viewZEv"></span><span id="CellCenteredUniformMesh::viewZC"></span><span class="kt"><span class="pre">auto</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">viewZ</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh5viewZEv" title="Permalink to this definition">¶</a><br/></dt>
+<dd><p>Returns a <em>reference</em> to the vector of z-coordinates of all <em>stencil</em> mesh cells
+The type of container returned by reference depends on the backend used.</p>
+</dd></dl>
+</dd></dl>
+</div>
 </div>
 
         </article>
@@ -345,7 +422,7 @@ evaluates the RHS and its Jacobian.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Problem class: Python API</div>
+                <div class="title">Python API</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -387,9 +464,10 @@ evaluates the RHS and its Jacobian.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Problem class: C++ API</a><ul>
-<li><a class="reference internal" href="#c-api">C++ API</a></li>
+<li><a class="reference internal" href="#">C++ API</a><ul>
+<li><a class="reference internal" href="#problem-class">Problem Class</a></li>
 <li><a class="reference internal" href="#c-backends-and-corresponding-types">C++ Backends and Corresponding Types</a></li>
+<li><a class="reference internal" href="#cell-centered-uniform-mesh-class">Cell-Centered Uniform Mesh Class</a></li>
 </ul>
 </li>
 </ul>
