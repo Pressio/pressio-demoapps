@@ -39,7 +39,7 @@ public:
   explicit CellCenteredUniformMesh(const std::string & meshDir)
   {
     allocateAndSetup(meshDir);
-    m_meshIsPeriodic = checkIfPeriodic();
+    m_meshIsFullyPeriodic = checkIfFullyPeriodic();
   }
 
 #else
@@ -54,7 +54,7 @@ public:
     : m_x(1), m_y(1), m_z(1), m_graph({1,1})
   {
     allocateAndSetup(meshDir);
-    m_meshIsPeriodic = checkIfPeriodic();
+    m_meshIsFullyPeriodic = checkIfFullyPeriodic();
   }
 #endif
 
@@ -97,8 +97,8 @@ public:
     return m_rowsForCellsBd;
   }
 
-  bool isPeriodic() const{
-    return m_meshIsPeriodic;
+  bool isFullyPeriodic() const{
+    return m_meshIsFullyPeriodic;
   }
 
   // 1d
@@ -242,7 +242,7 @@ public:
 private:
   // mesh connectivity is periodic if for each mesh cell,
   // all neighbors global GIDs are non-negative.
-  bool checkIfPeriodic(){
+  bool checkIfFullyPeriodic(){
     // Note that we need to check along ALL directions.
     const auto n = (m_stencilSize-1)*m_dim;
     for (index_t i=0; i<m_sampleMeshSize; ++i){
@@ -375,7 +375,7 @@ private:
   indices_v_t m_rowsForCellsInner;
   indices_v_t m_rowsForCellsBd;
 
-  bool m_meshIsPeriodic = false;
+  bool m_meshIsFullyPeriodic = false;
 };
 
 }}

@@ -136,7 +136,7 @@ protected:
     }
 
     else{
-      if (!m_meshObj.isPeriodic()){
+      if (!m_meshObj.isFullyPeriodic()){
 	velocityOnlyNearBdCellsImpl(U, currentTime, V,
 				    fluxL, fluxF, fluxR, fluxB,
 				    uMinusHalfNeg, uMinusHalfPos,
@@ -400,7 +400,7 @@ private:
     // near boundary I have be careful because
     // the jacobian can only be first order for now
     // only need to do near-BD cells if there are any
-    if (!m_meshObj.isPeriodic()){
+    if (!m_meshObj.isFullyPeriodic()){
       if (m_recEn == InviscidFluxReconstruction::FirstOrder){
 	velocityAndJacNearBDCellsImplFirstOrder(U, currentTime, V, J,
 						fluxL, fluxF, fluxR, fluxB,

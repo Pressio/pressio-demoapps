@@ -151,7 +151,7 @@ protected:
       }
       else
       {
-	if (!m_meshObj.isPeriodic()){
+	if (!m_meshObj.isFullyPeriodic()){
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp single
 #endif
@@ -352,7 +352,7 @@ private:
     // near boundary I have be careful because
     // the jacobian can only be first order for now
     // also, in 1d there is not enough work to justify threading
-    if (!m_meshObj.isPeriodic())
+    if (!m_meshObj.isFullyPeriodic())
       {
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp single
