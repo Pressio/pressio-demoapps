@@ -11,8 +11,8 @@
 namespace pressiodemoapps{ namespace impl{
 
 template<
-  class scalar_type,
-  class index_type,
+  class ScalarType,
+  class IndexType,
   class xyz_type,
   class mesh_g_type,
   bool is_binding = false
@@ -21,14 +21,21 @@ class CellCenteredUniformMesh
 {
 
 public:
-  using scalar_t  = scalar_type;
-  using index_t	  = index_type;
-  using x_t	  = xyz_type;
-  using y_t	  = xyz_type;
-  using z_t	  = xyz_type;
+  // these are here for backward comp but need to remove
+  using scalar_t  = ScalarType;
+  using index_t	  = IndexType;
   using graph_t   = mesh_g_type;
-  using indices_v_t = std::vector<index_t>;
 
+  using scalar_type  = ScalarType;
+  using index_type  = IndexType;
+  using x_coords_type = xyz_type;
+  using y_coords_type = xyz_type;
+  using z_coords_type = xyz_type;
+
+private:
+  using indices_v_t = std::vector<index_type>;
+
+public:
   CellCenteredUniformMesh() = delete;
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
@@ -59,26 +66,22 @@ public:
 #endif
 
   int dimensionality() const{ return m_dim; }
-  index_t stencilMeshSize() const{ return m_stencilMeshSize; }
-  index_t sampleMeshSize() const{ return m_sampleMeshSize; }
-  const int stencilSize() const { return m_stencilSize; }
+  index_type stencilMeshSize() const{ return m_stencilMeshSize; }
+  index_type sampleMeshSize() const{ return m_sampleMeshSize; }
+  int stencilSize() const { return m_stencilSize; }
 
   const graph_t & graph() const{ return m_graph; }
 
-  auto boundsX() const{ return boundsImpl(0); }
-  auto boundsY() const{ return boundsImpl(1); }
-  auto boundsZ() const{ return boundsImpl(2); }
+  ScalarType dx() const{ return m_cellDeltas[0]; }
+  ScalarType dy() const{ return m_cellDeltas[1]; }
+  ScalarType dz() const{ return m_cellDeltas[2]; }
+  ScalarType dxInv() const{ return m_cellDeltasInv[0]; }
+  ScalarType dyInv() const{ return m_cellDeltasInv[1]; }
+  ScalarType dzInv() const{ return m_cellDeltasInv[2]; }
 
-  const scalar_type dx() const{ return m_cellDeltas[0]; }
-  const scalar_type dy() const{ return m_cellDeltas[1]; }
-  const scalar_type dz() const{ return m_cellDeltas[2]; }
-  const scalar_type dxInv() const{ return m_cellDeltasInv[0]; }
-  const scalar_type dyInv() const{ return m_cellDeltasInv[1]; }
-  const scalar_type dzInv() const{ return m_cellDeltasInv[2]; }
-
-  const x_t & viewX() const{ return m_x; }
-  const y_t & viewY() const{ return m_y; }
-  const z_t & viewZ() const{ return m_z; }
+  const x_coords_type & viewX() const{ return m_x; }
+  const y_coords_type & viewY() const{ return m_y; }
+  const z_coords_type & viewZ() const{ return m_z; }
 
   // number of cells that do NOT get close to any boundary
   // i.e. those for which the farthest stencil cell is still within the BD
@@ -102,7 +105,7 @@ public:
   }
 
   // 1d
-  bool hasBdLeft1d(const index_t rowInd) const{
+  bool hasBdLeft1d(const index_type rowInd) const{
     if (m_graph(rowInd, 1)==-1) return true;
 
     if (m_stencilSize>=5){
@@ -114,7 +117,7 @@ public:
     return false;
   }
 
-  bool hasBdRight1d(const index_t rowInd) const{
+  bool hasBdRight1d(const index_type rowInd) const{
     if (m_graph(rowInd, 2)==-1) return true;
 
     if (m_stencilSize>=5){
@@ -127,7 +130,7 @@ public:
   }
 
   // 2d
-  bool hasBdLeft2d(const index_t rowInd) const{
+  bool hasBdLeft2d(const index_type rowInd) const{
     if (m_graph(rowInd, 1)==-1) {
       return true;
     }
@@ -141,7 +144,7 @@ public:
     return false;
   }
 
-  bool hasBdFront2d(const index_t rowInd) const{
+  bool hasBdFront2d(const index_type rowInd) const{
     if (m_graph(rowInd, 2)==-1) {
       return true;
     }
@@ -155,7 +158,7 @@ public:
     return false;
   }
 
-  bool hasBdRight2d(const index_t rowInd) const{
+  bool hasBdRight2d(const index_type rowInd) const{
     if (m_graph(rowInd, 3)==-1) {
       return true;
     }
@@ -169,7 +172,7 @@ public:
     return false;
   }
 
-  bool hasBdBack2d(const index_t rowInd) const{
+  bool hasBdBack2d(const index_type rowInd) const{
     if (m_graph(rowInd, 4)==-1) {
       return true;
     }
@@ -184,7 +187,7 @@ public:
   }
 
   // 3d
-  bool hasBdLeft3d(const index_t rowInd) const{
+  bool hasBdLeft3d(const index_type rowInd) const{
     if (m_graph(rowInd, 1)==-1) return true;
 
     if (m_stencilSize==5){
@@ -193,7 +196,7 @@ public:
     return false;
   }
 
-  bool hasBdFront3d(const index_t rowInd) const{
+  bool hasBdFront3d(const index_type rowInd) const{
     if (m_graph(rowInd, 2)==-1) return true;
 
     if (m_stencilSize==5){
@@ -202,7 +205,7 @@ public:
     return false;
   }
 
-  bool hasBdRight3d(const index_t rowInd) const{
+  bool hasBdRight3d(const index_type rowInd) const{
     if (m_graph(rowInd, 3)==-1) return true;
 
     if (m_stencilSize==5){
@@ -211,7 +214,7 @@ public:
     return false;
   }
 
-  bool hasBdBack3d(const index_t rowInd) const{
+  bool hasBdBack3d(const index_type rowInd) const{
     if (m_graph(rowInd, 4)==-1) return true;
 
     if (m_stencilSize==5){
@@ -220,7 +223,7 @@ public:
     return false;
   }
 
-  bool hasBdBottom3d(const index_t rowInd) const{
+  bool hasBdBottom3d(const index_type rowInd) const{
     if (m_graph(rowInd, 5)==-1) return true;
 
     if (m_stencilSize==5){
@@ -229,7 +232,7 @@ public:
     return false;
   }
 
-  bool hasBdTop3d(const index_t rowInd) const{
+  bool hasBdTop3d(const index_type rowInd) const{
     if (m_graph(rowInd, 6)==-1) return true;
 
     if (m_stencilSize==5){
@@ -245,8 +248,8 @@ private:
   bool checkIfFullyPeriodic(){
     // Note that we need to check along ALL directions.
     const auto n = (m_stencilSize-1)*m_dim;
-    for (index_t i=0; i<m_sampleMeshSize; ++i){
-      for (index_t j=0; j<n+1; ++j){
+    for (index_type i=0; i<m_sampleMeshSize; ++i){
+      for (index_type j=0; j<n+1; ++j){
 	if (m_graph(i, j) < 0){
 	  return false;
 	}
@@ -257,7 +260,7 @@ private:
 
   auto boundsImpl(int i) const
   {
-    using numlimits = std::numeric_limits<scalar_type>;
+    using numlimits = std::numeric_limits<ScalarType>;
     auto res = std::make_tuple(numlimits::max(), numlimits::min());
 
     const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
@@ -296,7 +299,7 @@ private:
     pressiodemoapps::impl::read_mesh_connectivity(meshDir, m_graph, graphNumCols);
 
     // figure out how many cells are near the boundaries
-    for (index_t it=0; it<m_sampleMeshSize; ++it)
+    for (index_type it=0; it<m_sampleMeshSize; ++it)
     {
       if (m_dim==1)
       {
@@ -355,14 +358,14 @@ private:
 
 private:
   int m_dim = {};
-  std::array<scalar_type,3> m_cellDeltas{};
-  std::array<scalar_type,3> m_cellDeltasInv{};
+  std::array<ScalarType,3> m_cellDeltas{};
+  std::array<ScalarType,3> m_cellDeltasInv{};
   int m_stencilSize = {};
-  index_t m_stencilMeshSize = {};
-  index_t m_sampleMeshSize  = {};
-  x_t m_x = {};
-  y_t m_y = {};
-  z_t m_z = {};
+  index_type m_stencilMeshSize = {};
+  index_type m_sampleMeshSize  = {};
+  x_coords_type m_x = {};
+  y_coords_type m_y = {};
+  z_coords_type m_z = {};
 
   /*
     graph:
