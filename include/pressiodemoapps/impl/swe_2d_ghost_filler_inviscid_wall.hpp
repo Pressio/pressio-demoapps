@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_GHOST_FILLER_SWE2D_INVISCID_WALL_HPP_
 #define PRESSIODEMOAPPS_GHOST_FILLER_SWE2D_INVISCID_WALL_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{
+namespace implswe2d{
 
 template<class state_t, class mesh_t, class ghost_t>
 class InviscidWallFiller
@@ -12,12 +13,12 @@ class InviscidWallFiller
 public:
   InviscidWallFiller() = delete;
   InviscidWallFiller(const int stencilSize,
-			   const state_t & stateIn,
-			   const mesh_t & meshIn,
-			   ghost_t & ghostLeft,
-			   ghost_t & ghostFront,
-			   ghost_t & ghostRight,
-			   ghost_t & ghostBack)
+		     const state_t & stateIn,
+		     const mesh_t & meshIn,
+		     ghost_t & ghostLeft,
+		     ghost_t & ghostFront,
+		     ghost_t & ghostRight,
+		     ghost_t & ghostBack)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_meshObj(meshIn),
@@ -27,12 +28,31 @@ public:
       m_ghostBack(ghostBack)
   {}
 
-  template<int stencilSize, class index_t>
-  typename std::enable_if<stencilSize == 3>::type
-  operator()(index_t smPt, int gRow)
+  template<class index_t>
+  void operator()(index_t smPt, int gRow)
+  {
+    if (m_stencilSize == 3){
+      stencilThreeImpl(smPt, gRow);
+    }
+
+    else if (m_stencilSize == 5){
+      stencilFiveImpl(smPt, gRow);
+    }
+
+    else if (m_stencilSize == 7){
+      stencilSevenImpl(smPt, gRow);
+    }
+
+    else{
+      throw std::runtime_error("swe2d ghost filler: invalid stencil size");
+    }
+  }
+
+private:
+  template<class index_t>
+  void stencilThreeImpl(index_t smPt, int gRow)
   {
     constexpr int numDofPerCell = 3;
-
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 5);
     const auto cellGID = graph(smPt, 0);
@@ -71,16 +91,14 @@ public:
     }
   }
 
-  template<int stencilSize, class index_t>
-  typename std::enable_if<stencilSize == 5>::type
-  operator()(index_t smPt, int gRow)
+  template<class index_t>
+  void stencilFiveImpl(index_t smPt, int gRow)
   {
-
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 9);
 
-    this->template operator()<3, index_t>(smPt, gRow);
+    stencilThreeImpl(smPt, gRow);
     const auto left0 = graph(smPt, 1);
     const auto front0 = graph(smPt, 2);
     const auto right0 = graph(smPt, 3);
@@ -119,15 +137,14 @@ public:
     }
   }
 
-  template<int stencilSize, class index_t>
-  typename std::enable_if<stencilSize == 7>::type
-  operator()(index_t smPt, int gRow)
+  template<class index_t>
+  void stencilSevenImpl(index_t smPt, int gRow)
   {
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 13);
 
-    this->template operator()<5, index_t>(smPt, gRow);
+    stencilFiveImpl(smPt, gRow);
     const auto left1  = graph(smPt, 5);
     const auto front1 = graph(smPt, 6);
     const auto right1 = graph(smPt, 7);

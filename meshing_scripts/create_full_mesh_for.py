@@ -68,6 +68,10 @@ valid = ["linadv1d_s3", \
          "swe2dslipwall_s5",\
          "swe2dslipwall_s7",\
          #
+         "burgers2d_s3", \
+         "burgers2d_s5", \
+         "burgers2d_s7", \
+         #
          ##############
          ##### 3d #####
          ##############
@@ -116,7 +120,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0),
-            "--periodic", "true")
+            "--periodic", "x")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("diffreac1d" in pName):
@@ -124,8 +128,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(3),
-            "--bounds", str(0.0), str(1.0),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler1dsmooth" in pName):
@@ -135,7 +138,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0),
-            "--periodic", "true")
+            "--periodic", "x")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sod1d" in pName):
@@ -144,8 +147,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-0.5), str(0.5),
-            "--periodic", "false")
+            "--bounds", str(-0.5), str(0.5))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("shuOsher1d" in pName):
@@ -154,8 +156,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-5.0), str(5.0),
-            "--periodic", "false")
+            "--bounds", str(-5.0), str(5.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("lax1d" in pName):
@@ -164,8 +165,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(1),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-5.0), str(5.0),
-            "--periodic", "false")
+            "--bounds", str(-5.0), str(5.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("diffreac2d" in pName):
@@ -173,8 +173,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(3),
-            "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(1.0), str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("grayscott2d" in pName):
@@ -183,7 +182,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(3),
             "--bounds", str(-1.25), str(1.25), str(-1.25), str(1.25),
-            "--periodic", "true")
+            "--periodic", "x y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler2dsmooth" in pName):
@@ -193,7 +192,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.), str(1.0), str(-1.0), str(1.0),
-            "--periodic", "true")
+            "--periodic", "x y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler2dKelvinHelmholtz" in pName):
@@ -203,7 +202,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-5.0), str(5.0), str(-5.0), str(5.0),
-            "--periodic", "true")
+            "--periodic", "x y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("normalshock2d" in pName):
@@ -212,8 +211,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(0.0), str(2.0), str(0.0), str(1.0),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(2.0), str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov2d" in pName):
@@ -222,8 +220,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-1.2), str(1.2), str(-1.2), str(1.2),
-            "--periodic", "false")
+            "--bounds", str(-1.2), str(1.2), str(-1.2), str(1.2))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov2dsym" in pName):
@@ -232,8 +229,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(0.0), str(1.2), str(0.0), str(1.2),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(1.2), str(0.0), str(1.2))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("riemann2d" in pName):
@@ -242,8 +238,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(0.0), str(1.0), str(0.0), str(1.0),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(1.0), str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("doublemach2d" in pName):
@@ -252,8 +247,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(0.0), str(4.0), str(0.0), str(1.0),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(4.0), str(0.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("swe2dSlipWall" in pName or "swe2dslipwall" in pName):
@@ -262,8 +256,7 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(-5.), str(5.), str(-5.), str(5.),
-            "--periodic", "false")
+            "--bounds", str(-5.), str(5.), str(-5.), str(5.))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler3dsmooth" in pName):
@@ -276,7 +269,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0), str(-1.0), str(1.0), str(-1.0), str(1.0),
-            "--periodic", "true")
+            "--periodic", "x y z")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov3dsym" in pName):
@@ -288,8 +281,16 @@ if __name__== "__main__":
             "-n", str(args.numCells[0]), str(args.numCells[1]), str(args.numCells[2]),
             "--outDir", args.outDir,
             "--stencilSize", str(s),
-            "--bounds", str(0.0), str(1.2), str(0.0), str(1.2), str(0.0), str(1.2),
-            "--periodic", "false")
+            "--bounds", str(0.0), str(1.2), str(0.0), str(1.2), str(0.0), str(1.2))
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("burgers2d" in pName):
+    s = int(pName[-1])
+    args = ("python3", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(-1.0), str(1.0), str(-1.0), str(1.0))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   else:

@@ -1,6 +1,7 @@
 
 import sys, os, time, collections
 from argparse import ArgumentParser
+from argparse import RawTextHelpFormatter
 import numpy as np
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
@@ -28,10 +29,10 @@ def str2bool(v):
     raise argparse.ArgumentTypeError('Boolean value expected.')
 
 # ------------------------------------------------
-def main(workDir, debug, dimensionality,\
-         Nx, Ny, Nz, orderingType, \
-         xBd, yBd, zBd, stencilSize, \
-         enablePeriodicBc):
+def main_impl(workDir, debug, dimensionality, \
+              Nx, Ny, Nz, orderingType, \
+              xBd, yBd, zBd, stencilSize, \
+              periodicX, periodicY, periodicZ):
 
   # figure out if domain is a plain rectangle or has a step in it
   plainDomain = True
@@ -57,8 +58,7 @@ def main(workDir, debug, dimensionality,\
   G = None
   gids = None
   if dimensionality == 1:
-    meshObj = OneDimMesh(Nx, dx, xBd[0], xBd[1], stencilSize, enablePeriodicBc)
-    # get mesh coordinates, gids and graph
+    meshObj = OneDimMesh(Nx, dx, xBd[0], xBd[1], stencilSize, periodicX)
     [x, y] = meshObj.getCoordinates()
     gids = meshObj.getGIDs()
     G = meshObj.getGraph()
@@ -67,7 +67,7 @@ def main(workDir, debug, dimensionality,\
     meshObj = NatOrdMeshRow2d(Nx,Ny, dx,dy,\
                               xBd[0], xBd[1], \
                               yBd[0], yBd[1], \
-                              stencilSize, enablePeriodicBc)
+                              stencilSize, periodicX, periodicY)
 
     # get mesh coordinates, gids and graph
     [x, y] = meshObj.getCoordinates()
@@ -86,16 +86,6 @@ def main(workDir, debug, dimensionality,\
 
     x,y,G,gids = removeStepCells(meshObj, xBd, yBd)
 
-  elif dimensionality==2 and plainDomain:
-    meshObj = NatOrdMeshRow2d(Nx,Ny, dx,dy,\
-                              xBd[0], xBd[1], yBd[0], yBd[1], \
-                              stencilSize, enablePeriodicBc)
-
-    # get mesh coordinates, gids and graph
-    [x, y] = meshObj.getCoordinates()
-    gids = meshObj.getGIDs()
-    G = meshObj.getGraph()
-
   elif dimensionality==3 and plainDomain:
     minX, maxX = min(xBd), max(xBd)
     minY, maxY = min(yBd), max(yBd)
@@ -107,7 +97,8 @@ def main(workDir, debug, dimensionality,\
                            xBd[0], xBd[1], \
                            yBd[0], yBd[1], \
                            zBd[0], zBd[1], \
-                           stencilSize, enablePeriodicBc)
+                           stencilSize, \
+                           periodicX, periodicY, periodicZ)
 
     # get mesh coordinates, gids and graph
     [x, y, z] = meshObj.getCoordinates()
@@ -229,65 +220,76 @@ def main(workDir, debug, dimensionality,\
 ###############################
 if __name__== "__main__":
 ###############################
-  parser = ArgumentParser()
-  parser.add_argument(
-    "--outDir", "--outdir",
-    dest="outDir",
-    help="Full path to where to store all the mesh output files.")
-
-  parser.add_argument(
-    "-n", "--numCells",
-    nargs="*",
-    type=int,
-    dest="numCells",
-    help="Num of cells along x and y. \
-If you only pass one value, I assume 1d.\
-If you pass two values, I assume 2d. \
-If you pass three values, I assume 3d.")
-
-  parser.add_argument(
-    "-b", "--bounds",
-    nargs="*",
-    type=float,
-    dest="bounds",
-    help="Domain bounds along each axis \
-First, you pass bounds for x. If needed, then ou pass those for y. If needed, those for z.")
-
-  parser.add_argument(
-    "-o", "--ordering",
-    dest="orderingType",
-    default="naturalRow",
-    help="Desired cell ordering: use <naturalRow> for \
-row natural ordering of the mesh cells, \
-use <naturalRowRcm> to apply the reverse Cuthill-Mckee")
-
-  parser.add_argument(
-    "-s", "--stencilSize", "--stencilsize",
-    type=int, dest="stencilSize", default=3,
-    help="Stencil size for connectivity: choices are 3,5,7.")
-
-  parser.add_argument(
-    "--periodic",
-    dest="periodic",
-    type=str2bool,
-    default=True,
-    help="True/False to enable/disable periodic BC so that mesh connectivity\
-has that info embedded in.")
+  # the RawTextHelpFormatter is needed so that help is formatted properly
+  parser = ArgumentParser(description='help', formatter_class=RawTextHelpFormatter)
 
   parser.add_argument(
     "-d", "--debug",
     dest="debug",
     type=str2bool,
     default=False,
-    help="True/False to eanble debug mode.")
+    choices=[False,True],
+    help="Enable/disable debug mode.")
+
+  parser.add_argument(
+    "--outDir", "--outdir",
+    dest="outDir",
+    help="Full path to output directory where all the mesh files will be generated.")
+
+  parser.add_argument(
+    "-n", "--numCells",
+    nargs="*",
+    type=int,
+    dest="numCells",
+    help="Number of cells to use along each axis. This determines the dimensionality.\n"+
+    "If you pass one value ,   I assume a 1d domain.\n"+
+    "If you pass two values,   I assume a 2d domain.\n"+
+    "If you pass three values, I assume a 3d domain.")
+
+  parser.add_argument(
+    "-b", "--bounds",
+    nargs="*",
+    type=float,
+    dest="bounds",
+    help="Domain physical bounds along each axis. Must be a list of pairs.\n"+
+    "First, you pass bounds for x axis, then, if needed, for y, and z.\n"+
+    "For example: \n"+
+    "  --bounds 0.0 1.0           implies that x is in (0,1)\n"+
+    "  --bounds 0.0 1.0 -1.0 1.0: implies x in (0,1) and y in (-1,1).\n"+
+    "NOTE: the number of pairs passed to --bounds must be consistent \n"+
+    "      with how many args you specify for --numCells. ")
+
+  parser.add_argument(
+    "-o", "--ordering",
+    dest="orderingType",
+    default="naturalRow",
+    choices=["naturalRow"],
+    help="Desired ordering to use for enumrating cells.\n"+
+    "naturalRow: row natural ordering of the mesh cells (default)\n")
+    #use <naturalRowRcm> to apply the reverse Cuthill-Mckee")
+
+  parser.add_argument(
+    "-s", "--stencilSize", "--stencilsize",
+    type=int, dest="stencilSize", default=3,
+    choices=[3,5,7],
+    help="Stencil size to use for assembling the connectivity")
+
+  parser.add_argument(
+    "--periodic",
+    nargs="*",
+    type=str,
+    dest="periodic",
+    choices=["x", "y", "z", "x y", "x y z", "x z", "y z"],
+    help="Specify which axes to assume periodic.\n"+
+    "Choices are either 'x, y, z'. Default is nonperiodic.")
 
   args = parser.parse_args()
 
   # -------------------------------------------------------
   # check args
   assert( len(args.numCells) in [1,2,3] )
-  assert( args.stencilSize in [3, 5, 7] )
-  assert( args.orderingType in ["naturalRow", "naturalRowRcm"] )
+  assert( args.stencilSize   in [3,5,7] )
+  assert( args.orderingType  in ["naturalRow", "naturalRowRcm"] )
 
   # check if working dir exists, if not, make it
   if not os.path.exists(args.outDir):
@@ -301,7 +303,6 @@ has that info embedded in.")
   if len(args.numCells) == 3:
     ny = int(args.numCells[1])
     nz = int(args.numCells[2])
-  print(nx, ny, nz)
 
   dim = -1
   if ny==1 and nz==1:
@@ -338,8 +339,37 @@ has that info embedded in.")
     zCoords = [args.bounds[4], args.bounds[5]]
     dim = 3
 
-  main(args.outDir, args.debug, dim,
-       nx, ny, nz,
-       args.orderingType,
-       xCoords, yCoords, zCoords,
-       args.stencilSize, args.periodic)
+  # handle periodic
+  periodicX = False
+  periodicY = False
+  periodicZ = False
+  ap = args.periodic
+
+  if isinstance(ap, list):
+    xIsInPeriodicArg = "x" in ap if isinstance(ap, list) else ap=="x"
+    yIsInPeriodicArg = "y" in ap if isinstance(ap, list) else ap=="y"
+    zIsInPeriodicArg = "z" in ap if isinstance(ap, list) else ap=="z"
+  else:
+    xIsInPeriodicArg = ap=="x"
+    yIsInPeriodicArg = ap=="y"
+    zIsInPeriodicArg = ap=="z"
+
+  # for 1d, we cannot have y or z in periodic arg
+  if dim==1 and yIsInPeriodicArg:
+    sys.exit("For 1d problem you cannot specify --periodic {}".format("y"))
+  if dim==1 and zIsInPeriodicArg:
+    sys.exit("For 1d problem you cannot specify --periodic {}".format("z"))
+
+  # for 2d, we cannot have z in periodic arg
+  if dim==2 and zIsInPeriodicArg:
+    sys.exit("For 2d problem you cannot specify --periodic {}".format("z"))
+
+  periodicX = xIsInPeriodicArg
+  periodicY = yIsInPeriodicArg
+  periodicZ = zIsInPeriodicArg
+
+  main_impl(args.outDir, args.debug, dim, \
+            nx, ny, nz, args.orderingType, \
+            xCoords, yCoords, zCoords, \
+            args.stencilSize, \
+            periodicX, periodicY, periodicZ)

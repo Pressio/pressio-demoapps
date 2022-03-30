@@ -16,13 +16,13 @@ Script Usage
 
 .. code-block:: shell
 
-   python create_full_mesh.py \
+   python3 create_full_mesh.py \
 		--outDir <path-to-where-you-want-mesh-to-be-generated> \
 		-n Nx [Ny Nz] \
 		--bounds xMin xMax [yMin yMax zMin zMaz] \
-		-s stencilSize        # valid choices are 3,5,7 \
-		--periodic true/false # default=false \
-		--debug true/false    # default=false
+		-s <int>             # valid choices are 3,5,7 \
+		--periodic <string>  # string for axis to set periodic \
+		--debug true/false   # default=false
 
 - ``--outDir``: full path to directory where you want all mesh files to be generated;
 

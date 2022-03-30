@@ -6,7 +6,8 @@ class NatOrdMesh3d:
                dx, dy, dz, \
                xL, xR, yL, yR, zL, zR, \
                stencilSize, \
-               enablePeriodicBc):
+               periodicX, periodicY, periodicZ):
+
     self.stSize_ = stencilSize
     self.numNeighbors_ = int((stencilSize-1))
     self.Nx_ = Nx
@@ -25,7 +26,7 @@ class NatOrdMesh3d:
     self.gids_ = []
     self.G_ = {}
     self.createFullGrid()
-    self.buildGraph(enablePeriodicBc)
+    self.buildGraph(periodicX, periodicY, periodicZ)
 
   def getTotCells(self):
     return self.Nx_ * self.Ny_ * self.Nz_
@@ -62,14 +63,16 @@ class NatOrdMesh3d:
     assert(len(self.gids_)==self.numCells_)
     self.gids_ = np.array(self.gids_)
 
-  def buildGraph(self, enablePeriodicBc):
+  def buildGraph(self, periodicX, periodicY, periodicZ):
     if self.numNeighbors_ == 2:
-      self._buildGraphStencil3(enablePeriodicBc)
+      self._buildGraphStencil3(periodicX, periodicY, periodicZ)
     elif self.numNeighbors_ == 4:
-      self._buildGraphStencil5(enablePeriodicBc)
+      self._buildGraphStencil5(periodicX, periodicY, periodicZ)
 
-  def _buildGraphStencil3(self, pBc):
+  def _buildGraphStencil3(self, pBcX, pBcY, pBcZ):
+
     for iPt in range(self.numCells_):
+
       [gi, gj, gk] = self.globalIDToGiGjGk(iPt)
       tmpList = np.zeros(6, dtype=np.int64)
 
@@ -88,37 +91,37 @@ class NatOrdMesh3d:
 
       # left neighbor
       if gi==0:
-        tmpList[0]=self.gigjgkToGlobalID(self.Nx_-1, gj, gk) if pBc else -1
+        tmpList[0]=self.gigjgkToGlobalID(self.Nx_-1, gj, gk) if pBcX else -1
       if gi>0:
         tmpList[0]=self.gigjgkToGlobalID(gi-1, gj, gk)
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjgkToGlobalID(gi, 0, gk) if pBc else -1
+        tmpList[1]=self.gigjgkToGlobalID(gi, 0, gk) if pBcY else -1
       if gj<self.Ny_-1:
         tmpList[1]=self.gigjgkToGlobalID(gi, gj+1, gk)
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjgkToGlobalID(0, gj, gk) if pBc else -1
+        tmpList[2]=self.gigjgkToGlobalID(0, gj, gk) if pBcX else -1
       if gi<self.Nx_-1:
         tmpList[2]=self.gigjgkToGlobalID(gi+1, gj, gk)
 
       # back
       if gj==0:
-        tmpList[3]=self.gigjgkToGlobalID(gi, self.Ny_-1, gk) if pBc else -1
+        tmpList[3]=self.gigjgkToGlobalID(gi, self.Ny_-1, gk) if pBcY else -1
       if gj>0:
         tmpList[3]=self.gigjgkToGlobalID(gi, gj-1, gk)
 
       # bottom
       if gk==0:
-        tmpList[4]=self.gigjgkToGlobalID(gi, gj, self.Nz_-1) if pBc else -1
+        tmpList[4]=self.gigjgkToGlobalID(gi, gj, self.Nz_-1) if pBcZ else -1
       if gk>0:
         tmpList[4]=self.gigjgkToGlobalID(gi, gj, gk-1)
 
       # top
       if gk==self.Nz_-1:
-        tmpList[5]=self.gigjgkToGlobalID(gi, gj, 0) if pBc else -1
+        tmpList[5]=self.gigjgkToGlobalID(gi, gj, 0) if pBcZ else -1
       if gk<self.Nz_-1:
         tmpList[5]=self.gigjgkToGlobalID(gi, gj, gk+1)
 
@@ -126,8 +129,10 @@ class NatOrdMesh3d:
       self.G_[iPt] = tmpList
 
 
-  def _buildGraphStencil5(self, pBc):
+  def _buildGraphStencil5(self, pBcX, pBcY, pBcZ):
+
     for iPt in range(self.numCells_):
+
       [gi, gj, gk] = self.globalIDToGiGjGk(iPt)
       tmpList = np.zeros(12, dtype=np.int64)
 
@@ -149,66 +154,66 @@ class NatOrdMesh3d:
 
       # left neighbor
       if gi==0:
-        tmpList[0]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBc else -1
-        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-2, gj,  gk) if pBc else -1
+        tmpList[0]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBcX else -1
+        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-2, gj,  gk) if pBcX else -1
       if gi==1:
         tmpList[0]=self.gigjgkToGlobalID(0,          gj,  gk)
-        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBc else -1
+        tmpList[6]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk) if pBcX else -1
       if gi>1:
         tmpList[0]=self.gigjgkToGlobalID(gi-1,       gj,  gk)
         tmpList[6]=self.gigjgkToGlobalID(gi-2,       gj,  gk)
 
       # front
       if gj==self.Ny_-1:
-        tmpList[1]=self.gigjgkToGlobalID(gi,          0,  gk) if pBc else -1
-        tmpList[7]=self.gigjgkToGlobalID(gi,          1,  gk) if pBc else -1
+        tmpList[1]=self.gigjgkToGlobalID(gi,          0,  gk) if pBcY else -1
+        tmpList[7]=self.gigjgkToGlobalID(gi,          1,  gk) if pBcY else -1
       if gj==self.Ny_-2:
         tmpList[1]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk)
-        tmpList[7]=self.gigjgkToGlobalID(gi,          0,  gk) if pBc else -1
+        tmpList[7]=self.gigjgkToGlobalID(gi,          0,  gk) if pBcY else -1
       if gj<self.Ny_-2:
         tmpList[1]=self.gigjgkToGlobalID(gi,       gj+1,  gk)
         tmpList[7]=self.gigjgkToGlobalID(gi,       gj+2,  gk)
 
       # right
       if gi==self.Nx_-1:
-        tmpList[2]=self.gigjgkToGlobalID(0,          gj,  gk) if pBc else -1
-        tmpList[8]=self.gigjgkToGlobalID(1,          gj,  gk) if pBc else -1
+        tmpList[2]=self.gigjgkToGlobalID(0,          gj,  gk) if pBcX else -1
+        tmpList[8]=self.gigjgkToGlobalID(1,          gj,  gk) if pBcX else -1
       if gi==self.Nx_-2:
         tmpList[2]=self.gigjgkToGlobalID(self.Nx_-1, gj,  gk)
-        tmpList[8]=self.gigjgkToGlobalID(0,          gj,  gk) if pBc else -1
+        tmpList[8]=self.gigjgkToGlobalID(0,          gj,  gk) if pBcX else -1
       if gi<self.Nx_-2:
         tmpList[2]=self.gigjgkToGlobalID(gi+1,       gj,  gk)
         tmpList[8]=self.gigjgkToGlobalID(gi+2,       gj,  gk)
 
       # back
       if gj==0:
-        tmpList[3]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBc else -1
-        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-2,  gk) if pBc else -1
+        tmpList[3]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBcY else -1
+        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-2,  gk) if pBcY else -1
       if gj==1:
         tmpList[3]=self.gigjgkToGlobalID(gi,          0,  gk)
-        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBc else -1
+        tmpList[9]=self.gigjgkToGlobalID(gi, self.Ny_-1,  gk) if pBcY else -1
       if gj>1:
         tmpList[3]=self.gigjgkToGlobalID(gi,       gj-1,  gk)
         tmpList[9]=self.gigjgkToGlobalID(gi,       gj-2,  gk)
 
       # bottom
       if gk==0:
-        tmpList[4] =self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBc else -1
-        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-2) if pBc else -1
+        tmpList[4] =self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBcZ else -1
+        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-2) if pBcZ else -1
       if gk==1:
         tmpList[4] =self.gigjgkToGlobalID(gi,        gj, 0,        )
-        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBc else -1
+        tmpList[10]=self.gigjgkToGlobalID(gi,        gj, self.Nz_-1) if pBcZ else -1
       if gk>1:
         tmpList[4] =self.gigjgkToGlobalID(gi,        gj, gk-1)
         tmpList[10]=self.gigjgkToGlobalID(gi,        gj, gk-2)
 
       # top
       if gk==self.Nz_-1:
-        tmpList[5] =self.gigjgkToGlobalID(gi,        gj, 0) if pBc else -1
-        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 1) if pBc else -1
+        tmpList[5] =self.gigjgkToGlobalID(gi,        gj, 0) if pBcZ else -1
+        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 1) if pBcZ else -1
       if gk==self.Nz_-2:
         tmpList[5] =self.gigjgkToGlobalID(gi,        gj, self.Nz_-1)
-        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 0         ) if pBc else -1
+        tmpList[11]=self.gigjgkToGlobalID(gi,        gj, 0         ) if pBcZ else -1
       if gk<self.Nz_-2:
         tmpList[5] =self.gigjgkToGlobalID(gi,        gj, gk+1)
         tmpList[11]=self.gigjgkToGlobalID(gi,        gj, gk+2)

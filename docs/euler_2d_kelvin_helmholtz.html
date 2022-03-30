@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Euler Sedov Full" href="euler_2d_sedov_full.html" /><link rel="prev" title="2D Euler Smooth" href="euler_2d_smooth.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>2D Euler Kelvin-Helmholtz - pressio-demoapps 0.1.0 documentation</title>
+        <title>2D Euler Kelvin-Helmholtz - pressio-demoapps documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps 0.1.0 documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps  documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -174,6 +175,7 @@
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d.html">2D Burgers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -226,21 +228,32 @@
         <article role="main">
           <div class="section" id="d-euler-kelvin-helmholtz">
 <h1>2D Euler Kelvin-Helmholtz<a class="headerlink" href="#d-euler-kelvin-helmholtz" title="Permalink to this headline">¶</a></h1>
-<p>This problem solves the <em>2D convervative Euler equations</em>.</p>
+<p>This problem solves the <em>2D conservative Euler equations</em></p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial }{\partial t} \begin{bmatrix}\rho \\ \rho u_x \\ \rho u_y\\ \rho E \end{bmatrix} + \frac{\partial }{\partial x} \begin{bmatrix}\rho u_x \\ \rho u_x^2 +p \\ \rho u_x u_y \\ (E+p)u_x \end{bmatrix} \frac{\partial }{\partial y} \begin{bmatrix}\rho u_y  \\ \rho u_x u_y \\ \rho u_y^2 +p \\ (E+p)u_y \end{bmatrix}= 0\end{split}\]</div></div>
+<p>where the pressure <span class="math notranslate nohighlight">\(p\)</span> is related to the conserved quantities through the equation of the state</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2)).\]</div></div>
 <ul class="simple">
 <li><p>Domain is <span class="math notranslate nohighlight">\(\Omega = \Omega_1 \cup \Omega_2 = [-5,5]^2\)</span> with periodic BC where:</p>
 <ul>
 <li><p><span class="math notranslate nohighlight">\(\Omega_1 = [-5,5] \times [-2 + \cos( 0.8 \pi x) , 2 + \cos(0.8 \pi x)]\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: Rest of domain</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: Rest of the domain</p></li>
 </ul>
 </li>
-<li><p>IC is as follows:</p>
+</ul>
+<ul class="simple">
+<li><p>Initial conditions in primitive variables:</p>
 <ul>
-<li><p><span class="math notranslate nohighlight">\(\Omega_1\)</span>: <span class="math notranslate nohighlight">\(\rho = 2, u = 0.5, v = 0, p = 2.5\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\Omega_2\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = -0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>in <span class="math notranslate nohighlight">\(\Omega_1\)</span>: <span class="math notranslate nohighlight">\(\rho = 2, u = 0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>in <span class="math notranslate nohighlight">\(\Omega_2\)</span>: <span class="math notranslate nohighlight">\(\rho = 1, u = -0.5, v = 0, p = 2.5\)</span></p></li>
+<li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
 </ul>
 </li>
-<li><p>Time integration performed for 2.5 flow through units, <cite>t in (0, 50)</cite>.</p></li>
+</ul>
+<ul class="simple">
+<li><p>By default, <span class="math notranslate nohighlight">\(\gamma = 1.4\)</span></p></li>
+<li><p>Time integration performed for 2.5 flow through units, <span class="math notranslate nohighlight">\(t \in (0, 50)\)</span></p></li>
 <li><p>Mach number in <span class="math notranslate nohighlight">\(\Omega_1\)</span> : <span class="math notranslate nohighlight">\(M_{\infty} = 0.377964\)</span></p></li>
 <li><p>Mach number in <span class="math notranslate nohighlight">\(\Omega_2\)</span> : <span class="math notranslate nohighlight">\(M_{\infty} = 0.267261\)</span></p></li>
 <li><p>This problem is often <em>unstable</em> for a standard Galerkin ROM</p></li>
@@ -248,19 +261,36 @@
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-        --problem euler2dKelvinHelmholtz_s<span class="o">{</span><span class="m">3</span>,5,7<span class="o">}</span> -n Nx Ny --outDir &lt;destination-path&gt;
+        --problem euler2dKelvinHelmholtz_s&lt;stencilSize&gt; -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> are the number of cells, and <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.</p>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>: defines the neighboring connectivity of each cell</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated.
+The script creates the directory if it does not exist.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When you set the <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span></code>, keep in mind the following constraints (more on this below):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::FirstOrder</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno3</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InviscidFluxReconstruction::Weno5</span></code> requires <code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">&gt;=</span> <span class="pre">7</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="c-synopsis">
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">"pressiodemoapps/euler2d.hpp"</span><span class="cp"></span>
-<span class="c1">// ...</span>
+
 <span class="k">namespace</span> <span class="n">pda</span>     <span class="o">=</span> <span class="n">pressiodemoapps</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="k">auto</span> <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">"path-to-mesh"</span><span class="p">);</span>
+
 <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">Euler2d</span><span class="o">::</span><span class="n">KelvinHelmholtz</span><span class="p">;</span>
-<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">scheme</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span> <span class="c1">//or Weno3, Weno5</span>
 <span class="k">auto</span> <span class="n">problem</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">);</span>
 <span class="k">auto</span> <span class="n">state</span>        <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
 </pre></div>
@@ -269,7 +299,9 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 <div class="section" id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
-<span class="c1"># ...</span>
+
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
+
 <span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler2d</span><span class="o">.</span><span class="n">KelvinHelmholtz</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
@@ -279,7 +311,7 @@ and <code class="docutils literal notranslate"><span class="pre">&lt;destination
 </div>
 <div class="section" id="sample-plot">
 <h2>Sample Plot<a class="headerlink" href="#sample-plot" title="Permalink to this headline">¶</a></h2>
-<p>Representative <em>density</em> field at <code class="docutils literal notranslate"><span class="pre">t=50</span></code> using a 256x256 mesh with <code class="docutils literal notranslate"><span class="pre">Weno5</span></code>
+<p>Representative <em>density</em> field at selected time <span class="math notranslate nohighlight">\(t=50\)</span> using a <code class="docutils literal notranslate"><span class="pre">256x256</span></code> mesh with Weno5
 and RK4 time integration:</p>
 <a class="reference internal image-reference" href="_images/wiki_2d_kelvin_helmholtz_density.png"><img alt="Alternative text" class="align-center" src="_images/wiki_2d_kelvin_helmholtz_density.png" style="width: 60%;"/></a>
 </div>
@@ -314,7 +346,7 @@ and RK4 time integration:</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 19, 2022. |
+            Last updated on Mar 30, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/euler_2d_kelvin_helmholtz.rst.txt"

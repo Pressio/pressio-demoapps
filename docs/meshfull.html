@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Sample Mesh Capabilty" href="meshsample.html" /><link rel="prev" title="Meshing Capability" href="meshing.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>Full mesh - pressio-demoapps 0.1.0 documentation</title>
+        <title>Full mesh - pressio-demoapps documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps 0.1.0 documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps  documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -157,7 +157,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Problem class API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -174,6 +175,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d.html">2D Burgers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -235,13 +237,13 @@
 Below, we describe the scripts in more details.</p>
 <div class="section" id="script-usage">
 <h2>Script Usage<a class="headerlink" href="#script-usage" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python create_full_mesh.py <span class="se">\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 create_full_mesh.py <span class="se">\</span>
              --outDir &lt;path-to-where-you-want-mesh-to-be-generated&gt; <span class="se">\</span>
              -n Nx <span class="o">[</span>Ny Nz<span class="o">]</span> <span class="se">\</span>
              --bounds xMin xMax <span class="o">[</span>yMin yMax zMin zMaz<span class="o">]</span> <span class="se">\</span>
-             -s stencilSize        <span class="c1"># valid choices are 3,5,7 \</span>
-             --periodic true/false <span class="c1"># default=false \</span>
-             --debug true/false    <span class="c1"># default=false</span>
+             -s &lt;int&gt;             <span class="c1"># valid choices are 3,5,7 \</span>
+             --periodic &lt;string&gt;  <span class="c1"># string for axis to set periodic \</span>
+             --debug true/false   <span class="c1"># default=false</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -291,7 +293,7 @@ If you pass two values, script assumes 2d. If you pass three values, assumes 3d;
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jan 19, 2022. |
+            Last updated on Mar 30, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/meshfull.rst.txt"

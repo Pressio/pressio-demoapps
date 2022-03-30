@@ -10,77 +10,45 @@
 #include "./adapter_mixins.hpp"
 
 namespace pressiodemoapps{
+
+// ----------------------------------------------------------
+// enums identifying the problems
+// ----------------------------------------------------------
 enum class Euler1d{
   PeriodicSmooth,
   Sod,
   Lax,
   ShuOsher
 };
+
 }//end namespace pressiodemoapps
 
-// this is here because it needs to see the enum above
+// this include is here because needs visiblity of the enums above
 #include "./impl/euler_1d_prob_class.hpp"
 
 namespace pressiodemoapps{
-namespace implee1d{
 
-template<class mesh_t, class T>
-T create1dImpl(const mesh_t & meshObj,
-	       ::pressiodemoapps::Euler1d probEnum,
-	       ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-	       ::pressiodemoapps::InviscidFluxScheme fluxEnum)
-{
-
-  const auto stencilSize = meshObj.stencilSize();
-  const auto check1 = stencilSizeCompatibleWithInviscidFluxReconstruction(recEnum, stencilSize);
-  if (!check1){
-    throw std::runtime_error
-      ("Stencil size in the mesh object not compatible with desired inviscid flux reconstruction.");
-  }
-
-  if (probEnum == ::pressiodemoapps::Euler1d::PeriodicSmooth){
-    if (!meshObj.isPeriodic()){
-      throw std::runtime_error("For periodicSmooth euler1d, mesh must be periodic.");
-    }
-  }
-
-  return T(meshObj, probEnum, recEnum, fluxEnum);
-}
-
+// ----------------------------------------------------------
+// create a default problem
+// ----------------------------------------------------------
+template<
+  class mesh_t,
+  class RetType = PublicProblemMixinCpp<impleuler1d::EigenApp<mesh_t>>
+  >
+RetType
+// bindings need unique nameing or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t, class T>
-T create_problem_for_pyA(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-{
-  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum,
-					   recEnum, InviscidFluxScheme::Rusanov);
-}
-
-template<class mesh_t, class T>
-T create_problem_for_pyB(const mesh_t & meshObj,
-		      ::pressiodemoapps::Euler1d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum,
-		      ::pressiodemoapps::InviscidFluxScheme fluxEnum)
-{
-  return implee1d::create1dImpl<mesh_t, T>(meshObj, probEnum, recEnum, fluxEnum);
-}
+create_euler_1d_py_problem_default
+#else
+create_problem_eigen
 #endif
-} //end pressiodemoapps::impl
-
-#if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<class mesh_t>
-auto create_problem_eigen(const mesh_t & meshObj,
-			::pressiodemoapps::Euler1d probEnum,
-			::pressiodemoapps::InviscidFluxReconstruction recEnum,
-			::pressiodemoapps::InviscidFluxScheme fluxEnum = InviscidFluxScheme::Rusanov)
+(const mesh_t & meshObj,
+ Euler1d problemEnum,
+ InviscidFluxReconstruction recEnum)
 {
-  using p_t = ::pressiodemoapps::implee1d::EigenEuler1dApp<mesh_t>;
-  using RetType = PublicProblemMixinCpp<p_t>;
-  return implee1d::create1dImpl<mesh_t, RetType>(meshObj, probEnum,
-						 recEnum, fluxEnum);
+  return RetType(meshObj, problemEnum, recEnum,
+		 InviscidFluxScheme::Rusanov);
 }
-#endif
 
 }//end namespace pressiodemoapps
 #endif

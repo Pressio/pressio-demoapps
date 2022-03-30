@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_SWE_FLUXES_HPP_
 #define PRESSIODEMOAPPS_SWE_FLUXES_HPP_
 
-namespace pressiodemoapps{ namespace implswe{
+namespace pressiodemoapps{ namespace implswe2d{
 
 template<typename T, class normal_t, class sc_t>
 void swe_rusanov_flux_three_dof(T & F,

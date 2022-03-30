@@ -1,7 +1,13 @@
 include(FindUnixCommands)
 
 # generate the mesh
-set(CMD "python3 ${MESHDRIVER} -n ${nx} ${ny} ${nz} --outDir ${OUTDIR} -s ${ss} --bounds 0.0 1.0 0.0 2.0 0.0 3.0 --periodic ${PER}")
+if (${PER} STREQUAL none)
+  set(CMD "python3 ${MESHDRIVER} -n ${nx} ${ny} ${nz} --outDir ${OUTDIR} -s ${ss} --bounds 0.0 1.0 0.0 2.0 0.0 3.0")
+endif()
+if (${PER} STREQUAL all)
+  set(CMD "python3 ${MESHDRIVER} -n ${nx} ${ny} ${nz} --outDir ${OUTDIR} -s ${ss} --bounds 0.0 1.0 0.0 2.0 0.0 3.0 --periodic x y z")
+endif()
+
 execute_process(COMMAND ${BASH} -c ${CMD} RESULT_VARIABLE RES)
 if(RES)
   message(FATAL_ERROR "Mesh generation failed")

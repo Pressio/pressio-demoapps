@@ -1,7 +1,6 @@
 Overview
 ========
 
-
 pressio-demoapps is a collection of 1D, 2D and 3D problems
 of varying complexity (from linear advection, to reaction-diffusion and compressible Euler)
 that can be used for a variety of purposes.
@@ -56,6 +55,7 @@ A C++ representative snippet showing our idea of a *problem*:
      auto problem         = pda::create_problem_eigen(meshObj, problemId, scheme);
    }
 
+Read more on `how to use a problem instance <howtouse>`_ or checkout what `the C++ public API <apicpp>`_.
 
 If you prefer, you can use directly Python:
 
@@ -68,7 +68,7 @@ If you prefer, you can use directly Python:
    problemId = pda.Euler1d.Sod
    problem   = pda.create_problem(mesh, problemId, scheme)
 
-Read more on `how to use a problem instance <howtouse>`_ or checkout what `public API a problem meets <api>`_.
+Read more on `how to use a problem instance <howtouse>`_ or checkout what `the Python public API <apipy>`_.
 
 
 Core development principles
@@ -98,7 +98,8 @@ Contents
 
     installation
     howtouse
-    api
+    apicpp
+    apipy
     your_first_problem
     problems_1d
     problems_2d

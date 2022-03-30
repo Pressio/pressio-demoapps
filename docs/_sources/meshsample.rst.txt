@@ -21,8 +21,7 @@ at the sample mesh, one can use these to reconstruct the residual
 on the full mesh.
 
 Several methods exist to determine which cells to include, e.g., random sampling,
-the `discrete empirical interpolation method (DEIM) <https://doi.org/10.1137/090766498>`_,
-and `Gauss-Newton with approximate tensors (GNAT) <https://doi.org/10.1016/j.jcp.2013.02.028>`_.
+and the `discrete empirical interpolation method (DEIM) <https://doi.org/10.1137/090766498>`_.
 
 While the sample mesh strictly speaking refers to the collection of cells
 where we compute the residual and Jacobian, a related concept is what we refer to as **stencil mesh**.
@@ -45,12 +44,14 @@ is the subset color-coded yellow.
 
 .. image:: ../../figures/readme_2dmesh.png
   :width: 75 %
+  :align: center
   :alt: Alternative text
 
 The following is an example in three dimensions.
 
 .. image:: ../../figures/readme_3dmesh.png
   :width: 75 %
+  :align: center
   :alt: Alternative text
 
 
@@ -59,12 +60,12 @@ How to do all this in pressio-demoapps?
 ---------------------------------------
 
 The ``pressio-demoapps/meshing/create_sample_mesh.py`` is the script we use for this.
-Specifically, this script accepts a path to a full mesh and a list of cell indices,
-and generate the new (reduced) mesh.
+This script accepts a path to a full mesh and a list of cell indices,
+and generates the new (reduced) mesh.
 
 .. code-block:: bash
 
-   python create_sample_mesh.py \
+   python3 create_sample_mesh.py \
 		--fullMeshDir        <path-to-the-FULL-mesh-dir-to-start-from> \
 		--sampleMeshIndices  <path-to-ascii-file-with-desired-cell-indices-list> \
 		--outDir <path-to-where-to-output-new-mesh> \
@@ -100,10 +101,10 @@ To simplify things, let's set the following:
 
 .. code-block:: bash
 
-   python ${REPODIR}/meshing/create_full_mesh.py \
+   python3 ${REPODIR}/meshing/create_full_mesh.py \
 		-n 10 8 --outDir $WORKDIR/full_mesh \
 		--bounds 0.0 1.2 0.0 1.0 \
-		--periodic false -s 5
+		-s 5
 
 This creates the mesh files inside ``${WORKDIR}/full_mesh``
 for a rectangular domain, using a 10x8 grid and setting a
@@ -122,7 +123,7 @@ If we then do:
 
 .. code-block:: bash
 
-   python ${REPODIR}/meshing/plot_mesh.py --wdir $WORKDIR/full_mesh -p show 9
+   python3 ${REPODIR}/meshing/plot_mesh.py --wdir $WORKDIR/full_mesh -p show 9
 
 where we use `show` to specify we want the figure plotted,
 and 9 is the font size to use to print the global ID of each cell.
@@ -130,6 +131,7 @@ You should see this plot:
 
 .. image:: ../../figures/docs_meshing_sample_1.png
   :width: 60 %
+  :align: center
   :alt: Alternative text
 
 
@@ -143,7 +145,7 @@ We can do:
 .. code-block:: bash
 
    echo 1 26 36 52 67 >> ${WORKDIR}/sample_gids.txt
-   python ${REPODIR}/meshing/create_sample_mesh.py \
+   python3 ${REPODIR}/meshing/create_sample_mesh.py \
 		--outDir $WORKDIR/sample_mesh \
 		--fullMeshDir $WORKDIR/full_mesh \
 		--sampleMeshIndices $WORKDIR/sample_gids.txt
@@ -155,11 +157,12 @@ Let's visualize this reduced mesh:
 
 .. code-block:: bash
 
-   python ${REPODIR}/meshing/plot_mesh.py --wdir $WORKDIR/sample_mesh -p show 9
+   python3 ${REPODIR}/meshing/plot_mesh.py --wdir $WORKDIR/sample_mesh -p show 9
 
 You should see this plot:
 
 .. image:: ../../figures/docs_meshing_sample_2.png
+  :align: center
   :width: 60 %
 
 In the figure above, the yellow cells are the "sample mesh cells",

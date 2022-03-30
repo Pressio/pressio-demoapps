@@ -1,6 +1,6 @@
 
-#ifndef PRESSIODEMOAPPS_EDGE_RECONSTRUCTOR_FROM_STENCIL_HPP_
-#define PRESSIODEMOAPPS_EDGE_RECONSTRUCTOR_FROM_STENCIL_HPP_
+#ifndef PRESSIODEMOAPPS_EDGE_RECONSTRUCTOR_FROM_STENCIL_NONTEMP_HPP_
+#define PRESSIODEMOAPPS_EDGE_RECONSTRUCTOR_FROM_STENCIL_NONTEMP_HPP_
 
 namespace pressiodemoapps{ namespace impl{
 
@@ -33,12 +33,8 @@ struct _ReconstructorFromStencilMembers
 };
 } // anonym namespace
 
-template<int numDofPerCell, class ReconstructedValueType, class StencilDataType>
-class ReconstructorFromStencil;
-
-// partial specialize for 1 dof/cell
 template<class ReconstructedValueType, class StencilDataType>
-class ReconstructorFromStencil<1, ReconstructedValueType, StencilDataType>
+class ReconstructorFromStencil
 {
   using members_t = _ReconstructorFromStencilMembers<ReconstructedValueType, StencilDataType>;
   members_t m_memb;
@@ -65,71 +61,61 @@ public:
   }
 
   template<class IndexType>
-  void operator()(IndexType /*unused*/)
+  void operator()(IndexType /*unused*/, int ndpc)
+  {
+    if (ndpc == 1){
+      oneDofPerCellImpl();
+    }
+
+    else if (ndpc == 3){
+      threeDofPerCellImpl();
+    }
+
+    else if (ndpc == 4){
+      fourDofPerCellImpl();
+    }
+
+    else if (ndpc == 5){
+      fiveDofPerCellImpl();
+    }
+  }
+
+private:
+  void oneDofPerCellImpl()
   {
     switch(m_memb.m_recEn){
     case ::pressiodemoapps::ReconstructionScheme::FirstOrder:
       {
-	m_memb.m_uMinusHalfNeg = m_memb.m_stencilVals(0);
-	m_memb.m_uMinusHalfPos = m_memb.m_stencilVals(1);
-	m_memb.m_uPlusHalfNeg  = m_memb.m_stencilVals(1);
-	m_memb.m_uPlusHalfPos  = m_memb.m_stencilVals(2);
+	m_memb.m_uMinusHalfNeg(0) = m_memb.m_stencilVals(0);
+	m_memb.m_uMinusHalfPos(0) = m_memb.m_stencilVals(1);
+	m_memb.m_uPlusHalfNeg(0)  = m_memb.m_stencilVals(1);
+	m_memb.m_uPlusHalfPos(0)  = m_memb.m_stencilVals(2);
 	break;
       }
 
     case ::pressiodemoapps::ReconstructionScheme::Weno3:
       {
-	pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg,
-			       m_memb.m_uMinusHalfPos,
-			       m_memb.m_uPlusHalfNeg,
-			       m_memb.m_uPlusHalfPos,
+	pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg(0),
+			       m_memb.m_uMinusHalfPos(0),
+			       m_memb.m_uPlusHalfNeg(0),
+			       m_memb.m_uPlusHalfPos(0),
 			       m_memb.m_stencilVals);
 	break;
       }
 
     case ::pressiodemoapps::ReconstructionScheme::Weno5:
       {
-	pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg,
-			       m_memb.m_uMinusHalfPos,
-			       m_memb.m_uPlusHalfNeg,
-			       m_memb.m_uPlusHalfPos,
+	pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg(0),
+			       m_memb.m_uMinusHalfPos(0),
+			       m_memb.m_uPlusHalfNeg(0),
+			       m_memb.m_uPlusHalfPos(0),
 			       m_memb.m_stencilVals);
 	break;
       }
     }
   }
-};
 
-// partial specialize for 3 dof/cell
-template<class ReconstructedValueType, class StencilDataType>
-class ReconstructorFromStencil<3, ReconstructedValueType, StencilDataType>
-{
-  using members_t = _ReconstructorFromStencilMembers<ReconstructedValueType, StencilDataType>;
-  members_t m_memb;
-
-public:
-  template<typename ...Args>
-  ReconstructorFromStencil(Args && ... args)
-    : m_memb(std::forward<Args>(args)...){}
-
-  const ReconstructionScheme reconstructionScheme() const{
-    return m_memb.m_recEn;
-  }
-  const ReconstructedValueType & reconstructionLeftNeg() const{
-    return m_memb.m_uMinusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionLeftPos() const{
-    return m_memb.m_uMinusHalfPos;
-  }
-  const ReconstructedValueType & reconstructionRightNeg() const{
-    return m_memb.m_uPlusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionRightPos() const{
-    return m_memb.m_uPlusHalfPos;
-  }
-
-  template<class IndexType>
-  void operator()(IndexType /*smPt*/)
+  void threeDofPerCellImpl()
   {
     switch(m_memb.m_recEn)
       {
@@ -224,39 +210,8 @@ public:
       }
       }
   }
-};
 
-// partial specialize for 4 dof/cell
-template<class ReconstructedValueType, class StencilDataType>
-class ReconstructorFromStencil<4, ReconstructedValueType, StencilDataType>
-{
-
-  using members_t = _ReconstructorFromStencilMembers<ReconstructedValueType, StencilDataType>;
-  members_t m_memb;
-
-public:
-  template<typename ...Args>
-  ReconstructorFromStencil(Args && ... args)
-    : m_memb(std::forward<Args>(args)...){}
-
-  const ReconstructionScheme reconstructionScheme() const{
-    return m_memb.m_recEn;
-  }
-  const ReconstructedValueType & reconstructionLeftNeg() const{
-    return m_memb.m_uMinusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionLeftPos() const{
-    return m_memb.m_uMinusHalfPos;
-  }
-  const ReconstructedValueType & reconstructionRightNeg() const{
-    return m_memb.m_uPlusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionRightPos() const{
-    return m_memb.m_uPlusHalfPos;
-  }
-
-  template<class IndexType>
-  void operator()(IndexType /*unused*/)
+  void fourDofPerCellImpl()
   {
     switch(m_memb.m_recEn)
       {
@@ -378,40 +333,9 @@ public:
       }
       }
   }
-};
 
-// partial specialize for 5 dof/cell
-template<class ReconstructedValueType, class StencilDataType>
-class ReconstructorFromStencil<5, ReconstructedValueType, StencilDataType>
-{
-  using members_t = _ReconstructorFromStencilMembers<ReconstructedValueType, StencilDataType>;
-  members_t m_memb;
-
-public:
-  template<typename ...Args>
-  ReconstructorFromStencil(Args && ... args)
-    : m_memb(std::forward<Args>(args)...){}
-
-  const ReconstructionScheme reconstructionScheme() const{
-    return m_memb.m_recEn;
-  }
-  const ReconstructedValueType & reconstructionLeftNeg() const{
-    return m_memb.m_uMinusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionLeftPos() const{
-    return m_memb.m_uMinusHalfPos;
-  }
-  const ReconstructedValueType & reconstructionRightNeg() const{
-    return m_memb.m_uPlusHalfNeg;
-  }
-  const ReconstructedValueType & reconstructionRightPos() const{
-    return m_memb.m_uPlusHalfPos;
-  }
-
-  template<class IndexType>
-  void operator()(IndexType /*unused*/)
+  void fiveDofPerCellImpl()
   {
-
     switch(m_memb.m_recEn){
     case ::pressiodemoapps::ReconstructionScheme::FirstOrder:{
       m_memb.m_uMinusHalfNeg(0) = m_memb.m_stencilVals(0);
@@ -558,6 +482,7 @@ public:
     }
     }
   }
+
 };
 
 }}

@@ -3,8 +3,6 @@
 Installation
 ============
 
-This page walks you through the process of installing pressio-demoapps for both C++ and Python.
-
 
 C++ library
 -----------
@@ -50,7 +48,7 @@ Then, you can do:
    git clone --recursive git@github.com:Pressio/pressio-demoapps.git
    export CXX=<path-to-your-CXX-compiler> #must support C++14
    cd pressio-demoapps
-   python3 build.py
+   python3 cmake_build.py
    pip3 install .
 
 
@@ -62,7 +60,7 @@ This builds/installs pressiodemoapps with default options (build_mode=Release).
    To build/install pressiodemoapps with OpenMP and Release mode:
    git clone --recursive git@github.com:Pressio/pressio-demoapps.git
    export CXX=<path-to-your-CXX-compiler> #must support C++14
-   python3 build.py --openmp
+   python3 cmake_build.py --openmp
    pip3 install .
    # to just build do
    python -m build

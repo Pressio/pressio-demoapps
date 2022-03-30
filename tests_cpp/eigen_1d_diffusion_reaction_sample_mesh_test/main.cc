@@ -1,7 +1,7 @@
 
 #include "pressio/ode_steppers_explicit.hpp"
 #include "pressio/ode_advancers.hpp"
-#include "pressiodemoapps/diffusion_reaction.hpp"
+#include "pressiodemoapps/diffusion_reaction1d.hpp"
 #include "../observer.hpp"
 
 template<class T>
@@ -31,9 +31,8 @@ int main(int argc, char *argv[])
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
-  const auto scheme   = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probid = pda::DiffusionReaction1d::ProblemA;
-  auto appObj      = pda::create_problem_eigen(meshObj, probid, scheme);
+  auto appObj      = pda::create_problem_eigen(meshObj, probid);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
   using scalar_t = typename app_t::scalar_type;

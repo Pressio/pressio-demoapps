@@ -4,7 +4,7 @@
 
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
-#include "advection_mixins.hpp"
+#include "advection_1d_mixins.hpp"
 #include "mixin_directional_flux_balance.hpp"
 #include "mixin_directional_flux_balance_jacobian.hpp"
 
@@ -12,43 +12,95 @@
 #include <omp.h>
 #endif
 
-namespace pressiodemoapps{ namespace impladv{
+namespace pressiodemoapps{
+namespace impladvection1d{
+
+// tags are used inside he public create function: create_problem_...()
+// to dispatch to the proper problem
+// so add new ones if a new problem is added
+struct TagLinearAdvection{};
 
 template<class MeshType>
-class EigenAdvection1dApp
+class EigenApp
 {
 
 public:
+  // required public aliases
   using index_t	      = typename MeshType::index_t;
   using scalar_type   = typename MeshType::scalar_t;
   using state_type    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
 
-  static constexpr int dimensionality{1};
-  static constexpr int numDofPerCell{1};
-
 private:
-  using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
+  static constexpr int dimensionality{1};
+  using flux_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
+  using edge_rec_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
+  using flux_jac_type             = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
+  using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
-  EigenAdvection1dApp(const MeshType & meshObj,
-		      ::pressiodemoapps::Advection1d probEnum,
-		      ::pressiodemoapps::InviscidFluxReconstruction recEnum)
-    : m_meshObj(meshObj),
-      m_numDofStencilMesh(m_meshObj.stencilMeshSize()),
-      m_numDofSampleMesh(m_meshObj.sampleMeshSize()),
-      m_probEn(probEnum),
-      m_recEn(recEnum),
-      // default flux is Rusanov
-      m_fluxEn(::pressiodemoapps::InviscidFluxScheme::Rusanov)
-  {}
+  EigenApp(TagLinearAdvection /*tag*/,
+	   const MeshType & meshObj,
+	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
+	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
+	   scalar_type velocity,
+	   int icIdentifier)
+    : m_numDofPerCell(1),
+      m_probEn(::pressiodemoapps::Advection1d::PeriodicLinear),
+      m_inviscidFluxRecEn(inviscidFluxRecEn),
+      m_inviscidFluxSchemeEn(invFluxSchemeEn),
+      m_linear_adv_vel(velocity),
+      m_meshObj(meshObj),
+      m_icIdentifier(icIdentifier)
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
+  }
 
   state_type initialCondition() const{
     state_type res(m_numDofStencilMesh);
     const auto & x = m_meshObj.viewX();
+
     for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
-      res(i) = std::sin(M_PI*x(i));
+      if (m_icIdentifier == 1){
+	res(i) = std::sin(M_PI*x(i));
+      }
+
+      else if (m_icIdentifier == 2){
+	const auto x1= static_cast<scalar_type>(1.2);
+	const auto A1= static_cast<scalar_type>(200.0);
+	const auto delta1 = 16.0;
+	const auto x2= static_cast<scalar_type>(2.5);
+	const auto A2= static_cast<scalar_type>(100.0);
+	const auto delta2 = 36.0;
+
+	const auto dx1Sq = (x(i)-x1)*(x(i)-x1);
+	const auto dx2Sq = (x(i)-x2)*(x(i)-x2);
+        res(i) = 0.8*std::exp(-A1*dx1Sq/delta1) + std::exp(-A2*dx2Sq/delta2);
+      }
+
+      else if (m_icIdentifier == 3){
+	const auto x1= static_cast<scalar_type>(2.);
+	const auto x2= static_cast<scalar_type>(3.0);
+	const auto delta = 0.5*0.5;
+	const auto dx1Sq = (x(i)-x1)*(x(i)-x1);
+	const auto dx2Sq = (x(i)-x2)*(x(i)-x2);
+        res(i) = std::exp(-dx1Sq/delta) + 0.5*std::exp(-dx2Sq/delta);
+      }
+
+      else if (m_icIdentifier == 4){
+	const auto x1= static_cast<scalar_type>(1);
+	const auto x2= static_cast<scalar_type>(3);
+	const auto sf= static_cast<scalar_type>(8);
+	const auto dx1 = (x(i)-x1);
+	const auto dx2 = (x(i)-x2);
+        res(i) = std::tanh(sf*dx1) - std::tanh(sf*dx2);
+      }
+
+      else{
+	throw std::runtime_error("advection1d: invalid ic");
+      }
     }
     return res;
   }
@@ -65,18 +117,17 @@ protected:
     const auto & graph = m_meshObj.graph();
     for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
       {
-	const auto jacRowOfCurrentCell = cell*numDofPerCell;
-	const auto ci  = graph(cell, 0)*numDofPerCell;
+	const auto jacRowOfCurrentCell = cell*m_numDofPerCell;
+	const auto ci  = graph(cell, 0)*m_numDofPerCell;
 
 	// entry wrt current cell
 	trList.push_back( Tr(jacRowOfCurrentCell, ci, zero) );
 
 	const int numNeighbors =
-	  (m_recEn == InviscidFluxReconstruction::FirstOrder) ? 2
-	  : (m_recEn == InviscidFluxReconstruction::Weno3) ? 4
-	  : (m_recEn == InviscidFluxReconstruction::Weno5) ? 6 : -1;
+	  (m_inviscidFluxRecEn == InviscidFluxReconstruction::FirstOrder) ? 2
+	   : (m_inviscidFluxRecEn == InviscidFluxReconstruction::Weno3) ? 4
+	    : (m_inviscidFluxRecEn == InviscidFluxReconstruction::Weno5) ? 6 : -1;
 	assert(numNeighbors != -1);
-
 	for (int i=1; i<=numNeighbors; ++i){
 	  trList.push_back( Tr(jacRowOfCurrentCell, graph(cell, i), zero) );
 	}
@@ -90,8 +141,8 @@ protected:
     }
   }
 
-  // note that here we MUST use a template because when doing
-  // bindings, this gets deduced to be a Ref
+  // note that we MUST template U_t, V_t because
+  // when doing bindings, these are deduced to be a Eigen Ref
   template<class U_t, class V_t>
   void velocityAndOptionalJacobian(const U_t & U,
 				   const scalar_type currentTime,
@@ -118,13 +169,10 @@ protected:
 #endif
     }
 
-    int nonZerosCountBeforeComputing = 0;
     if (J){
+      int nonZerosCountBeforeComputing = 0;
       nonZerosCountBeforeComputing = J->nonZeros();
       velocityAndJacImpl(U, currentTime, V, *J);
-
-      // std::cout << "NONZEROS BEFORE COMP = " << nonZerosCountBeforeComputing << "\n";
-      // std::cout << "NONZEROS AFTER  COMP = " << J->nonZeros() << "\n";
       assert(J->nonZeros() == nonZerosCountBeforeComputing);
     }
     else{
@@ -146,42 +194,49 @@ private:
     namespace pda = ::pressiodemoapps;
     constexpr int xAxis = 1;
 
-    // reconstructions values
-    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
+    // for omp, these are private variables for each thread
+    // edge reconstructions
+    edge_rec_type uMinusHalfNeg(m_numDofPerCell);
+    edge_rec_type uMinusHalfPos(m_numDofPerCell);
+    edge_rec_type uPlusHalfNeg(m_numDofPerCell);
+    edge_rec_type uPlusHalfPos(m_numDofPerCell);
     // fluxes
-    scalar_type fluxL{0}, fluxR{0};
+    flux_type fluxL(m_numDofPerCell);
+    flux_type fluxR(m_numDofPerCell);
+
     // flux jacobians
-    scalar_type fluxJacLNeg, fluxJacLPos;
-    scalar_type fluxJacRNeg, fluxJacRPos;
+    flux_jac_type fluxJacLNeg(m_numDofPerCell, m_numDofPerCell);
+    flux_jac_type fluxJacLPos(m_numDofPerCell, m_numDofPerCell);
+    flux_jac_type fluxJacRNeg(m_numDofPerCell, m_numDofPerCell);
+    flux_jac_type fluxJacRPos(m_numDofPerCell, m_numDofPerCell);
 
     // allocate gradients of reconstructed states
     // the size depends on the scheme selected
-    const auto stencilSize = reconstructionTypeToStencilSize(m_recEn);
-    reconstruction_gradient_t gradLNeg(stencilSize-1);
-    reconstruction_gradient_t gradLPos(stencilSize-1);
-    reconstruction_gradient_t gradRNeg(stencilSize-1);
-    reconstruction_gradient_t gradRPos(stencilSize-1);
+    const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    reconstruction_gradient_t gradLNeg(m_numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradLPos(m_numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradRNeg(m_numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradRPos(m_numDofPerCell, stencilSize-1);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
 	pda::impl::ComputeDirectionalFluxBalanceJacobianOnInteriorCell<
-	  pda::impladv::ComputeDirectionalFluxValuesAndJacobians<
+	  pda::impladvection1d::ComputeDirectionalFluxValuesAndJacobians<
 	    pda::impl::ReconstructorForDiscreteFunction<
-	      dimensionality, numDofPerCell, MeshType, U_t, scalar_type, reconstruction_gradient_t>,
-	    scalar_type, scalar_type, scalar_type>,
-	  dimensionality, numDofPerCell, MeshType, jacobian_type>,
-      numDofPerCell, V_t, scalar_type
+	      dimensionality, MeshType, U_t, edge_rec_type, reconstruction_gradient_t>,
+	    scalar_type, flux_type, flux_jac_type>,
+	  dimensionality, MeshType, jacobian_type>,
+      V_t, scalar_type
       >;
 
     functor_type F(V, m_meshObj.dxInv(),
 		   /* end args for velo */
 		   J, xAxis, m_meshObj,
 		   /* end args for jac */
-		   m_fluxEn, fluxL, fluxR,
-		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
+		   m_inviscidFluxSchemeEn, fluxL, fluxR,
+		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
@@ -192,7 +247,7 @@ private:
 #pragma omp for schedule(static)
 #endif
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt){
-      F(smPt);
+      F(smPt, m_numDofPerCell);
     }
   }
 
@@ -204,29 +259,30 @@ private:
     namespace pda = ::pressiodemoapps;
     constexpr int xAxis = 1;
 
-    // reconstructions values
-    scalar_type uMinusHalfNeg{0}, uMinusHalfPos{0};
-    scalar_type uPlusHalfNeg {0}, uPlusHalfPos {0};
+    // for omp, these are private variables for each thread
+    // edge reconstructions
+    edge_rec_type uMinusHalfNeg(m_numDofPerCell);
+    edge_rec_type uMinusHalfPos(m_numDofPerCell);
+    edge_rec_type uPlusHalfNeg(m_numDofPerCell);
+    edge_rec_type uPlusHalfPos(m_numDofPerCell);
     // fluxes
-    scalar_type fluxL{0}, fluxR{0};
-    // flux jacobians
-    scalar_type fluxJacLNeg, fluxJacLPos;
-    scalar_type fluxJacRNeg, fluxJacRPos;
+    flux_type fluxL(m_numDofPerCell);
+    flux_type fluxR(m_numDofPerCell);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
-	pda::impladv::ComputeDirectionalFluxValues<
+	pda::impladvection1d::ComputeDirectionalFluxValues<
 	  pda::impl::ReconstructorForDiscreteFunction<
-	    dimensionality, numDofPerCell, MeshType, U_t, scalar_type>,
-	  scalar_type, scalar_type>,
-      numDofPerCell, V_t, scalar_type
+	    dimensionality, MeshType, U_t, edge_rec_type>,
+	  scalar_type, flux_type>,
+      V_t, scalar_type
       >;
 
     functor_type F(V, m_meshObj.dxInv(),
 		   /* end args for velo */
-		   m_fluxEn, fluxL, fluxR,
+		   m_inviscidFluxSchemeEn, fluxL, fluxR, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_recEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );
@@ -236,24 +292,28 @@ private:
 #pragma omp for schedule(static)
 #endif
     for (index_t smPt=0; smPt < sampleMeshSize; ++smPt){
-      F(smPt);
+      F(smPt, m_numDofPerCell);
     }
   }
 
 protected:
+  // common to all problems
+  int m_numDofPerCell = {};
+  ::pressiodemoapps::Advection1d m_probEn;
+  ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
+  ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   const MeshType & m_meshObj;
+  int m_icIdentifier = {};
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
-  ::pressiodemoapps::Advection1d m_probEn;
-  ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
-  ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
+
+  // parameters specific to problems
+  // will need to handle this better later
+  scalar_type m_linear_adv_vel = {};
 };
 
-template<class MeshType>
-constexpr int EigenAdvection1dApp<MeshType>::numDofPerCell;
-
-template<class MeshType>
-constexpr int EigenAdvection1dApp<MeshType>::dimensionality;
+template<class MeshType> constexpr int EigenApp<MeshType>::dimensionality;
 
 }}//end namespace
 #endif

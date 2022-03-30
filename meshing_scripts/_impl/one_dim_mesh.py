@@ -2,7 +2,7 @@
 import numpy as np
 
 class OneDimMesh:
-  def __init__(self, Nx, dx, xL, xR, stencilSize, enablePeriodicBc):
+  def __init__(self, Nx, dx, xL, xR, stencilSize, enablePeriodic):
     self.stSize_ = stencilSize
     self.numNeighbors_ = int((stencilSize-1))
     self.Nx_ = Nx
@@ -14,7 +14,7 @@ class OneDimMesh:
     self.gids_ = np.zeros(self.numCells_)
     self.G_ = {}
     self.createFullGrid()
-    self.buildGraph(enablePeriodicBc)
+    self.buildGraph(enablePeriodic)
 
   def getCoordinates(self):
     return [self.x_, self.y_]
@@ -39,13 +39,13 @@ class OneDimMesh:
       self.x_[i] = ox + i * self.dx_
       self.gids_[i] = i
 
-  def buildGraph(self, enablePeriodicBc):
+  def buildGraph(self, enablePeriodic):
     if self.numNeighbors_ == 2:
-      self._buildGraphStencil3(enablePeriodicBc)
+      self._buildGraphStencil3(enablePeriodic)
     elif self.numNeighbors_ == 4:
-      self._buildGraphStencil5(enablePeriodicBc)
+      self._buildGraphStencil5(enablePeriodic)
     elif self.numNeighbors_ == 6:
-      self._buildGraphStencil7(enablePeriodicBc)
+      self._buildGraphStencil7(enablePeriodic)
 
   def _buildGraphStencil3(self, pBc):
     # neighbors are listed as west, north, east, south

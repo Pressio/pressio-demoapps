@@ -1,9 +1,0 @@
-xMin 0.00000000000000
-xMax 1.00000000000000
-yMin 0.00000000000000
-yMax 1.00000000000000
-dx 0.20000000000000
-dy 0.16666666666667
-sampleMeshSize        6
-stencilMeshSize       18
-stencilSize  3

@@ -11,20 +11,28 @@
 
 #include "types.hpp"
 #include "pressiodemoapps/mesh.hpp"
-#include "pressiodemoapps/advection.hpp"
-#include "pressiodemoapps/diffusion_reaction.hpp"
+// 1d
+#include "pressiodemoapps/advection1d.hpp"
+#include "pressiodemoapps/diffusion_reaction1d.hpp"
 #include "pressiodemoapps/euler1d.hpp"
+// 2d
+#include "pressiodemoapps/advection_diffusion2d.hpp"
+#include "pressiodemoapps/diffusion_reaction2d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/swe2d.hpp"
+// 3d
 #include "pressiodemoapps/euler3d.hpp"
 
-namespace pressiodemoappspy{ namespace impl{
+namespace pressiodemoappspy{
+namespace impl{
 
 template<class p_t, class T>
 void bindCommonApiMethods(T & appObj)
 {
-  appObj.def("totalDofSampleMesh",  &p_t::totalDofSampleMesh);
-  appObj.def("totalDofStencilMesh", &p_t::totalDofStencilMesh);
+  appObj.def("totalDofSampleMesh",
+	     &p_t::totalDofSampleMesh);
+  appObj.def("totalDofStencilMesh",
+	     &p_t::totalDofStencilMesh);
 
   appObj.def("initialCondition",
 	     &p_t::initialCondition,
@@ -34,14 +42,21 @@ void bindCommonApiMethods(T & appObj)
 	     &p_t::createVelocity,
 	     pybind11::return_value_policy::automatic);
 
-  appObj.def("velocity", &p_t::velocity);
+  appObj.def("velocity",
+	     &p_t::velocity);
 
-  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank1);
-  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank2_ll);
-  appObj.def("createApplyJacobianResult", &p_t::createApplyJacobianResultRank2_lr);
-  appObj.def("applyJacobian", &p_t::applyJacobianRank1);
-  appObj.def("applyJacobian", &p_t::applyJacobianRank2_ll);
-  appObj.def("applyJacobian", &p_t::applyJacobianRank2_lr);
+  appObj.def("createApplyJacobianResult",
+	     &p_t::createApplyJacobianResultRank1);
+  appObj.def("createApplyJacobianResult",
+	     &p_t::createApplyJacobianResultRank2_ll);
+  appObj.def("createApplyJacobianResult",
+	     &p_t::createApplyJacobianResultRank2_lr);
+  appObj.def("applyJacobian",
+	     &p_t::applyJacobianRank1);
+  appObj.def("applyJacobian",
+	     &p_t::applyJacobianRank2_ll);
+  appObj.def("applyJacobian",
+	     &p_t::applyJacobianRank2_lr);
 }
 
 // ---------------------------
@@ -49,53 +64,89 @@ void bindSchemeEnums(pybind11::module & mParent)
 {
   namespace pda = pressiodemoapps;
 
+  // reconstructions
   pybind11::enum_<pda::InviscidFluxReconstruction>(mParent, "InviscidFluxReconstruction")
-    .value("FirstOrder",     pda::InviscidFluxReconstruction::FirstOrder)
-    .value("Weno3",	     pda::InviscidFluxReconstruction::Weno3)
-    .value("Weno5",	     pda::InviscidFluxReconstruction::Weno5);
+    .value("FirstOrder",
+	   pda::InviscidFluxReconstruction::FirstOrder)
+    .value("Weno3",
+	   pda::InviscidFluxReconstruction::Weno3)
+    .value("Weno5",
+	   pda::InviscidFluxReconstruction::Weno5);
 
   pybind11::enum_<pda::ViscousFluxReconstruction>(mParent, "ViscousFluxReconstruction")
-    .value("FirstOrder",     pda::ViscousFluxReconstruction::FirstOrder);
+    .value("FirstOrder",
+	   pda::ViscousFluxReconstruction::FirstOrder);
 
+  // flux schemes
   pybind11::enum_<pda::InviscidFluxScheme>(mParent, "InviscidFluxScheme")
-    .value("Rusanov",	     pda::InviscidFluxScheme::Rusanov);
+    .value("Rusanov",
+	   pda::InviscidFluxScheme::Rusanov);
 
   pybind11::enum_<pda::ViscousFluxScheme>(mParent, "ViscousFluxScheme")
-    .value("Central",	     pda::ViscousFluxScheme::Central);
+    .value("Central",
+	   pda::ViscousFluxScheme::Central);
 }
 
-void bindProblemEnums(pybind11::module & mParent)
+void bind1dProblemEnums(pybind11::module & mParent)
 {
   namespace pda = pressiodemoapps;
 
   pybind11::enum_<pda::Advection1d>(mParent, "Advection1d")
-    .value("PeriodicLinear", pda::Advection1d::PeriodicLinear);
+    .value("PeriodicLinear",
+	   pda::Advection1d::PeriodicLinear);
 
   pybind11::enum_<pda::DiffusionReaction1d>(mParent, "DiffusionReaction1d")
-    .value("ProblemA", pda::DiffusionReaction1d::ProblemA);
-
-  pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
-    .value("ProblemA", pda::DiffusionReaction2d::ProblemA)
-    .value("GrayScott", pda::DiffusionReaction2d::GrayScott);
+    .value("ProblemA",
+	   pda::DiffusionReaction1d::ProblemA);
 
   pybind11::enum_<pda::Euler1d>(mParent, "Euler1d")
-    .value("PeriodicSmooth", pda::Euler1d::PeriodicSmooth)
-    .value("Sod",	     pda::Euler1d::Sod)
-    .value("Lax",	     pda::Euler1d::Lax)
-    .value("ShuOsher",	     pda::Euler1d::ShuOsher);
+    .value("PeriodicSmooth",
+	   pda::Euler1d::PeriodicSmooth)
+    .value("Sod",
+	   pda::Euler1d::Sod)
+    .value("Lax",
+	   pda::Euler1d::Lax)
+    .value("ShuOsher",
+	   pda::Euler1d::ShuOsher);
+}
+
+void bind2dProblemEnums(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  pybind11::enum_<pda::AdvectionDiffusion2d>(mParent, "AdvectionDiffusion2d")
+    .value("Burgers",
+	   pda::AdvectionDiffusion2d::Burgers);
+
+  pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
+    .value("ProblemA",
+	   pda::DiffusionReaction2d::ProblemA)
+    .value("GrayScott",
+	   pda::DiffusionReaction2d::GrayScott);
 
   pybind11::enum_<pda::Euler2d>(mParent, "Euler2d")
-    .value("PeriodicSmooth", pda::Euler2d::PeriodicSmooth)
-    .value("KelvinHelmholtz", pda::Euler2d::KelvinHelmholtz)
-    .value("SedovFull",	     pda::Euler2d::SedovFull)
-    .value("SedovSymmetry",  pda::Euler2d::SedovSymmetry)
-    .value("Riemann",	     pda::Euler2d::Riemann)
-    .value("NormalShock",    pda::Euler2d::NormalShock)
-    .value("DoubleMachReflection", pda::Euler2d::DoubleMachReflection);
+    .value("PeriodicSmooth",
+	   pda::Euler2d::PeriodicSmooth)
+    .value("KelvinHelmholtz",
+	   pda::Euler2d::KelvinHelmholtz)
+    .value("SedovFull",
+	   pda::Euler2d::SedovFull)
+    .value("SedovSymmetry",
+	   pda::Euler2d::SedovSymmetry)
+    .value("Riemann",
+	   pda::Euler2d::Riemann)
+    .value("NormalShock",
+	   pda::Euler2d::NormalShock)
+    .value("DoubleMachReflection",
+	   pda::Euler2d::DoubleMachReflection);
 
   pybind11::enum_<pda::Swe2d>(mParent, "Swe2d")
     .value("SlipWall", pda::Swe2d::SlipWall);
+}
 
+void bind3dProblemEnums(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
   pybind11::enum_<pda::Euler3d>(mParent, "Euler3d")
     .value("PeriodicSmooth", pda::Euler3d::PeriodicSmooth)
     .value("SedovSymmetry",  pda::Euler3d::SedovSymmetry);
@@ -129,10 +180,13 @@ struct CcuMeshBinder
     meshClass.def("graph",	     &mesh_t::graph);
     meshClass.def("dx",		     &mesh_t::dx);
     meshClass.def("dy",		     &mesh_t::dy);
+    meshClass.def("dz",		     &mesh_t::dz);
     meshClass.def("dxInv",	     &mesh_t::dxInv);
     meshClass.def("dyInv",	     &mesh_t::dyInv);
+    meshClass.def("dzInv",	     &mesh_t::dzInv);
     meshClass.def("viewX",	     &mesh_t::viewX);
     meshClass.def("viewY",	     &mesh_t::viewY);
+    meshClass.def("viewZ",	     &mesh_t::viewZ);
 
     // function that constructs the object directly
     mParent.def("load_cellcentered_uniform_mesh",
@@ -140,172 +194,295 @@ struct CcuMeshBinder
 		pybind11::return_value_policy::take_ownership);
   }
 };
+
+// -----------------------
+// advection 1d
+// -----------------------
+template<class MeshType>
+void bindAdvection1d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impladvection1d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "Advection1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+
+  mParent.def("create_problem",
+	      &pda::create_linear_advection_1d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_linear_advection_1d_problem",
+	      &pda::create_linear_advection_1d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_linear_advection_1d_problem",
+	      &pda::create_linear_advection_1d_problem_ov2_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg("ic") = 1);
+}
+
+// -----------------------
+// diffusion-reaction 1d
+// -----------------------
+template<class MeshType>
+void bindDiffusionReaction1d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impldiffusionreaction1d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "DiffusionReaction1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+
+  mParent.def("create_problem",
+	      &pda::create_diffusion_reaction_1d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_diffusion_reaction_1d_problem_A",
+	      &pda::create_diffusion_reaction_1d_problem_A_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_diffusion_reaction_1d_problem_A",
+	      &pda::create_diffusion_reaction_1d_problem_A_ov2_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+}
+
+// -----------------------
+// euler 1d
+// -----------------------
+template<class MeshType>
+void bindEuler1d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impleuler1d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "Euler1dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+  prob.def("gamma", &py_problem_type::gamma);
+
+  mParent.def("create_problem",
+	      &pda::create_euler_1d_py_problem_default<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+}
+
+// -----------------------
+// advection-diffusion 2d
+// -----------------------
+template<class MeshType>
+void bindAdvectionDiffusion2d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impladvdiff2d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "AdvectionDiffusion2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+
+  mParent.def("create_problem",
+	      &pda::create_advecdiffusion2d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_burgers_2d_problem",
+	      &pda::create_burgers_2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
+}
+
+// -----------------------
+// diffusion-reaction 2d
+// -----------------------
+template<class MeshType>
+void bindDiffusionReaction2d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impldiffusionreaction2d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "DiffusionReaction2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+
+  mParent.def("create_problem",
+	      &pda::create_diffreac2d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_problem",
+	      &pda::create_diffreac2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+
+  mParent.def("create_diffusion_reaction_2d_problem_A",
+	      &pda::create_diffreac2d_problem_A_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
+  mParent.def("create_diffusion_reaction_2d_problem_A",
+	      &pda::create_diffreac2d_problem_A_ov2_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+
+  mParent.def("create_gray_scott_2d_problem",
+	      &pda::create_diffreac2d_problem_grayscott_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
+}
+
+// -----------------------
+// euler 2d
+// -----------------------
+template<class MeshType>
+void bindEuler2d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impleuler2d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "Euler2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+  prob.def("gamma", &py_problem_type::gamma);
+
+  mParent.def("create_problem",
+	      &pda::create_euler_2d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_problem",
+	      &pda::create_euler_2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+}
+
+// -----------------------
+// swe 2d
+// -----------------------
+template<class MeshType>
+void bindSwe2d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::implswe2d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "Swe2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+  prob.def("coriolis", &py_problem_type::coriolis);
+  prob.def("gravity",  &py_problem_type::gravity);
+
+  mParent.def("create_problem",
+	      &pda::create_swe2d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_slip_wall_swe_2d_problem",
+	      &pda::create_slip_wall_swe2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+}
+
+// -----------------------
+// euler 3d
+// -----------------------
+template<class MeshType>
+void bindEuler3d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impleuler3d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "Euler3dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+  prob.def("gamma", &py_problem_type::gamma);
+
+  mParent.def("create_problem",
+	      &pda::create_euler_3d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_problem",
+	      &pda::create_euler_3d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+}
+
 }}//end namespace pressiodemoappspy::impl
 
 //=======================================
 PYBIND11_MODULE(MODNAME, mTopLevel)
 //=======================================
 {
-  namespace pda = pressiodemoapps;
+  namespace pdapyimpl = pressiodemoappspy::impl;
 
-  pressiodemoappspy::impl::bindSchemeEnums(mTopLevel);
-  pressiodemoappspy::impl::bindProblemEnums(mTopLevel);
+  pdapyimpl::bindSchemeEnums(mTopLevel);
+  pdapyimpl::bind1dProblemEnums(mTopLevel);
+  pdapyimpl::bind2dProblemEnums(mTopLevel);
+  pdapyimpl::bind3dProblemEnums(mTopLevel);
 
   // ---------------------------------
   // cell-centered uniform (ccu) mesh
   // ---------------------------------
-  using mesh_binder_t = pressiodemoappspy::impl::CcuMeshBinder;
+  using mesh_binder_t = pdapyimpl::CcuMeshBinder;
   using ccumesh_t = typename mesh_binder_t::mesh_t;
   mesh_binder_t ccuMeshB;
   ccuMeshB(mTopLevel);
 
-  // -----------------------
-  // advection 1d
-  // -----------------------
-  using ad1d_t = decltype
-    (
-     pda::impladv::create_problem_for_py
-     (
-      std::declval<const ccumesh_t &>(),
-      std::declval<pda::Advection1d>(),
-      std::declval<pda::InviscidFluxReconstruction>()
-      )
-     );
-
-  pybind11::class_<ad1d_t> adv1dProb(mTopLevel, "Advection1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<ad1d_t>(adv1dProb);
-
-  mTopLevel.def("create_problem",
-		&pda::impladv::create_problem_for_py<ccumesh_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // diffusion-reaction 1d
-  // -----------------------
-  using diffreac_impl_1d_t = pda::impldiffreac::EigenDiffReac1dApp<ccumesh_t>;
-
-  using diffreac_1d_t = pda::PublicProblemMixinPy<diffreac_impl_1d_t>;
-  pybind11::class_<diffreac_1d_t> diffReac1dProb(mTopLevel, "DiffusionReaction1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<diffreac_1d_t>(diffReac1dProb);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyA<
-		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyB<
-		ccumesh_t, diffreac_1d_t, pda::DiffusionReaction1d>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyC1d<ccumesh_t, diffreac_1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // Euler 1d
-  // -----------------------
-  using euler_impl_1d_t = pda::implee1d::EigenEuler1dApp<ccumesh_t>;
-
-  using euler_1d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_1d_t>;
-  pybind11::class_<euler_1d_t> ee1dProb(mTopLevel, "Euler1dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_1d_t>(ee1dProb);
-  ee1dProb.def("gamma", &euler_1d_t::gamma);
-
-  mTopLevel.def("create_problem",
-		&pda::implee1d::create_problem_for_pyA<ccumesh_t, euler_1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::implee1d::create_problem_for_pyB<ccumesh_t, euler_1d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // diffusion-reaction 2d
-  // -----------------------
-  using diffreac_impl_2d_t = pda::impldiffreac::EigenDiffReac2dApp<ccumesh_t>;
-
-  using diffreac_2d_t = pda::PublicProblemMixinPy<diffreac_impl_2d_t>;
-  pybind11::class_<diffreac_2d_t> diffReac2dProb(mTopLevel, "DiffusionReaction2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<diffreac_2d_t>(diffReac2dProb);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyA<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyB<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyC2d<ccumesh_t, diffreac_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::impldiffreac::create_problem_for_pyD<
-		ccumesh_t, diffreac_2d_t, pda::DiffusionReaction2d>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // Euler 2d
-  // -----------------------
-  using euler_impl_2d_t = pda::ee::impl::EigenEuler2dApp<ccumesh_t>;
-
-  using euler_2d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_2d_t>;
-  pybind11::class_<euler_2d_t> ee2dProb(mTopLevel, "Euler2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_2d_t>(ee2dProb);
-  ee2dProb.def("gamma", &euler_2d_t::gamma);
-
-  mTopLevel.def("create_problem",
-		&pda::implee2d::create_problem_for_pyA<ccumesh_t, euler_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::implee2d::create_problem_for_pyB<ccumesh_t, euler_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // Swe 2d
-  // -----------------------
-  using swe_impl_2d_t = pda::implswe::EigenSwe2dApp<ccumesh_t>;
-
-  using swe_2d_t = pressiodemoapps::PublicProblemMixinPy<swe_impl_2d_t>;
-  pybind11::class_<swe_2d_t> swe2dProb(mTopLevel, "Swe2dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<swe_2d_t>(swe2dProb);
-  swe2dProb.def("coriolis", &swe_2d_t::coriolis);
-  swe2dProb.def("gravity", &swe_2d_t::gravity);
-
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyA<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyB<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::implswe2d::create_problem_for_pyC<ccumesh_t, swe_2d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  // -----------------------
-  // Euler 3d
-  // -----------------------
-  using euler_impl_3d_t = pda::ee::impl::EigenEuler3dApp<ccumesh_t>;
-
-  using euler_3d_t = pressiodemoapps::PublicProblemMixinPy<euler_impl_3d_t>;
-  pybind11::class_<euler_3d_t> ee3dProb(mTopLevel, "Euler3dProblem");
-  pressiodemoappspy::impl::bindCommonApiMethods<euler_3d_t>(ee3dProb);
-  ee3dProb.def("gamma", &euler_3d_t::gamma);
-
-  mTopLevel.def("create_problem",
-		&pda::implee3d::create_problem_for_pyA<ccumesh_t, euler_3d_t>,
-		pybind11::return_value_policy::take_ownership);
-
-  mTopLevel.def("create_problem",
-		&pda::implee3d::create_problem_for_pyB<ccumesh_t, euler_3d_t>,
-		pybind11::return_value_policy::take_ownership);
+  pdapyimpl::bindAdvection1d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindDiffusionReaction1d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindEuler1d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindAdvectionDiffusion2d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindDiffusionReaction2d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindEuler2d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindSwe2d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindEuler3d<ccumesh_t>(mTopLevel);
 
 }
 #endif

@@ -2,7 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EULER3D_IC_HPP_
 #define PRESSIODEMOAPPS_EULER3D_IC_HPP_
 
-namespace pressiodemoapps{ namespace ee{
+namespace pressiodemoapps{
+namespace impleuler3d{
 
 template<class state_type, class mesh_t, class scalar_type>
 void euler3dsmoothInitialCondition(state_type & state,
