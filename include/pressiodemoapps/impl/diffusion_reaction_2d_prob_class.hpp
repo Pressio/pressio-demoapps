@@ -178,19 +178,19 @@ protected:
 				   jacobian_type * J) const
   {
 
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp parallel
 {
 #endif
 
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
     ::pressiodemoapps::set_zero_omp(V);
 #else
     ::pressiodemoapps::set_zero(V);
 #endif
 
     if (J){
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
       ::pressiodemoapps::set_zero_omp(*J);
 #else
       ::pressiodemoapps::set_zero(*J);
@@ -217,7 +217,7 @@ protected:
       assert(nonZerosCountBeforeComputing == J->nonZeros());
     }
 
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 }//end omp parallel
 #endif
 
@@ -236,7 +236,7 @@ private:
 			 m_ghostRight, m_ghostBack);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
       for (int it=0; it<rowsBd.size(); ++it){
@@ -283,7 +283,7 @@ private:
     const auto diffDyInvSq  = m_probA_diffusionCoeff*dyInvSq;
 
     const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
     for (std::size_t it=0; it<rows.size(); ++it)
@@ -366,7 +366,7 @@ private:
     const auto diffDyInvSq  = m_probA_diffusionCoeff*dyInvSq;
 
     const auto & rows   = m_meshObj.graphRowsOfCellsAwayFromBd();
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
     for (std::size_t it=0; it<rows.size(); ++it)
@@ -420,7 +420,7 @@ private:
     const auto v_diffDyInvSq  = m_gs_diffusionCoeff_v*dyInvSq;
 
     const auto & graph  = m_meshObj.graph();
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
 
