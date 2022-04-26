@@ -7,7 +7,8 @@
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
 #include "./euler_compute_energy.hpp"
-#include "./adapter_mixins.hpp"
+#include "./adapter_cpp.hpp"
+#include "./adapter_py.hpp"
 
 namespace pressiodemoapps{
 
@@ -37,7 +38,7 @@ namespace pressiodemoapps{
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impleuler2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
   >
 RetType
 // bindings need unique nameing or we get error associated with overloads
@@ -60,7 +61,7 @@ RetType
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impleuler2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
   >
 RetType
 // bindings need unique nameing or we get error associated with overloads

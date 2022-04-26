@@ -6,7 +6,8 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
-#include "./adapter_mixins.hpp"
+#include "./adapter_cpp.hpp"
+#include "./adapter_py.hpp"
 
 namespace pressiodemoapps{
 
@@ -29,10 +30,11 @@ namespace pressiodemoapps{
 // ----------------------------------------------------------
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
 create_advecdiffusion2d_problem_default_for_py
 #else
 create_problem_eigen
@@ -72,10 +74,11 @@ create_problem_eigen
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
 create_burgers_2d_problem_ov1_for_py
 #else
 create_burgers_2d_problem_eigen

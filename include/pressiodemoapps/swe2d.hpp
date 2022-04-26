@@ -6,7 +6,8 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
-#include "./adapter_mixins.hpp"
+#include "./adapter_cpp.hpp"
+#include "./adapter_py.hpp"
 
 namespace pressiodemoapps{
 
@@ -30,7 +31,7 @@ namespace pressiodemoapps{
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<implswe2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
   >
 RetType
 // bindings need unique naming or we get error associated with overloads
@@ -66,7 +67,7 @@ RetType
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<implswe2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
   >
 RetType
 // bindings need unique naming or we get error associated with overloads

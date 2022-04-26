@@ -6,7 +6,8 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
-#include "./adapter_mixins.hpp"
+#include "./adapter_cpp.hpp"
+#include "./adapter_py.hpp"
 
 namespace pressiodemoapps{
 
@@ -77,7 +78,7 @@ namespace pressiodemoapps{
 // ----------------------------------------------------------
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 RetType
 // bindings need unique naming or we get error associated with overloads
@@ -113,7 +114,7 @@ create_problem_eigen
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 RetType create_diffreac2d_problem_ov1_for_py(const mesh_t & meshObj,
@@ -137,10 +138,11 @@ RetType create_problem_eigen(const mesh_t & meshObj,
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
   create_diffreac2d_problem_A_ov1_for_py
 #else
   create_diffusion_reaction_2d_problem_A_eigen
@@ -165,7 +167,7 @@ RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 RetType create_diffreac2d_problem_A_ov2_for_py(const mesh_t & meshObj,
 					       ViscousFluxReconstruction viscFluxRecEnum,
@@ -192,7 +194,7 @@ RetType create_diffreac2d_problem_A_ov2_for_py(const mesh_t & meshObj,
 template<
   class mesh_t,
   class SourceType,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 RetType create_diffusion_reaction_2d_problem_A_eigen(const mesh_t & meshObj,
 						     ViscousFluxReconstruction viscFluxRecEnum,
@@ -212,10 +214,11 @@ RetType create_diffusion_reaction_2d_problem_A_eigen(const mesh_t & meshObj,
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction2d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
   create_diffreac2d_problem_grayscott_ov1_for_py
 #else
   create_gray_scott_2d_problem_eigen
