@@ -610,11 +610,13 @@ private:
     std::array<scalar_type, numDofPerCell> bcCellJacFactorsDefault;
     std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveX;
     std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveY;
+    std::array<scalar_type, numDofPerCell> bcCellJacFactorsDiric;
     bcCellJacFactorsDefault.fill(static_cast<scalar_type>(1));
     bcCellJacFactorsReflectiveX.fill(static_cast<scalar_type>(1));
     bcCellJacFactorsReflectiveY.fill(static_cast<scalar_type>(1));
     bcCellJacFactorsReflectiveX[1] = static_cast<scalar_type>(-1);
     bcCellJacFactorsReflectiveY[2] = static_cast<scalar_type>(-1);
+    bcCellJacFactorsDiric.fill(static_cast<scalar_type>(0));
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -627,13 +629,15 @@ private:
 	FillStencilX(smPt, it, numDofPerCell);
 	auto bcTypeX = findCellBdType(smPt, xAxis);
 	const auto & factorsX = (bcTypeX == 1)
-	  ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
+	  ? bcCellJacFactorsReflectiveX :
+	    (bcTypeX == 2) ? bcCellJacFactorsDiric : bcCellJacFactorsDefault;
 	funcx(smPt, numDofPerCell, factorsX, bcTypeX);
 
 	FillStencilY(smPt, it, numDofPerCell);
 	auto bcTypeY = findCellBdType(smPt, yAxis);
 	const auto & factorsY = (bcTypeY == 1)
-	  ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
+	  ? bcCellJacFactorsReflectiveY :
+	    (bcTypeY == 2) ? bcCellJacFactorsDiric : bcCellJacFactorsDefault;
 	funcy(smPt, numDofPerCell, factorsY, bcTypeY);
       }
   }

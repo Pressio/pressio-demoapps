@@ -68,7 +68,8 @@ try:
     import create_problem, \
     create_linear_advection_1d_problem, \
     create_diffusion_reaction_1d_problem_A,\
-    create_burgers_2d_problem,\
+    create_periodic_burgers_2d_problem,\
+    create_dirichlet_burgers_2d_problem,\
     create_diffusion_reaction_2d_problem_A,\
     create_gray_scott_2d_problem,\
     create_slip_wall_swe_2d_problem
