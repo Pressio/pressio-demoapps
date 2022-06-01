@@ -104,16 +104,16 @@ Python synopsis
 
    meshObj = pda.load_cellcentered_uniform_mesh_eigen("path-to-mesh")
 
-   probId  = pda.Swe2d::SlipWall;
+   probId  = pda.Swe2d.SlipWall;
    scheme  = pda.InviscidFluxReconstruction.FirstOrder # or Weno3, Weno5
 
    # A. constructor for problem using default values
    problem = pda.create_problem(meshObj, probId, scheme)
 
    # B. constructor for problem specifying all coefficients
-   gravity  = ...
-   coriolis = ...
-   alpha    = ...
+   gravity  = # some value
+   coriolis = # some value
+   alpha    = # some value
    problem = pda.create_slip_wall_swe_2d_problem(meshObj, scheme, gravity, coriolis, alpha)
 
 
