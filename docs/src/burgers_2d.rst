@@ -1,20 +1,27 @@
 2D Burgers
 ==========
-TODO: Add Initial conditions and parameters. Fix code blocks.
 
 This problem solves the 2D Burgers equations. We consider a two-dimensional nonlinear viscous Burgers equations
 
 .. math::
 
-   \frac{\partial u}{\partial t} + u \nabla u = D \nabla^2 u
+   \frac{\partial u}{\partial t} + u \frac{\partial u}{\partial x} + v \frac{\partial u}{\partial y}  &= D \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} \right) 
+
+   \frac{\partial v}{\partial t} + u \frac{\partial v}{\partial x} + v \frac{\partial v}{\partial y}  &= D \left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} \right)
 
 with:
 
-* Domain is :math:`[0,1]^2` with periodic BC
-
-* initial condition is: :math:`u = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )`
+* Initial conditions : :math:`u = v = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )`
 
 * Default settings: :math:`\alpha = 0.5`, :math:`\delta = 0.15`, :math:`x_0=0, y_0=-0.2`, :math:`D = 0.00001`
+
+* Domain :math:`[0,1]^2` 
+
+We allow for two type of boundary conditions:
+
+- Homogeneous Dirichlet
+
+- Periodic
 
 Mesh
 ----
@@ -63,7 +70,7 @@ C++ synopsis
 
    // A. constructor for problem using default values
    {
-     const auto probId = pda::AdvectionDiffusion2d::Burgers;
+     const auto probId = pda::AdvectionDiffusion2d::BurgersDirichlet; // or pda::AdvectionDiffusion2d::BurgersPeriodic;
      auto problem = pda::create_problem_eigen(meshObj, probId, inviscidScheme, viscousScheme);
    }
 
@@ -92,16 +99,16 @@ Python synopsis
    viscousScheme  = pda.ViscousFluxReconstruction.FirstOrder;  # must be FirstOrder
 
    # A. constructor for problem using default values
-   probId  = pda.AdvectionDiffusion2d::Burgers
-   problem = pda.create_problem(meshObj, probId, scheme)
+   probId   = pda.AdvectionDiffusion2d.BurgersPeriodic # or pda.AdvectionDiffusion2d.BurgersDirichlet 
+   problem = pda.create_problem(meshObj, probId, inviscidScheme, viscousScheme)
 
    # B. setting custom coefficients
-   alpha  = /* something */
-   delta  = /* something */
-   D      = /* something */
-   x0     = /* something */
-   y0     = /* something */
-   problem = pda.create_burgers_2d_problem(meshObj, inviscidScheme, viscousScheme,
+   alpha  = # something 
+   delta  = # something 
+   D      = # something 
+   x0     = # something 
+   y0     = # something 
+   problem = pda.create_problem(meshObj, probId, inviscidScheme, viscousScheme,
                                            alpha, delta, D, x0, y0)
 
 
