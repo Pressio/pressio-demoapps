@@ -12,7 +12,9 @@ void burgers2d_gaussian(state_type & state,
 			sc_t x0,
 			sc_t y0)
 {
-  // numDofsPerCell = 1, so omitted below
+  // numDofsPerCell = 2 for Burgers2d
+  constexpr int numDofPerCell = 2;
+
   constexpr auto zero = static_cast<sc_t>(0);
   constexpr auto one  = static_cast<sc_t>(1);
   constexpr auto two  = static_cast<sc_t>(2);
@@ -23,12 +25,14 @@ void burgers2d_gaussian(state_type & state,
 
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
-      const auto ind  = i;
+      const auto ind = i*numDofPerCell;
+
       const auto dx   = x(i) - x0;
       const auto dy   = y(i) - y0;
       const auto dxSq = dx*dx;
       const auto dySq = dy*dy;
-      state(ind) = pulseMag * std::exp( -(dxSq+dySq)/pulseSpread );
+      state(ind)   = pulseMag * std::exp( -(dxSq+dySq)/pulseSpread );
+      state(ind+1) = pulseMag * std::exp( -(dxSq+dySq)/pulseSpread );
     }
 }
 

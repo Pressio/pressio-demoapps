@@ -67,6 +67,10 @@ public:
       oneDofPerCellImpl();
     }
 
+    else if (ndpc == 2){
+      twoDofPerCellImpl();
+    }
+
     else if (ndpc == 3){
       threeDofPerCellImpl();
     }
@@ -113,6 +117,75 @@ private:
 	break;
       }
     }
+  }
+
+  void twoDofPerCellImpl()
+  {
+    switch(m_memb.m_recEn)
+      {
+      case ::pressiodemoapps::ReconstructionScheme::FirstOrder:{
+	m_memb.m_uMinusHalfNeg(0) = m_memb.m_stencilVals(0);
+	m_memb.m_uMinusHalfPos(0) = m_memb.m_stencilVals(2);
+	m_memb.m_uPlusHalfNeg(0)  = m_memb.m_stencilVals(2);
+	m_memb.m_uPlusHalfPos(0)  = m_memb.m_stencilVals(4);
+
+	m_memb.m_uMinusHalfNeg(1) = m_memb.m_stencilVals(1);
+	m_memb.m_uMinusHalfPos(1) = m_memb.m_stencilVals(3);
+	m_memb.m_uPlusHalfNeg(1)  = m_memb.m_stencilVals(3);
+	m_memb.m_uPlusHalfPos(1)  = m_memb.m_stencilVals(5);
+	break;
+      }
+
+      case ::pressiodemoapps::ReconstructionScheme::Weno3:{
+	pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg(0),
+			       m_memb.m_uMinusHalfPos(0),
+			       m_memb.m_uPlusHalfNeg(0),
+			       m_memb.m_uPlusHalfPos(0),
+			       m_memb.m_stencilVals(0),
+			       m_memb.m_stencilVals(2),
+			       m_memb.m_stencilVals(4),
+			       m_memb.m_stencilVals(6),
+			       m_memb.m_stencilVals(8));
+
+	pressiodemoapps::weno3(m_memb.m_uMinusHalfNeg(1),
+			       m_memb.m_uMinusHalfPos(1),
+			       m_memb.m_uPlusHalfNeg(1),
+			       m_memb.m_uPlusHalfPos(1),
+			       m_memb.m_stencilVals(1),
+			       m_memb.m_stencilVals(3),
+			       m_memb.m_stencilVals(5),
+			       m_memb.m_stencilVals(7),
+			       m_memb.m_stencilVals(9));
+	break;
+      }
+
+      case ::pressiodemoapps::ReconstructionScheme::Weno5:{
+	pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg(0),
+			       m_memb.m_uMinusHalfPos(0),
+			       m_memb.m_uPlusHalfNeg(0),
+			       m_memb.m_uPlusHalfPos(0),
+			       m_memb.m_stencilVals(0),
+			       m_memb.m_stencilVals(2),
+			       m_memb.m_stencilVals(4),
+			       m_memb.m_stencilVals(6),
+			       m_memb.m_stencilVals(8),
+			       m_memb.m_stencilVals(10),
+			       m_memb.m_stencilVals(12));
+
+	pressiodemoapps::weno5(m_memb.m_uMinusHalfNeg(1),
+			       m_memb.m_uMinusHalfPos(1),
+			       m_memb.m_uPlusHalfNeg(1),
+			       m_memb.m_uPlusHalfPos(1),
+			       m_memb.m_stencilVals(1),
+			       m_memb.m_stencilVals(3),
+			       m_memb.m_stencilVals(5),
+			       m_memb.m_stencilVals(7),
+			       m_memb.m_stencilVals(9),
+			       m_memb.m_stencilVals(11),
+			       m_memb.m_stencilVals(13));
+	break;
+      }
+      }
   }
 
   void threeDofPerCellImpl()

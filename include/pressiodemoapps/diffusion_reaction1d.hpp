@@ -6,7 +6,8 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
-#include "./adapter_mixins.hpp"
+#include "./adapter_cpp.hpp"
+#include "./adapter_py.hpp"
 
 namespace pressiodemoapps{
 
@@ -63,11 +64,11 @@ namespace pressiodemoapps{
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType
-// bindings need unique naming or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
 create_diffusion_reaction_1d_problem_default_for_py
 #else
 create_problem_eigen
@@ -96,10 +97,11 @@ create_problem_eigen
 
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+// bindings need unique naming or we get error associated with overloads
 create_diffusion_reaction_1d_problem_A_ov1_for_py
 #else
 create_diffusion_reaction_1d_problem_A_eigen
@@ -123,7 +125,7 @@ create_diffusion_reaction_1d_problem_A_eigen
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<
   class mesh_t,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType create_diffusion_reaction_1d_problem_A_ov2_for_py(const mesh_t & meshObj,
 							  // source term is passed as a Python functor
@@ -148,7 +150,7 @@ RetType create_diffusion_reaction_1d_problem_A_ov2_for_py(const mesh_t & meshObj
 template<
   class mesh_t,
   class SourceType,
-  class RetType = PublicProblemMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
+  class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType create_diffusion_reaction_1d_problem_A_eigen(const mesh_t & meshObj,
 						     ViscousFluxReconstruction viscFluxRecEnum,

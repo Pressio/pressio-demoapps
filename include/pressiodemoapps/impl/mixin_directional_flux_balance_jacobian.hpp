@@ -308,26 +308,23 @@ public:
       }
     }
 
-    if (bc_type != 2)
-    {
-      if (l0 == -1){
-	for (int k=0; k<ndpc; ++k){
-	  for (int j=0; j<ndpc; ++j){
-	    m_J.coeffRef(rowIndex+k, col_i+j) += (factors[j]*JLNeg(k,j))*m_hInv;
-	  }
-	}
-      }
-
-      if (r0 == -1){
-	for (int k=0; k<ndpc; ++k){
-	  for (int j=0; j<ndpc; ++j){
-	    m_J.coeffRef(rowIndex+k, col_i+j) += (factors[j]*-JRPos(k,j))*m_hInv;
-	  }
+    if (l0 == -1){
+      for (int k=0; k<ndpc; ++k){
+	for (int j=0; j<ndpc; ++j){
+	  m_J.coeffRef(rowIndex+k, col_i+j) += (factors[j]*JLNeg(k,j))*m_hInv;
 	}
       }
     }
 
-  }// end operator()
+    if (r0 == -1){
+      for (int k=0; k<ndpc; ++k){
+	for (int j=0; j<ndpc; ++j){
+	  m_J.coeffRef(rowIndex+k, col_i+j) += (factors[j]*-JRPos(k,j))*m_hInv;
+	}
+      }
+    }
+
+  }
 };
 
 }}

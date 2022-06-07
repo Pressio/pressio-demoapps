@@ -68,9 +68,13 @@ valid = ["linadv1d_s3", \
          "swe2dslipwall_s5",\
          "swe2dslipwall_s7",\
          #
-         "burgers2d_s3", \
-         "burgers2d_s5", \
-         "burgers2d_s7", \
+         "burgers2d_periodic_s3", \
+         "burgers2d_periodic_s5", \
+         "burgers2d_periodic_s7", \
+         #
+         "burgers2d_dirichlet_s3", \
+         "burgers2d_dirichlet_s5", \
+         "burgers2d_dirichlet_s7", \
          #
          ##############
          ##### 3d #####
@@ -284,7 +288,17 @@ if __name__== "__main__":
             "--bounds", str(0.0), str(1.2), str(0.0), str(1.2), str(0.0), str(1.2))
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
-  elif ("burgers2d" in pName):
+  elif ("burgers2d_periodic" in pName):
+    s = int(pName[-1])
+    args = ("python3", fullMeshScript,
+            "-n", str(args.numCells[0]), str(args.numCells[1]),
+            "--outDir", args.outDir,
+            "--stencilSize", str(s),
+            "--bounds", str(-1.0), str(1.0), str(-1.0), str(1.0),
+            "--periodic", "x y")
+    popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
+
+  elif ("burgers2d_dirichlet" in pName):
     s = int(pName[-1])
     args = ("python3", fullMeshScript,
             "-n", str(args.numCells[0]), str(args.numCells[1]),

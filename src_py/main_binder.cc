@@ -115,8 +115,10 @@ void bind2dProblemEnums(pybind11::module & mParent)
   namespace pda = pressiodemoapps;
 
   pybind11::enum_<pda::AdvectionDiffusion2d>(mParent, "AdvectionDiffusion2d")
-    .value("Burgers",
-	   pda::AdvectionDiffusion2d::Burgers);
+    .value("BurgersPeriodic",
+	   pda::AdvectionDiffusion2d::BurgersPeriodic)
+    .value("BurgersDirichlet",
+	   pda::AdvectionDiffusion2d::BurgersDirichlet);
 
   pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
     .value("ProblemA",
@@ -309,8 +311,15 @@ void bindAdvectionDiffusion2d(pybind11::module & mParent)
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert());
-  mParent.def("create_burgers_2d_problem",
-	      &pda::create_burgers_2d_problem_ov1_for_py<MeshType, py_problem_type>,
+  mParent.def("create_periodic_burgers_2d_problem",
+	      &pda::create_periodic_burgers_2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
+  mParent.def("create_dirichlet_burgers_2d_problem",
+	      &pda::create_dirichlet_burgers_2d_problem_ov1_for_py<MeshType, py_problem_type>,
 	      pybind11::return_value_policy::take_ownership,
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
