@@ -21,7 +21,7 @@ This problem focuses on the following 2D reaction diffusion PDE:
 
   - :math:`u(x, y, t) = 4 \sin(4 \pi x y) \sin(\pi x (y-2/10))`
 
-* Domain is unit square :math:`[0,1]^2` with homogenous Dirichlet BC
+* Domain is unit square :math:`[0,1]^2` with homogeneous Dirichlet BC
 
 
 Mesh
