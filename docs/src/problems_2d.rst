@@ -5,7 +5,8 @@
     :maxdepth: 2
 
     diffusion_reaction_2d
-    burgers_2d
+    burgers_2d_dirichlet
+    burgers_2d_periodic
     grayscott_2d
     swe_2d
     euler_2d_smooth

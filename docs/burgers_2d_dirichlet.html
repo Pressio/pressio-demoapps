@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Gray Scott reaction-diffusion" href="grayscott_2d.html" /><link rel="prev" title="2D single-species reaction diffusion" href="diffusion_reaction_2d.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Burgers (Periodic BCs)" href="burgers_2d_periodic.html" /><link rel="prev" title="2D single-species reaction diffusion" href="diffusion_reaction_2d.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
-        <title>2D Burgers - pressio-demoapps documentation</title>
+        <title>2D Burgers (Dirichlet BCs) - pressio-demoapps documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -175,7 +175,8 @@
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">2D Burgers</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">2D Burgers (Dirichlet BCs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -226,22 +227,20 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="d-burgers">
-<h1>2D Burgers<a class="headerlink" href="#d-burgers" title="Permalink to this headline">¶</a></h1>
-<p>TODO: Add Initial conditions and parameters. Fix code blocks.</p>
-<p>This problem solves the 2D Burgers equations. We consider a two-dimensional nonlinear viscous Burgers equations</p>
+          <div class="section" id="d-burgers-dirichlet-bcs">
+<h1>2D Burgers (Dirichlet BCs)<a class="headerlink" href="#d-burgers-dirichlet-bcs" title="Permalink to this headline">¶</a></h1>
+<p>This problem solves the 2D nonlinear viscous Burgers equations</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[\frac{\partial u}{\partial t} + u \nabla u = D \nabla^2 u\]</div></div>
-<p>with:</p>
+\[ \begin{align}\begin{aligned}\frac{\partial u}{\partial t} + u \frac{\partial u}{\partial x} + v \frac{\partial u}{\partial y}  &amp;= D \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} \right)\\\frac{\partial v}{\partial t} + u \frac{\partial v}{\partial x} + v \frac{\partial v}{\partial y}  &amp;= D \left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} \right)\end{aligned}\end{align} \]</div></div>
 <ul class="simple">
-<li><p>Domain is <span class="math notranslate nohighlight">\([0,1]^2\)</span> with periodic BC</p></li>
-<li><p>initial condition is: <span class="math notranslate nohighlight">\(u = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )\)</span></p></li>
+<li><p>Domain is <span class="math notranslate nohighlight">\([-1,1]^2\)</span> with homogeneous Dirichlet BC</p></li>
+<li><p>Initial conditions are: <span class="math notranslate nohighlight">\(u = v = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )\)</span></p></li>
 <li><p>Default settings: <span class="math notranslate nohighlight">\(\alpha = 0.5\)</span>, <span class="math notranslate nohighlight">\(\delta = 0.15\)</span>, <span class="math notranslate nohighlight">\(x_0=0, y_0=-0.2\)</span>, <span class="math notranslate nohighlight">\(D = 0.00001\)</span></p></li>
 </ul>
 <div class="section" id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-        --problem burgers2d_s&lt;stencilSize&gt; -n Nx Ny --outDir &lt;destination-path&gt;
+        --problem burgers2d_dirichlet_s&lt;stencilSize&gt; -n Nx Ny --outDir &lt;destination-path&gt;
 </pre></div>
 </div>
 <p>where</p>
@@ -274,7 +273,7 @@ The script creates the directory if it does not exist.</p></li>
 
 <span class="c1">// A. constructor for problem using default values</span>
 <span class="p">{</span>
-  <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">AdvectionDiffusion2d</span><span class="o">::</span><span class="n">Burgers</span><span class="p">;</span>
+  <span class="k">const</span> <span class="k">auto</span> <span class="n">probId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">AdvectionDiffusion2d</span><span class="o">::</span><span class="n">BurgersDirichlet</span><span class="p">;</span>
   <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -286,8 +285,9 @@ The script creates the directory if it does not exist.</p></li>
   <span class="k">const</span> <span class="k">auto</span> <span class="n">D</span>      <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
   <span class="k">const</span> <span class="k">auto</span> <span class="n">x0</span>     <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
   <span class="k">const</span> <span class="k">auto</span> <span class="n">y0</span>     <span class="o">=</span> <span class="cm">/* something */</span><span class="p">;</span>
-  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_burgers_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">,</span>
-                                                      <span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+  <span class="k">auto</span> <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">::</span><span class="n">create_dirichlet_burgers_2d_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span>
+                                                                <span class="n">viscousScheme</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                                                                <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -302,17 +302,18 @@ The script creates the directory if it does not exist.</p></li>
 <span class="n">viscousScheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">ViscousFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span><span class="p">;</span>  <span class="c1"># must be FirstOrder</span>
 
 <span class="c1"># A. constructor for problem using default values</span>
-<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">AdvectionDiffusion2d</span><span class="p">::</span><span class="n">Burgers</span>
-<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">AdvectionDiffusion2d</span><span class="o">.</span><span class="n">BurgersPeriodic</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">)</span>
 
 <span class="c1"># B. setting custom coefficients</span>
-<span class="n">alpha</span>  <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
-<span class="n">delta</span>  <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
-<span class="n">D</span>      <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
-<span class="n">x0</span>     <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
-<span class="n">y0</span>     <span class="o">=</span> <span class="o">/*</span> <span class="n">something</span> <span class="o">*/</span>
-<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_burgers_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span> <span class="n">viscousScheme</span><span class="p">,</span>
-                                        <span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+<span class="n">alpha</span>  <span class="o">=</span> <span class="c1"># something</span>
+<span class="n">delta</span>  <span class="o">=</span> <span class="c1"># something</span>
+<span class="n">D</span>      <span class="o">=</span> <span class="c1"># something</span>
+<span class="n">x0</span>     <span class="o">=</span> <span class="c1"># something</span>
+<span class="n">y0</span>     <span class="o">=</span> <span class="c1"># something</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_dirichlet_burgers_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">inviscidScheme</span><span class="p">,</span>
+                                                  <span class="n">viscousScheme</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                                                  <span class="n">delta</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -331,12 +332,12 @@ flux reconstruction, which leads to a second-order scheme.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="grayscott_2d.html">
+          <a class="next-page" href="burgers_2d_periodic.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">2D Gray Scott reaction-diffusion</div>
+                <div class="title">2D Burgers (Periodic BCs)</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -355,10 +356,10 @@ flux reconstruction, which leads to a second-order scheme.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 30, 2022. |
+            Last updated on Jun 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
-            | <a class="muted-link" href="_sources/burgers_2d.rst.txt"
+            | <a class="muted-link" href="_sources/burgers_2d_dirichlet.rst.txt"
                rel="nofollow">
               Show Source
             </a>
@@ -378,7 +379,7 @@ flux reconstruction, which leads to a second-order scheme.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">2D Burgers</a><ul>
+<li><a class="reference internal" href="#">2D Burgers (Dirichlet BCs)</a><ul>
 <li><a class="reference internal" href="#mesh">Mesh</a></li>
 <li><a class="reference internal" href="#c-synopsis">C++ synopsis</a></li>
 <li><a class="reference internal" href="#python-synopsis">Python synopsis</a></li>

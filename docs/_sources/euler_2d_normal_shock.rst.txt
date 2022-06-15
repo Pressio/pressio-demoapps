@@ -20,7 +20,7 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 - Domain is :math:`[0, 2]\times[0, 1]` 
 
-- BC are homogenous Neumann at left (:math:`x=0`) and right (:math:`x=2`) boundaries, 
+- BC are homogeneous Neumann at left (:math:`x=0`) and right (:math:`x=2`) boundaries, 
    and reflective at top (:math:`y=1`) and bottom (:math:`y=0`) boundaries
 
 

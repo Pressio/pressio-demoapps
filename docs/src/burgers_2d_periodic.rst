@@ -1,5 +1,5 @@
-2D Burgers Periodic
-===================
+2D Burgers (Periodic BCs)
+=========================
 
 This problem solves the 2D nonlinear viscous Burgers equations
 
@@ -75,8 +75,9 @@ C++ synopsis
      const auto D      = /* something */;
      const auto x0     = /* something */;
      const auto y0     = /* something */;
-     auto problem = pda::create_periodic_burgers_2d_problem_eigen(meshObj, inviscidScheme, viscousScheme,
-                                                         alpha, delta, D, x0, y0)
+     auto problem = pda::create_periodic_burgers_2d_problem_eigen(meshObj, inviscidScheme, 
+                                                                  viscousScheme, alpha, 
+                                                                  delta, D, x0, y0)
    }
 
 Python synopsis
@@ -101,8 +102,9 @@ Python synopsis
    D      = # something 
    x0     = # something 
    y0     = # something
-   problem = pda.create_periodic_burgers_2d_problem(meshObj, inviscidScheme, viscousScheme,
-                                           alpha, delta, D, x0, y0)
+   problem = pda.create_periodic_burgers_2d_problem(meshObj, inviscidScheme, 
+                                                    viscousScheme, alpha, 
+                                                    delta, D, x0, y0)
 
 
 

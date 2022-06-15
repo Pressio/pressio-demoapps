@@ -175,7 +175,8 @@
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="burgers_2d.html">2D Burgers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d_dirichlet.html">2D Burgers Dirichlet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers Periodic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -312,16 +313,16 @@ The script creates the directory if it does not exist.</p></li>
 
 <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s2">"path-to-mesh"</span><span class="p">)</span>
 
-<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Swe2d</span><span class="p">::</span><span class="n">SlipWall</span><span class="p">;</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Swe2d</span><span class="o">.</span><span class="n">SlipWall</span><span class="p">;</span>
 <span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
 
 <span class="c1"># A. constructor for problem using default values</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
 
 <span class="c1"># B. constructor for problem specifying all coefficients</span>
-<span class="n">gravity</span>  <span class="o">=</span> <span class="o">...</span>
-<span class="n">coriolis</span> <span class="o">=</span> <span class="o">...</span>
-<span class="n">alpha</span>    <span class="o">=</span> <span class="o">...</span>
+<span class="n">gravity</span>  <span class="o">=</span> <span class="c1"># some value</span>
+<span class="n">coriolis</span> <span class="o">=</span> <span class="c1"># some value</span>
+<span class="n">alpha</span>    <span class="o">=</span> <span class="c1"># some value</span>
 <span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_slip_wall_swe_2d_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">coriolis</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -363,7 +364,7 @@ using default physical parameters, a <code class="docutils literal notranslate">
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Mar 30, 2022. |
+            Last updated on Jun 15, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/swe_2d.rst.txt"
