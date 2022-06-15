@@ -22,7 +22,7 @@ This problem focuses on the following 1D diffusion reaction PDE:
 
   - :math:`u(x, t) = 4 x^2\sin(\pi x) \cos(4 \pi x)`
 
-* Domain is :math:`[0,1]` with homogenous Dirichlet BC
+* Domain is :math:`[0,1]` with homogeneous Dirichlet BC
 
 
 Mesh
