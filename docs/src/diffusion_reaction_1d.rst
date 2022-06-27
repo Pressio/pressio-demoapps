@@ -108,7 +108,7 @@ Python synopsis
 
    # A. constructor for problem using default values
    probId  = pda.DiffusionReaction1d.ProblemA
-   problem = pda.create_problem(meshObj, probId, scheme)
+   problem = pda.create_problem(meshObj, probId)
 
    # B. setting custom coefficients
    myD, myK = 0.2, 0.001
@@ -117,5 +117,5 @@ Python synopsis
    # C. setting custom coefficients and custom source function
    myD, myK = 0.55, 0.002
    mysource = lambda x, time : np.sin(math.pi*x) *x*x * 4.*np.cos(4.*math.pi*x)
-   problem = pda.create_diffusion_reaction_1d_problem_A(meshObj, probId, scheme, \
+   problem = pda.create_diffusion_reaction_1d_problem_A(meshObj, probId, \
 							mysource, myD, myK)
