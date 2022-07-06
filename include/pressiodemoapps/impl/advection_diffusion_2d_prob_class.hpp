@@ -544,9 +544,9 @@ private:
       const auto smPt = graphRows[it];
 
       FillStencilX(smPt, it, m_numDofPerCell);
-      funcx(smPt, m_numDofPerCell, bdCellJacFactorsX, 2);
+      funcx(smPt, m_numDofPerCell, bdCellJacFactorsX);
       FillStencilY(smPt, it, m_numDofPerCell);
-      funcy(smPt, m_numDofPerCell, bdCellJacFactorsY, 2);
+      funcy(smPt, m_numDofPerCell, bdCellJacFactorsY);
 
       if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet)
 	{
@@ -748,7 +748,7 @@ private:
       FillStencilVeloX(smPt, it, m_numDofPerCell);
       funcVeloX(smPt, m_numDofPerCell);
       FillStencilJacX(smPt, it, m_numDofPerCell);
-      funcJacX(smPt, m_numDofPerCell, bdCellJacFactorsX, 1);
+      funcJacX(smPt, m_numDofPerCell, bdCellJacFactorsX);
       if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet){
 	constexpr auto two  = static_cast<scalar_type>(2);
 	const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
@@ -777,7 +777,7 @@ private:
       FillStencilVeloY(smPt, it, m_numDofPerCell);
       funcVeloY(smPt, m_numDofPerCell);
       FillStencilJacY(smPt, it, m_numDofPerCell);
-      funcJacY(smPt, m_numDofPerCell, bdCellJacFactorsY, 1);
+      funcJacY(smPt, m_numDofPerCell, bdCellJacFactorsY);
       if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet){
 	constexpr auto two  = static_cast<scalar_type>(2);
 	const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();

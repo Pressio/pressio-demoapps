@@ -266,8 +266,7 @@ public:
   template<class index_t, class FactorsType>
   void operator()(const index_t smPt,
 		  int ndpc,
-		  const FactorsType & factors,
-		  int bc_type)
+		  const FactorsType & factors)
   {
     Parent::operator()(smPt, ndpc);
 
