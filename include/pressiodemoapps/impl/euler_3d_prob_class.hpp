@@ -595,19 +595,19 @@ private:
       auto bcTypeX = findCellBdType(smPt, xAxis);
       const auto & factorsX = (bcTypeX == 1)
 	? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcx(smPt, numDofPerCell, factorsX, bcTypeX);
+      funcx(smPt, numDofPerCell, factorsX);
 
       FillStencilY(smPt, it, numDofPerCell);
       auto bcTypeY = findCellBdType(smPt, yAxis);
       const auto & factorsY = (bcTypeY == 1)
 	? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcy(smPt, numDofPerCell, factorsY, bcTypeY);
+      funcy(smPt, numDofPerCell, factorsY);
 
       FillStencilZ(smPt, it, numDofPerCell);
       auto bcTypeZ = findCellBdType(smPt, zAxis);
       const auto & factorsZ = (bcTypeZ == 1)
 	? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
-      funcz(smPt, numDofPerCell, factorsZ, bcTypeZ);
+      funcz(smPt, numDofPerCell, factorsZ);
     }
   }
 
@@ -785,21 +785,21 @@ private:
       FillStencilJacX(smPt, it, numDofPerCell);
       auto bcTypeX = findCellBdType(smPt, xAxis);
       const auto & factorsX = (bcTypeX == 1) ? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcJacX(smPt, numDofPerCell, factorsX, bcTypeX);
+      funcJacX(smPt, numDofPerCell, factorsX);
 
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
       auto bcTypeY = findCellBdType(smPt, yAxis);
       const auto & factorsY = (bcTypeY == 1) ? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcJacY(smPt, numDofPerCell, factorsY, bcTypeY);
+      funcJacY(smPt, numDofPerCell, factorsY);
 
       FillStencilVeloZ(smPt, it, numDofPerCell);
       funcVeloZ(smPt, numDofPerCell);
       FillStencilJacZ(smPt, it, numDofPerCell);
       auto bcTypeZ = findCellBdType(smPt, zAxis);
       const auto & factorsZ = (bcTypeZ == 1) ? bcCellJacFactorsReflectiveZ : bcCellJacFactorsDefault;
-      funcJacZ(smPt, numDofPerCell, factorsZ, bcTypeZ);
+      funcJacZ(smPt, numDofPerCell, factorsZ);
 
     }
   }

@@ -401,6 +401,14 @@ void bindEuler2d(pybind11::module & mParent)
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert());
+  mParent.def("create_cross_shock_problem",
+	      &pda::create_euler_2d_cross_shock_problem_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
 }
 
 // -----------------------

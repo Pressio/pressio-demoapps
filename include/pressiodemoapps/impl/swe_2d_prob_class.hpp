@@ -511,9 +511,9 @@ private:
       const auto smPt = graphRows[it];
 
       FillStencilX(smPt, it, numDofPerCell);
-      funcx(smPt, numDofPerCell, bdCellJacFactorsX, 1); //1 signals a reflective BC
+      funcx(smPt, numDofPerCell, bdCellJacFactorsX);
       FillStencilY(smPt, it, numDofPerCell);
-      funcy(smPt, numDofPerCell, bdCellJacFactorsY, 1); //1 signals a reflective BC
+      funcy(smPt, numDofPerCell, bdCellJacFactorsY);
       addForcingContributionToVelocityAndJacobian(U, V, J, smPt);
     }
   }
@@ -653,12 +653,12 @@ private:
       FillStencilVeloX(smPt, it, numDofPerCell);
       funcVeloX(smPt, numDofPerCell);
       FillStencilJacX(smPt, it, numDofPerCell);
-      funcJacX(smPt, numDofPerCell, bdCellJacFactorsX, 1);
+      funcJacX(smPt, numDofPerCell, bdCellJacFactorsX);
 
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
-      funcJacY(smPt, numDofPerCell, bdCellJacFactorsY, 1);
+      funcJacY(smPt, numDofPerCell, bdCellJacFactorsY);
 
       addForcingContributionToVelocityAndJacobian(U, V, J, smPt);
     }

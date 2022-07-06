@@ -10,6 +10,7 @@
 #include "euler_2d_ghost_filler_sedov2d_sym.hpp"
 #include "euler_2d_ghost_filler_normal_shock.hpp"
 #include "euler_2d_ghost_filler_double_mach_reflection.hpp"
+#include "euler_2d_ghost_filler_cross_shock.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -24,6 +25,11 @@
 
 namespace pressiodemoapps{
 namespace impleuler2d{
+
+// tags are used inside he public create function: create_problem_...()
+// to dispatch to the proper problem
+// so add new ones if a new problem is added
+struct TagCrossShock{};
 
 template<class MeshType>
 class EigenApp
@@ -58,6 +64,26 @@ public:
       m_recEn(recEnum),
       m_fluxEn(fluxEnum),
       m_icIdentifier(icIdentifier)
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+  EigenApp(TagCrossShock /*tag*/,
+	   const MeshType & meshObj,
+	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+	   int icIdentifier,
+	   scalar_type inletXVel,
+	   scalar_type bottomYVel,
+	   scalar_type density)
+    : m_meshObj(meshObj),
+      m_probEn(::pressiodemoapps::Euler2d::CrossShock),
+      m_recEn(recEnum),
+      m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
+      m_crossshock_params{density, inletXVel, bottomYVel}
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -285,6 +311,12 @@ private:
       case ::pressiodemoapps::Euler2d::testingonlyneumann:{
 	return initialState;
       }
+
+      case ::pressiodemoapps::Euler2d::CrossShock:{
+	crossShockIC(initialState, m_meshObj, m_gamma,
+		     m_crossshock_params[0], m_crossshock_params[1]);
+	return initialState;
+      }
       };
 
     return initialState;
@@ -356,6 +388,27 @@ private:
 	U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, U,
 			 currentTime, m_gamma, m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::CrossShock)
+    {
+      using ghost_filler_t  = CrossShock2dGhostFiller<
+	U_t, MeshType, ghost_container_type>;
+      ghost_filler_t ghF(stencilSize, U, m_gamma,
+			 m_crossshock_params[0],
+			 m_crossshock_params[1],
+			 m_crossshock_params[2],
+			 m_meshObj,
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
 
@@ -607,16 +660,7 @@ private:
 		       /* end args for reconstructor */
 		       );
 
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsDefault;
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveX;
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveY;
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsDiric;
-    bcCellJacFactorsDefault.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveX.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveY.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveX[1] = static_cast<scalar_type>(-1);
-    bcCellJacFactorsReflectiveY[2] = static_cast<scalar_type>(-1);
-    bcCellJacFactorsDiric.fill(static_cast<scalar_type>(0));
+    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -627,18 +671,12 @@ private:
 	const auto smPt = graphRows[it];
 
 	FillStencilX(smPt, it, numDofPerCell);
-	auto bcTypeX = findCellBdType(smPt, xAxis);
-	const auto & factorsX = (bcTypeX == 1)
-	  ? bcCellJacFactorsReflectiveX :
-	    (bcTypeX == 2) ? bcCellJacFactorsDiric : bcCellJacFactorsDefault;
-	funcx(smPt, numDofPerCell, factorsX, bcTypeX);
+	fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
+	funcx(smPt, numDofPerCell, bcCellJacFactors);
 
 	FillStencilY(smPt, it, numDofPerCell);
-	auto bcTypeY = findCellBdType(smPt, yAxis);
-	const auto & factorsY = (bcTypeY == 1)
-	  ? bcCellJacFactorsReflectiveY :
-	    (bcTypeY == 2) ? bcCellJacFactorsDiric : bcCellJacFactorsDefault;
-	funcy(smPt, numDofPerCell, factorsY, bcTypeY);
+	fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
+	funcy(smPt, numDofPerCell, bcCellJacFactors);
       }
   }
 
@@ -756,14 +794,7 @@ private:
 			      /* end args for reconstructor */
 			      );
 
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsDefault;
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveX;
-    std::array<scalar_type, numDofPerCell> bcCellJacFactorsReflectiveY;
-    bcCellJacFactorsDefault.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveX.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveY.fill(static_cast<scalar_type>(1));
-    bcCellJacFactorsReflectiveX[1] = static_cast<scalar_type>(-1);
-    bcCellJacFactorsReflectiveY[2] = static_cast<scalar_type>(-1);
+    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
 
     // ************
     // loop
@@ -772,23 +803,21 @@ private:
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
+    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
+    {
       const auto smPt = graphRows[it];
+
       FillStencilVeloX(smPt, it, numDofPerCell);
       funcVeloX(smPt, numDofPerCell);
       FillStencilJacX(smPt, it, numDofPerCell);
-      auto bcTypeX = findCellBdType(smPt, xAxis);
-      const auto & factorsX = (bcTypeX == 1)
-	? bcCellJacFactorsReflectiveX : bcCellJacFactorsDefault;
-      funcJacX(smPt, numDofPerCell, factorsX, bcTypeX);
+      fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
+      funcJacX(smPt, numDofPerCell, bcCellJacFactors);
 
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
-      auto bcTypeY = findCellBdType(smPt, yAxis);
-      const auto & factorsY = (bcTypeY == 1)
-	? bcCellJacFactorsReflectiveY : bcCellJacFactorsDefault;
-      funcJacY(smPt, numDofPerCell, factorsY, bcTypeY);
+      fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
+      funcJacY(smPt, numDofPerCell, bcCellJacFactors);
     }
   }
 
@@ -917,75 +946,115 @@ private:
     }
   }
 
-  int findCellBdType(index_t graphRow, int axis) const
+  void fillJacFactorsForCellBd(index_t graphRow, int axis,
+			       std::array<scalar_type, numDofPerCell> & facs) const
   {
-    // 0: Neumann
-    // 1: Reflective
-    // 2: Dirichlet
-    constexpr int neumann = 0;
-    constexpr int reflective = 1;
-    constexpr int dirichlet = 2;
-
-    // we need to change this, since we know which cells are what in advance
-    // we can just fit all this logic by having separate loops over the
-    // various boundary cells
 
     if (m_probEn == ::pressiodemoapps::Euler2d::SedovFull or
 	m_probEn == ::pressiodemoapps::Euler2d::Riemann or
 	m_probEn == ::pressiodemoapps::Euler2d::testingonlyneumann)
     {
       (void)graphRow;
-      return neumann;
+      // homog neumann
+      facs.fill(static_cast<scalar_type>(1));
+      return;
     }
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
     {
       if (axis == 1 && m_meshObj.hasBdLeft2d(graphRow)){
-	return reflective;
+	// relfective
+	facs = {1., -1., 1., 1.};
+	return;
       }
 
-      if (axis == 2 && m_meshObj.hasBdBack2d(graphRow)){
-	return reflective;
+      else if (axis == 2 && m_meshObj.hasBdBack2d(graphRow)){
+	// relfective
+	facs = {1., 1., -1., 1.};
+	return;
       }
 
-      return neumann;
+      else{
+	// homog neumann
+	facs = {1., 1., 1., 1.};
+	return;
+      }
     }
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::NormalShock)
     {
       if (axis == 2){
-	return reflective;
+	// relfective
+	facs = {1., 1., -1., 1.};
+	return;
       }
       else{
-	return neumann;
+	// homog neumann
+	facs = {1., 1., 1., 1.};
+	return;
       }
     }
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::DoubleMachReflection)
     {
-      const scalar_type one = static_cast<scalar_type>(1);
-      const scalar_type six = static_cast<scalar_type>(6);
-      const scalar_type wedgePosition = one/six;
+
+      const scalar_type wedgePosition = static_cast<scalar_type>(1)/static_cast<scalar_type>(6);
       const auto & x = m_meshObj.viewX();
       const auto cellGID = m_meshObj.graph()(graphRow, 0);
       const auto myX = x(cellGID);
 
       if (axis == 1){
-	return neumann;
+	// homog neumann
+	facs = {1., 1., 1., 1.};
+	return;
       }
 
       if (axis == 2 && m_meshObj.hasBdBack2d(graphRow) && (myX < wedgePosition)){
-	return neumann;
+	// homog neumann
+	facs = {1., 1., 1., 1.};
+	return;
       }
 
       if (axis == 2 && m_meshObj.hasBdBack2d(graphRow) && (myX >= wedgePosition)){
-	return reflective;
+	// reflective
+	facs = {1., 1., -1., 1.};
+	return;
       }
 
-      return dirichlet;
+      // dirichlet
+      facs = {0., 0., 0., 0.};
+      return;
     }
 
-    return 0;
+    else if (m_probEn == ::pressiodemoapps::Euler2d::CrossShock)
+    {
+      if (axis == 1 && m_meshObj.hasBdLeft2d(graphRow)){
+	// dirichlet
+	facs = {0., 0., 0., 0.};
+	return;
+      }
+
+      if (axis == 1 && m_meshObj.hasBdRight2d(graphRow)){
+	// homog neumann
+	facs = {1., 1., 1., 1.};
+	return;
+      }
+
+      if (axis == 2 && m_meshObj.hasBdBack2d(graphRow))
+      {
+	// dirichlet for u,v, and homog neumann for rho and rho*E
+	facs = {1., 0., 0., 1.};
+	return;
+      }
+
+      if (axis == 2 && m_meshObj.hasBdFront2d(graphRow))
+      {
+	// homog neumann for rho and rho*E
+	facs = {1., 1., 1., 1.};
+	return;
+      }
+
+    }
   }
 
   void allocateGhosts()
@@ -1053,6 +1122,9 @@ protected:
 
   const std::array<scalar_type, 2> normalX_{1, 0};
   const std::array<scalar_type, 2> normalY_{0, 1};
+
+  // for cross-shock problem: density, inletXVel, bottomYVel
+  std::array<scalar_type, 3> m_crossshock_params;
 };
 
 template<class MeshType> constexpr int EigenApp<MeshType>::numDofPerCell;
