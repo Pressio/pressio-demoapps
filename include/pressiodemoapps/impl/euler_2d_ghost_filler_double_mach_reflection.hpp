@@ -274,7 +274,7 @@ private:
   const scalar_type six = static_cast<scalar_type>(6);
   const scalar_type m_gammaMinusOneInv = one/(m_gamma-one);
   const scalar_type m_machShock{10};
-  const scalar_type m_angle{M_PI/6.};
+  const scalar_type m_angle = M_PI/6.;
   const scalar_type m_wedgePosition    = one/six;
   const scalar_type m_shockSpeed       = m_machShock/std::cos(m_angle);
   const scalar_type m_shockSlope       = std::tan(m_angle);

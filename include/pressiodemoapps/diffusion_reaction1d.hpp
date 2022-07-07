@@ -8,6 +8,7 @@
 #include "./schemes_info.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
+#include "mypi.hpp"
 
 namespace pressiodemoapps{
 
