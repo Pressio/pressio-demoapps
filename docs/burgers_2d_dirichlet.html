@@ -231,7 +231,7 @@
 <h1>2D Burgers (Dirichlet BCs)<a class="headerlink" href="#d-burgers-dirichlet-bcs" title="Permalink to this headline">¶</a></h1>
 <p>This problem solves the 2D nonlinear viscous Burgers equations</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\frac{\partial u}{\partial t} + u \frac{\partial u}{\partial x} + v \frac{\partial u}{\partial y}  &amp;= D \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} \right)\\\frac{\partial v}{\partial t} + u \frac{\partial v}{\partial x} + v \frac{\partial v}{\partial y}  &amp;= D \left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} \right)\end{aligned}\end{align} \]</div></div>
+\[ \begin{align}\begin{aligned}\frac{\partial u}{\partial t} + \frac{1}{2} \frac{\partial u^2}{\partial x} + \frac{1}{2} \frac{\partial u v}{\partial y}  &amp;= D \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} \right)\\\frac{\partial v}{\partial t} + \frac{1}{2} \frac{\partial u v}{\partial x} + \frac{1}{2} \frac{\partial v^2}{\partial y}  &amp;= D \left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} \right)\end{aligned}\end{align} \]</div></div>
 <ul class="simple">
 <li><p>Domain is <span class="math notranslate nohighlight">\([-1,1]^2\)</span> with homogeneous Dirichlet BC</p></li>
 <li><p>Initial conditions are: <span class="math notranslate nohighlight">\(u = v = \alpha \exp( - \frac{(x-x_0)^2+(y-y_0)^2}{\delta} )\)</span></p></li>
@@ -356,7 +356,7 @@ flux reconstruction, which leads to a second-order scheme.</p>
 
         <div class="related-information">
               Copyright &#169; 2021, National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS) |
-            Last updated on Jun 15, 2022. |
+            Last updated on Jul 08, 2022. |
           Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
           <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             | <a class="muted-link" href="_sources/burgers_2d_dirichlet.rst.txt"

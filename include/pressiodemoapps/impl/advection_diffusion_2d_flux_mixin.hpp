@@ -46,8 +46,7 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
-	    m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet)
+	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
 	{
 	  burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg,
 					       uMinusHalfPos, m_normal);
@@ -108,8 +107,7 @@ public:
       {
 
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
-	    m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet)
+	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
 	{
 	  burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacLNeg, m_fluxJacLPos,
 							uMinusHalfNeg, uMinusHalfPos,
@@ -178,8 +176,7 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
-	    m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet)
+	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
         {
 	  burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_normal);
 	  burgers_rusanov_flux_2d<scalar_type>(m_fluxR, uPlusHalfNeg, uPlusHalfPos, m_normal);

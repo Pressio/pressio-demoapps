@@ -15,8 +15,7 @@ namespace pressiodemoapps{
 // enums identifying the problems
 // ----------------------------------------------------------
 enum class AdvectionDiffusion2d{
-  BurgersPeriodic,
-  BurgersDirichlet
+  BurgersPeriodic
 };
 
 }//end namespace pressiodemoapps
@@ -47,8 +46,7 @@ create_problem_eigen
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  if (problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
-      problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersDirichlet)
+  if (problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
   {
     // default parameters
     const auto icPulseMagnitude = static_cast<scalar_t>(0.5);
@@ -57,26 +55,14 @@ create_problem_eigen
     const auto icCenterX = static_cast<scalar_t>(0.0);
     const auto icCenterY = static_cast<scalar_t>(-0.2);
 
-    if (problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic){
-      return RetType(impladvdiff2d::TagBurgersPeriodic{},
-		     meshObj,
-		     inviscidFluxRecEnum,
-		     InviscidFluxScheme::Rusanov,
-		     viscFluxRecEnum,
-		     icPulseMagnitude, icSpread, diffusion,
-		     icCenterX, icCenterY);
-    }
-    else{
-      return RetType(impladvdiff2d::TagBurgersDirichlet{},
-		     meshObj,
-		     inviscidFluxRecEnum,
-		     InviscidFluxScheme::Rusanov,
-		     viscFluxRecEnum,
-		     icPulseMagnitude, icSpread, diffusion,
-		     icCenterX, icCenterY);
-    }
+    return RetType(impladvdiff2d::TagBurgersPeriodic{},
+		   meshObj,
+		   inviscidFluxRecEnum,
+		   InviscidFluxScheme::Rusanov,
+		   viscFluxRecEnum,
+		   icPulseMagnitude, icSpread, diffusion,
+		   icCenterX, icCenterY);
   }
-
   else{
     throw std::runtime_error("advection-diffusion2d: invalid problem enum");
   }
@@ -108,36 +94,6 @@ create_periodic_burgers_2d_problem_eigen
 {
 
   return RetType(impladvdiff2d::TagBurgersPeriodic{},
-		 meshObj,
-		 inviscidFluxRecEnum,
-		 InviscidFluxScheme::Rusanov,
-		 viscFluxRecEnum,
-		 icPulseMagnitude, icSpread, diffusion,
-		 icCenterX, icCenterY);
-}
-
-template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
-  >
-RetType
-#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-// bindings need unique naming or we get error associated with overloads
-create_dirichlet_burgers_2d_problem_ov1_for_py
-#else
-create_dirichlet_burgers_2d_problem_eigen
-#endif
-(const mesh_t & meshObj,
- InviscidFluxReconstruction inviscidFluxRecEnum,
- ViscousFluxReconstruction viscFluxRecEnum,
- typename mesh_t::scalar_t icPulseMagnitude,
- typename mesh_t::scalar_t icSpread,
- typename mesh_t::scalar_t diffusion,
- typename mesh_t::scalar_t icCenterX,
- typename mesh_t::scalar_t icCenterY)
-{
-
-  return RetType(impladvdiff2d::TagBurgersDirichlet{},
 		 meshObj,
 		 inviscidFluxRecEnum,
 		 InviscidFluxScheme::Rusanov,

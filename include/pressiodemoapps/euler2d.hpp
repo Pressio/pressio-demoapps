@@ -80,6 +80,9 @@ RetType
 		 InviscidFluxScheme::Rusanov, icId);
 }
 
+
+// this crossshock one should really just be experimental
+// and it is not documented on the website
 template<
   class mesh_t,
   class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>

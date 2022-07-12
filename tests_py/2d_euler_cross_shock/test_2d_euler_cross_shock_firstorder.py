@@ -44,7 +44,7 @@ def test_run():
   dt = 0.001
   Nsteps = int(1./dt)
   pda.advanceSSP3(appObj, yn, dt, Nsteps, showProgress=True)
-  makePlot(meshPath, yn)
+  # makePlot(meshPath, yn)
 
   fomS = np.reshape(yn, (nx*ny, 4))
   rho = fomS[:,0]
