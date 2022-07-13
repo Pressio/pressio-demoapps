@@ -55,7 +55,7 @@ A C++ representative snippet showing our idea of a *problem*:
      auto problem         = pda::create_problem_eigen(meshObj, problemId, scheme);
    }
 
-Read more on `how to use a problem instance <howtouse>`_ or checkout what `the C++ public API <apicpp>`_.
+Read more on `how to use a problem instance <howtouse>`_ or checkout `the C++ public API <apicpp>`_.
 
 If you prefer, you can use directly Python:
 
@@ -68,7 +68,7 @@ If you prefer, you can use directly Python:
    problemId = pda.Euler1d.Sod
    problem   = pda.create_problem(mesh, problemId, scheme)
 
-Read more on `how to use a problem instance <howtouse>`_ or checkout what `the Python public API <apipy>`_.
+Read more on `how to use a problem instance <howtouse>`_ or checkout `the Python public API <apipy>`_.
 
 
 Core development principles
