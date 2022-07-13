@@ -5,3 +5,4 @@ venv
 _build/
 /docs/generated_docs
 /.pytest_cache
+/dist
