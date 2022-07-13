@@ -265,8 +265,8 @@ private:
 
     const auto & a = (i==0) ? m_x : (i==1) ? m_y : m_z;
     for (int i=0; i<m_stencilMeshSize; ++i){
-      auto & v1 = res.get<0>(res);
-      auto & v2 = res.get<1>(res);
+      auto & v1 = res.template get<0>(res);
+      auto & v2 = res.template get<1>(res);
       v1 = std::min(v1, a(i));
       v2 = std::max(v2, a(i));
     }

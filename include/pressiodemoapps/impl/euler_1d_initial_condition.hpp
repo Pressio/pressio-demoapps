@@ -2,6 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EE1D_IC_HPP_
 #define PRESSIODEMOAPPS_EE1D_IC_HPP_
 
+#include "../mypi.hpp"
+
 namespace pressiodemoapps{ namespace impleuler1d{
 
 template<class state_type, class mesh_t, class scalar_type>

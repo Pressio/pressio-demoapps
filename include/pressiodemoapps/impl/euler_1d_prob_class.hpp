@@ -553,15 +553,14 @@ private:
 		      );
 
     std::array<scalar_type, 3> bdCellJacFactors;
+    // both Sod and Lax have Neumann BC type
     bdCellJacFactors.fill(static_cast<scalar_type>(1));
 
     const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       FillStencilF(smPt, it, m_numDofPerCell);
-      // both Sod and Lax have Neumann BC type
-      const auto bcType = 0;
-      func(smPt, m_numDofPerCell, bdCellJacFactors, bcType);
+      func(smPt, m_numDofPerCell, bdCellJacFactors);
     }
   }
 
@@ -661,7 +660,7 @@ private:
       FillStencilVelo(smPt, it, m_numDofPerCell);
       funcVelo(smPt, m_numDofPerCell);
       FillStencilJac(smPt, it, m_numDofPerCell);
-      funcJac(smPt, m_numDofPerCell, bdCellJacFactors, 0);
+      funcJac(smPt, m_numDofPerCell, bdCellJacFactors);
     }
   }
 

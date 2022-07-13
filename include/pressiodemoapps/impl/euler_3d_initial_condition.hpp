@@ -2,6 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EULER3D_IC_HPP_
 #define PRESSIODEMOAPPS_EULER3D_IC_HPP_
 
+#include "../mypi.hpp"
+
 namespace pressiodemoapps{
 namespace impleuler3d{
 

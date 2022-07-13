@@ -2,6 +2,8 @@
 #ifndef PRESSIODEMOAPPS_EULER2D_IC_HPP_
 #define PRESSIODEMOAPPS_EULER2D_IC_HPP_
 
+#include "../mypi.hpp"
+
 namespace pressiodemoapps{
 namespace impleuler2d{
 
@@ -407,6 +409,36 @@ void doubleMachReflection2dIC(state_type & state,
       }
 
     }
+}
+
+template<class state_type, class mesh_t, class scalar_type>
+void crossShockIC(state_type & state,
+		  const mesh_t & meshObj,
+		  const scalar_type gamma,
+		  const scalar_type density,
+		  const scalar_type inletXVel)
+{
+
+  constexpr int numDofPerCell = 4;
+  constexpr auto one = static_cast<scalar_type>(1);
+  constexpr auto two = static_cast<scalar_type>(2);
+
+  const auto & x= meshObj.viewX();
+  const auto & y= meshObj.viewY();
+  const auto gammaMinusOneInv = one/(gamma - one);
+  constexpr auto x0 = one/two;
+  constexpr auto y0 = one/two;
+
+  std::array<scalar_type, numDofPerCell> prim = {density, inletXVel, 0., 1.};
+  for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
+    {
+      const auto ind = i*numDofPerCell;
+      state(ind)   = prim[0];
+      state(ind+1) = prim[0]*prim[1];
+      state(ind+2) = prim[0]*prim[2];
+      state(ind+3) = eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+    }
+
 }
 
 }}//end namespace

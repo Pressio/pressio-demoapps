@@ -2,10 +2,9 @@
 ===========
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     diffusion_reaction_2d
-    burgers_2d_dirichlet
     burgers_2d_periodic
     grayscott_2d
     swe_2d
