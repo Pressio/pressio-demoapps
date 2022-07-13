@@ -1,7 +1,0 @@
-.idea
-venv
-*__pycache__
-.vscode
-_build/
-/docs/generated_docs
-/.pytest_cache
