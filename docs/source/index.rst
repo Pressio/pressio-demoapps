@@ -45,7 +45,7 @@ A C++ representative snippet showing our idea of a *problem*:
 
 .. code-block:: c++
 
-   #import <pressiodemoapps/euler1d.hpp>
+   #include <pressiodemoapps/euler1d.hpp>
 
    int main(){
      namespace pda        = pressiodemoapps;
@@ -90,21 +90,31 @@ Core development principles
      This makes the code accessible to Python users, while maintaining the performance of the compiled C++ backend;
 
 
-Contents
-========
-
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     installation
     howtouse
     apicpp
     apipy
+    meshing
+
+.. toctree::
+    :caption: Problems
+    :maxdepth: 1
+    :hidden:
+
     your_first_problem
     problems_1d
     problems_2d
     problems_3d
-    meshing
+
+.. toctree::
+    :caption: Miscellanea
+    :maxdepth: 1
+    :hidden:
+
     GitHub Repo <https://github.com/Pressio/pressio-demoapps>
     Open an issue/feature req. <https://github.com/Pressio/pressio-demoapps/issues>
     license

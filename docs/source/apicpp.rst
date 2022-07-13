@@ -55,20 +55,20 @@ A *pressio-demoapps* C++ problem class meets the following API
 
    .. cpp:function:: void velocity(const state_type & y, scalar_type time, velocity_type & v)
 
-      Given a state :class:`y` and time :class:`time`,
-      evaluates the RHS of the system and overwrites :class:`v`.
+      Given a state :math:`y` and time :math:`time`,
+      evaluates the RHS of the system and overwrites :math:`v`.
 
    .. cpp:function:: void jacobian(const state_type & y, scalar_type time, jacobian_type & J)
 
-      Given a state :class:`y` and time :class:`time`,
-      evaluates the Jacobian of the RHS and stores it into :class:`J`.
+      Given a state :math:`y` and time :math:`time`,
+      evaluates the Jacobian of the RHS and stores it into :math:`J`.
 
    .. cpp:function:: void velocityAndJacobian(const state_type & y, \
 		                              scalar_type time, \
 					      velocity_type & v, \
 					      jacobian_type & J)
 
-      Given a state :class:`y` and time :class:`time`,
+      Given a state :math:`y` and time :math:`time`,
       evaluates the RHS and its Jacobian.
 
    .. cpp:function:: auto totalDofSampleMesh()
@@ -129,12 +129,12 @@ A *pressio-demoapps* C++ cell-centered mesh class meets the following API
 
       Returns the size of the stencil (connectivity) of this mesh object.
 
-   .. cpp:function:: index_t stencilMeshSize() const
+   .. cpp:function:: index_type stencilMeshSize() const
 
       Returns the number of *stencil* cells in the mesh.
       This corresponds to all cells where the state is defined.
 
-   .. cpp:function:: index_t sampleMeshSize() const
+   .. cpp:function:: index_type sampleMeshSize() const
 
       Returns the number of *sample* cells in the mesh.
       This corresponds to all cells where the velocity (or RHS) is defined.

@@ -15,7 +15,7 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
 
 - Initial conditions (primitive variables):
-    
+
   - a high pressure concentrated small spherical region of radius :math:`R = 3 \min(dx, dy)`
 
   - :math:`\left\{\begin{matrix}\rho =1, u = 0, v = 0, p = ((\gamma-1)0.851072)/(4 \pi R^3); & r\leq R \\ \rho =1, u = 0, v = 0, p = 2.5\cdot 10^{-5}; & r>R \end{matrix}\right.`
@@ -39,7 +39,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem sedov3dsym_s<stencilSize> -n Nx Ny Nz --outDir <destination-path>
 
-where 
+where
 
 - ``Nx, Ny, Nz`` is the number of cells you want along :math:`x`, :math:`y`, :math:`z` respectively
 
@@ -53,9 +53,9 @@ where
   When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
 
   - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
- 
+
   - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
-  
+
 
 
 C++ synopsis
@@ -65,14 +65,16 @@ C++ synopsis
 
    #include "pressiodemoapps/euler3d.hpp"
 
-   namespace pda = pressiodemoapps;
+   int main(){
+     namespace pda = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   const auto probId = pda::Euler3d::SedovSymmetry;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
-   auto state	     = problem.initialCondition();
+     const auto probId = pda::Euler3d::SedovSymmetry;
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     auto state	     = problem.initialCondition();
+   }
 
 Python synopsis
 ---------------

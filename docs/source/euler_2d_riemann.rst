@@ -51,11 +51,11 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem riemann2d_s<stencilSize> -n Nx Ny --outDir <destination-path>
 
-where 
+where
 
 - ``Nx, Ny`` is the number of cells you want along :math:`x` and :math:`y` respectively
 
-- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell
 
 - ``<destination-path>`` is where you want the mesh files to be generated.
   The script creates the directory if it does not exist.
@@ -66,9 +66,9 @@ where
   When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
 
   - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
- 
+
   - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
-  
+
   - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
@@ -79,14 +79,16 @@ C++ synopsis
 
    #include "pressiodemoapps/euler2d.hpp"
 
-   namespace pda     = pressiodemoapps;
+   int main(){
+     namespace pda     = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   const auto probId = pda::Euler2d::Riemann;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId]);
-   auto state	     = problem.initialCondition();
+     const auto probId = pda::Euler2d::Riemann;
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId]);
+     auto state	     = problem.initialCondition();
+   }
 
 Where the ``icId`` is an integer identifying the initial condition above.
 

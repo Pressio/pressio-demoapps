@@ -21,11 +21,12 @@
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named "sphinx.ext.*") or your custom ones.
 extensions = [
-        "sphinx.ext.autodoc",
-        "sphinx.ext.viewcode",
-        "sphinx.ext.intersphinx",
-        "sphinx_copybutton",
-        ]
+  "sphinx.ext.autodoc",
+  "sphinx.ext.viewcode",
+  "sphinx.ext.intersphinx",
+  "sphinx_copybutton",
+  "sphinx_design"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -34,6 +35,16 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
 source_suffix = ".rst"
+
+# Be strict about any broken references:
+nitpicky = True
+
+'''
+see this: https://techwriter.documatt.com/2021/sphinx-conf-py-tips.html
+ignore allows us to avoid things like:
+apipy.rst:20: WARNING: py:class reference target not found: numpy array
+'''
+nitpick_ignore = [('py:class', 'numpy array')]
 
 # The encoding of source files.
 #source_encoding = "utf-8-sig"
@@ -46,21 +57,16 @@ project = "pressio-demoapps"
 copyright = u"2021, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
 
 
-# # The default replacements for |version| and |release|, also used in various
-# # other places throughout the built documents.
-# #
-# # The short X.Y version.
-# def get_version():
-#     conf = {}
-#     exec(compile(open("../pressiodemoapps/__init__.py").read(), \
-#         "../pressiodemoapps/__init__.py",
-#         "exec"), conf)
-#     return conf["version"]
+# The default replacements for |version| and |release|, also used in various
+# other places throughout the built documents.
+def get_version():
+  with open("../../version.txt") as version_file:
+    return version_file.read().strip()
 
-# version = "0.2.0" #get_version()
+version = get_version()
 
 # The full version, including alpha/beta/rc tags.
-# release = version
+release = version
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -87,7 +93,9 @@ today_fmt = "%B %d, %Y"
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+pygments_style = "tango"
+pygments_dark_style = "monokai"
+
 
 
 # Options for HTML output
@@ -95,7 +103,20 @@ pygments_style = "sphinx"
 
 html_theme = "furo"
 
-html_theme_options = {}
+html_theme_options = {
+  "sidebar_hide_name": False,
+  "light_css_variables": {
+    "color-brand-primary": "#336790",  # blue
+    "color-brand-content": "#336790"
+  },
+  "dark_css_variables": {
+    #"color-brand-primary": "#E5B62F"  # yellow
+    #"color-brand-content": "#E5B62F",
+    "color-brand-primary": "#F39C12",  # orange
+    "color-brand-content": "#F39C12",
+  },
+}
+
 
 html_sidebars = {}
 
@@ -106,7 +127,7 @@ html_sidebars = {}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+html_title = project + "\n" + "v"+release
 
 # The name of an image file (within the static path) to place at the top of
 # the sidebar.

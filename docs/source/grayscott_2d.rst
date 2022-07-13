@@ -50,24 +50,26 @@ C++ synopsis
 
    #include "pressiodemoapps/diffusion_reaction2d.hpp"
 
-   namespace pda      = pressiodemoapps;
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
-   const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
+   int main(){
+     namespace pda      = pressiodemoapps;
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto scheme  = pda::ViscousFluxReconstruction::FirstOrder;
 
-   // A. constructor for problem using default values
-   {
-     const auto probId  = pda::DiffusionReaction2d::GrayScott;
-     auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
-   }
+     // A. constructor for problem using default values
+     {
+       const auto probId  = pda::DiffusionReaction2d::GrayScott;
+       auto problem = pda::create_problem_eigen(meshObj, probId, scheme);
+     }
 
-   // B. setting custom coefficients
-   {
-     using scalar_type = typename decltype(meshObj)::scalar_t;
-     const scalar_type Da  = /*some_value*/;
-     const scalar_type Db  = /*some_value*/;
-     const scalar_type F   = /*some_value*/;
-     const scalar_type K   = /*some_value*/;
-     auto problem      = pda::create_gray_scott_2d_problem(meshObj, scheme, Da, Db, F, K);
+     // B. setting custom coefficients
+     {
+       using scalar_type = typename decltype(meshObj)::scalar_t;
+       const scalar_type Da  = /*some_value*/;
+       const scalar_type Db  = /*some_value*/;
+       const scalar_type F   = /*some_value*/;
+       const scalar_type K   = /*some_value*/;
+       auto problem      = pda::create_gray_scott_2d_problem(meshObj, scheme, Da, Db, F, K);
+     }
    }
 
 
