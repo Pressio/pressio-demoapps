@@ -1,7 +1,8 @@
 
-set(testname eigen_burgers_homog_dirichlet_2d_jac_fd)
+set(testname eigen_euler_2d_cross_shock_jac_fd)
 set(exename  ${testname}_exe)
 
+configure_file(plot.py plot.py COPYONLY)
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/main.cc)
 
 add_test(NAME ${testname}

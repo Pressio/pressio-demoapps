@@ -1,9 +1,9 @@
 
-set(testname eigen_2d_burgers_homog_dirichlet_firstorder_explicit)
+set(testname eigen_2d_cross_shock_firstorder_explicit)
 set(exename  ${testname}_exe)
 
 configure_file(../compare.py compare.py COPYONLY)
-configure_file(gold.txt gold.txt COPYONLY)
+configure_file(rho_gold.txt rho_gold.txt COPYONLY)
 configure_file(../plot.py plot.py COPYONLY)
 
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)

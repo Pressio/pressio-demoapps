@@ -24,10 +24,10 @@ add_subdirectory(eigen_2d_gray_scott_jacobian_fd)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
 add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
+add_subdirectory(eigen_2d_euler_cross_shock_jacobian_fd)
 add_subdirectory(eigen_2d_swe_jacobian_fd_slip_wall)
 add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
 add_subdirectory(eigen_2d_burgers_periodic_jacobian_fd)
-add_subdirectory(eigen_2d_burgers_dirichlet_jacobian_fd)
 add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
 add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
 
@@ -71,9 +71,9 @@ add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 add_subdirectory(eigen_2d_burgers_periodic_explicit)
-add_subdirectory(eigen_2d_burgers_homog_dirichlet_explicit)
 add_subdirectory(eigen_2d_burgers_periodic_sample_mesh_test)
-add_subdirectory(eigen_2d_burgers_homog_dirichlet_sample_mesh_test)
+add_subdirectory(eigen_2d_euler_cross_shock_explicit)
+
 
 # ---------------------------------------------------------
 # 3d problems

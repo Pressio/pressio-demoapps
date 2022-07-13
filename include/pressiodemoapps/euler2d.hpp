@@ -23,6 +23,7 @@ enum class Euler2d{
   Riemann,
   NormalShock,
   DoubleMachReflection,
+  CrossShock,
   testingonlyneumann
 };
 }//end namespace pressiodemoapps
@@ -77,6 +78,32 @@ RetType
 {
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov, icId);
+}
+
+
+// this crossshock one should really just be experimental
+// and it is not documented on the website
+template<
+  class mesh_t,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
+  >
+RetType
+// bindings need unique nameing or we get error associated with overloads
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+  create_euler_2d_cross_shock_problem_for_py
+#else
+  create_cross_shock_problem_eigen
+#endif
+(const mesh_t & meshObj,
+ InviscidFluxReconstruction recEnum,
+ typename mesh_t::scalar_t density,
+ typename mesh_t::scalar_t inletXVel,
+ typename mesh_t::scalar_t bottomYVel)
+{
+  return RetType(impleuler2d::TagCrossShock{},
+		 meshObj, recEnum,
+		 InviscidFluxScheme::Rusanov, 1,
+		 inletXVel, bottomYVel, density);
 }
 
 }//end namespace pressiodemoapps

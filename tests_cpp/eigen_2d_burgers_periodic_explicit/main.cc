@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
   state_t state = appObj.initialCondition();
 
   const auto dt = 0.005;
-  const auto Nsteps = 6.0/dt;
-  FomObserver<state_t> Obs("burgers2d_solution.bin", 10);
+  const auto Nsteps = 10./dt;
+  FomObserver<state_t> Obs("burgers2d_solution.bin", 50);
 
   auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
   pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);

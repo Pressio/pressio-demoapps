@@ -116,9 +116,7 @@ void bind2dProblemEnums(pybind11::module & mParent)
 
   pybind11::enum_<pda::AdvectionDiffusion2d>(mParent, "AdvectionDiffusion2d")
     .value("BurgersPeriodic",
-	   pda::AdvectionDiffusion2d::BurgersPeriodic)
-    .value("BurgersDirichlet",
-	   pda::AdvectionDiffusion2d::BurgersDirichlet);
+	   pda::AdvectionDiffusion2d::BurgersPeriodic);
 
   pybind11::enum_<pda::DiffusionReaction2d>(mParent, "DiffusionReaction2d")
     .value("ProblemA",
@@ -318,13 +316,6 @@ void bindAdvectionDiffusion2d(pybind11::module & mParent)
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
-  mParent.def("create_dirichlet_burgers_2d_problem",
-	      &pda::create_dirichlet_burgers_2d_problem_ov1_for_py<MeshType, py_problem_type>,
-	      pybind11::return_value_policy::take_ownership,
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
 }
 
 // -----------------------
@@ -397,6 +388,14 @@ void bindEuler2d(pybind11::module & mParent)
   mParent.def("create_problem",
 	      &pda::create_euler_2d_problem_ov1_for_py<MeshType, py_problem_type>,
 	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_cross_shock_problem",
+	      &pda::create_euler_2d_cross_shock_problem_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),

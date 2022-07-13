@@ -2,7 +2,7 @@
 ===========
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     advection_1d
     diffusion_reaction_1d
