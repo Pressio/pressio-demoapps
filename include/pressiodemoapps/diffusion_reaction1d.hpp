@@ -153,14 +153,13 @@ template<
   class RetType = PublicProblemEigenMixinCpp<impldiffusionreaction1d::EigenApp<mesh_t>>
   >
 RetType create_diffusion_reaction_1d_problem_A_eigen(const mesh_t & meshObj,
-						     ViscousFluxReconstruction viscFluxRecEnum,
 						     SourceType sourceF,
 						     typename mesh_t::scalar_t diffusion,
 						     typename mesh_t::scalar_t reaction)
 {
   return RetType(impldiffusionreaction1d::TagProblemA{},
-		 meshObj, viscFluxRecEnum, sourceF,
-		 diffusion, reaction);
+		 meshObj, ViscousFluxReconstruction::FirstOrder,
+		 sourceF, diffusion, reaction);
 }
 #endif
 
