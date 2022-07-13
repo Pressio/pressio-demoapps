@@ -40,13 +40,13 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	   --problem sod1d_s<stencilSize> -n <N> --outDir <destination-path>
 
-where: 
+where:
 
 - ``N`` is the number of cells you want
 
-- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell
 
-- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+- ``<destination-path>``: full path to where you want the mesh files to be generated.
   The script creates the directory if it does not exist.
 
 
@@ -55,9 +55,9 @@ where:
   When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
 
   - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
- 
+
   - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
-  
+
   - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
@@ -68,13 +68,15 @@ C++ synopsis
 
    #include "pressiodemoapps/euler1d.hpp"
 
-   namespace pda = pressiodemoapps;
+   int main(){
+     namespace pda = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   const auto probId = pda::Euler1d::Sod;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     const auto probId = pda::Euler1d::Sod;
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+   }
 
 Python synopsis
 ---------------

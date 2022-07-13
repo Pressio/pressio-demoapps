@@ -16,41 +16,41 @@ Problem Class
 
       Constructs and returns an instance of the initial condition for the target problem.
 
-      :rtype: numpy.array
+      :rtype: numpy array
 
    .. py:method:: createVelocity()
 
       Constructs and returns an instance of the velocity.
 
-      :rtype: numpy.array
+      :rtype: numpy array
 
    .. py:method:: createApplyJacobianResult(operand)
 
-      Constructs and returns an instance of the action of the Jacobian applied to :class:`operand`.
+      Constructs and returns an instance of the action of the Jacobian applied to the `operand`.
       The result is constructed, and zeroed out before returning it.
 
-      :param numpy.array operand: rank-1 or rank-2 operand to apply the Jacobian to.
-      :rtype: numpy.array
+      :param numpy array operand: rank-1 or rank-2 operand to apply the Jacobian to.
+      :rtype: numpy array
 
 
    .. py:method:: velocity(y, time, v)
 
-      Given a state :class:`y` and time :class:`time`,
-      evaluates the RHS of the system and stores it into :class:`v`.
+      Given a state :math:`y` and time :math:`time`,
+      evaluates the RHS of the system and stores it into :math:`v`.
 
-      :param numpy.array y: state vector
+      :param numpy array y: state vector
       :param float time: evaluation time
-      :param numpy.array v: velocity to overwrite
+      :param numpy array v: velocity to overwrite
 
    .. py:method:: applyJacobian(y, operand, time, result)
 
-      Given a state :class:`y` and time :class:`time`,
-      this computes the action of the Jacobian applied to :class:`operand`.
+      Given a state :math:`y` and time :math:`time`,
+      this computes the action of the Jacobian applied to :math:`operand`.
 
-      :param numpy.array y: state vector
-      :param numpy.array operand: rank-1 or rank-2 operand to apply the Jacobian to.
+      :param numpy array y: state vector
+      :param numpy array operand: rank-1 or rank-2 operand to apply the Jacobian to.
       :param float time: evaluation time
-      :param numpy.array result: rank-1 or rank-2 operand to apply the Jacobian to.
+      :param numpy array result: rank-1 or rank-2 operand to apply the Jacobian to.
 
    .. py:method:: totalDofSampleMesh()
 
@@ -59,7 +59,7 @@ Problem Class
       When you have multiple dofs/cell (for example Euler equations),
       then the total # of dofs on sample mesh = # dofs/cell times the # of sample mesh cells.
 
-      :rtype: integer
+      :rtype: int
 
    .. py:method:: totalDofStencilMesh()
 
@@ -68,8 +68,7 @@ Problem Class
       When you have multiple dofs/cell (for example Euler equations),
       then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.
 
-      :rtype: integer
-
+      :rtype: int
 
 .. note::
    Note how the Python interface only supports the Jacobian **action**.
@@ -90,27 +89,27 @@ A *pressio-demoapps* Python cell-centered mesh class meets the following API
 
       Returns the dimensionality of this mesh: returns 1 for 1d problem, 2 for 2d, etc.
 
-      :rtype: integer
+      :rtype: int
 
    .. py:method:: stencilSize()
 
       Returns the size of the stencil (connectivity) of this mesh object.
 
-      :rtype: integer
+      :rtype: int
 
    .. py:method:: stencilMeshSize()
 
       Returns the number of *stencil* cells in the mesh.
       This corresponds to all cells where the state is defined.
 
-      :rtype: integer
+      :rtype: int
 
    .. py:method:: sampleMeshSize()
 
       Returns the number of *sample* cells in the mesh.
       This corresponds to all cells where the velocity (or RHS) is defined.
 
-      :rtype: integer
+      :rtype: int
 
    .. py:method:: dx()
 

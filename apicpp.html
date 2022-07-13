@@ -6,10 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Python API" href="apipy.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>C++ API - pressio-demoapps documentation</title>
+        <title>C++ API - pressio-demoapps v0.4.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -17,20 +18,26 @@
 
 <style>
   body {
-    --color-code-background: #eeffcc;
+    --color-code-background: #f8f8f8;
   --color-code-foreground: black;
+  --color-brand-primary: #336790;
+  --color-brand-content: #336790;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #F39C12;
+  --color-brand-content: #F39C12;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #F39C12;
+  --color-brand-content: #F39C12;
   
       }
     }
@@ -124,7 +131,8 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps  documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps
+v0.4.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +155,8 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps  documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps
+v0.4.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -160,12 +169,20 @@
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Problems</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
@@ -174,7 +191,7 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_shu_osher.html">1D Euler Shu-Osher</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
@@ -188,16 +205,14 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_double_mach.html">2D Euler Double Mach Reflection</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_smooth.html">3D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_sedov_symmetry.html">3D Euler Sedov (with symmetry)</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
 </ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">Miscellanea</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps/issues">Open an issue/feature req.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -297,21 +312,21 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type">
 <span id="_CPPv3N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="_CPPv2N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="Problem::velocity__state_typeCR.scalar_type.velocity_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
-evaluates the RHS of the system and overwrites <code class="xref py py-class docutils literal notranslate"><span class="pre">v</span></code>.</p>
+<dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
+evaluates the RHS of the system and overwrites <span class="math notranslate nohighlight">\(v\)</span>.</p>
 </dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type">
 <span id="_CPPv3N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="_CPPv2N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="Problem::jacobian__state_typeCR.scalar_type.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
-evaluates the Jacobian of the RHS and stores it into <code class="xref py py-class docutils literal notranslate"><span class="pre">J</span></code>.</p>
+<dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
+evaluates the Jacobian of the RHS and stores it into <span class="math notranslate nohighlight">\(J\)</span>.</p>
 </dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type">
 <span id="_CPPv3N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="_CPPv2N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="Problem::velocityAndJacobian__state_typeCR.scalar_type.velocity_typeR.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocityAndJacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Given a state <code class="xref py py-class docutils literal notranslate"><span class="pre">y</span></code> and time <code class="xref py py-class docutils literal notranslate"><span class="pre">time</span></code>,
+<dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
 evaluates the RHS and its Jacobian.</p>
 </dd></dl>
 
@@ -390,14 +405,14 @@ basically for all ordinals. Defaults to <code class="docutils literal notranslat
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh15stencilMeshSizeEv">
-<span id="_CPPv3NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="CellCenteredUniformMesh::stencilMeshSizeC"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stencilMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh15stencilMeshSizeEv" title="Permalink to this definition">#</a><br /></dt>
+<span id="_CPPv3NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh15stencilMeshSizeEv"></span><span id="CellCenteredUniformMesh::stencilMeshSizeC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh10index_typeE" title="CellCenteredUniformMesh::index_type"><span class="n"><span class="pre">index_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stencilMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh15stencilMeshSizeEv" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Returns the number of <em>stencil</em> cells in the mesh.
 This corresponds to all cells where the state is defined.</p>
 </dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv">
-<span id="_CPPv3NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="CellCenteredUniformMesh::sampleMeshSizeC"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sampleMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv" title="Permalink to this definition">#</a><br /></dt>
+<span id="_CPPv3NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="CellCenteredUniformMesh::sampleMeshSizeC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh10index_typeE" title="CellCenteredUniformMesh::index_type"><span class="n"><span class="pre">index_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sampleMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Returns the number of <em>sample</em> cells in the mesh.
 This corresponds to all cells where the velocity (or RHS) is defined.</p>
 </dd></dl>
@@ -529,5 +544,7 @@ The type of container returned by reference depends on the backend used.</p>
     <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

@@ -1,7 +1,7 @@
 1D Linear Advection
 ===================
 
-This problem solves the *1D linear advection* 
+This problem solves the *1D linear advection*
 
 .. math::
    \frac{\partial \phi}{\partial t} + a \frac{\partial \phi}{\partial x} = 0
@@ -21,13 +21,13 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	  --problem linadv1d_s<stencilSize> -n <N> --outDir <destination-path>
 
-where:  
+where:
 
-- ``N`` is the number of cells you want 
+- ``N`` is the number of cells you want
 
-- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell 
+- ``<stencilSize> = 3 or 5 or 7``: defines the neighboring connectivity of each cell
 
-- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+- ``<destination-path>``: full path to where you want the mesh files to be generated.
   The script creates the directory if it does not exist.
 
 
@@ -36,9 +36,9 @@ where:
   When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
 
   - ``InviscidFluxReconstruction::FirstOder`` requires ``<stencilSize> >= 3``
- 
+
   - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
-  
+
   - ``InviscidFluxReconstruction::Weno5`` requires ``<stencilSize> >= 7``
 
 
@@ -50,18 +50,20 @@ C++ synopsis
 
    #include "pressiodemoapps/advection1d.hpp"
 
-   namespace pda = pressiodemoapps;
+   int main(){
+     namespace pda = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   // 1. using default velocity
-   const auto probId = pda::Advection1d::PeriodicLinear;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     // 1. using default velocity
+     const auto probId = pda::Advection1d::PeriodicLinear;
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
 
-   // 2. specify a custom velocity
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
-   auto problem      = pda::create_linear_advection_1d_problem_eigen(meshObj, scheme, /*vel*);
+     // 2. specify a custom velocity
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOder; //or Weno3, Weno5
+     auto problem      = pda::create_linear_advection_1d_problem_eigen(meshObj, scheme, /*vel*);
+   }
 
 
 Python synopsis

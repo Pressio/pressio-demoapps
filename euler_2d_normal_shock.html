@@ -6,10 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Euler Double Mach Reflection" href="euler_2d_double_mach.html" /><link rel="prev" title="2D Euler Riemann" href="euler_2d_riemann.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>2D Euler Normal Shock - pressio-demoapps documentation</title>
+        <title>2D Euler Normal Shock - pressio-demoapps v0.4.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -17,20 +18,26 @@
 
 <style>
   body {
-    --color-code-background: #eeffcc;
+    --color-code-background: #f8f8f8;
   --color-code-foreground: black;
+  --color-brand-primary: #336790;
+  --color-brand-content: #336790;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #F39C12;
+  --color-brand-content: #F39C12;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #F39C12;
+  --color-brand-content: #F39C12;
   
       }
     }
@@ -124,7 +131,8 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">pressio-demoapps  documentation</div></a>
+      <a href="index.html"><div class="brand">pressio-demoapps
+v0.4.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +155,8 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">pressio-demoapps  documentation</span>
+  <span class="sidebar-brand-text">pressio-demoapps
+v0.4.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -155,17 +164,25 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Problems</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_1d.html">1d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="advection_1d.html">1D Linear Advection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_1d.html">1D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_smooth.html">1D Euler Smooth</a></li>
@@ -174,7 +191,7 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_shu_osher.html">1D Euler Shu-Osher</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
@@ -188,16 +205,14 @@
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_double_mach.html">2D Euler Double Mach Reflection</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="problems_3d.html">3d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_smooth.html">3D Euler Smooth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_3d_sedov_symmetry.html">3D Euler Sedov (with symmetry)</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="meshing.html">Meshing Capability</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="meshfull.html">Full mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="meshsample.html">Sample Mesh Capabilty</a></li>
 </ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">Miscellanea</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Pressio/pressio-demoapps/issues">Open an issue/feature req.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -283,14 +298,16 @@ The script creates the directory if it does not exist.</p></li>
 <h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this heading">#</a></h2>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressiodemoapps/euler2d.hpp&quot;</span><span class="cp"></span>
 
-<span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(){</span><span class="w"></span>
+<span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;path-to-mesh&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;path-to-mesh&quot;</span><span class="p">);</span><span class="w"></span>
 
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">probId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler2d</span><span class="o">::</span><span class="n">NormalShock</span><span class="p">;</span><span class="w"></span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span><span class="w"> </span><span class="c1">//or Weno3 or Weno5</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">);</span><span class="w"></span>
-<span class="k">auto</span><span class="w"> </span><span class="n">state</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">probId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler2d</span><span class="o">::</span><span class="n">NormalShock</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span><span class="w"> </span><span class="c1">//or Weno3 or Weno5</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">state</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -390,6 +407,7 @@ The script creates the directory if it does not exist.</p></li>
     <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
+    <script src="_static/design-tabs.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

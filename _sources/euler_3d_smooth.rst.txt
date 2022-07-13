@@ -31,7 +31,7 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 - Typically, integration is performed for :math:`t \in (0, 2)`
 
 - The problem is adopted from `this paper <https://www.sciencedirect.com/science/article/pii/S0021999117307830>`_:
-  
+
   - in the original paper, they used :math:`v = -0.5`, while we use :math:`v = 1`
 
 
@@ -46,13 +46,13 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
            --problem euler3dsmooth_s<stencilSize> -n Nx Ny Nz --outDir <destination-path>
 
-where 
+where
 
 - ``Nx, Ny, Nz`` is the number of cells you want along :math:`x`, :math:`y`, :math:`z` respectively
 
-- ``<stencilSize> = 3 or 5``: defines the neighboring connectivity of each cell 
+- ``<stencilSize> = 3 or 5``: defines the neighboring connectivity of each cell
 
-- ``<destination-path>``: full path to where you want the mesh files to be generated. 
+- ``<destination-path>``: full path to where you want the mesh files to be generated.
   The script creates the directory if it does not exist.
 
 
@@ -61,7 +61,7 @@ where
   When you set the ``<stencilSize>``, keep in mind the following constraints (more on this below):
 
   - ``InviscidFluxReconstruction::FirstOrder`` requires ``<stencilSize> >= 3``
- 
+
   - ``InviscidFluxReconstruction::Weno3`` requires ``<stencilSize> >= 5``
 
 
@@ -72,14 +72,16 @@ C++ synopsis
 
    #include "pressiodemoapps/euler3d.hpp"
 
-   namespace pda = pressiodemoapps;
+   int main(){
+     namespace pda = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   const auto probId = pda::Euler3d::PeriodicSmooth;
-   const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3
-   auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
-   auto state	     = problem.initialCondition();
+     const auto probId = pda::Euler3d::PeriodicSmooth;
+     const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme);
+     auto state	     = problem.initialCondition();
+   }
 
 Python synopsis
 ---------------

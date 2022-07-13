@@ -33,7 +33,7 @@ Mesh
    python3 pressio-demoapps/meshing_scripts/create_full_mesh_for.py \
 	  --problem diffreac1d -n <N> --outDir <destination-path>
 
-where: 
+where:
 
 - ``N`` is the number of cells you want
 
@@ -50,7 +50,7 @@ Notes:
    Note also that the stencil cannot be (yet) set because
    the implementation currently only supports a thee-point stencil
    that allows a first order viscous flux reconstruction,
-   yielding a second-order scheme. We might relax this in 
+   yielding a second-order scheme. We might relax this in
    the future if additional scheme are added.
 
 
@@ -61,39 +61,41 @@ C++ synopsis
 
    #include "pressiodemoapps/diffusion_reaction1d.hpp"
 
-   namespace pda      = pressiodemoapps;
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+   int main(){
+     namespace pda      = pressiodemoapps;
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   // A. constructor for problem using default values
-   {
-     const auto probId  = pda::DiffusionReaction1d::ProblemA;
-     auto problem = pda::create_problem_eigen(meshObj, probId);
-   }
-
-   // B. setting custom coefficients
-   {
-     using scalar_type = typename decltype(meshObj)::scalar_t;
-     const auto diffCoeff = static_cast<scalar_type(0.5);
-     const auto reacCoeff = static_cast<scalar_type(0.2);
-     auto problem = pda::create_diffusion_reaction_1d_problem_A_eigen(meshObj, diffCoeff, reacCoeff);
-   }
-
-   // C. setting custom coefficients and custom source function
-   {
-     using scalar_type = typename decltype(meshObj)::scalar_t;
-     const auto diffCoeff = static_cast<scalar_type(0.5);
-     const auto reacCoeff = static_cast<scalar_type(0.2);
-
-     auto mySource = [](const scalar_type & x,
-			const scalar_type & t,
-			scalar_type & result)
+     // A. constructor for problem using default values
      {
-       // x, t are the location and time where the source must be evaluated
-       result = /* do whatever you want */;
-     };
+       const auto probId  = pda::DiffusionReaction1d::ProblemA;
+       auto problem = pda::create_problem_eigen(meshObj, probId);
+     }
 
-     auto problem = pda::create_diffusion_reaction_1d_problem_A_eigen(meshObj, mySource,
-								      diffCoeff, reacCoeff);
+     // B. setting custom coefficients
+     {
+       using scalar_type = typename decltype(meshObj)::scalar_t;
+       const auto diffCoeff = static_cast<scalar_type(0.5);
+       const auto reacCoeff = static_cast<scalar_type(0.2);
+       auto problem = pda::create_diffusion_reaction_1d_problem_A_eigen(meshObj, diffCoeff, reacCoeff);
+     }
+
+     // C. setting custom coefficients and custom source function
+     {
+       using scalar_type = typename decltype(meshObj)::scalar_t;
+       const auto diffCoeff = static_cast<scalar_type(0.5);
+       const auto reacCoeff = static_cast<scalar_type(0.2);
+
+       auto mySource = [](const scalar_type & x,
+			  const scalar_type & t,
+			  scalar_type & result)
+       {
+	 // x, t are the location and time where the source must be evaluated
+	 result = /* do whatever you want */;
+       };
+
+       auto problem = pda::create_diffusion_reaction_1d_problem_A_eigen(meshObj, mySource,
+									diffCoeff, reacCoeff);
+     }
    }
 
 

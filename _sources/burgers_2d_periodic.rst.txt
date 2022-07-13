@@ -53,31 +53,33 @@ C++ synopsis
 .. code-block:: c++
 
    #include "pressiodemoapps/advection_diffusion2d.hpp"
-   // ...
-   namespace pda = pressiodemoapps;
 
-   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
+   int main(){
+     namespace pda = pressiodemoapps;
 
-   const auto inviscidScheme = pda::InviscidFluxReconstruction::FirstOrder; // or Weno3, Weno5
-   const auto viscousScheme  = pda::ViscousFluxReconstruction::FirstOrder;  // must be FirstOrder
+     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
-   // A. constructor for problem using default values
-   {
-     const auto probId = pda::AdvectionDiffusion2d::BurgersPeriodic;
-     auto problem = pda::create_problem_eigen(meshObj, probId, inviscidScheme, viscousScheme);
-   }
+     const auto inviscidScheme = pda::InviscidFluxReconstruction::FirstOrder; // or Weno3, Weno5
+     const auto viscousScheme  = pda::ViscousFluxReconstruction::FirstOrder;  // must be FirstOrder
 
-   // B. setting custom coefficients
-   {
-     using scalar_type = typename decltype(meshObj)::scalar_t;
-     const auto alpha  = /* something */;
-     const auto delta  = /* something */;
-     const auto D      = /* something */;
-     const auto x0     = /* something */;
-     const auto y0     = /* something */;
-     auto problem = pda::create_periodic_burgers_2d_problem_eigen(meshObj, inviscidScheme,
-                                                                  viscousScheme, alpha,
-                                                                  delta, D, x0, y0)
+     // A. constructor for problem using default values
+     {
+       const auto probId = pda::AdvectionDiffusion2d::BurgersPeriodic;
+       auto problem = pda::create_problem_eigen(meshObj, probId, inviscidScheme, viscousScheme);
+     }
+
+     // B. setting custom coefficients
+     {
+       using scalar_type = typename decltype(meshObj)::scalar_t;
+       const auto alpha  = /* something */;
+       const auto delta  = /* something */;
+       const auto D      = /* something */;
+       const auto x0     = /* something */;
+       const auto y0     = /* something */;
+       auto problem = pda::create_periodic_burgers_2d_problem_eigen(meshObj, inviscidScheme,
+								    viscousScheme, alpha,
+								    delta, D, x0, y0)
+     }
    }
 
 Python synopsis
