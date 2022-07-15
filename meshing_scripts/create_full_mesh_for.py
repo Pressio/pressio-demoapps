@@ -182,7 +182,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(3),
             "--bounds", str(-1.25), str(1.25), str(-1.25), str(1.25),
-            "--periodic", "x y")
+            "--periodic", "x", "y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler2dsmooth" in pName):
@@ -192,7 +192,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.), str(1.0), str(-1.0), str(1.0),
-            "--periodic", "x y")
+            "--periodic", "x", "y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("euler2dKelvinHelmholtz" in pName):
@@ -202,7 +202,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-5.0), str(5.0), str(-5.0), str(5.0),
-            "--periodic", "x y")
+            "--periodic", "x", "y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("normalshock2d" in pName):
@@ -269,7 +269,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0), str(-1.0), str(1.0), str(-1.0), str(1.0),
-            "--periodic", "x y z")
+            "--periodic", "x", "y", "z")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   elif ("sedov3dsym" in pName):
@@ -291,7 +291,7 @@ if __name__== "__main__":
             "--outDir", args.outDir,
             "--stencilSize", str(s),
             "--bounds", str(-1.0), str(1.0), str(-1.0), str(1.0),
-            "--periodic", "x y")
+            "--periodic", "x", "y")
     popen  = subprocess.Popen(args, stdout=subprocess.PIPE); popen.wait()
 
   else:
