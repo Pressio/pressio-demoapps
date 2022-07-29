@@ -20,6 +20,10 @@ A *pressio-demoapps* C++ problem class meets the following API
 
       The scalar type: this is by default ``double``.
 
+   .. cpp:type:: independent_variable_type
+
+      This represents "time" and is the same as the ``scalar_type``.
+
    .. cpp:type:: state_type
 
       Data structure type storing the state: this depends on which specific implementation
@@ -27,12 +31,12 @@ A *pressio-demoapps* C++ problem class meets the following API
       (see `Supported Backends And Types`_ for more details about backends and corresponding types).
       For example, if you use ``create_problem_eigen``, the ``state_type`` will be an Eigen vector.
 
-   .. cpp:type:: velocity_type
+   .. cpp:type:: right_hand_side_type
 
-      Data structure type to store the velocity (or RHS): this depends on which specific implementation
+      Data structure type to store the RHS: this depends on which specific implementation
       you use when you instantiate the problem using the ``create_problem_<>`` API
       (see `Supported Backends And Types`_ for more details about backends and corresponding types).
-      For example, if you use ``create_problem_eigen``, the ``velocity_type`` will be an Eigen vector.
+      For example, if you use ``create_problem_eigen``, the ``right_hand_side_type`` will be an Eigen vector.
 
    .. cpp:type:: jacobian_type
 
@@ -45,15 +49,15 @@ A *pressio-demoapps* C++ problem class meets the following API
 
       Constructs and returns an instance of the initial condition for the target problem.
 
-   .. cpp:function:: velocity_type createVelocity()
+   .. cpp:function:: right_hand_side_type createRightHandSide()
 
-      Constructs and returns an instance of the velocity.
+      Constructs and returns an instance of the right hand side.
 
    .. cpp:function:: jacobian_type createJacobian()
 
       Constructs and returns an instance of the jacobian.
 
-   .. cpp:function:: void velocity(const state_type & y, scalar_type time, velocity_type & v)
+   .. cpp:function:: void rightHandSide(const state_type & y, scalar_type time, right_hand_side_type & v)
 
       Given a state :math:`y` and time :math:`time`,
       evaluates the RHS of the system and overwrites :math:`v`.
@@ -63,9 +67,9 @@ A *pressio-demoapps* C++ problem class meets the following API
       Given a state :math:`y` and time :math:`time`,
       evaluates the Jacobian of the RHS and stores it into :math:`J`.
 
-   .. cpp:function:: void velocityAndJacobian(const state_type & y, \
+   .. cpp:function:: void rightHandSideAndJacobian(const state_type & y, \
 		                              scalar_type time, \
-					      velocity_type & v, \
+					      right_hand_side_type & v, \
 					      jacobian_type & J)
 
       Given a state :math:`y` and time :math:`time`,
@@ -100,7 +104,7 @@ C++ Backends and Corresponding Types
      - Type alias
 
    * - Eigen
-     - ``using state_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using velocity_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int32_t>;``
+     - ``using state_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using right_hand_side_type = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>`` :raw-html-m2r:`<br/>` :raw-html-m2r:`<br/>` ``using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, int32_t>;``
 
 
 .. _cpp-mesh-api:
@@ -137,7 +141,7 @@ A *pressio-demoapps* C++ cell-centered mesh class meets the following API
    .. cpp:function:: index_type sampleMeshSize() const
 
       Returns the number of *sample* cells in the mesh.
-      This corresponds to all cells where the velocity (or RHS) is defined.
+      This corresponds to all cells where the RHS is defined.
 
    .. cpp:function:: scalar_type dx() const
 

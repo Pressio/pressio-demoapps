@@ -48,7 +48,6 @@ void KelvinHelmholtzIC(state_type & state,
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
   const auto gammaMinusOne = gamma - one;
-  const auto gammaMinusOneInv = one/gammaMinusOne;
 
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
@@ -421,14 +420,8 @@ void crossShockIC(state_type & state,
 
   constexpr int numDofPerCell = 4;
   constexpr auto one = static_cast<scalar_type>(1);
-  constexpr auto two = static_cast<scalar_type>(2);
-
   const auto & x= meshObj.viewX();
-  const auto & y= meshObj.viewY();
   const auto gammaMinusOneInv = one/(gamma - one);
-  constexpr auto x0 = one/two;
-  constexpr auto y0 = one/two;
-
   std::array<scalar_type, numDofPerCell> prim = {density, inletXVel, 0., 1.};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {

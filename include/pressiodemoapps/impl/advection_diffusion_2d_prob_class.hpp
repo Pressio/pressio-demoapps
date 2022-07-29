@@ -73,12 +73,12 @@ public:
       m_inviscidFluxRecEn(inviscidFluxRecEn),
       m_inviscidFluxSchemeEn(invFluxSchemeEn),
       m_viscousFluxRecEn(visFluxRecEn),
+      m_meshObj(meshObj),
       m_burgers2d_icPulse(icPulseMagnitude),
       m_burgers2d_icSpread(icSpread),
       m_burgers2d_diffusion(diffusionCoeff),
       m_burgers2d_x0(x0),
-      m_burgers2d_y0(y0),
-      m_meshObj(meshObj)
+      m_burgers2d_y0(y0)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
@@ -258,8 +258,7 @@ private:
     flux_jac_type fluxJacBNeg(m_numDofPerCell, m_numDofPerCell);
     flux_jac_type fluxJacBPos(m_numDofPerCell, m_numDofPerCell);
 
-    int nonZerosCountBeforeComputing = 0;
-    nonZerosCountBeforeComputing = J.nonZeros();
+    int nonZerosCountBeforeComputing = J.nonZeros();
 
     // this is for periodic so we don't have boundary cells,
     // all cells count as "inner cells"
@@ -273,11 +272,12 @@ private:
 				 uPlusHalfNeg,  uPlusHalfPos);
 
     assert(J.nonZeros() == nonZerosCountBeforeComputing);
+    (void) nonZerosCountBeforeComputing;
   }
 
   template<class U_t, class V_t>
   void velocityAndJacInnerCellsImpl(const U_t & U,
-				    const scalar_type currentTime,
+				    const scalar_type /*currentTime*/,
 				    V_t & V,
 				    jacobian_type & J,
 				    flux_type & fluxL,
@@ -374,7 +374,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyInnerCellsImpl(const U_t & U,
-				  const scalar_type currentTime,
+				  const scalar_type /*currentTime*/,
 				  V_t & V,
 				  flux_type & fluxL,
 				  flux_type & fluxF,

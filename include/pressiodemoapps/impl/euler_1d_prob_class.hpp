@@ -274,7 +274,7 @@ private:
 			 m_ghostLeft, m_ghostRight);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
-      for (int it=0; it<rowsBd.size(); ++it){
+      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it, m_numDofPerCell);
       }
     }
@@ -282,7 +282,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyInnerCellsImpl(const U_t & U,
-				  const scalar_type currentTime,
+				  const scalar_type /*currentTime*/,
 				  V_t & V,
 				  flux_type & fluxL,
 				  flux_type & fluxR,
@@ -338,8 +338,8 @@ private:
     flux_jac_type fluxJacRNeg(m_numDofPerCell, m_numDofPerCell);
     flux_jac_type fluxJacRPos(m_numDofPerCell, m_numDofPerCell);
 
-    int nonZerosCountBeforeComputing = 0;
-    nonZerosCountBeforeComputing = J.nonZeros();
+    int nonZerosCountBeforeComputing = J.nonZeros();
+    (void) nonZerosCountBeforeComputing;
 
     // this is done in parallel if openmp is on
     velocityAndJacInnerCellsImpl(U, currentTime, V, J,
@@ -384,7 +384,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacInnerCellsImpl(const U_t & U,
-				    const scalar_type currentTime,
+				    const scalar_type /*currentTime*/,
 				    V_t & V,
 				    jacobian_type & J,
 				    flux_type & fluxL,
@@ -448,7 +448,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyNearBdCellsImpl(const U_t & U,
-				   const scalar_type currentTime,
+				   const scalar_type /*currentTime*/,
 				   V_t & V,
 				   flux_type & fluxL,
 				   flux_type & fluxR,
@@ -458,7 +458,6 @@ private:
 				   edge_rec_type & uPlusHalfPos) const
   {
     namespace pda = ::pressiodemoapps;
-    constexpr int xAxis = 1;
 
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     stencil_container_type stencilVals(m_numDofPerCell*stencilSize);
@@ -498,7 +497,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplFirstOrder(const U_t & U,
-					       const scalar_type currentTime,
+					       const scalar_type /*currentTime*/,
 					       V_t & V,
 					       jacobian_type & J,
 					       flux_type & fluxL,
@@ -566,7 +565,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplDifferentScheme(const U_t & U,
-						    const scalar_type currentTime,
+						    const scalar_type /*currentTime*/,
 						    V_t & V,
 						    jacobian_type & J,
 						    flux_type & fluxL,

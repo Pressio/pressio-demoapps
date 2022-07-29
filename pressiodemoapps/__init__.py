@@ -84,7 +84,7 @@ def advanceRK2(appObj, state, dt, Nsteps, \
                observer = None, \
                showProgress=False):
 
-  v = appObj.createVelocity()
+  v = appObj.createRightHandSide()
   tmpState = state.copy()
   half = 0.5
 
@@ -93,13 +93,13 @@ def advanceRK2(appObj, state, dt, Nsteps, \
     if showProgress:
       if step % 50 == 0: print("step = ", step, "/", Nsteps)
 
-    appObj.velocity(state, time, v)
+    appObj.rightHandSide(state, time, v)
     if observer!= None:
       observer(step-1, state, v)
     k1 = dt * v
 
     tmpState = state+k1
-    appObj.velocity(tmpState, time+dt, v)
+    appObj.rightHandSide(tmpState, time+dt, v)
     k2 = dt * v
 
     state[:] = state + k2*half + k1*half
@@ -111,7 +111,7 @@ def advanceRK4(appObj, state, dt, Nsteps, \
                observer = None, \
                showProgress=False):
 
-  v = appObj.createVelocity()
+  v = appObj.createRightHandSide()
   tmpState = state.copy()
   half = 0.5
   two  = 2.
@@ -122,21 +122,21 @@ def advanceRK4(appObj, state, dt, Nsteps, \
     if showProgress:
       if step % 50 == 0: print("step = ", step, "/", Nsteps)
 
-    appObj.velocity(state, time, v)
+    appObj.rightHandSide(state, time, v)
     if observer!= None:
       observer(step-1, state, v)
     k1 = dt * v
 
     tmpState = state+half*k1
-    appObj.velocity(tmpState, time+half*dt, v)
+    appObj.rightHandSide(tmpState, time+half*dt, v)
     k2 = dt * v
 
     tmpState = state+half*k2
-    appObj.velocity(tmpState, time+half*dt, v)
+    appObj.rightHandSide(tmpState, time+half*dt, v)
     k3 = dt * v
 
     tmpState = state+k3
-    appObj.velocity(tmpState, time+dt, v)
+    appObj.rightHandSide(tmpState, time+dt, v)
     k4 = dt * v
 
     state[:] = state + (k1+two*k2+two*k3+k4)*oneOverSix
@@ -149,7 +149,7 @@ def advanceSSP3(appObj, state, dt, Nsteps,\
                 observer = None, \
                 showProgress=False):
 
-  v = appObj.createVelocity()
+  v = appObj.createRightHandSide()
   tmpState1 = state.copy()
   tmpState2 = state.copy()
 
@@ -163,15 +163,15 @@ def advanceSSP3(appObj, state, dt, Nsteps,\
     if showProgress:
       if step % 50 == 0: print("step = ", step, "/", Nsteps)
 
-    appObj.velocity(state, time, v)
+    appObj.rightHandSide(state, time, v)
     if observer!= None:
       observer(step-1, state, v)
     tmpState1[:] = state + dt * v
 
-    appObj.velocity(tmpState1, time+dt, v)
+    appObj.rightHandSide(tmpState1, time+dt, v)
     tmpState2[:] = threeOverFour*state + oneOverFour*tmpState1 + oneOverFour*dt*v
 
-    appObj.velocity(tmpState2, time+dt*0.5, v)
+    appObj.rightHandSide(tmpState2, time+dt*0.5, v)
     state[:] = oneOverThree*(state + two*tmpState2 + two*dt*v)
 
     time += dt

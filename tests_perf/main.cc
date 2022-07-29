@@ -45,17 +45,17 @@ int main(int argc, char *argv[])
   using app_t = decltype(appObj);
 
   auto state = appObj.initialCondition();
-  auto V     = appObj.createVelocity();
+  auto V     = appObj.createRightHandSide();
   auto J     = appObj.createJacobian();
 
   // warmup
-  // appObj.velocityAndJacobian(state, 0., V, J);
-  appObj.velocity(state, 0., V);
+  // appObj.rightHandSideAndJacobian(state, 0., V, J);
+  appObj.rightHandSide(state, 0., V);
 
   auto t1 = std::chrono::high_resolution_clock::now();
   for (int i=0; i<loopCount; ++i){
-    appObj.velocity(state, 0., V);
-    // appObj.velocityAndJacobian(state, 0., V, J);
+    appObj.rightHandSide(state, 0., V);
+    // appObj.rightHandSideAndJacobian(state, 0., V, J);
   }
   auto t2 = std::chrono::high_resolution_clock::now();
   std::chrono::duration< double > fs = t2 - t1;

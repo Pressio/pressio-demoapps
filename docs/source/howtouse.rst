@@ -109,14 +109,14 @@ Here we show some things you can do using the C++ as an example:
    auto state = problem.initialCondition();
 
    // having the problem and initial condition, create instance of the RHS
-   auto rhs = problem.createVelocity()
+   auto rhs = problem.createRightHandSide()
    // compute the rhs of the discrete system at time=0.0
-   problem.velocity(state, 0.0, rhs);
+   problem.rightHandSide(state, 0.0, rhs);
 
    // create the Jacobian
    auto J = problem.createJacobian()
    // compute J at time=0.0
-   problem.velocityAndJacobian(state, 0.0, rhs, J);
+   problem.rightHandSideAndJacobian(state, 0.0, rhs, J);
    // or we can compute just the Jacobian
    problem.jacobian(state, 0.0, J);
 

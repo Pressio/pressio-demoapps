@@ -50,9 +50,9 @@ public:
       m_probEn(::pressiodemoapps::Advection1d::PeriodicLinear),
       m_inviscidFluxRecEn(inviscidFluxRecEn),
       m_inviscidFluxSchemeEn(invFluxSchemeEn),
-      m_linear_adv_vel(velocity),
       m_meshObj(meshObj),
-      m_icIdentifier(icIdentifier)
+      m_icIdentifier(icIdentifier),
+      m_linear_adv_vel(velocity)
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
@@ -170,10 +170,10 @@ protected:
     }
 
     if (J){
-      int nonZerosCountBeforeComputing = 0;
-      nonZerosCountBeforeComputing = J->nonZeros();
+      int nonZerosCountBeforeComputing = J->nonZeros();
       velocityAndJacImpl(U, currentTime, V, *J);
       assert(J->nonZeros() == nonZerosCountBeforeComputing);
+      (void) nonZerosCountBeforeComputing;
     }
     else{
       velocityOnlyImpl(U, currentTime, V);
@@ -191,6 +191,8 @@ private:
 			  V_t & V,
 			  jacobian_type & J) const
   {
+    (void) currentTime;
+    
     namespace pda = ::pressiodemoapps;
     constexpr int xAxis = 1;
 
@@ -253,11 +255,10 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyImpl(const U_t & U,
-			const scalar_type currentTime,
+			const scalar_type /*currentTime*/,
 			V_t & V) const
   {
     namespace pda = ::pressiodemoapps;
-    constexpr int xAxis = 1;
 
     // for omp, these are private variables for each thread
     // edge reconstructions

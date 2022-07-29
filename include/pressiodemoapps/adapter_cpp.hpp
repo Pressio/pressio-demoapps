@@ -12,16 +12,17 @@ class PublicProblemEigenMixinCpp : public T
 {
 
 public:
-  using scalar_type   = typename T::scalar_type;
-  using state_type    = typename T::state_type;
-  using velocity_type = typename T::velocity_type;
-  using jacobian_type = typename T::jacobian_type;
+  using scalar_type               = typename T::scalar_type;
+  using independent_variable_type = typename T::scalar_type;
+  using state_type		  = typename T::state_type;
+  using right_hand_side_type      = typename T::velocity_type;
+  using jacobian_type             = typename T::jacobian_type;
 
 private:
   using typename T::index_t;
-  using eigen_vec_t    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
-  using eigen_mat_ll_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
-  using eigen_mat_lr_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+  using eigen_vec_t    = Eigen::Matrix<typename T::scalar_type, Eigen::Dynamic, 1>;
+  using eigen_mat_ll_t = Eigen::Matrix<typename T::scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
+  using eigen_mat_lr_t = Eigen::Matrix<typename T::scalar_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 public:
   template<class ...Args>
@@ -30,8 +31,8 @@ public:
   {
     T::initializeJacobian(m_jacobian);
     ::pressiodemoapps::set_zero(m_jacobian);
-    ::pressiodemoapps::resize(m_velocity, T::m_numDofSampleMesh);
-    ::pressiodemoapps::set_zero(m_velocity);
+    ::pressiodemoapps::resize(m_rhs, T::m_numDofSampleMesh);
+    ::pressiodemoapps::set_zero(m_rhs);
   }
 
   typename T::index_t totalDofSampleMesh()  const{
@@ -42,9 +43,15 @@ public:
     return T::m_numDofStencilMesh;
   }
 
-  velocity_type createVelocity() const{
+  state_type createState() const{
+    state_type tmp = T::initialCondition();
+    ::pressiodemoapps::set_zero(tmp);
+    return tmp;
+  }
+
+  right_hand_side_type createRightHandSide() const{
     namespace pda = ::pressiodemoapps;
-    return pda::clone(m_velocity);
+    return pda::clone(m_rhs);
   }
 
   jacobian_type createJacobian() const{
@@ -70,64 +77,64 @@ public:
     return res;
   }
 
-  void velocity(const state_type & state,
-		const scalar_type currentTime,
-		velocity_type & V) const
+  void rightHandSide(const state_type & state,
+		     const independent_variable_type currentTime,
+		     right_hand_side_type & V) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
 				   V, nullptr);
   }
 
-  void velocityAndJacobian(const state_type & state,
-			   const scalar_type currentTime,
-			   velocity_type & V,
-			   jacobian_type & jacobian) const
+  void rightHandSideAndJacobian(const state_type & state,
+				const independent_variable_type currentTime,
+				right_hand_side_type & V,
+				jacobian_type & jacobian) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
 				   V, &jacobian);
   }
 
   void jacobian(const state_type & state,
-		const scalar_type currentTime,
+		const independent_variable_type currentTime,
 		jacobian_type & jacobian) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
-				   m_velocity, &jacobian);
+				   m_rhs, &jacobian);
   }
 
   void applyJacobian(const state_type & state,
 		     const eigen_vec_t & operand,
-		     const scalar_type currentTime,
+		     const independent_variable_type currentTime,
 		     eigen_vec_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
-				   m_velocity, &m_jacobian);
+				   m_rhs, &m_jacobian);
     result = m_jacobian * operand;
   }
 
   void applyJacobian(const state_type & state,
 		     const eigen_mat_ll_t & operand,
-		     const scalar_type currentTime,
+		     const independent_variable_type currentTime,
 		     eigen_mat_ll_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
-				   m_velocity, &m_jacobian);
+				   m_rhs, &m_jacobian);
     result = m_jacobian * operand;
   }
 
   void applyJacobian(const state_type & state,
 		     const eigen_mat_lr_t & operand,
-		     const scalar_type currentTime,
+		     const independent_variable_type currentTime,
 		     eigen_mat_lr_t & result) const
   {
     T::velocityAndOptionalJacobian(state, currentTime,
-				   m_velocity, &m_jacobian);
+				   m_rhs, &m_jacobian);
     result = m_jacobian * operand;
   }
 
 private:
   mutable jacobian_type m_jacobian;
-  mutable velocity_type m_velocity;
+  mutable right_hand_side_type m_rhs;
 };
 
 }

@@ -38,7 +38,6 @@ public:
     std::array<scalar_type, 4> m_prim = {m_density, m_inletXVel, 0, 1.};
 
     const scalar_type one = static_cast<scalar_type>(1);
-    const scalar_type m_gammaMinusOne    = m_gamma-one;
     const scalar_type m_gammaMinusOneInv = one/(m_gamma-one);
 
     m_dirichState[0] = m_prim[0];
@@ -51,9 +50,6 @@ public:
   void operator()(index_t smPt, int gRow)
   {
     constexpr int numDofPerCell = 4;
-    constexpr scalar_type zero{0};
-    constexpr scalar_type two{2};
-    constexpr scalar_type three{3};
 
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 0) >= 5);
@@ -61,10 +57,7 @@ public:
     const auto uIndex  = cellGID*numDofPerCell;
 
     const auto & x = m_meshObj.viewX();
-    const auto & y = m_meshObj.viewY();
     const auto myX = x(cellGID);
-    const auto myY = y(cellGID);
-    const auto dy  = m_meshObj.dy();
 
     const auto left0  = graph(smPt, 1);
     const auto front0 = graph(smPt, 2);
@@ -160,7 +153,7 @@ public:
     if (m_stencilSize >= 7){
       const auto left1  = graph(smPt, 5);
       const auto front1 = graph(smPt, 6);
-      const auto right1 = graph(smPt, 7);
+      // const auto right1 = graph(smPt, 7);
       const auto back1  = graph(smPt, 8);
       const auto left2  = graph(smPt, 9);
       const auto front2 = graph(smPt, 10);

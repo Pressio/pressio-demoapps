@@ -164,7 +164,7 @@ public:
       const auto left1  = graph(smPt, 5);
       const auto front1 = graph(smPt, 6);
       const auto right1 = graph(smPt, 7);
-      const auto back1  = graph(smPt, 8);
+      // const auto back1  = graph(smPt, 8);
       const auto left2  = graph(smPt, 9);
       const auto front2 = graph(smPt, 10);
       const auto right2 = graph(smPt, 11);

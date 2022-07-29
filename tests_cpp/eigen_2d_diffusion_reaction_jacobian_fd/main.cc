@@ -6,7 +6,7 @@ template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.size(); i++){
+  for (int i=0; i<obj.size(); i++){
     file << std::setprecision(14) << obj(i) << " \n";
   }
   file.close();
@@ -16,11 +16,6 @@ template<class state_type, class mesh_t>
 void modify_state(state_type & state,
 		  const mesh_t & meshObj)
 {
-
-  using scalar_type = typename mesh_t::scalar_t;
-  constexpr auto zero = static_cast<scalar_type>(0);
-  constexpr auto one  = static_cast<scalar_type>(1);
-
   const auto & x= meshObj.viewX();
   const auto & y= meshObj.viewY();
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
@@ -30,26 +25,23 @@ void modify_state(state_type & state,
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
-  constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
 
   const auto scheme = ::pressiodemoapps::ViscousFluxReconstruction::FirstOrder;
   const auto probId = pda::DiffusionReaction2d::ProblemA;
   auto appObj     = pda::create_problem_eigen(meshObj, probId, scheme);
   using app_t = decltype(appObj);
-  using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;
   using app_rhs_t	= typename app_t::velocity_type;
-  using app_jacob_t	= typename app_t::jacobian_type;
 
   app_state_t state = appObj.initialCondition();
   modify_state(state, meshObj);
   writeToFile(state, "IC.txt");
 
-  auto velo = appObj.createVelocity();
+  auto velo = appObj.createRightHandSide();
   auto J = appObj.createJacobian();
 
   const double eps = 1e-8;
@@ -58,7 +50,7 @@ int main(int argc, char *argv[])
   // not just a single time
   for (int loop=0; loop<5; ++loop)
   {
-    appObj.velocity(state, 0., velo);
+    appObj.rightHandSide(state, 0., velo);
     appObj.jacobian(state, 0., J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
@@ -66,7 +58,7 @@ int main(int argc, char *argv[])
     // first order
     auto state2 = state+eps*a;
     app_rhs_t velo2(velo.size());
-    appObj.velocity(state2, 0., velo2);
+    appObj.rightHandSide(state2, 0., velo2);
 
     auto Ja = J*a;
     auto Ja_fd = (velo2 - velo)/eps;
@@ -87,7 +79,7 @@ int main(int argc, char *argv[])
     // second order
     auto state3 = state-eps*a;
     app_rhs_t velo3(velo.size());
-    appObj.velocity(state3, 0., velo3);
+    appObj.rightHandSide(state3, 0., velo3);
     auto Ja_fd_2 = (velo2 - velo3)/(2.*eps);
     for (int i=0; i<Ja.size(); ++i){
       const auto diff = std::abs(Ja(i)- Ja_fd_2(i));

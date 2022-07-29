@@ -231,7 +231,6 @@ RetType
  typename mesh_t::scalar_t feedRate,
  typename mesh_t::scalar_t killRate)
 {
-  using scalar_t = typename mesh_t::scalar_t;
   return RetType(impldiffusionreaction2d::TagProblemGrayScott{},
 		 meshObj,
 		 viscFluxRecEnum,

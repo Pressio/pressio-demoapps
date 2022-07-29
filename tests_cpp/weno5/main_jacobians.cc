@@ -8,7 +8,6 @@ int main(){
   auto passedString = "PASS";
   double tol = 1e-12;
   double eps = 1e-18;
-  int nVars = 4;
   using scalar_t = double;
   using complex_scalar_t = std::complex<double>;
 

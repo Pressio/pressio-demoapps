@@ -203,7 +203,8 @@ protected:
     if (J){
       nonZerosCountBeforeComputing = J->nonZeros();
     }
-
+    (void) nonZerosCountBeforeComputing;
+    
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
       velocityAndOptionalJacobianNearBdProblemA(U, currentTime, V, J);
       velocityAndOptionalJacobianInnerCellsProblemA(U, currentTime, V, J);
@@ -239,7 +240,7 @@ private:
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
-      for (int it=0; it<rowsBd.size(); ++it){
+      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it);
       }
     }
@@ -275,7 +276,6 @@ private:
     const auto & y          = m_meshObj.viewY();
     const auto & graph      = m_meshObj.graph();
     constexpr auto two      = static_cast<scalar_type>(2);
-    constexpr auto three    = static_cast<scalar_type>(3);
     const auto dxInvSq	    = m_meshObj.dxInv()*m_meshObj.dxInv();
     const auto dyInvSq	    = m_meshObj.dyInv()*m_meshObj.dyInv();
     const auto twoReacCoeff = m_probA_reactionCoeff*two;
@@ -403,12 +403,10 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndOptionalJacobianGrayScott(const U_t & U,
-					    const scalar_type currentTime,
+					    const scalar_type /*currentTime*/,
 					    V_t & V,
 					    jacobian_type * J) const
   {
-    const auto & x = m_meshObj.viewX();
-    const auto & y = m_meshObj.viewY();
     constexpr auto one = static_cast<scalar_type>(1);
     constexpr auto two = static_cast<scalar_type>(2);
 

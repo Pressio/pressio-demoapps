@@ -45,7 +45,6 @@ RetType
  InviscidFluxReconstruction inviscRecEn)
 {
 
-  using scalar_t = typename mesh_t::scalar_t;
   if (problemEnum == Swe2d::SlipWall)
   {
     return RetType(implswe2d::TagProblemSlipWall{},
@@ -83,7 +82,6 @@ RetType
  typename mesh_t::scalar_t pulseMagnitude)
 {
 
-  using scalar_t = typename mesh_t::scalar_t;
   return RetType(implswe2d::TagProblemSlipWall{},
 		 meshObj, inviscRecEn,
 		 ::pressiodemoapps::InviscidFluxScheme::Rusanov,

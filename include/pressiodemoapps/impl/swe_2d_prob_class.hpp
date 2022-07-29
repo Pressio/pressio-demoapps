@@ -255,7 +255,7 @@ private:
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-      for (int it=0; it<rowsBd.size(); ++it){
+      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it);
       }
     }
@@ -287,8 +287,8 @@ private:
     flux_jac_type fluxJacRNeg, fluxJacRPos;
     flux_jac_type fluxJacBNeg, fluxJacBPos;
 
-    int nonZerosCountBeforeComputing = 0;
-    nonZerosCountBeforeComputing = J.nonZeros();
+    int nonZerosCountBeforeComputing = J.nonZeros();
+    (void) nonZerosCountBeforeComputing;
 
     // near boundary I have be careful because
     // the jacobian can only be first order for now
@@ -327,7 +327,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacInnerCellsImpl(const U_t & U,
-				    const scalar_type currentTime,
+				    const scalar_type /*currentTime*/,
 				    V_t & V,
 				    jacobian_type & J,
 				    flux_type & fluxL,
@@ -419,7 +419,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplFirstOrder(const U_t & U,
-					       const scalar_type currentTime,
+					       const scalar_type /*currentTime*/,
 					       V_t & V,
 					       jacobian_type & J,
 					       flux_type & fluxL,
@@ -520,7 +520,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplDifferentScheme(const U_t & U,
-						    const scalar_type currentTime,
+						    const scalar_type /*currentTime*/,
 						    V_t & V,
 						    jacobian_type & J,
 						    flux_type & fluxL,
@@ -666,7 +666,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyNearBdCellsImpl(const U_t & U,
-				   const scalar_type currentTime,
+				   const scalar_type /*currentTime*/,
 				   V_t & V,
 				   flux_type & fluxL,
 				   flux_type & fluxF,
@@ -737,7 +737,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyInnerCellsImpl(const U_t & U,
-				  const scalar_type currentTime,
+				  const scalar_type /*currentTime*/,
 				  V_t & V,
 				  flux_type & fluxL,
 				  flux_type & fluxF,

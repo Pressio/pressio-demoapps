@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <vector>
 
-int main(int argc, char *argv[])
+int main()
 {
   const auto meshObj = pressiodemoapps::load_cellcentered_uniform_mesh_eigen(".");
   using int_t = typename decltype(meshObj)::index_t;

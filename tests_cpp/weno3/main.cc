@@ -83,7 +83,7 @@ bool api2()
 }
 
 
-int main(int argc, char *argv[])
+int main()
 {
   const auto s1 = api1();
   const auto s2 = api2();

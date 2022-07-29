@@ -61,8 +61,7 @@ abs_pow(T1 & y,
 	const T2 & x,
 	const typename ::pressio::Traits<T1>::scalar_type & exponent)
 {
-  static_assert(::pressio::are_scalar_compatible<T1,T2>::value,
-		"not scalar compatible");
+
   using sc_t = typename ::pressio::Traits<T1>::scalar_type;
   using ord_t = typename ::pressio::Traits<T1>::local_ordinal_type;
 
@@ -72,11 +71,11 @@ abs_pow(T1 & y,
     throw std::runtime_error("this overload is only for exponent > 0");
   }
 
-  const auto y_tp = y.getVectorView();
+  auto y_tp = y.getVectorView();
   // I have to constcast here because for block vector getVectorView is non-const
   const auto x_tp = const_cast<T2 &>(x).getVectorView();
-  const auto y_kv = y_tp.getLocalViewDevice();
-  const auto x_kv = x_tp.getLocalViewDevice();
+  const auto y_kv = y_tp.getLocalViewDevice(Tpetra::Access::OverwriteAllStruct());
+  const auto x_kv = x_tp.getLocalViewDevice(Tpetra::Access::ReadOnlyStruct());
   // NOTE that we need the local length of the tpetra view NOT the block
   Kokkos::parallel_for(y_tp.getLocalLength(),
 		       KOKKOS_LAMBDA (const ord_t& i){
@@ -97,8 +96,7 @@ abs_pow(T1 & y,
 	const typename ::pressio::Traits<T1>::scalar_type & exponent,
 	const typename ::pressio::Traits<T1>::scalar_type & eps)
 {
-  static_assert(::pressio::are_scalar_compatible<T1,T2>::value,
-		"not scalar compatible");
+
   using sc_t = typename ::pressio::Traits<T1>::scalar_type;
   using ord_t = typename ::pressio::Traits<T1>::local_ordinal_type;
 
@@ -108,11 +106,11 @@ abs_pow(T1 & y,
     throw std::runtime_error("this overload is only for exponent < 0");
   }
 
-  const auto y_tp = y.getVectorView();
+  auto y_tp = y.getVectorView();
   // I have to constcast here because for block vector getVectorView is non-const
   const auto x_tp = const_cast<T2 &>(x).getVectorView();
-  const auto y_kv = y_tp.getLocalViewDevice();
-  const auto x_kv = x_tp.getLocalViewDevice();
+  const auto y_kv = y_tp.getLocalViewDevice(Tpetra::Access::OverwriteAllStruct());
+  const auto x_kv = x_tp.getLocalViewDevice(Tpetra::Access::ReadOnlyStruct());
 
   constexpr auto one = ::pressio::utils::Constants<sc_t>::one();
   const auto expo = -exponent;
@@ -136,7 +134,7 @@ pow(T & x,
   using ord_t = typename ::pressio::Traits<T>::local_ordinal_type;
 
   auto x_tpetraview = x.getVectorView();
-  auto x_kv = x_tpetraview.getLocalViewDevice();
+  auto x_kv = x_tpetraview.getLocalViewDevice(Tpetra::Access::ReadWriteStruct());
 
   // NOTE that we need the local length of the tpetra view NOT the block
   Kokkos::parallel_for(x_tpetraview.getLocalLength(),

@@ -72,16 +72,13 @@ template < typename A_type, typename x_type, typename scalar_type, typename y_ty
   ::pressio::Traits<x_type>::rank == 1 and
   ::pressio::Traits<y_type>::rank == 1
   >
-product(::pressio::nontranspose mode,
+product(::pressio::nontranspose /*unused*/,
 	const scalar_type alpha,
 	const A_type & A,
 	const x_type & x,
 	const scalar_type beta,
 	y_type & y)
 {
-  static_assert
-    (are_scalar_compatible<A_type, x_type, y_type>::value,
-     "Types are not scalar compatible");
   static_assert
     (::pressio::have_matching_execution_space<A_type, x_type, y_type>::value,
      "operands need to have same execution space" );
@@ -108,15 +105,13 @@ template < typename A_type, typename x_type, typename scalar_type, typename y_ty
   ::pressio::Traits<x_type>::rank == 1 and
   ::pressio::Traits<y_type>::rank == 1
   >
-product(::pressio::transpose mode,
+product(::pressio::transpose /*unused*/,
 	const scalar_type alpha,
 	const A_type & A,
 	const x_type & x,
 	const scalar_type beta,
 	y_type & y)
 {
-  static_assert(are_scalar_compatible<A_type, x_type, y_type>::value,
-     "Types are not scalar compatible");
   static_assert
     (::pressio::have_matching_execution_space<A_type,x_type, y_type>::value,
      "operands need to have same execution space" );

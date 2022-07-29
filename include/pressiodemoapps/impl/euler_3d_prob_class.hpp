@@ -257,7 +257,7 @@ private:
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-	for (int it=0; it<rowsBd.size(); ++it){
+	for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<3>(rowsBd[it], it);
 	}
       }
@@ -265,7 +265,7 @@ private:
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-	for (int it=0; it<rowsBd.size(); ++it){
+	for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	  ghF.template operator()<5>(rowsBd[it], it);
 	}
       }else{
@@ -299,8 +299,7 @@ private:
     flux_jac_type fluxJacDNeg, fluxJacDPos;
     flux_jac_type fluxJacUNeg, fluxJacUPos;
 
-    int nonZerosCountBeforeComputing = 0;
-    nonZerosCountBeforeComputing = J.nonZeros();
+    int nonZerosCountBeforeComputing = J.nonZeros();
 
     // near boundary I have be careful because
     // the jacobian can only be first order for now
@@ -351,11 +350,12 @@ private:
 				 uPlusHalfNeg,  uPlusHalfPos);
 
     assert(J.nonZeros() == nonZerosCountBeforeComputing);
+    (void) nonZerosCountBeforeComputing;
   }
 
   template<class U_t, class V_t>
   void velocityAndJacInnerCellsImpl(const U_t & U,
-				    const scalar_type currentTime,
+				    const scalar_type /*currentTime*/,
 				    V_t & V,
 				    jacobian_type & J,
 				    flux_type & fluxL,
@@ -470,7 +470,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplFirstOrder(const U_t & U,
-					       const scalar_type currentTime,
+					       const scalar_type /*currentTime*/,
 					       V_t & V,
 					       jacobian_type & J,
 					       flux_type & fluxL,
@@ -613,7 +613,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacNearBDCellsImplDifferentScheme(const U_t & U,
-						    const scalar_type currentTime,
+						    const scalar_type /*currentTime*/,
 						    V_t & V,
 						    jacobian_type & J,
 						    flux_type & fluxL,
@@ -806,7 +806,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyInnerCellsImpl(const U_t & U,
-				  const scalar_type currentTime,
+				  const scalar_type /*currentTime*/,
 				  V_t & V,
 				  flux_type & fluxL,
 				  flux_type & fluxR,
@@ -853,7 +853,7 @@ private:
 
     functor_type Fz(V, m_meshObj.dzInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalZ_, m_gamma, fluxB, fluxF,
+		    m_fluxEn, normalZ_, m_gamma, fluxD, fluxU,
 		    /* end args for flux */
 		    zAxis, toReconstructionScheme(m_recEn), U, m_meshObj,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -874,7 +874,7 @@ private:
 
   template<class U_t, class V_t>
   void velocityOnlyNearBdCellsImpl(const U_t & U,
-				   const scalar_type currentTime,
+				   const scalar_type /*currentTime*/,
 				   V_t & V,
 				   flux_type & fluxL,
 				   flux_type & fluxR,
@@ -967,7 +967,7 @@ private:
     // 2: Dirichlet
     constexpr int neumann = 0;
     constexpr int reflective = 1;
-    constexpr int dirichlet = 2;
+    // constexpr int dirichlet = 2;
 
     if (m_probEn == ::pressiodemoapps::Euler3d::SedovSymmetry)
     {

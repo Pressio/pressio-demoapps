@@ -18,9 +18,9 @@ Problem Class
 
       :rtype: numpy array
 
-   .. py:method:: createVelocity()
+   .. py:method:: createRightHandSide()
 
-      Constructs and returns an instance of the velocity.
+      Constructs and returns an instance of the rhs.
 
       :rtype: numpy array
 
@@ -33,14 +33,14 @@ Problem Class
       :rtype: numpy array
 
 
-   .. py:method:: velocity(y, time, v)
+   .. py:method:: rightHandSide(y, time, rhs)
 
       Given a state :math:`y` and time :math:`time`,
       evaluates the RHS of the system and stores it into :math:`v`.
 
       :param numpy array y: state vector
       :param float time: evaluation time
-      :param numpy array v: velocity to overwrite
+      :param numpy array rhs: rhs to overwrite
 
    .. py:method:: applyJacobian(y, operand, time, result)
 
@@ -107,7 +107,7 @@ A *pressio-demoapps* Python cell-centered mesh class meets the following API
    .. py:method:: sampleMeshSize()
 
       Returns the number of *sample* cells in the mesh.
-      This corresponds to all cells where the velocity (or RHS) is defined.
+      This corresponds to all cells where the RHS is defined.
 
       :rtype: int
 

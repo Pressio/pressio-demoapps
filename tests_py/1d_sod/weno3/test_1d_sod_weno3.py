@@ -10,7 +10,7 @@ def test_create_vel():
   meshPath = str(file_path)
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   appObj   = pda.create_problem(meshO, pda.Euler1d.Sod, pda.InviscidFluxReconstruction.Weno3)
-  v = appObj.createVelocity()
+  v = appObj.createRightHandSide()
   print(v.shape)
   assert(v.shape[0] == 300)
 

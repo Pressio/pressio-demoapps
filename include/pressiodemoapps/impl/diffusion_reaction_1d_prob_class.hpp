@@ -121,6 +121,7 @@ protected:
 
     if (J){
       assert(nonZerosCountBeforeComputing == J->nonZeros());
+      (void) nonZerosCountBeforeComputing;
     }
   }
 
@@ -135,7 +136,7 @@ private:
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
 
       const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
-      for (int it=0; it<rowsBd.size(); ++it){
+      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it);
       }
     }

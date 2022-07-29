@@ -3,7 +3,7 @@
 #include <iomanip>
 #include "pressiodemoapps/euler1d.hpp"
 
-int main(int argc, char *argv[])
+int main()
 {
   using scalar_t = double;
   using vec_t = std::array<scalar_t, 3>;

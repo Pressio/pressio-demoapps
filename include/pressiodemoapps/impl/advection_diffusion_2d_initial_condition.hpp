@@ -15,14 +15,8 @@ void burgers2d_gaussian(state_type & state,
   // numDofsPerCell = 2 for Burgers2d
   constexpr int numDofPerCell = 2;
 
-  constexpr auto zero = static_cast<sc_t>(0);
-  constexpr auto one  = static_cast<sc_t>(1);
-  constexpr auto two  = static_cast<sc_t>(2);
-  constexpr auto half = one/two;
-
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
-
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto ind = i*numDofPerCell;

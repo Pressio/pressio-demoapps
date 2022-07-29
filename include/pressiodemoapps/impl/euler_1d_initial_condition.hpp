@@ -70,7 +70,6 @@ void lax1dInitialCondition(state_type & state,
 
   constexpr int numDofPerCell = 3;
   constexpr auto zero = static_cast<scalar_type>(0);
-  constexpr auto one  = static_cast<scalar_type>(1);
 
   const auto & x= meshObj.viewX();
   std::array<scalar_type, numDofPerCell> prim;

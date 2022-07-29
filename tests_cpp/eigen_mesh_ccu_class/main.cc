@@ -27,7 +27,7 @@ std::vector<double> goldY = {
   0.9, 0.9, 0.9, 0.9, 0.9
 };
 
-int main(int argc, char *argv[])
+int main()
 {
   const auto meshObj = pressiodemoapps::load_cellcentered_uniform_mesh_eigen(".");
 

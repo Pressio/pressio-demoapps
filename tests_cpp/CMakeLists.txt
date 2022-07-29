@@ -66,14 +66,13 @@ add_subdirectory(eigen_2d_euler_sample_mesh_test1)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_explicit)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
 add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit)
+add_subdirectory(eigen_2d_euler_cross_shock_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 add_subdirectory(eigen_2d_burgers_periodic_explicit)
 add_subdirectory(eigen_2d_burgers_periodic_sample_mesh_test)
-add_subdirectory(eigen_2d_euler_cross_shock_explicit)
-
 
 # ---------------------------------------------------------
 # 3d problems

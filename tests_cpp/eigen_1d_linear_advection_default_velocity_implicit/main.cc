@@ -4,7 +4,7 @@
 #include "pressiodemoapps/advection1d.hpp"
 #include "../observer.hpp"
 
-int main(int argc, char *argv[])
+int main()
 {
   pressio::log::initialize(pressio::logto::terminal);
   pressio::log::setVerbosity({pressio::log::level::debug});
@@ -24,28 +24,27 @@ int main(int argc, char *argv[])
   auto appObj      = pda::create_problem_eigen(meshObj, probid, order);
 
   using app_t = decltype(appObj);
-  using scalar_t	= typename app_t::scalar_type;
   using state_t	= typename app_t::state_type;
   using jacob_t	= typename app_t::jacobian_type;
 
   state_t state = appObj.initialCondition();
 
   auto stepperObj = pressio::ode::create_implicit_stepper(
-    pressio::ode::StepScheme::BDF1, state, appObj);
+    pressio::ode::StepScheme::BDF1, appObj);
 
   using lin_solver_t = pressio::linearsolvers::Solver<
     pressio::linearsolvers::iterative::Bicgstab, jacob_t>;
   lin_solver_t linSolverObj;
 
   auto NonLinSolver=
-    pressio::nonlinearsolvers::create_newton_raphson(stepperObj, state, linSolverObj);
+    pressio::nonlinearsolvers::create_newton_raphson(stepperObj, linSolverObj);
   NonLinSolver.setTolerance(1e-6);
 
   FomObserver<state_t> Obs("linadv_1d_solution.bin", 1);
 
   const auto dt = 0.001;
-  const auto Nsteps = 2000;
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0.,
+  const auto Nsteps = pressio::ode::StepCount(2000);
+  pressio::ode::advance_n_steps(stepperObj, state, 0.,
 					    dt, Nsteps, Obs, NonLinSolver);
 
   pressio::log::finalize();

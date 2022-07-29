@@ -38,11 +38,11 @@ void bindCommonApiMethods(T & appObj)
 	     &p_t::initialCondition,
 	     pybind11::return_value_policy::copy);
 
-  appObj.def("createVelocity",
+  appObj.def("createRightHandSide",
 	     &p_t::createVelocity,
 	     pybind11::return_value_policy::automatic);
 
-  appObj.def("velocity",
+  appObj.def("rightHandSide",
 	     &p_t::velocity);
 
   appObj.def("createApplyJacobianResult",

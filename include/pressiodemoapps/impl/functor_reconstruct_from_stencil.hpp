@@ -44,7 +44,7 @@ public:
   ReconstructorFromStencil(Args && ... args)
     : m_memb(std::forward<Args>(args)...){}
 
-  const ReconstructionScheme reconstructionScheme() const{
+  ReconstructionScheme reconstructionScheme() const{
     return m_memb.m_recEn;
   }
   const ReconstructedValueType & reconstructionLeftNeg() const{

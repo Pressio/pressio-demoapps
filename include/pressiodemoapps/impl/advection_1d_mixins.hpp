@@ -33,9 +33,9 @@ public:
     Parent::operator()(smPt, ndpc);
 
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
-    const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
+    // const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
-    const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
+    // const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
 
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
@@ -144,9 +144,9 @@ public:
     Parent::operator()(smPt, ndpc);
 
     const auto & uMinusHalfNeg = Parent::reconstructionLeftNeg();
-    const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
+    // const auto & uMinusHalfPos = Parent::reconstructionLeftPos();
     const auto & uPlusHalfNeg  = Parent::reconstructionRightNeg();
-    const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
+    // const auto & uPlusHalfPos  = Parent::reconstructionRightPos();
 
     switch(m_fluxEnum){
     case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
