@@ -73,19 +73,11 @@ else()
 
   if(PRESSIODEMOAPPS_ENABLE_TESTS)
     enable_testing()
-    include_directories(
-      ${CMAKE_CURRENT_SOURCE_DIR}/include
-      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
-      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
     add_subdirectory(tests_mesh)
     add_subdirectory(tests_cpp)
   endif()
 
   if(PRESSIODEMOAPPS_ENABLE_PERF)
-    include_directories(
-      ${CMAKE_CURRENT_SOURCE_DIR}/include
-      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3
-      ${CMAKE_CURRENT_SOURCE_DIR}/tpls/pressio/include)
     add_subdirectory(tests_perf)
   endif()
 
