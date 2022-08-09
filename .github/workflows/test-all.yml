@@ -99,8 +99,7 @@ jobs:
       - name: Build C++ tests
         run: |
           export NUM_CPU=$(grep -c processor /proc/cpuinfo)
-          cmake --build $BUILD_DIR
-          #-j $NUM_CPU
+          cmake --build $BUILD_DIR -j $NUM_CPU
 
       - name: Run C++ tests
         run: |
