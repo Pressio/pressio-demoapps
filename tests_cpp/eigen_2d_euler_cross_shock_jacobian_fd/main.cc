@@ -32,20 +32,8 @@ void modify_state(state_type & state,
 
   UnifDist randObj(0.05, 0.08);
   const auto & x = meshObj.viewX();
-  // const auto & y = meshObj.viewY();
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
     const auto ind = i*4;
-
-    // std::array<scalar_type, 4> prim = {0.7, 10., 0., 1.};
-    // prim[0] += randObj();
-    // prim[1] += randObj();
-    // prim[2] += randObj();
-    // prim[3] += randObj();
-    // state(ind)   = prim[0];
-    // state(ind+1) = prim[0]*prim[1];
-    // state(ind+2) = prim[0]*prim[2];
-    // state(ind+3) = pressiodemoapps::eulerEquationsComputeEnergyFromPrimitive2(1./(gamma -1.), prim);
-
     state(ind)   = 1. + randObj();
     state(ind+1) = 1.5 + randObj();
     state(ind+2) = 2. + randObj();
