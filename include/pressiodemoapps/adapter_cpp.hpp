@@ -14,6 +14,7 @@ class PublicProblemEigenMixinCpp : public T
 public:
   using scalar_type               = typename T::scalar_type;
   using independent_variable_type = typename T::scalar_type;
+  using time_type                 = typename T::scalar_type;
   using state_type		  = typename T::state_type;
   using right_hand_side_type      = typename T::velocity_type;
   using jacobian_type             = typename T::jacobian_type;
