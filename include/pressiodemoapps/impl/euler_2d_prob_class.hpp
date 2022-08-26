@@ -11,6 +11,7 @@
 #include "euler_2d_ghost_filler_normal_shock.hpp"
 #include "euler_2d_ghost_filler_double_mach_reflection.hpp"
 #include "euler_2d_ghost_filler_cross_shock.hpp"
+#include "euler_2d_ghost_filler_cross_shock_wall.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -30,6 +31,7 @@ namespace impleuler2d{
 // to dispatch to the proper problem
 // so add new ones if a new problem is added
 struct TagCrossShock{};
+struct TagCrossShockWall{};
 
 template<class MeshType>
 class EigenApp
@@ -84,6 +86,25 @@ public:
       m_fluxEn(fluxEnum),
       m_icIdentifier(icIdentifier),
       m_crossshock_params{density, inletXVel, bottomYVel}
+  {
+    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+
+  EigenApp(TagCrossShockWall /*tag*/,
+	   const MeshType & meshObj,
+	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+	   int icIdentifier,
+	   scalar_type inletXVel,
+	   scalar_type density)
+    : m_meshObj(meshObj),
+      m_probEn(::pressiodemoapps::Euler2d::CrossShockWall),
+      m_recEn(recEnum),
+      m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
+      m_crossshock_params{density, inletXVel, 0.}
   {
     m_numDofStencilMesh = m_meshObj.stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * numDofPerCell;
@@ -317,6 +338,12 @@ private:
 		     m_crossshock_params[0], m_crossshock_params[1]);
 	return initialState;
       }
+
+      case ::pressiodemoapps::Euler2d::CrossShockWall:{
+	crossShockIC(initialState, m_meshObj, m_gamma,
+		     m_crossshock_params[0], m_crossshock_params[1]);
+	return initialState;
+      }
       };
 
     return initialState;
@@ -408,6 +435,26 @@ private:
 			 m_crossshock_params[0],
 			 m_crossshock_params[1],
 			 m_crossshock_params[2],
+			 m_meshObj,
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+
+      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int it=0; it<rowsBd.size(); ++it){
+	ghF(rowsBd[it], it);
+      }
+    }
+
+    else if (m_probEn == ::pressiodemoapps::Euler2d::CrossShockWall)
+    {
+      using ghost_filler_t  = CrossShock2dWallGhostFiller<
+	U_t, MeshType, ghost_container_type>;
+      ghost_filler_t ghF(stencilSize, U, m_gamma,
+			 m_crossshock_params[0],
+			 m_crossshock_params[1],
 			 m_meshObj,
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
