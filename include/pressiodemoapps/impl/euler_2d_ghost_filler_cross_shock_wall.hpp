@@ -84,7 +84,6 @@ public:
       m_ghostFront(gRow, 3) = m_state(uIndex+3);
     }
 
-    /* wall case */
     if (back0 == -1)
     {
       m_ghostBack(gRow, 0) = m_state(uIndex);
@@ -95,7 +94,7 @@ public:
 
     if (right0 == -1)
     {
-      if (myY < 0.5){
+      if (myY < wallTopY_){
 	m_ghostRight(gRow, 0) = m_state(uIndex);
 	m_ghostRight(gRow, 1) = -m_state(uIndex+1);
 	m_ghostRight(gRow, 2) = -m_state(uIndex+2);
@@ -105,10 +104,9 @@ public:
 	m_ghostRight(gRow, 0) = m_state(uIndex);
 	m_ghostRight(gRow, 1) = m_state(uIndex+1);
 	m_ghostRight(gRow, 2) = m_state(uIndex+2);
-	m_ghostRight(gRow, 3) = m_state(uIndex+3);
+	m_ghostRight(gRow, 3) = m_state(uIndex+3) + 0.5*(m_dirichState[3] - m_state(uIndex+3));
       }
     }
-    /*end wall*/
 
     if (m_stencilSize >= 5){
       const auto left1  = graph(smPt, 5);
@@ -141,72 +139,70 @@ public:
 
       if (right1 == -1){
 	const auto ind = left0*numDofPerCell;
-	if (myY < 0.5){
+	if (myY < wallTopY_){
 	  m_ghostRight(gRow, 4) = m_state(ind);
-	  m_ghostRight(gRow, 5) = -m_state(uIndex+1);
-	  m_ghostRight(gRow, 6) = -m_state(uIndex+2);
+	  m_ghostRight(gRow, 5) = -m_state(ind+1);
+	  m_ghostRight(gRow, 6) = -m_state(ind+2);
 	  m_ghostRight(gRow, 7) = m_state(ind+3);
 	}
 	else{
 	  m_ghostRight(gRow, 4) = m_state(ind);
 	  m_ghostRight(gRow, 5) = m_state(ind+1);
 	  m_ghostRight(gRow, 6) = m_state(ind+2);
-	  m_ghostRight(gRow, 7) = m_state(ind+3);
+	  m_ghostRight(gRow, 7) = m_state(ind+3) + 0.5*(m_dirichState[3] - m_state(ind+3));
 	}
       }
     }
 
-    // if (m_stencilSize >= 7){
-    //   const auto left1  = graph(smPt, 5);
-    //   const auto front1 = graph(smPt, 6);
-    //   const auto right1 = graph(smPt, 7);
-    //   const auto back1  = graph(smPt, 8);
-    //   const auto left2  = graph(smPt, 9);
-    //   const auto front2 = graph(smPt, 10);
-    //   const auto right2 = graph(smPt, 11);
-    //   const auto back2  = graph(smPt, 12);
+    if (m_stencilSize >= 7){
+      const auto left1  = graph(smPt, 5);
+      const auto front1 = graph(smPt, 6);
+      const auto right1 = graph(smPt, 7);
+      const auto back1  = graph(smPt, 8);
+      const auto left2  = graph(smPt, 9);
+      const auto front2 = graph(smPt, 10);
+      const auto right2 = graph(smPt, 11);
+      const auto back2  = graph(smPt, 12);
 
-    //   if (left2 == -1){
-    // 	m_ghostLeft(gRow, 8) = m_dirichState[0];
-    // 	m_ghostLeft(gRow, 9) = m_dirichState[1];
-    // 	m_ghostLeft(gRow, 10) = m_dirichState[2];
-    // 	m_ghostLeft(gRow, 11) = m_dirichState[3];
-    //   }
+      if (left2 == -1){
+	m_ghostLeft(gRow, 8) = m_dirichState[0];
+	m_ghostLeft(gRow, 9) = m_dirichState[1];
+	m_ghostLeft(gRow, 10) = m_dirichState[2];
+	m_ghostLeft(gRow, 11) = m_dirichState[3];
+      }
 
-    //   if (front2 == -1){
-    // 	const auto ind = back1*numDofPerCell;
-    // 	m_ghostFront(gRow, 8) = m_state(ind);
-    // 	m_ghostFront(gRow, 9) = m_state(ind+1);
-    // 	m_ghostFront(gRow, 10) = m_state(ind+2);
-    // 	m_ghostFront(gRow, 11) = m_state(ind+3);
-    //   }
+      if (front2 == -1){
+	const auto ind = back1*numDofPerCell;
+	m_ghostFront(gRow, 8) = m_state(ind);
+	m_ghostFront(gRow, 9) = m_state(ind+1);
+	m_ghostFront(gRow, 10) = m_state(ind+2);
+	m_ghostFront(gRow, 11) = m_state(ind+3);
+      }
 
-    //   if (right2 == -1){
-    // 	const auto ind = left1*numDofPerCell;
-    // 	m_ghostRight(gRow, 8)  = m_state(ind);
-    // 	m_ghostRight(gRow, 9)  = m_state(ind+1);
-    // 	m_ghostRight(gRow, 10) = m_state(ind+2);
-    // 	m_ghostRight(gRow, 11) = m_state(ind+3);
-    //   }
+      if (back2 == -1){
+	const auto ind = front1*numDofPerCell;
+	m_ghostBack(gRow, 8) = m_state(ind);
+	m_ghostBack(gRow, 9) = m_state(ind+1);
+	m_ghostBack(gRow, 10) = m_state(ind+2);
+	m_ghostBack(gRow, 11) = m_state(ind+3);
+      }
 
-    //   if (back2 == -1){
-    // 	const auto ind = front1*numDofPerCell;
-    // 	if (myX < 0.5){
-    // 	  m_ghostBack(gRow, 8) = m_density;
-    // 	  m_ghostBack(gRow, 9) = m_density*m_inletXVel;
-    // 	  m_ghostBack(gRow, 10) = 0.;
-    // 	  m_ghostBack(gRow, 11) = m_state(ind+3);
-
-    // 	}
-    // 	else{
-    // 	  m_ghostBack(gRow, 8) = m_density;
-    // 	  m_ghostBack(gRow, 9) = m_density*m_inletXVel;
-    // 	  m_ghostBack(gRow, 10) = m_density*m_bottomYVel;
-    // 	  m_ghostBack(gRow, 11) = m_state(ind+3);
-    // 	}
-    //   }
-    // }
-
+      if (right2 == -1){
+	const auto ind = left1*numDofPerCell;
+	if (myY < wallTopY_){
+	  m_ghostRight(gRow, 8) = m_state(ind);
+	  m_ghostRight(gRow, 9) = -m_state(ind+1);
+	  m_ghostRight(gRow, 10) = -m_state(ind+2);
+	  m_ghostRight(gRow, 11) = m_state(ind+3);
+	}
+	else{
+	  m_ghostRight(gRow, 8) = m_state(ind);
+	  m_ghostRight(gRow, 9) = m_state(ind+1);
+	  m_ghostRight(gRow, 10) = m_state(ind+2);
+	  m_ghostRight(gRow, 11) = m_state(ind+3) + 0.5*(m_dirichState[3] - m_state(ind+3));
+	}
+      }
+    }
   }
 
 private:
@@ -222,6 +218,7 @@ private:
   scalar_type m_density = {};
   scalar_type m_inletXVel = {};
   std::array<scalar_type, 4> m_dirichState = {0,0,0,0};
+  const scalar_type wallTopY_ = 0.5;
 };
 
 }}

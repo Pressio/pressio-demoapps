@@ -72,7 +72,8 @@ try:
     create_diffusion_reaction_2d_problem_A,\
     create_gray_scott_2d_problem,\
     create_slip_wall_swe_2d_problem,\
-    create_cross_shock_problem
+    create_cross_shock_problem, \
+    create_cross_shock_wall_problem
 except ImportError:
   raise ImportError("Unable to import create_* from _pressiodemoappsimpl")
 
