@@ -78,6 +78,29 @@ public:
     return res;
   }
 
+  void operator()(const state_type & state,
+		  const independent_variable_type currentTime,
+		  right_hand_side_type & V) const
+  {
+    T::velocityAndOptionalJacobian(state, currentTime,
+				   V, nullptr);
+  }
+
+  void operator()(const state_type & state,
+		 const independent_variable_type currentTime,
+		 right_hand_side_type & V,
+		 jacobian_type & jacobian,
+		 bool computeJacobian) const
+  {
+    if (computeJacobian){
+      T::velocityAndOptionalJacobian(state, currentTime,
+				     V, &jacobian);
+    }else{
+      T::velocityAndOptionalJacobian(state, currentTime,
+				     V, nullptr);
+    }
+  }
+
   void rightHandSide(const state_type & state,
 		     const independent_variable_type currentTime,
 		     right_hand_side_type & V) const

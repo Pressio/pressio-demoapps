@@ -57,23 +57,17 @@ A *pressio-demoapps* C++ problem class meets the following API
 
       Constructs and returns an instance of the jacobian.
 
-   .. cpp:function:: void rightHandSide(const state_type & y, scalar_type time, right_hand_side_type & v)
+   .. cpp:function:: void operator()(const state_type & y, scalar_type time, right_hand_side_type & v)
 
       Given a state :math:`y` and time :math:`time`,
-      evaluates the RHS of the system and overwrites :math:`v`.
+      evaluates the RHS of the system overwriting :math:`v`.
 
-   .. cpp:function:: void jacobian(const state_type & y, scalar_type time, jacobian_type & J)
-
-      Given a state :math:`y` and time :math:`time`,
-      evaluates the Jacobian of the RHS and stores it into :math:`J`.
-
-   .. cpp:function:: void rightHandSideAndJacobian(const state_type & y, \
-		                              scalar_type time, \
-					      right_hand_side_type & v, \
-					      jacobian_type & J)
+   .. cpp:function:: void operator()(const state_type & y, scalar_type time,\
+		     right_hand_side_type & v, jacobian_type & J, bool computeJac)
 
       Given a state :math:`y` and time :math:`time`,
-      evaluates the RHS and its Jacobian.
+      evaluates the RHS of the system overwriting :math:`v` and  if ``computeJac == true``,
+      its Jacobian and stores it into :math:`J`.
 
    .. cpp:function:: auto totalDofSampleMesh()
 

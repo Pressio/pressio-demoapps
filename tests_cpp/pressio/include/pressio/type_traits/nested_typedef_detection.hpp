@@ -3,7 +3,7 @@
 // ************************************************************************
 //
 // nested_typedef_detection.hpp
-//                     		  Pressio
+//                          Pressio
 //                             Copyright 2019
 //    National Technology & Engineering Solutions of Sandia, LLC (NTESS)
 //
@@ -89,6 +89,11 @@ PRESSIO_IMPL_HAS_NESTED_TYPEDEF(manifold_tangent)
 PRESSIO_IMPL_HAS_NESTED_TYPEDEF(basis)
 PRESSIO_IMPL_HAS_NESTED_TYPEDEF(operand)
 PRESSIO_IMPL_HAS_NESTED_TYPEDEF(result)
+PRESSIO_IMPL_HAS_NESTED_TYPEDEF(residual_operand)
+PRESSIO_IMPL_HAS_NESTED_TYPEDEF(jacobian_action_operand)
+PRESSIO_IMPL_HAS_NESTED_TYPEDEF(right_hand_side_operand)
+PRESSIO_IMPL_HAS_NESTED_TYPEDEF(offset)
+PRESSIO_IMPL_HAS_NESTED_TYPEDEF(basis_matrix)
 
 }//end namespace
 #endif  // TYPE_TRAITS_NESTED_TYPEDEF_DETECTION_HPP_
