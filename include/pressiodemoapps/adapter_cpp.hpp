@@ -60,6 +60,9 @@ public:
     return pda::clone(m_jacobian);
   }
 
+  //
+  // jacobian action
+  //
   eigen_vec_t createApplyJacobianResult(const eigen_vec_t & operand) const{
     eigen_vec_t res(m_jacobian.rows());
     ::pressiodemoapps::set_zero(res);
@@ -78,6 +81,21 @@ public:
     return res;
   }
 
+  eigen_vec_t createResultOfJacobianActionOn(const eigen_vec_t & operand) const{
+    return createApplyJacobianResult(operand);
+  }
+
+  eigen_mat_ll_t createResultOfJacobianActionOn(const eigen_mat_ll_t & operand) const{
+    return createApplyJacobianResult(operand);
+  }
+
+  eigen_mat_lr_t createResultOfJacobianActionOn(const eigen_mat_lr_t & operand) const{
+    return createApplyJacobianResult(operand);
+  }
+
+  //
+  // evaluation
+  //
   void operator()(const state_type & state,
 		  const independent_variable_type currentTime,
 		  right_hand_side_type & V) const
