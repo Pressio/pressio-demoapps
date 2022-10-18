@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="C++ API" href="apicpp.html" /><link rel="prev" title="Installation" href="installation.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>How to use it in 3 steps! - pressio-demoapps v0.4.0</title>
+        <title>How to use it in 3 steps! - pressio-demoapps v0.13.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.4.0</div></a>
+v0.13.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.4.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.4.0</span>
+v0.13.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -341,14 +341,14 @@ Here we show some things you can do using the C++ as an example:</p>
 <span class="k">auto</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// having the problem and initial condition, create instance of the RHS</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">createVelocity</span><span class="p">()</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">rhs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">createRightHandSide</span><span class="p">()</span><span class="w"></span>
 <span class="c1">// compute the rhs of the discrete system at time=0.0</span>
-<span class="n">problem</span><span class="p">.</span><span class="n">velocity</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">);</span><span class="w"></span>
+<span class="n">problem</span><span class="p">.</span><span class="n">rightHandSide</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">);</span><span class="w"></span>
 
 <span class="c1">// create the Jacobian</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">createJacobian</span><span class="p">()</span><span class="w"></span>
 <span class="c1">// compute J at time=0.0</span>
-<span class="n">problem</span><span class="p">.</span><span class="n">velocityAndJacobian</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">,</span><span class="w"> </span><span class="n">J</span><span class="p">);</span><span class="w"></span>
+<span class="n">problem</span><span class="p">.</span><span class="n">rightHandSideAndJacobian</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">,</span><span class="w"> </span><span class="n">J</span><span class="p">);</span><span class="w"></span>
 <span class="c1">// or we can compute just the Jacobian</span>
 <span class="n">problem</span><span class="p">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">J</span><span class="p">);</span><span class="w"></span>
 </pre></div>
@@ -392,7 +392,7 @@ Here we show some things you can do using the C++ as an example:</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jul 15, 2022</div>
+              Last updated on Oct 18, 2022</div>
           </div>
           <div class="right-details">
             <div class="icons">

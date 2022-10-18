@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Meshing Capability" href="meshing.html" /><link rel="prev" title="C++ API" href="apicpp.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Python API - pressio-demoapps v0.4.0</title>
+        <title>Python API - pressio-demoapps v0.13.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.4.0</div></a>
+v0.13.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.4.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.4.0</span>
+v0.13.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -269,9 +269,9 @@ v0.4.0</span>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Problem.createVelocity">
-<span class="sig-name descname"><span class="pre">createVelocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.createVelocity" title="Permalink to this definition">#</a></dt>
-<dd><p>Constructs and returns an instance of the velocity.</p>
+<dt class="sig sig-object py" id="Problem.createRightHandSide">
+<span class="sig-name descname"><span class="pre">createRightHandSide</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Problem.createRightHandSide" title="Permalink to this definition">#</a></dt>
+<dd><p>Constructs and returns an instance of the rhs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy array</p>
@@ -295,8 +295,8 @@ The result is constructed, and zeroed out before returning it.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Problem.velocity">
-<span class="sig-name descname"><span class="pre">velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Problem.velocity" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="Problem.rightHandSide">
+<span class="sig-name descname"><span class="pre">rightHandSide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Problem.rightHandSide" title="Permalink to this definition">#</a></dt>
 <dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
 evaluates the RHS of the system and stores it into <span class="math notranslate nohighlight">\(v\)</span>.</p>
 <dl class="field-list simple">
@@ -304,7 +304,7 @@ evaluates the RHS of the system and stores it into <span class="math notranslate
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>numpy array</em>) – state vector</p></li>
 <li><p><strong>time</strong> (<em>float</em>) – evaluation time</p></li>
-<li><p><strong>v</strong> (<em>numpy array</em>) – velocity to overwrite</p></li>
+<li><p><strong>rhs</strong> (<em>numpy array</em>) – rhs to overwrite</p></li>
 </ul>
 </dd>
 </dl>
@@ -408,7 +408,7 @@ This corresponds to all cells where the state is defined.</p>
 <dt class="sig sig-object py" id="CellCenteredUniformMesh.sampleMeshSize">
 <span class="sig-name descname"><span class="pre">sampleMeshSize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#CellCenteredUniformMesh.sampleMeshSize" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the number of <em>sample</em> cells in the mesh.
-This corresponds to all cells where the velocity (or RHS) is defined.</p>
+This corresponds to all cells where the RHS is defined.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -527,7 +527,7 @@ The type of container returned by reference depends on the backend used.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jul 15, 2022</div>
+              Last updated on Oct 18, 2022</div>
           </div>
           <div class="right-details">
             <div class="icons">

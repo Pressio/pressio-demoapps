@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="Full mesh" href="meshfull.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Sample Mesh Capabilty - pressio-demoapps v0.4.0</title>
+        <title>Sample Mesh Capabilty - pressio-demoapps v0.13.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.4.0</div></a>
+v0.13.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.4.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.4.0</span>
+v0.13.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -257,7 +257,7 @@ v0.4.0</span>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>In practice, a sample mesh is a disjoint collection
-of cells where one computes the velocity (or RHS or residual) vector
+of cells where one computes the RHS (or residual) vector
 and Jacobian matrix of the target system.</p>
 </div>
 <p>The sample mesh is critical, for example, for projection-based ROMs of nonlinear systems.
@@ -273,9 +273,9 @@ and the <a class="reference external" href="https://doi.org/10.1137/090766498">d
 <p>While the sample mesh strictly speaking refers to the collection of cells
 where we compute the residual and Jacobian, a related concept is what we refer to as <strong>stencil mesh</strong>.
 We refer to <strong>stencil mesh</strong> the collection of cells that are needed to compute
-the velocity or residual vector on the <em>sample mesh</em>.
+the RHS or residual vector on the <em>sample mesh</em>.
 Note that, in general, the sample mesh is a subset of the stencil mesh,
-because to compute the velocity or residual at a given cell, one also needs
+because to compute the RHS or residual at a given cell, one also needs
 the cell-centered values at that target cell.</p>
 <p>For more discussion on this, see <a class="reference external" href="https://pressio.github.io/proms/hyper/">this page</a>.</p>
 </section>
@@ -418,7 +418,7 @@ This is because this new mesh is effectively a new, self-contained mesh.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jul 15, 2022</div>
+              Last updated on Oct 18, 2022</div>
           </div>
           <div class="right-details">
             <div class="icons">

@@ -4,11 +4,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
 
-    <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/><title>Index - pressio-demoapps v0.4.0</title>
+    <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/><title>Index - pressio-demoapps v0.13.0</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -130,7 +130,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.4.0</div></a>
+v0.13.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -154,7 +154,7 @@ v0.4.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.4.0</span>
+v0.13.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -250,7 +250,7 @@ v0.4.0</span>
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#V"><strong>V</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#V"><strong>V</strong></a></div>
 </section>
 <section id="A" class="genindex-section">
   <h2>A</h2>
@@ -300,7 +300,7 @@ v0.4.0</span>
 </li>
         <li><a href="apipy.html#Problem.createApplyJacobianResult">createApplyJacobianResult() (Problem method)</a>
 </li>
-        <li><a href="apipy.html#Problem.createVelocity">createVelocity() (Problem method)</a>
+        <li><a href="apipy.html#Problem.createRightHandSide">createRightHandSide() (Problem method)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -346,16 +346,20 @@ v0.4.0</span>
         </ul></li>
         <li><a href="apicpp.html#_CPPv4N7Problem14createJacobianEv">Problem::createJacobian (C++ function)</a>
 </li>
-        <li><a href="apicpp.html#_CPPv4N7Problem14createVelocityEv">Problem::createVelocity (C++ function)</a>
+        <li><a href="apicpp.html#_CPPv4N7Problem19createRightHandSideEv">Problem::createRightHandSide (C++ function)</a>
+</li>
+        <li><a href="apicpp.html#_CPPv4N7Problem25independent_variable_typeE">Problem::independent_variable_type (C++ type)</a>
 </li>
         <li><a href="apicpp.html#_CPPv4N7Problem16initialConditionEv">Problem::initialCondition (C++ function)</a>
 </li>
-        <li><a href="apicpp.html#_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type">Problem::jacobian (C++ function)</a>
-</li>
-        <li><a href="apicpp.html#_CPPv4N7Problem13jacobian_typeE">Problem::jacobian_type (C++ type)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="apicpp.html#_CPPv4N7Problem13jacobian_typeE">Problem::jacobian_type (C++ type)</a>
+</li>
+        <li><a href="apicpp.html#_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_type">Problem::operator() (C++ function)</a>, <a href="apicpp.html#_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_typeR13jacobian_typeb">[1]</a>
+</li>
+        <li><a href="apicpp.html#_CPPv4N7Problem20right_hand_side_typeE">Problem::right_hand_side_type (C++ type)</a>
+</li>
         <li><a href="apicpp.html#_CPPv4N7Problem11scalar_typeE">Problem::scalar_type (C++ type)</a>
 </li>
         <li><a href="apicpp.html#_CPPv4N7Problem10state_typeE">Problem::state_type (C++ type)</a>
@@ -364,11 +368,15 @@ v0.4.0</span>
 </li>
         <li><a href="apicpp.html#_CPPv4N7Problem19totalDofStencilMeshEv">Problem::totalDofStencilMesh (C++ function)</a>
 </li>
-        <li><a href="apicpp.html#_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type">Problem::velocity (C++ function)</a>
-</li>
-        <li><a href="apicpp.html#_CPPv4N7Problem13velocity_typeE">Problem::velocity_type (C++ type)</a>
-</li>
-        <li><a href="apicpp.html#_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type">Problem::velocityAndJacobian (C++ function)</a>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="apipy.html#Problem.rightHandSide">rightHandSide() (Problem method)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -408,8 +416,6 @@ v0.4.0</span>
   <h2>V</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="apipy.html#Problem.velocity">velocity() (Problem method)</a>
-</li>
         <li><a href="apipy.html#CellCenteredUniformMesh.viewX">viewX() (CellCenteredUniformMesh method)</a>
 </li>
     </ul></td>
@@ -440,7 +446,7 @@ v0.4.0</span>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jul 15, 2022</div>
+              Last updated on Oct 18, 2022</div>
           </div>
           <div class="right-details">
             <div class="icons">

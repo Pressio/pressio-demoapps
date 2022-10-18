@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Python API" href="apipy.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>C++ API - pressio-demoapps v0.4.0</title>
+        <title>C++ API - pressio-demoapps v0.13.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.4.0</div></a>
+v0.13.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.4.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.4.0</span>
+v0.13.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -265,6 +265,12 @@ v0.4.0</span>
 </dd></dl>
 
 <dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem25independent_variable_typeE">
+<span id="_CPPv3N7Problem25independent_variable_typeE"></span><span id="_CPPv2N7Problem25independent_variable_typeE"></span><span id="Problem::independent_variable_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">independent_variable_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem25independent_variable_typeE" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>This represents “time” and is the same as the <code class="docutils literal notranslate"><span class="pre">scalar_type</span></code>.</p>
+</dd></dl>
+
+<dl class="cpp type">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem10state_typeE">
 <span id="_CPPv3N7Problem10state_typeE"></span><span id="_CPPv2N7Problem10state_typeE"></span><span id="Problem::state_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">state_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem10state_typeE" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Data structure type storing the state: this depends on which specific implementation
@@ -274,12 +280,12 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="cpp type">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem13velocity_typeE">
-<span id="_CPPv3N7Problem13velocity_typeE"></span><span id="_CPPv2N7Problem13velocity_typeE"></span><span id="Problem::velocity_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem13velocity_typeE" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Data structure type to store the velocity (or RHS): this depends on which specific implementation
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem20right_hand_side_typeE">
+<span id="_CPPv3N7Problem20right_hand_side_typeE"></span><span id="_CPPv2N7Problem20right_hand_side_typeE"></span><span id="Problem::right_hand_side_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">right_hand_side_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem20right_hand_side_typeE" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>Data structure type to store the RHS: this depends on which specific implementation
 you use when you instantiate the problem using the <code class="docutils literal notranslate"><span class="pre">create_problem_&lt;&gt;</span></code> API
 (see <a class="reference internal" href="#supported-backends-and-types">Supported Backends And Types</a> for more details about backends and corresponding types).
-For example, if you use <code class="docutils literal notranslate"><span class="pre">create_problem_eigen</span></code>, the <code class="docutils literal notranslate"><span class="pre">velocity_type</span></code> will be an Eigen vector.</p>
+For example, if you use <code class="docutils literal notranslate"><span class="pre">create_problem_eigen</span></code>, the <code class="docutils literal notranslate"><span class="pre">right_hand_side_type</span></code> will be an Eigen vector.</p>
 </dd></dl>
 
 <dl class="cpp type">
@@ -298,9 +304,9 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem14createVelocityEv">
-<span id="_CPPv3N7Problem14createVelocityEv"></span><span id="_CPPv2N7Problem14createVelocityEv"></span><span id="Problem::createVelocity"></span><a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createVelocity</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem14createVelocityEv" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Constructs and returns an instance of the velocity.</p>
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem19createRightHandSideEv">
+<span id="_CPPv3N7Problem19createRightHandSideEv"></span><span id="_CPPv2N7Problem19createRightHandSideEv"></span><span id="Problem::createRightHandSide"></span><a class="reference internal" href="#_CPPv4N7Problem20right_hand_side_typeE" title="Problem::right_hand_side_type"><span class="n"><span class="pre">right_hand_side_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createRightHandSide</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19createRightHandSideEv" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>Constructs and returns an instance of the right hand side.</p>
 </dd></dl>
 
 <dl class="cpp function">
@@ -310,24 +316,18 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type">
-<span id="_CPPv3N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="_CPPv2N7Problem8velocityERK10state_type11scalar_typeR13velocity_type"></span><span id="Problem::velocity__state_typeCR.scalar_type.velocity_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8velocityERK10state_type11scalar_typeR13velocity_type" title="Permalink to this definition">#</a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_type">
+<span id="_CPPv3N7ProblemclERK10state_type11scalar_typeR20right_hand_side_type"></span><span id="_CPPv2N7ProblemclERK10state_type11scalar_typeR20right_hand_side_type"></span><span id="Problem::call-operator__state_typeCR.scalar_type.right_hand_side_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem20right_hand_side_typeE" title="Problem::right_hand_side_type"><span class="n"><span class="pre">right_hand_side_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_type" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
-evaluates the RHS of the system and overwrites <span class="math notranslate nohighlight">\(v\)</span>.</p>
+evaluates the RHS of the system overwriting <span class="math notranslate nohighlight">\(v\)</span>.</p>
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type">
-<span id="_CPPv3N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="_CPPv2N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type"></span><span id="Problem::jacobian__state_typeCR.scalar_type.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem8jacobianERK10state_type11scalar_typeR13jacobian_type" title="Permalink to this definition">#</a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_typeR13jacobian_typeb">
+<span id="_CPPv3N7ProblemclERK10state_type11scalar_typeR20right_hand_side_typeR13jacobian_typeb"></span><span id="_CPPv2N7ProblemclERK10state_type11scalar_typeR20right_hand_side_typeR13jacobian_typeb"></span><span id="Problem::call-operator__state_typeCR.scalar_type.right_hand_side_typeR.jacobian_typeR.b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem20right_hand_side_typeE" title="Problem::right_hand_side_type"><span class="n"><span class="pre">right_hand_side_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">computeJac</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7ProblemclERK10state_type11scalar_typeR20right_hand_side_typeR13jacobian_typeb" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
-evaluates the Jacobian of the RHS and stores it into <span class="math notranslate nohighlight">\(J\)</span>.</p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type">
-<span id="_CPPv3N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="_CPPv2N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type"></span><span id="Problem::velocityAndJacobian__state_typeCR.scalar_type.velocity_typeR.jacobian_typeR"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocityAndJacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13velocity_typeE" title="Problem::velocity_type"><span class="n"><span class="pre">velocity_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span>, <a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem19velocityAndJacobianERK10state_type11scalar_typeR13velocity_typeR13jacobian_type" title="Permalink to this definition">#</a><br /></dt>
-<dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
-evaluates the RHS and its Jacobian.</p>
+evaluates the RHS of the system overwriting <span class="math notranslate nohighlight">\(v\)</span> and  if <code class="docutils literal notranslate"><span class="pre">computeJac</span> <span class="pre">==</span> <span class="pre">true</span></code>,
+its Jacobian and stores it into <span class="math notranslate nohighlight">\(J\)</span>.</p>
 </dd></dl>
 
 <dl class="cpp function">
@@ -366,7 +366,7 @@ then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mes
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Eigen</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">state_type</span> <span class="pre">=</span> <span class="pre">Eigen::Matrix&lt;scalar_type,</span> <span class="pre">Eigen::Dynamic,</span> <span class="pre">1&gt;</span></code> <span class="raw-html-m2r"><br/></span> <span class="raw-html-m2r"><br/></span> <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">velocity_type</span> <span class="pre">=</span> <span class="pre">Eigen::Matrix&lt;scalar_type,</span> <span class="pre">Eigen::Dynamic,</span> <span class="pre">1&gt;</span></code> <span class="raw-html-m2r"><br/></span> <span class="raw-html-m2r"><br/></span> <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">jacobian_type</span> <span class="pre">=</span> <span class="pre">Eigen::SparseMatrix&lt;scalar_type,</span> <span class="pre">Eigen::RowMajor,</span> <span class="pre">int32_t&gt;;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">state_type</span> <span class="pre">=</span> <span class="pre">Eigen::Matrix&lt;scalar_type,</span> <span class="pre">Eigen::Dynamic,</span> <span class="pre">1&gt;</span></code> <span class="raw-html-m2r"><br/></span> <span class="raw-html-m2r"><br/></span> <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">right_hand_side_type</span> <span class="pre">=</span> <span class="pre">Eigen::Matrix&lt;scalar_type,</span> <span class="pre">Eigen::Dynamic,</span> <span class="pre">1&gt;</span></code> <span class="raw-html-m2r"><br/></span> <span class="raw-html-m2r"><br/></span> <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">jacobian_type</span> <span class="pre">=</span> <span class="pre">Eigen::SparseMatrix&lt;scalar_type,</span> <span class="pre">Eigen::RowMajor,</span> <span class="pre">int32_t&gt;;</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -414,7 +414,7 @@ This corresponds to all cells where the state is defined.</p>
 <dt class="sig sig-object cpp" id="_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv">
 <span id="_CPPv3NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="_CPPv2NK23CellCenteredUniformMesh14sampleMeshSizeEv"></span><span id="CellCenteredUniformMesh::sampleMeshSizeC"></span><a class="reference internal" href="#_CPPv4N23CellCenteredUniformMesh10index_typeE" title="CellCenteredUniformMesh::index_type"><span class="n"><span class="pre">index_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sampleMeshSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK23CellCenteredUniformMesh14sampleMeshSizeEv" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Returns the number of <em>sample</em> cells in the mesh.
-This corresponds to all cells where the velocity (or RHS) is defined.</p>
+This corresponds to all cells where the RHS is defined.</p>
 </dd></dl>
 
 <dl class="cpp function">
@@ -498,7 +498,7 @@ The type of container returned by reference depends on the backend used.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jul 15, 2022</div>
+              Last updated on Oct 18, 2022</div>
           </div>
           <div class="right-details">
             <div class="icons">
