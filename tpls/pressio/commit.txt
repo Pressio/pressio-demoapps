@@ -1,8 +1,0 @@
-commit 020e9e9454b3b772f8630221e17223cc5e270c29 (HEAD -> develop, origin/develop)
-Merge: 54fd7884 9e13fe03
-Author: Francesco Rizzi <fnrizzi@sandia.gov>
-Date:   Wed Feb 2 19:28:05 2022 +0100
-
-    Merge pull request #335 from Pressio/observe_rhs_for_explicit_steppers_333
-
-    ode: support RHS observer for explicit steppers

@@ -8,7 +8,7 @@ What is a sample mesh and why?
 
 .. Important::
    In practice, a sample mesh is a disjoint collection
-   of cells where one computes the velocity (or RHS or residual) vector
+   of cells where one computes the RHS (or residual) vector
    and Jacobian matrix of the target system.
 
 The sample mesh is critical, for example, for projection-based ROMs of nonlinear systems.
@@ -26,9 +26,9 @@ and the `discrete empirical interpolation method (DEIM) <https://doi.org/10.1137
 While the sample mesh strictly speaking refers to the collection of cells
 where we compute the residual and Jacobian, a related concept is what we refer to as **stencil mesh**.
 We refer to **stencil mesh** the collection of cells that are needed to compute
-the velocity or residual vector on the *sample mesh*.
+the RHS or residual vector on the *sample mesh*.
 Note that, in general, the sample mesh is a subset of the stencil mesh,
-because to compute the velocity or residual at a given cell, one also needs
+because to compute the RHS or residual at a given cell, one also needs
 the cell-centered values at that target cell.
 
 For more discussion on this, see `this page <https://pressio.github.io/proms/hyper/>`_.

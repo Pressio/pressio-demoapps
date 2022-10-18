@@ -2,7 +2,7 @@
 #ifndef PRESSIODEMOAPPS_TESTS_OBSERVER_HPP_
 #define PRESSIODEMOAPPS_TESTS_OBSERVER_HPP_
 
-template <typename state_t>
+template <typename StateType>
 class FomObserver
 {
 public:
@@ -14,14 +14,15 @@ public:
     myfile0_.close();
   }
 
-  template<typename time_t>
-  void operator()(const size_t step,
-  		  const time_t t,
-  		  const state_t & y)
+  template<typename TimeType>
+  void operator()(const pressio::ode::StepCount stepIn,
+  		  const TimeType /*timein*/,
+  		  const StateType & state)
   {
+    const auto step = stepIn.get();
     if (step % sampleFreq_ == 0){
-      const std::size_t ext = y.size()*sizeof(double);
-      myfile0_.write(reinterpret_cast<const char*>(&y(0)), ext);
+      const std::size_t ext = state.size()*sizeof(double);
+      myfile0_.write(reinterpret_cast<const char*>(&state(0)), ext);
     }
   }
 

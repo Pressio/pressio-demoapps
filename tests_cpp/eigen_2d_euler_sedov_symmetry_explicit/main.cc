@@ -3,7 +3,7 @@
 #include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
 
-int main(int argc, char *argv[])
+int main()
 {
 
   namespace pda = pressiodemoapps;
@@ -18,18 +18,17 @@ int main(int argc, char *argv[])
 
   const auto probId  = pda::Euler2d::SedovSymmetry;
   auto appObj      = pda::create_problem_eigen(meshObj, probId, order);
-  const auto stateSize = appObj.totalDofStencilMesh();
 
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 
   state_t state = appObj.initialCondition();
   FomObserver<state_t> Obs("sedov2dsym_solution.bin", 10);
-  auto stepperObj = pressio::ode::create_ssprk3_stepper(state, appObj);
+  auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
 
   const auto dt = 0.0001;
-  const auto Nsteps = 0.05/dt;
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
+  const auto Nsteps = pressio::ode::StepCount(0.05/dt);
+  pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

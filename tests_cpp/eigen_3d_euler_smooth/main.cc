@@ -8,13 +8,13 @@ template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.extent(0); i++){
+  for (int i=0; i<obj.extent(0); i++){
     file << std::setprecision(14) << obj(i) << " \n";
   }
   file.close();
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
@@ -30,12 +30,12 @@ int main(int argc, char *argv[])
   using state_t = typename app_t::state_type;
 
   state_t state(appObj.initialCondition());
-  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  auto stepperObj = pressio::ode::create_rk4_stepper(appObj);
 
   const auto dt = 0.001;
-  const auto Nsteps = 2./dt;
+  const auto Nsteps = pressio::ode::StepCount(2./dt);
   FomObserver<state_t> Obs("solution.bin", 100);
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
+  pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

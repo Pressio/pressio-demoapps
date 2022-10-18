@@ -3,7 +3,7 @@
 #include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
 
-int main(int argc, char *argv[])
+int main()
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
 
   FomObserver<state_t> Obs("riemann2d_solution.bin", 100);
   const auto dt = 0.001;
-  const auto Nsteps = 0.6/dt;
+  const auto Nsteps = pressio::ode::StepCount(0.6/dt);
 
-  auto stepperObj = pressio::ode::create_ssprk3_stepper(state, appObj);
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
+  auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
+  pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

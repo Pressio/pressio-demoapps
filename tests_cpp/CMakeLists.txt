@@ -1,6 +1,19 @@
 
 set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
+# note that eigen is inside tpls because the code inside
+# pressio-demoapps directly depends on it.
+# pressio instead is placed here, inside the tests,
+# because the tests rely on pressio for doing time integration
+# but the actual demoapps implementation does not depend on it
+# so it is better to keep things clean this way.
+
+include_directories(
+  # include eigen, pressio-demoapps headers, and pressio
+  ${CMAKE_CURRENT_SOURCE_DIR}/../tpls/eigen/eigen3
+  ${CMAKE_CURRENT_SOURCE_DIR}/../include
+  ${CMAKE_CURRENT_SOURCE_DIR}/pressio/include)
+
 # ---------------------------------------------------------
 # various
 # ---------------------------------------------------------
@@ -66,14 +79,13 @@ add_subdirectory(eigen_2d_euler_sample_mesh_test1)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_explicit)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
 add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit)
+add_subdirectory(eigen_2d_euler_cross_shock_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
 add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 add_subdirectory(eigen_2d_burgers_periodic_explicit)
 add_subdirectory(eigen_2d_burgers_periodic_sample_mesh_test)
-add_subdirectory(eigen_2d_euler_cross_shock_explicit)
-
 
 # ---------------------------------------------------------
 # 3d problems

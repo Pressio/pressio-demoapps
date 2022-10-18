@@ -6,7 +6,7 @@
 #include <random>
 
 template<class scalar_type, class prim_t>
-void initcond(int i, const scalar_type x, const scalar_type y, prim_t & prim)
+void initcond(const scalar_type x, const scalar_type y, prim_t & prim)
 {
   prim[0] = 1. + 0.1*x + 0.2*y;
   prim[1] = 0.1;
@@ -18,7 +18,7 @@ template<class T>
 void writeToFileRank1(const T & obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.rows(); i++){
+  for (int i=0; i<obj.rows(); i++){
     file << std::setprecision(14) << obj(i) << " \n";
   }
   file.close();
@@ -28,8 +28,8 @@ template<class T>
 void writeToFileSparseMat(const T & obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.rows(); i++){
-    for (size_t j=0; j<obj.cols(); j++){
+  for (int i=0; i<obj.rows(); i++){
+    for (int j=0; j<obj.cols(); j++){
       file << std::setprecision(14) << obj.coeff(i,j) << " ";
     }
     file << " \n";
@@ -37,7 +37,7 @@ void writeToFileSparseMat(const T & obj, const std::string & fileName)
   file.close();
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   namespace pda = pressiodemoapps;
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
   const auto &x = meshObj.viewX();
   const auto &y = meshObj.viewY();
   for (int i=0; i<x.size(); ++i){
-    initcond(i, x(i), y(i), prim);
+    initcond(x(i), y(i), prim);
     const auto ind = i*4;
     state(ind)   = prim[0];
     state(ind+1) = prim[0]*prim[1];
@@ -72,9 +72,9 @@ int main(int argc, char *argv[])
   }
 
   auto time = 0.0;
-  auto velo = appObj.createVelocity();
+  auto velo = appObj.createRightHandSide();
   auto jac  = appObj.createJacobian();
-  appObj.velocityAndJacobian(state, time, velo, jac);
+  appObj.rightHandSideAndJacobian(state, time, velo, jac);
   //appObj.jacobian(state, time, jac);
 
   writeToFileRank1(state,   "state.txt");

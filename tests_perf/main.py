@@ -33,7 +33,7 @@ if __name__ == '__main__':
   appObj     = pda.create_problem(meshObj, probId, schemeEnum)
 
   yn = appObj.initialCondition()
-  V = appObj.createVelocity()
+  V = appObj.createRightHandSide()
   B = np.ones((len(yn), 25), order='F')
   AJ = appObj.createApplyJacobianResult(B)
   # warmup

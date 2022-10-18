@@ -14,7 +14,7 @@ void analytical(const scalar_type x,
   prim[2] = 1.;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 
   namespace pda = pressiodemoapps;
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
   using state_t = typename app_t::state_type;
   state_t state(appObj.initialCondition());
 
-  auto stepperObj = pressio::ode::create_rk4_stepper(state, appObj);
+  auto stepperObj = pressio::ode::create_rk4_stepper(appObj);
 #ifdef USE_WENO5
   FomObserver<state_t> Obs("eigen_1d_euler_convergence_weno5_solution.bin", 1);
 #elif defined USE_WENO3
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 #endif
 
   const auto dt = 0.001;
-  const auto Nsteps = 2./dt;
-  pressio::ode::advance_n_steps_and_observe(stepperObj, state, 0., dt, Nsteps, Obs);
+  const auto Nsteps = pressio::ode::StepCount(2./dt);
+  pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;
 }

@@ -15,8 +15,6 @@ To use it, you need a C++14 compiler and you have to:
 
 2. include the Eigen library (whose headers you can find inside ``pressiodemoapps/tpls``).
 
-3. specify the CMake option ``-DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON`` while building your code.
-
 Building the test suite
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -25,7 +23,7 @@ If you want to build the C++ tests, you need CMake > 3.18.0 and then do::
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
   export CXX=<path-to-your-CXX-compiler> #must support C++14
   cd pressio-demoapps && mkdir build && cd build
-  cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On -DPRESSIODEMOAPPS_ENABLE_TPL_EIGEN=ON ..
+  cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On ..
   make -j4
   ctest -j4
 
@@ -53,18 +51,6 @@ Then, you can do:
 
 
 This builds/installs pressiodemoapps with default options (build_mode=Release).
-
-
-
-..
-   To build/install pressiodemoapps with OpenMP and Release mode:
-   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-   export CXX=<path-to-your-CXX-compiler> #must support C++14
-   python3 cmake_build.py --openmp
-   pip3 install .
-   # to just build do
-   python -m build
-
 
 You can run the tests to verify things::
 

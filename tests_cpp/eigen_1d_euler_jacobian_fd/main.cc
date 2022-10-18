@@ -6,7 +6,7 @@ template<class T>
 void writeToFile(const T& obj, const std::string & fileName)
 {
   std::ofstream file; file.open(fileName);
-  for (size_t i=0; i<obj.size(); i++){
+  for (int i=0; i<obj.size(); i++){
     file << std::setprecision(14) << obj(i) << " \n";
   }
   file.close();
@@ -41,7 +41,7 @@ void modify_state(state_type & state,
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   namespace pda = pressiodemoapps;
   const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen(".");
@@ -58,16 +58,14 @@ int main(int argc, char *argv[])
   // because Sod and Lax both have Neumann BC
   auto appObj = pda::create_problem_eigen(meshObj, pda::Euler1d::Sod, order);
   using app_t = decltype(appObj);
-  using scalar_t	= typename app_t::scalar_type;
   using app_state_t	= typename app_t::state_type;
   using app_rhs_t	= typename app_t::velocity_type;
-  using app_jacob_t	= typename app_t::jacobian_type;
 
   app_state_t state = appObj.initialCondition();
   modify_state(state, meshObj);
   writeToFile(state, "IC.txt");
 
-  auto velo = appObj.createVelocity();
+  auto velo = appObj.createRightHandSide();
   auto J = appObj.createJacobian();
 
   const double eps = 1e-8;
@@ -76,7 +74,7 @@ int main(int argc, char *argv[])
   // not just a single time
   for (int loop=0; loop<1; ++loop)
   {
-    appObj.velocityAndJacobian(state, 0., velo, J);
+    appObj.rightHandSideAndJacobian(state, 0., velo, J);
 
     Eigen::VectorXd a = Eigen::VectorXd::Random(state.size());
     auto Ja = J*a;
@@ -84,7 +82,7 @@ int main(int argc, char *argv[])
     // first order
     auto state2 = state+eps*a;
     app_rhs_t velo2(velo.size());
-    appObj.velocity(state2, 0., velo2);
+    appObj.rightHandSide(state2, 0., velo2);
 
     Eigen::VectorXd Ja_fd(velo.size());
     Ja_fd.setZero();
