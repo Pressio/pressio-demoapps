@@ -64,7 +64,7 @@ struct SpanExpr<
   using this_t = SpanExpr<VectorType>;
   using mytraits = SpanTraits<this_t>;
   using ord_t = typename mytraits::ordinal_type;
-  using size_t = typename mytraits::size_type;
+  using size_t = typename mytraits::ordinal_type;
   using ref_t = typename mytraits::reference_type;
   using const_ref_t = typename mytraits::const_reference_type;
   using native_expr_t = typename mytraits::native_expr_type;
@@ -82,18 +82,6 @@ public:
   SpanExpr(SpanExpr && other) = default;
   SpanExpr & operator=(SpanExpr && other) = delete;
   ~SpanExpr() = default;
-
-  SpanExpr(VectorType & objIn,
-	   const ord_t startIndexIn,
-	   const ord_t extentIn)
-    : vecObj_(objIn),
-      startIndex_(startIndexIn),
-      extent_(extentIn),
-      nativeExprObj_(vecObj_.get().segment(startIndex_, extent_))
-  {
-    assert( startIndex_ >= 0 and startIndex_ < objIn.size() );
-    assert( extent_ <= objIn.size() );
-  }
 
   SpanExpr(VectorType & objIn,
 	   std::pair<ord_t, ord_t> indexRange)
@@ -148,11 +136,10 @@ struct SpanExpr<
 {
   using this_t = SpanExpr<VectorType>;
   using traits = SpanTraits<this_t>;
-  using ord_t = typename traits::ordinal_type;
-  using size_t = typename traits::size_type;
+  using size_t = typename VectorType::traits::size_type;
   using pair_t = typename traits::pair_type;
-  using ref_t = typename traits::reference_type;
   using native_expr_t = typename traits::native_expr_type;
+  using ref_t = decltype( std::declval<native_expr_t>()(0) );
 
 private:
   std::reference_wrapper<VectorType> vecObj_;
@@ -168,17 +155,17 @@ public:
   SpanExpr & operator=(SpanExpr && other) = delete;
   ~SpanExpr() = default;
 
-  SpanExpr(VectorType & objIn,
-	   const size_t startIndexIn,
-	   const size_t extentIn)
-    : vecObj_(objIn),
-      startIndex_(startIndexIn),
-      extent_(extentIn),
-      nativeExprObj_(Kokkos::subview(vecObj_.get(),std::make_pair(startIndex_, startIndex_+extent_)))
-  {
-    assert( startIndex_ >= 0 and startIndex_ < objIn.extent(0) );
-    assert( extent_ <= objIn.extent(0) );
-  }
+  // SpanExpr(VectorType & objIn,
+  // 	   const size_t startIndexIn,
+  // 	   const size_t extentIn)
+  //   : vecObj_(objIn),
+  //     startIndex_(startIndexIn),
+  //     extent_(extentIn),
+  //     nativeExprObj_(Kokkos::subview(vecObj_.get(),std::make_pair(startIndex_, startIndex_+extent_)))
+  // {
+  //   assert( startIndex_ >= 0 and startIndex_ < objIn.extent(0) );
+  //   assert( extent_ <= objIn.extent(0) );
+  // }
 
   SpanExpr(VectorType & objIn,
 	   pair_t indexRange)
@@ -218,7 +205,7 @@ public:
 
   template<typename _VectorType = VectorType>
   mpl::enable_if_t<
-    std::is_same<typename traits::memory_space, Kokkos::HostSpace>::value,
+    std::is_same<typename VectorType::memory_space, Kokkos::HostSpace>::value,
     ref_t
     >
   operator()(size_t i) const
