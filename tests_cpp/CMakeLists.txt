@@ -81,6 +81,8 @@ add_subdirectory(eigen_2d_advdiffreac_probA_explicit)
 add_subdirectory(eigen_2d_advdiffreac_probA_sample_mesh_test)
 add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 
+add_subdirectory(eigen_2d_euler_double_mach_reflection_schwarz)
+
 # ---------------------------------------------------------
 # 3d problems
 # ---------------------------------------------------------

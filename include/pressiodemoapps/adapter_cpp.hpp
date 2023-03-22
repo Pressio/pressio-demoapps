@@ -148,6 +148,10 @@ public:
     return createApplyJacobianResult(operand);
   }
 
+  void setStateBc(state_type * stateBc){
+    T::setStateBc(stateBc);
+  }
+
   //
   // evaluation
   //

@@ -146,6 +146,10 @@ public:
   }
 
 protected:
+  void setStateBc(state_type * stateBc){
+    m_stateBc = stateBc;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
@@ -431,20 +435,41 @@ private:
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::DoubleMachReflection)
     {
-      using ghost_filler_t = DoubleMachReflection2dGhostFiller<
-	U_t, MeshType, ghost_container_type>;
-      ghost_filler_t ghF(stencilSize, U,
-			 currentTime, m_gamma, m_meshObj,
-			 m_ghostLeft, m_ghostFront,
-			 m_ghostRight, m_ghostBack);
-
-      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      if (m_stateBc){
+	using ghost_filler_t = DoubleMachReflection2dGhostFillerWithCustomBc<
+	  U_t, MeshType, ghost_container_type>;
+	ghost_filler_t ghF(stencilSize, U,
+			   currentTime, m_gamma, m_meshObj,
+			   m_ghostLeft, m_ghostFront,
+			   m_ghostRight, m_ghostBack,
+			   *m_stateBc);
+	const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
-	ghF(rowsBd[it], it);
+	for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
+	  ghF(rowsBd[it], it);
+	}
+
       }
+
+      else{
+	using ghost_filler_t = DoubleMachReflection2dGhostFiller<
+	  U_t, MeshType, ghost_container_type>;
+	ghost_filler_t ghF(stencilSize, U,
+			   currentTime, m_gamma, m_meshObj,
+			   m_ghostLeft, m_ghostFront,
+			   m_ghostRight, m_ghostBack);
+
+	const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+	for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
+	  ghF(rowsBd[it], it);
+	}
+      }
+
     }
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::CrossShock)
@@ -1172,6 +1197,8 @@ protected:
 
   // for cross-shock problem: density, inletXVel, bottomYVel
   std::array<scalar_type, 3> m_crossshock_params;
+
+  state_type * m_stateBc = nullptr;
 };
 
 template<class MeshType> constexpr int EigenApp<MeshType>::numDofPerCell;
