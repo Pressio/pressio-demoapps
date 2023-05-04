@@ -83,6 +83,7 @@ int main()
   int numSteps = 3;
   const auto dtWrap = pode::StepSize<double>(0.0025);
   const auto startTimeWrap = pode::StepStartAt<double>(0);
+  double time = startTimeWrap.get();
   for (int stepId=1; stepId<=numSteps; ++stepId)
     {
       std::cout << " Doing step = " << stepId << "\n";
@@ -92,6 +93,7 @@ int main()
 			   pode::StepCount(stepId), dtWrap,
 			   nonlinSolverVec[domIdx]);
       }
+      time += dtWrap.get();
     }
 
   return 0;
