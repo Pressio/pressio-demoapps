@@ -101,6 +101,8 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = default;
+
   EigenApp(const MeshType & meshObj,
 	   ::pressiodemoapps::Euler2d probEnum,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
@@ -143,6 +145,10 @@ public:
 
   state_type initialCondition() const{
     return initialConditionImpl();
+  }
+
+  const MeshType & getMesh() const{
+    return m_meshObj;
   }
 
 protected:
@@ -1173,7 +1179,7 @@ private:
 protected:
   scalar_type m_gamma = static_cast<scalar_type>(1.4);
 
-  const MeshType & m_meshObj;
+  MeshType m_meshObj;
   ::pressiodemoapps::Euler2d m_probEn;
   ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
@@ -1192,8 +1198,8 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  const std::array<scalar_type, 2> normalX_{1, 0};
-  const std::array<scalar_type, 2> normalY_{0, 1};
+  std::array<scalar_type, 2> normalX_{1, 0};
+  std::array<scalar_type, 2> normalY_{0, 1};
 
   // for cross-shock problem: density, inletXVel, bottomYVel
   std::array<scalar_type, 3> m_crossshock_params;

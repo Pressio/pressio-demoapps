@@ -6,7 +6,7 @@ configure_file(../compare.py compare.py COPYONLY)
 configure_file(rho_gold.txt rho_gold.txt COPYONLY)
 configure_file(../plot.py plot.py COPYONLY)
 
-add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
+add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main_FR.cc)
 
 add_test(NAME ${testname}
 COMMAND ${CMAKE_COMMAND}

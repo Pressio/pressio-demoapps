@@ -83,7 +83,7 @@ private:
   using indices_v_t = std::vector<index_type>;
 
 public:
-  CellCenteredUniformMesh() = delete;
+  CellCenteredUniformMesh() = default;
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   template<
