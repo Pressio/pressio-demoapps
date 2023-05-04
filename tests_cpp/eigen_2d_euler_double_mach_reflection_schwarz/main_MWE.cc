@@ -15,6 +15,7 @@ int main()
 
     constexpr auto order   = pda::InviscidFluxReconstruction::FirstOrder;
     const auto probId  = pda::Euler2d::DoubleMachReflection;
+    const auto scheme = pressio::ode::StepScheme::CrankNicolson;
     
     // ---- user inputs
 
@@ -33,7 +34,7 @@ int main()
     using jacob_t = typename app_t::jacobian_type;
 
     auto stepperObj = pressio::ode::create_implicit_stepper(
-        pressio::ode::StepScheme::CrankNicolson, appObj);
+        scheme, appObj);
     using lin_solver_t = pressio::linearsolvers::Solver<
     pressio::linearsolvers::iterative::Bicgstab, jacob_t>;
     lin_solver_t linSolverObj;
@@ -55,7 +56,7 @@ int main()
         meshVec.push_back(pda::load_cellcentered_uniform_mesh_eigen("."));
         appVec.push_back(pda::create_problem_eigen(meshVec[domIdx], probId, order));
         stateVec.push_back(appVec[domIdx].initialCondition());
-        stepperVec.push_back(pressio::ode::create_implicit_stepper(pressio::ode::StepScheme::CrankNicolson, appVec[domIdx]));
+        stepperVec.push_back(pressio::ode::create_implicit_stepper(scheme, appVec[domIdx]));
         nonlinSolverVec.push_back(pressio::nonlinearsolvers::create_newton_raphson(stepperVec[domIdx], linSolverVec[domIdx]));
         nonlinSolverVec[domIdx].setTolerance(1e-5);
 
