@@ -63,7 +63,7 @@ int main()
 	      << std::endl;
   }
 
-  std::cout << "\nVERIFIY \n";
+  std::cout << "\nVERIFY \n";
   for (int domIdx = 0; domIdx < ndomains; ++domIdx) {  //
     std::cout << " LOOP: "
 	      << "domIdx = " << domIdx << " "
@@ -75,6 +75,7 @@ int main()
   //
   // try solve
   //
+  std::cout << "\n";
   auto fixTol   = [](nonlin_solver_t & s){ s.setTolerance(1e-5); };
   auto fixIters = [](nonlin_solver_t & s){ s.setMaxIterations(3); };
   std::for_each(nonlinSolverVec.begin(), nonlinSolverVec.end(), fixIters);
