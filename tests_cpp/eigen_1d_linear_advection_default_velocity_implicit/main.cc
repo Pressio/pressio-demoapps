@@ -36,9 +36,8 @@ int main()
     pressio::linearsolvers::iterative::Bicgstab, jacob_t>;
   lin_solver_t linSolverObj;
 
-  auto NonLinSolver=
-    pressio::nonlinearsolvers::create_newton_raphson(stepperObj, linSolverObj);
-  NonLinSolver.setTolerance(1e-6);
+  auto NonLinSolver= pressio::create_newton_solver(stepperObj, linSolverObj);
+  NonLinSolver.setStopTolerance(1e-6);
 
   FomObserver<state_t> Obs("linadv_1d_solution.bin", 1);
 

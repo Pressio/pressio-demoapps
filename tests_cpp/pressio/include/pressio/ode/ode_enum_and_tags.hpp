@@ -46,8 +46,8 @@
 //@HEADER
 */
 
-#ifndef ODE_ENUM_AND_TAG_TYPES_HPP_
-#define ODE_ENUM_AND_TAG_TYPES_HPP_
+#ifndef ODE_ODE_ENUM_AND_TAGS_HPP_
+#define ODE_ODE_ENUM_AND_TAGS_HPP_
 
 namespace pressio{ namespace ode{
 
@@ -63,6 +63,21 @@ enum class StepScheme{
   CrankNicolson,
   ImplicitArbitrary
 };
+
+template<class T = bool>
+T is_explicit_scheme(StepScheme name)
+{
+  if (name == StepScheme::ForwardEuler){ return true; }
+  else if (name == StepScheme::RungeKutta4){ return true; }
+  else if (name == StepScheme::AdamsBashforth2){ return true; }
+  else if (name == StepScheme::SSPRungeKutta3){ return true; }
+  else{ return false; }
+}
+
+template<class T = bool>
+T is_implicit_scheme(StepScheme name){
+  return !is_explicit_scheme(name);
+}
 
 struct ForwardEuler{};
 struct RungeKutta4{};
@@ -83,4 +98,4 @@ class nMinusFour{};
 
 }}//end namespace pressio::ode
 
-#endif  // ODE_STEPPERS_COMMON_HPP_
+#endif  // ODE_ODE_ENUM_AND_TAGS_HPP_
