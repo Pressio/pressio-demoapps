@@ -40,7 +40,7 @@ A *pressio-demoapps* C++ problem class meets the following API
 
    .. cpp:type:: rhs_type
 
-      Same as ``right_hand_side_type``
+      Shortcut for ``right_hand_side_type``
 
    .. cpp:type:: jacobian_type
 
@@ -82,7 +82,7 @@ A *pressio-demoapps* C++ problem class meets the following API
 
       Given a state :math:`y` and time :math:`time`,
       evaluates the RHS of the system overwriting :math:`v` and if ``J == true``,
-      its Jacobian and stores it into :math:`*J.value()`.
+      its Jacobian and stores it into ``*(J.value())``.
 
    .. cpp:function:: auto totalDofSampleMesh()
 

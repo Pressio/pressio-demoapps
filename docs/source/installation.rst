@@ -1,13 +1,12 @@
 .. highlight:: sh
 
-Installation
-============
-
+Build/install
+=============
 
 C++ library
 -----------
 
-The C++ library is header-only so it does not need to be compiled and installed.
+**The C++ library is header-only so it does not need to be compiled and installed.**
 
 To use it, you need a C++17 compiler and you have to:
 
