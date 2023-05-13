@@ -38,6 +38,10 @@ A *pressio-demoapps* C++ problem class meets the following API
       (see `Supported Backends And Types`_ for more details about backends and corresponding types).
       For example, if you use ``create_problem_eigen``, the ``right_hand_side_type`` will be an Eigen vector.
 
+   .. cpp:type:: rhs_type
+
+      Same as ``right_hand_side_type``
+
    .. cpp:type:: jacobian_type
 
       Data structure type to store the Jacobian: this depends on which specific implementation
@@ -52,6 +56,10 @@ A *pressio-demoapps* C++ problem class meets the following API
    .. cpp:function:: right_hand_side_type createRightHandSide()
 
       Constructs and returns an instance of the right hand side.
+
+   .. cpp:function:: right_hand_side_type createRhs()
+
+      Shortcut for ``createRightHandSide()``.
 
    .. cpp:function:: jacobian_type createJacobian()
 
@@ -68,6 +76,13 @@ A *pressio-demoapps* C++ problem class meets the following API
       Given a state :math:`y` and time :math:`time`,
       evaluates the RHS of the system overwriting :math:`v` and  if ``computeJac == true``,
       its Jacobian and stores it into :math:`J`.
+
+   .. cpp:function:: void rhsAndJacobian(const state_type & y, scalar_type time,\
+       rhs_type & v, std::optional<jacobian_type *> J)
+
+      Given a state :math:`y` and time :math:`time`,
+      evaluates the RHS of the system overwriting :math:`v` and if ``J == true``,
+      its Jacobian and stores it into :math:`*J.value()`.
 
    .. cpp:function:: auto totalDofSampleMesh()
 

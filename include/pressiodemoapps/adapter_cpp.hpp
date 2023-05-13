@@ -49,6 +49,8 @@
 #ifndef PRESSIODEMOAPPS_ADAPTER_MIXINS_CPP_HPP_
 #define PRESSIODEMOAPPS_ADAPTER_MIXINS_CPP_HPP_
 
+#include <optional>
+
 namespace pressiodemoapps{
 
 // this is the class that gets instantiated and passed
@@ -63,6 +65,7 @@ public:
   using independent_variable_type = typename T::scalar_type;
   using time_type                 = typename T::scalar_type;
   using state_type		  = typename T::state_type;
+  using rhs_type                  = typename T::velocity_type;
   using right_hand_side_type      = typename T::velocity_type;
   using jacobian_type             = typename T::jacobian_type;
 
@@ -98,6 +101,11 @@ public:
   }
 
   right_hand_side_type createRightHandSide() const{
+    namespace pda = ::pressiodemoapps;
+    return pda::clone(m_rhs);
+  }
+
+  rhs_type createRhs() const{
     namespace pda = ::pressiodemoapps;
     return pda::clone(m_rhs);
   }
@@ -166,6 +174,14 @@ public:
     }
   }
 
+  void rhs(const state_type & state,
+	   const independent_variable_type currentTime,
+	   right_hand_side_type & V) const
+  {
+    T::velocityAndOptionalJacobian(state, currentTime,
+				   V, nullptr);
+  }
+
   void rightHandSide(const state_type & state,
 		     const independent_variable_type currentTime,
 		     right_hand_side_type & V) const
@@ -181,6 +197,19 @@ public:
   {
     T::velocityAndOptionalJacobian(state, currentTime,
 				   V, &jacobian);
+  }
+
+  void rhsAndJacobian(const state_type & state,
+		      const independent_variable_type currentTime,
+		      rhs_type & V,
+		      std::optional<jacobian_type*> jacobian) const
+  {
+    if (jacobian){
+      T::velocityAndOptionalJacobian(state, currentTime, V, jacobian.value());
+    }
+    else{
+      T::velocityAndOptionalJacobian(state, currentTime, V, nullptr);
+    }
   }
 
   void jacobian(const state_type & state,

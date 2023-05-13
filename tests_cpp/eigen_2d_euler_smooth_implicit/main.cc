@@ -34,9 +34,8 @@ int main()
   using lin_solver_t = pressio::linearsolvers::Solver<
     pressio::linearsolvers::iterative::Bicgstab, jacob_t>;
   lin_solver_t linSolverObj;
-  auto NonLinSolver=
-    pressio::nonlinearsolvers::create_newton_raphson(stepperObj, linSolverObj);
-  NonLinSolver.setTolerance(1e-10);
+  auto NonLinSolver=pressio::create_newton_solver(stepperObj, linSolverObj);
+  NonLinSolver.setStopTolerance(1e-10);
 
   FomObserver<state_t> Obs("smooth2d_solution.bin", 5);
 
