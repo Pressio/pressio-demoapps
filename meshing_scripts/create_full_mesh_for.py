@@ -64,9 +64,6 @@ valid = ["linadv1d_s3", \
          "swe2dSlipWall_s3",\
          "swe2dSlipWall_s5",\
          "swe2dSlipWall_s7",\
-         "swe2dslipwall_s3",\
-         "swe2dslipwall_s5",\
-         "swe2dslipwall_s7",\
          #
          "burgers2d_periodic_s3", \
          "burgers2d_periodic_s5", \
