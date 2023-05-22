@@ -68,6 +68,7 @@ public:
   using rhs_type                  = typename T::velocity_type;
   using right_hand_side_type      = typename T::velocity_type;
   using jacobian_type             = typename T::jacobian_type;
+  using graph_type                = typename T::graph_type;
 
 private:
   using typename T::index_t;
@@ -150,6 +151,10 @@ public:
 
   void setStateBc(state_type * stateBc){
     T::setStateBc(stateBc);
+  }
+
+  void setGraphBc(graph_type * ghostGraph){
+    T::setGraphBc(ghostGraph);
   }
 
   //

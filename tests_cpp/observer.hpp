@@ -14,6 +14,10 @@ public:
     myfile0_.close();
   }
 
+  FomObserver() = default;
+  FomObserver & operator=(FomObserver &) = default;
+  FomObserver & operator=(FomObserver &&) = default;
+
   template<typename TimeType>
   void operator()(const pressio::ode::StepCount stepIn,
   		  const TimeType /*timein*/,

@@ -56,6 +56,7 @@ template<class state_t, class mesh_t, class ghost_t>
 class DoubleMachReflection2dGhostFillerWithCustomBc
 {
   using scalar_type = typename mesh_t::scalar_t;
+  using graph_t = typename mesh_t::graph_t;
 
 public:
   DoubleMachReflection2dGhostFillerWithCustomBc() = delete;
@@ -68,7 +69,8 @@ public:
 				    ghost_t & ghostFront,
 				    ghost_t & ghostRight,
 				    ghost_t & ghostBack,
-				    const state_t & stateBcs)
+				    const state_t & stateBcs,
+				    const graph_t & graphBcs)
     : m_stencilSize(stencilSize),
       m_state(stateIn),
       m_evaluationTime(evaluationTime),
@@ -78,7 +80,8 @@ public:
       m_ghostFront(ghostFront),
       m_ghostRight(ghostRight),
       m_ghostBack(ghostBack),
-      m_stateBcs(stateBcs)
+      m_stateBcs(stateBcs),
+      m_graphBcs(graphBcs)
   {
     computeShockConditions();
   }
@@ -111,48 +114,84 @@ public:
 
     if (left0 == -1)
     {
-      m_ghostLeft(gRow, 0) = m_state(uIndex+0);
-      m_ghostLeft(gRow, 1) = m_state(uIndex+1);
-      m_ghostLeft(gRow, 2) = m_state(uIndex+2);
-      m_ghostLeft(gRow, 3) = m_state(uIndex+3);
+      const auto bcIndex = m_graphBcs(gRow, 0);
+      if (bcIndex == -1) {
+        m_ghostLeft(gRow, 0) = m_state(uIndex+0);
+        m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+        m_ghostLeft(gRow, 2) = m_state(uIndex+2);
+        m_ghostLeft(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostLeft(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostLeft(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostLeft(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostLeft(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
     }
 
     if (front0 == -1){
-      if (distanceFromShock(myX, myY+dy) < zero){
-	m_ghostFront(gRow, 0) = m_postShockState[0];
-	m_ghostFront(gRow, 1) = m_postShockState[1];
-	m_ghostFront(gRow, 2) = m_postShockState[2];
-	m_ghostFront(gRow, 3) = m_postShockState[3];
+      const auto bcIndex = m_graphBcs(gRow, 1);
+      if (bcIndex == -1) {
+        if (distanceFromShock(myX, myY+dy) < zero){
+          m_ghostFront(gRow, 0) = m_postShockState[0];
+          m_ghostFront(gRow, 1) = m_postShockState[1];
+          m_ghostFront(gRow, 2) = m_postShockState[2];
+          m_ghostFront(gRow, 3) = m_postShockState[3];
+        }
+        else{
+          m_ghostFront(gRow, 0) = m_preShockState[0];
+          m_ghostFront(gRow, 1) = m_preShockState[1];
+          m_ghostFront(gRow, 2) = m_preShockState[2];
+          m_ghostFront(gRow, 3) = m_preShockState[3];
+        }
       }
-      else{
-	m_ghostFront(gRow, 0) = m_preShockState[0];
-	m_ghostFront(gRow, 1) = m_preShockState[1];
-	m_ghostFront(gRow, 2) = m_preShockState[2];
-	m_ghostFront(gRow, 3) = m_preShockState[3];
+      else {
+        m_ghostFront(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostFront(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostFront(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostFront(gRow, 3) = m_stateBcs(bcIndex+3);
       }
     }
 
     if (right0 == -1)
     {
-      m_ghostRight(gRow, 0) = m_state(uIndex);
-      m_ghostRight(gRow, 1) = m_state(uIndex+1);
-      m_ghostRight(gRow, 2) = m_state(uIndex+2);
-      m_ghostRight(gRow, 3) = m_state(uIndex+3);
+      const auto bcIndex = m_graphBcs(gRow, 2);
+      if (bcIndex == -1) {
+        m_ghostRight(gRow, 0) = m_state(uIndex+0);
+        m_ghostRight(gRow, 1) = m_state(uIndex+1);
+        m_ghostRight(gRow, 2) = m_state(uIndex+2);
+        m_ghostRight(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostRight(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostRight(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostRight(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostRight(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
     }
 
     if (back0 == -1)
     {
-      if (myX < m_wedgePosition){
-	m_ghostBack(gRow, 0) = m_state(uIndex+0);
-	m_ghostBack(gRow, 1) = m_state(uIndex+1);
-	m_ghostBack(gRow, 2) = m_state(uIndex+2);
-	m_ghostBack(gRow, 3) = m_state(uIndex+3);
+      const auto bcIndex = m_graphBcs(gRow, 3);
+      if (bcIndex == -1) {
+        if (myX < m_wedgePosition){
+          m_ghostBack(gRow, 0) = m_state(uIndex+0);
+          m_ghostBack(gRow, 1) = m_state(uIndex+1);
+          m_ghostBack(gRow, 2) = m_state(uIndex+2);
+          m_ghostBack(gRow, 3) = m_state(uIndex+3);
+        }
+        else{
+          m_ghostBack(gRow, 0) = m_state(uIndex+0);
+          m_ghostBack(gRow, 1) = m_state(uIndex+1);
+          m_ghostBack(gRow, 2) = -m_state(uIndex+2);
+          m_ghostBack(gRow, 3) = m_state(uIndex+3);
+        }
       }
-      else{
-	m_ghostBack(gRow, 0) = m_state(uIndex+0);
-	m_ghostBack(gRow, 1) = m_state(uIndex+1);
-	m_ghostBack(gRow, 2) = -m_state(uIndex+2);
-	m_ghostBack(gRow, 3) = m_state(uIndex+3);
+      else {
+        m_ghostBack(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostBack(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostBack(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostBack(gRow, 3) = m_stateBcs(bcIndex+3);
       }
     }
 
@@ -226,7 +265,10 @@ private:
   const scalar_type m_shockSlope       = std::tan(m_angle);
   const scalar_type m_shockSlopeInv    = one/m_shockSlope;
   const scalar_type m_shockSlopeInv_sq = m_shockSlopeInv*m_shockSlopeInv;
+  
+  // Schwarz coupling
   const state_t & m_stateBcs;
+  const graph_t & m_graphBcs;
 };
 
 

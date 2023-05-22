@@ -88,6 +88,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type,-1,1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using graph_type    = typename MeshType::graph_t;
 
   static constexpr int dimensionality{2};
   static constexpr int numDofPerCell{4};
@@ -154,6 +155,10 @@ public:
 protected:
   void setStateBc(state_type * stateBc){
     m_stateBc = stateBc;
+  }
+
+  void setGraphBc(graph_type * ghostGraph){
+    m_ghostGraph = ghostGraph;
   }
 
   void initializeJacobian(jacobian_type & J)
@@ -448,7 +453,7 @@ private:
 			   currentTime, m_gamma, m_meshObj,
 			   m_ghostLeft, m_ghostFront,
 			   m_ghostRight, m_ghostBack,
-			   *m_stateBc);
+			   *m_stateBc, *m_ghostGraph);
 	const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
@@ -1205,6 +1210,7 @@ protected:
   std::array<scalar_type, 3> m_crossshock_params;
 
   state_type * m_stateBc = nullptr;
+  graph_type * m_ghostGraph = nullptr;
 };
 
 template<class MeshType> constexpr int EigenApp<MeshType>::numDofPerCell;

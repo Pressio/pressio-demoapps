@@ -130,6 +130,10 @@ public:
   const y_coords_type & viewY() const{ return m_y; }
   const z_coords_type & viewZ() const{ return m_z; }
 
+  int nx() const{ return m_meshDims[0]; };
+  int ny() const{ return m_meshDims[1]; };
+  int nz() const{ return m_meshDims[2]; };
+
   // number of cells that do NOT get close to any boundary
   // i.e. those for which the farthest stencil cell is still within the BD
   auto numCellsInner() const{ return m_rowsForCellsInner.size(); }
@@ -327,7 +331,8 @@ private:
 					  m_cellDeltasInv,
 					  m_stencilSize,
 					  m_stencilMeshSize,
-					  m_sampleMeshSize);
+					  m_sampleMeshSize,
+					  m_meshDims);
     if(m_dim==3 and m_stencilSize==7){
       throw std::runtime_error("3D mesh with 7pt stencil not yet supported.");
     }
@@ -410,6 +415,7 @@ private:
   int m_stencilSize = {};
   index_type m_stencilMeshSize = {};
   index_type m_sampleMeshSize  = {};
+  std::array<int,3> m_meshDims{};
   x_coords_type m_x = {};
   y_coords_type m_y = {};
   z_coords_type m_z = {};
