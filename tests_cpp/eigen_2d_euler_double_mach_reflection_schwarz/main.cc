@@ -16,12 +16,14 @@ namespace pnls = pressio::nonlinearsolvers;
 // forward declarations
 void calc_neighbor_dims(int, int, int, int, vector<vector<int>> &);
 template<class app_t, class graph_t> vector<graph_t> calc_exch_graph(
-  const int, const int, const int, const int, const int, const vector<app_t> &, const vector<vector<int>> &);
+  const int, const int, const int, const vector<app_t> &, const vector<vector<int>> &);
 template<class app_t, class state_t, class graph_t> void broadcast_bcState(
   const int, const int, const int, vector<state_t> &, vector<state_t> &,
   const vector<app_t> &, const vector<vector<int>> &, const vector<graph_t> &);
 template<class mesh_t, class graph_t> vector<graph_t> calc_ghost_graph(
   const int, const int, const vector<mesh_t> &, const vector<vector<int>> &);
+template<class state_t> array<double, 2> calcConvergence(
+  const state_t, const state_t, const int);
 
 int main()
 {
@@ -31,16 +33,16 @@ int main()
 
   // ---- user inputs
 
-  string meshRoot = "./meshes/mesh_2x2";
-  // string meshRoot = "./meshes/mesh_2x2_small";
+  string meshRoot = "/home/crwentl/research/runs/pressio/double_mach/meshes/mesh_2x2";
   const auto order  = pda::InviscidFluxReconstruction::FirstOrder;
   const auto probId = pda::Euler2d::DoubleMachReflection;
   const auto scheme = pode::StepScheme::CrankNicolson;
-  const int numSteps = 200;
-  const int convergeStepMax = 5;
-  vector<double> dt = {0.001, 0.001, 0.001, 0.001};
-  // vector<double> dt = {0.0025, 0.0025, 0.0025, 0.0025};
-  
+  const int numSteps = 100;
+  const int convergeStepMax = 10;
+  vector<double> dt(4, 0.002);
+  // vector<double> dt(4, 0.0025); // TODO: solver just gives up on domIdx > 0 for this time step
+  double abs_err_tol = 1e-13;
+  double rel_err_tol = 1e-13;
   // ---- end user inputs
 
   // load mesh info
@@ -60,7 +62,7 @@ int main()
       exit(-1);
     }
   }
-  
+
   // controller step setup
   double dtMax = *max_element(dt.begin(), dt.end());
   vector<int> controlIters(ndomains);
@@ -87,22 +89,25 @@ int main()
   using graph_t = typename mesh_t::graph_t;
 
   // problem vectors initialization
-  lin_solver_t linSolverObj;
+  lin_solver_t            linSolverObj;
   vector<mesh_t>          meshVec(ndomains);
+  vector<int>             ncellsVec(ndomains);
   vector<app_t>           appVec(ndomains);
   vector<state_t>         stateVec(ndomains);
-  vector<vector<state_t>> stateVecHist(ndomains, vector<state_t>(2)); // 
+  vector<vector<state_t>> stateHistVec(ndomains); // intra-controller step history, for interpolation
   vector<stepper_t>       stepperVec;
   vector<nonlin_solver_t> nonlinSolverVec;
   vector<obs_t>           obsVec(ndomains);
   for (int domIdx = 0; domIdx < ndomains; ++domIdx)
   {
     meshVec[domIdx]  = pda::load_cellcentered_uniform_mesh_eigen(meshRoot + "/domain_" + to_string(domIdx));
+    ncellsVec[domIdx] = meshVec[domIdx].nx() * meshVec[domIdx].ny(); // TODO: generalize to 3D
+
     appVec[domIdx]   = pda::create_problem_eigen(meshVec[domIdx], probId, order);
     stateVec[domIdx] = appVec[domIdx].initialCondition();
-    // for (int histIdx = 0; histIdx < stateVecHist[domIdx].size(); ++histIdx) {
-    //   stateVecHist[domIdx][histIdx] = stateVec[domIdx];
-    // }
+    for (int histIdx = 0; histIdx < controlIters[domIdx] + 1; ++histIdx) {  // includes initial controller step solution
+      stateHistVec[domIdx].emplace_back(appVec[domIdx].initialCondition());
+    }
 
     stepperVec.emplace_back( pode::create_implicit_stepper(scheme, appVec[domIdx]) );
     nonlinSolverVec.emplace_back( pnls::create_newton_raphson(stepperVec.back(), linSolverObj) );
@@ -120,13 +125,13 @@ int main()
   const int bcStencilSize = (stencilSize - 1) / 2;
   const int bcStencilDof = bcStencilSize * numDofPerCell;
   const int maxDomNeighbors = 4; // generalize to 2*ndim
-  
-  // determine neighboring domain IDs, 
+
+  // determine neighboring domain IDs,
   vector<vector<int>> exchDomIdVec(ndomains, vector<int>(maxDomNeighbors, -1));
   calc_neighbor_dims(ndomX, ndomY, ndomZ, bcStencilDof, exchDomIdVec);
 
   // set up boundary broadcast patterns
-  const auto exchGraphVec = calc_exch_graph<app_t, graph_t>(ndomX, ndomY, ndomZ, overlap, bcStencilSize, appVec, exchDomIdVec);
+  const auto exchGraphVec = calc_exch_graph<app_t, graph_t>(ndomains, overlap, bcStencilSize, appVec, exchDomIdVec);
 
   // create stateBcVec, sized accordingly
   vector<state_t> stateBcVec(ndomains);
@@ -152,34 +157,29 @@ int main()
     appVec[domIdx].setGraphBc(&ghostGraphVec[domIdx]);
   }
 
-  // TO REVERT TO NO EXCHANGE
-  // for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
-  //   for (int row = 0; row < ghostGraphVec[domIdx].rows(); ++row) {
-  //     for (int col = 0; col < ghostGraphVec[domIdx].cols(); ++col) {
-  //       ghostGraphVec[domIdx](row, col) = -1;
-  //     }
-  //   }
-  // }
-
   // +++++++++ SOLVE ++++++++++++
 
   // controller outer loop
   double time = 0.0;
-  // cerr << "NO SOLVE YET" << endl;
-  // exit(-1);
+  double abs_err, rel_err;
+  vector<array<double, 2>> convergeVals(ndomains);
   for (int outerStep = 1; outerStep <= numSteps; ++outerStep)
   {
     cout << "Step " << outerStep << endl;
 
+    // store initial step for resetting
+    for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
+      stateHistVec[domIdx][0] = stateVec[domIdx];
+    }
+
     // convergence
-    bool converged = false;
     int convergeStep = 0;
-    while ((!converged) && (convergeStep < convergeStepMax)) {
+    while (convergeStep < convergeStepMax) {
+
+      cerr << "Schwarz iteration " << convergeStep + 1 << endl;
 
       // domain loop
       for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
-
-        cerr << "Domain " << domIdx << endl;
 
         // reset to beginning of controller time
         auto timeDom = time;
@@ -187,7 +187,7 @@ int main()
 
         const auto dtDom = dt[domIdx];
         const auto dtWrap = pode::StepSize<double>(dtDom);
-        
+
         // controller inner loop
         for (int innerStep = 0; innerStep < controlIters[domIdx]; ++innerStep) {
 
@@ -196,10 +196,16 @@ int main()
 
           stepperVec[domIdx](stateVec[domIdx], startTimeWrap, stepWrap, dtWrap, nonlinSolverVec[domIdx]);
 
-          // store inner step history
+          // for last iteration, compute convergence criteria
+          // important to do this before saving history, as stateHistVec still has last convergence loop's state
+          if (innerStep == (controlIters[domIdx] - 1)) {
+            convergeVals[domIdx] = calcConvergence<state_t>(stateVec[domIdx], stateHistVec[domIdx].back(), ncellsVec[domIdx]);
+          }
+
+          // store intra-step history
+          stateHistVec[domIdx][innerStep + 1] = stateVec[domIdx];
 
           // set (interpolated) boundary conditions
-
 
           // update local step and time
           stepDom++;
@@ -212,11 +218,27 @@ int main()
 
       }
 
-      // NOTE: REMOVE FOR TRUE IMPLEMENTATION
-      converged = true;
-      // convergeStep++;
+      // check convergence for all domains, break if conditions met
+      abs_err = 0.0;
+      rel_err = 0.0;
+      for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
+        abs_err += convergeVals[domIdx][0];
+        rel_err += convergeVals[domIdx][1];
+      }
+      abs_err /= ndomains;
+      rel_err /= ndomains;
+      cerr << "Average abs err: " << abs_err << endl;
+      cerr << "Average rel err: " << rel_err << endl;
+      if ((rel_err < rel_err_tol) || (abs_err < abs_err_tol)) {
+        break;
+      }
 
-      // reset interior state
+      convergeStep++;
+
+      // reset interior state if not converged
+      for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
+        stateVec[domIdx] = stateHistVec[domIdx][0];
+      }
 
     }
 
@@ -224,18 +246,11 @@ int main()
     const auto stepWrap = pode::StepCount(outerStep);
     for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
       obsVec[domIdx](stepWrap, time + dtMax, stateVec[domIdx]);
-
-      // update history
-
-      // update boundary conditions
-      // broadcast_bcState<app_t, state_t, graph_t>(domIdx, numDofPerCell, bcStencilSize, stateVec, stateBcVec, appVec, exchDomIdVec, exchGraphVec);
-
     }
 
     time += dtMax;
 
   }
-
   return 0;
 }
 
@@ -256,7 +271,7 @@ void calc_neighbor_dims(
     int i = domIdx % ndomX;
     int j = domIdx / ndomX;
     int neighborId;
-    
+
     // left boundary
     if (i != 0) {
       neighborId = domIdx - 1;
@@ -288,18 +303,18 @@ void calc_neighbor_dims(
 
 template<class app_t, class graph_t>
 vector<graph_t> calc_exch_graph(
-  const int ndomX,
-  const int ndomY,
-  const int ndomZ,
+  const int ndomains,
   const int overlap,
   const int bcStencilSize,
-  const vector<app_t> & appVec, 
-  const vector<vector<int>> & exchDomIdVec) 
+  const vector<app_t> & appVec,
+  const vector<vector<int>> & exchDomIdVec)
 {
   // TODO: extend to 3D
-  
-  // BC cell indexing
-  //                  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+  // BC cell indexing example
+  // L/R is from bottom to top, F/B is from left to right
+  // Trying to mix cell ordering and face ordering
+  //                  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   //                 ¦_(4, 1)_¦_(5, 1)_¦_(6, 1)_¦_(7, 1)_¦_(8, 1)_¦
   //  _ _ _ _ _ _ _ _¦_(4, 0)_¦_(5, 0)_¦_(6, 0)_¦_(7, 0)_¦_(8, 0)_¦_ _ _ _ _ _ _ _ _
   // ¦_(3,1)_¦_(3,0)_|________|________|________|________|________|_(12,1)_¦_(12,0)_|
@@ -309,7 +324,6 @@ vector<graph_t> calc_exch_graph(
   //                 ¦_(13,0)_¦_(14,0)_¦_(15,0)_¦_(16,0)_¦_(17,0)_¦
   //                 ¦_(13,1)_¦_(14,1)_¦_(15,1)_¦_(16,1)_¦_(17,1)_¦
 
-  const int ndomains = ndomX * ndomY * ndomZ;
   vector<graph_t> exchGraphVec(ndomains);
 
   for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
@@ -325,6 +339,8 @@ vector<graph_t> calc_exch_graph(
 
     // TODO: generalize to 3D
     pda::resize(exchGraphVec[domIdx], 2*nx + 2*ny, bcStencilSize);
+    exchGraphVec[domIdx].setOnes();
+    exchGraphVec[domIdx] *= -1;
 
     // loop through neighboring domains
     for (int neighIdx = 0; neighIdx < exchDomIdVec[domIdx].size(); ++neighIdx) {
@@ -352,7 +368,8 @@ vector<graph_t> calc_exch_graph(
         int bcCellIdx = 0; // left boundary is the start
         for (int yIdx = 0; yIdx < ny; ++yIdx) {
           for (int stencilIdx = 0; stencilIdx < bcStencilSize; ++stencilIdx) {
-            exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap - stencilIdx;
+            // exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap - stencilIdx;
+            exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap + 1 - stencilIdx; // toward boundary
             exchGraphVec[domIdx](bcCellIdx, stencilIdx) = exchCellIdx;
           }
           bcCellIdx++;
@@ -388,6 +405,9 @@ vector<graph_t> calc_exch_graph(
         for (int yIdx = 0; yIdx < ny; ++yIdx) {
           for (int stencilIdx = 0; stencilIdx < bcStencilSize; ++stencilIdx) {
             exchCellIdx = nxNeigh * yIdx + overlap + stencilIdx;
+            // TODO: check for a different problem
+            // exchCellIdx = nxNeigh * yIdx + overlap - 1 + stencilIdx; // toward boundary
+            // exchCellIdx = nxNeigh * yIdx + overlap + 1 + stencilIdx; // away from boundary
             exchGraphVec[domIdx](bcCellIdx, stencilIdx) = exchCellIdx;
           }
           bcCellIdx++;
@@ -414,7 +434,6 @@ vector<graph_t> calc_exch_graph(
       // TODO: generalize to 3D
 
     } // neighbor loop
-
   } // domain loop
 
   return exchGraphVec;
@@ -453,7 +472,7 @@ void broadcast_bcState(
   vector<state_t> & stateBcVec,
   const vector<app_t> & appVec,
   const vector<vector<int>> & exchDomIdVec,
-  const vector<graph_t> & exchGraphVec) 
+  const vector<graph_t> & exchGraphVec)
 {
 
   const auto domState = stateVec[domIdx];
@@ -574,9 +593,54 @@ vector<graph_t> calc_ghost_graph(
       }
       // TODO: extend to higher order, 3D
 
+    } // boundary cell loop
+  } // domain loop
+
+  return ghostGraphVec;
+
+}
+
+
+template<class state_t>
+array<double, 2> calcConvergence(
+  const state_t state1,
+  const state_t state2,
+  const int numElems)
+{
+  // TODO: assumed to be an Eigen state, not sure how to generalize
+  // TODO: compute convergence for each variable separately
+
+  int numDOF = state1.size();
+  if (state2.size() != numDOF) {
+    cerr << "state1 size does not match state2 size, " << numDOF << " vs. " << state2.size() << endl;
+    exit(-1);
+  }
+  double numDOFPerCellD = double(numDOF) / numElems;
+  if (round(numDOFPerCellD) != numDOFPerCellD) {
+    cerr << "Computed a non-integer number of variables: " << numDOFPerCellD << endl;
+    exit(-1);
+  }
+  int numDOFPerCell = round(numDOFPerCellD);
+
+  // absolute error
+  double abs_err = (state1 - state2).squaredNorm();
+
+  // handle edge cases for relative error
+  double rel_err;
+  double basenorm = state1.squaredNorm();
+  if (basenorm > 0) {
+    rel_err = abs_err / basenorm;
+  }
+  else {
+    if (abs_err > 0) {
+        rel_err = 1.0;
+    }
+    else {
+        rel_err = 0.0;
     }
   }
 
-  return ghostGraphVec;
+  array<double, 2> errArr = {abs_err, rel_err};
+  return errArr;
 
 }
