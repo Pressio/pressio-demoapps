@@ -25,11 +25,9 @@ int main()
   const auto probId = pda::Euler2d::DoubleMachReflection;
   const auto order  = pda::InviscidFluxReconstruction::FirstOrder;
   const auto scheme = pode::StepScheme::CrankNicolson;
-  // using itsolv_t = pls::iterative::Bicgstab;
-  // using linsolver_t = pls::Solver<pls::iterative::Bicgstab, jacob_t>;
 
   // time stepping
-  const int numSteps = 2;
+  const int numSteps = 100;
   vector<double> dt(4, 0.002);
   const int convergeStepMax = 10;
   const double abs_err_tol = 1e-11;
@@ -46,13 +44,13 @@ int main()
   >(probId, order, scheme, meshRoot, dt);
 
   // observer
-  // using state_t = decltype(decomp)::state_t;
-  // using obs_t = FomObserver<state_t>;
-  // vector<obs_t> obsVec(decomp.ndomains);
-  // for (int domIdx = 0; domIdx < decomp.ndomains; ++domIdx) {
-  //   obsVec[domIdx] = obs_t(obsRoot + "_" + to_string(domIdx) + ".bin", 1);
-  //   obsVec[domIdx](::pressio::ode::StepCount(0), 0.0, decomp.stateVec[domIdx]);
-  // }
+  using state_t = decltype(decomp)::state_t;
+  using obs_t = FomObserver<state_t>;
+  vector<obs_t> obsVec(decomp.ndomains);
+  for (int domIdx = 0; domIdx < decomp.ndomains; ++domIdx) {
+    obsVec[domIdx] = obs_t(obsRoot + "_" + to_string(domIdx) + ".bin", 1);
+    obsVec[domIdx](::pressio::ode::StepCount(0), 0.0, decomp.stateVec[domIdx]);
+  }
 
   // solve
   double time = 0.0;
@@ -72,10 +70,10 @@ int main()
     time += decomp.dtMax;
 
     // output observer
-    // const auto stepWrap = pode::StepCount(outerStep);
-    // for (int domIdx = 0; domIdx < decomp.ndomains; ++domIdx) {
-    //   obsVec[domIdx](stepWrap, time, decomp.stateVec[domIdx]);
-    // }
+    const auto stepWrap = pode::StepCount(outerStep);
+    for (int domIdx = 0; domIdx < decomp.ndomains; ++domIdx) {
+      obsVec[domIdx](stepWrap, time, decomp.stateVec[domIdx]);
+    }
 
   }
 

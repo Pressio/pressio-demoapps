@@ -175,7 +175,7 @@ namespace pressiodemoapps{ namespace impl {
       {
         // problem vectors initialization for each subdomain
 
-        linsolver_t linSolverObj;
+        linSolverObj = new linsolver_t;
         meshVec.resize(ndomains);
         appVec.resize(ndomains);
         stateVec.resize(ndomains);
@@ -195,7 +195,7 @@ namespace pressiodemoapps{ namespace impl {
 
           // time stepping
           stepperVec.emplace_back( pode::create_implicit_stepper(scheme, appVec[domIdx]) );
-          nonlinSolverVec.emplace_back( pnls::create_newton_raphson(stepperVec.back(), linSolverObj) );
+          nonlinSolverVec.emplace_back( pnls::create_newton_raphson(stepperVec.back(), *linSolverObj) );
           nonlinSolverVec[domIdx].setTolerance(1e-5);
 
         }
@@ -681,25 +681,12 @@ namespace pressiodemoapps{ namespace impl {
           stateHistVec[domIdx][0] = stateVec[domIdx];
         }
 
-        // for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
-        //   cerr << "Domain " << domIdx << endl;
-        //   for (int cell = 0; cell < ghostGraphVec[domIdx].rows(); ++cell) {
-        //     cerr << "Cell " << cell << ":";
-        //     for (int neigh = 0; neigh < 4; ++neigh) {
-        //       cerr << " " << ghostGraphVec[domIdx](cell, neigh);
-        //     }
-        //     cerr << endl;
-        //   }
-
-        // }
-        // exit(-1);
-
         // convergence
         int convergeStep = 0;
         vector<array<double, 2>> convergeVals(ndomains);
         while (convergeStep < convergeStepMax) {
 
-          cerr << "Schwarz iteration " << convergeStep + 1 << endl;
+          cout << "Schwarz iteration " << convergeStep + 1 << endl;
 
           for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
 
@@ -716,12 +703,10 @@ namespace pressiodemoapps{ namespace impl {
               const auto startTimeWrap = pode::StepStartAt<double>(timeDom);
               const auto stepWrap = pode::StepCount(stepDom);
 
-              cerr << "stepperVec call" << endl;
               stepperVec[domIdx](stateVec[domIdx], startTimeWrap, stepWrap, dtWrap, nonlinSolverVec[domIdx]);
 
               // for last iteration, compute convergence criteria
               // important to do this before saving history, as stateHistVec still has last convergence loop's state
-              cerr << "calc convergence" << endl;
               if (innerStep == (controlIters[domIdx] - 1)) {
                 convergeVals[domIdx] = calcConvergence(stateVec[domIdx], stateHistVec[domIdx].back());
               }
@@ -737,16 +722,12 @@ namespace pressiodemoapps{ namespace impl {
 
             } // domain loop
 
-            exit(-1);
-
             // broadcast boundary conditions
-            cerr << "Broadcast" << endl;
             broadcast_bcState(domIdx);
 
           }
 
           // check convergence for all domains, break if conditions met
-          cerr << "Check convergence" << endl;
           double abs_err = 0.0;
           double rel_err = 0.0;
           for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
@@ -755,8 +736,8 @@ namespace pressiodemoapps{ namespace impl {
           }
           abs_err /= ndomains;
           rel_err /= ndomains;
-          cerr << "Average abs err: " << abs_err << endl;
-          cerr << "Average rel err: " << rel_err << endl;
+          cout << "Average abs err: " << abs_err << endl;
+          cout << "Average rel err: " << rel_err << endl;
           if ((rel_err < rel_err_tol) || (abs_err < abs_err_tol)) {
             break;
           }
@@ -801,6 +782,7 @@ namespace pressiodemoapps{ namespace impl {
       vector<int> controlIters;
 
       // problem vectors
+      linsolver_t* linSolverObj;
       vector<mesh_t> meshVec;
       vector<app_t> appVec;
       vector<vector<state_t>> stateHistVec;

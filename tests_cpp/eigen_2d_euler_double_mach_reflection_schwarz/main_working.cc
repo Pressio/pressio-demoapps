@@ -41,8 +41,8 @@ int main()
   const int convergeStepMax = 10;
   vector<double> dt(4, 0.002);
   // vector<double> dt(4, 0.0025); // TODO: solver just gives up on domIdx > 0 for this time step
-  double abs_err_tol = 1e-13;
-  double rel_err_tol = 1e-13;
+  double abs_err_tol = 1e-11;
+  double rel_err_tol = 1e-11;
   // ---- end user inputs
 
   // load mesh info
@@ -172,24 +172,11 @@ int main()
       stateHistVec[domIdx][0] = stateVec[domIdx];
     }
 
-    // for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
-    //   cerr << "Domain " << domIdx << endl;
-    //   for (int cell = 0; cell < ghostGraphVec[domIdx].rows(); ++cell) {
-    //     cerr << "Cell " << cell << ":";
-    //     for (int neigh = 0; neigh < 4; ++neigh) {
-    //       cerr << " " << ghostGraphVec[domIdx](cell, neigh);
-    //     }
-    //     cerr << endl;
-    //   }
-
-    // }
-    // exit(-1);
-
     // convergence
     int convergeStep = 0;
     while (convergeStep < convergeStepMax) {
 
-      cerr << "Schwarz iteration " << convergeStep + 1 << endl;
+      cout << "Schwarz iteration " << convergeStep + 1 << endl;
 
       // domain loop
       for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
@@ -207,7 +194,6 @@ int main()
           const auto startTimeWrap = pode::StepStartAt<double>(timeDom);
           const auto stepWrap = pode::StepCount(stepDom);
 
-          cerr << "stepperVec call" << endl;
           stepperVec[domIdx](stateVec[domIdx], startTimeWrap, stepWrap, dtWrap, nonlinSolverVec[domIdx]);
 
           // for last iteration, compute convergence criteria
@@ -227,8 +213,6 @@ int main()
 
         } // domain loop
 
-        exit(-1);
-
         // broadcast boundary conditions
         broadcast_bcState<app_t, state_t, graph_t>(domIdx, numDofPerCell, bcStencilSize, stateVec, stateBcVec, appVec, exchDomIdVec, exchGraphVec);
 
@@ -243,8 +227,8 @@ int main()
       }
       abs_err /= ndomains;
       rel_err /= ndomains;
-      cerr << "Average abs err: " << abs_err << endl;
-      cerr << "Average rel err: " << rel_err << endl;
+      cout << "Average abs err: " << abs_err << endl;
+      cout << "Average rel err: " << rel_err << endl;
       if ((rel_err < rel_err_tol) || (abs_err < abs_err_tol)) {
         break;
       }
