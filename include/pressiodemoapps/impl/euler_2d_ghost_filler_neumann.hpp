@@ -256,5 +256,147 @@ private:
   ghost_t & m_ghostBack;
 };
 
+template<class state_t, class mesh_t, class ghost_t>
+class Ghost2dNeumannFillerWithCustomBc
+{
+
+  using graph_t = typename mesh_t::graph_t;
+
+public:
+  Ghost2dNeumannFillerWithCustomBc() = delete;
+  Ghost2dNeumannFillerWithCustomBc(const int stencilSize,
+		       int numDofPerCell,
+		       const state_t & stateIn,
+		       const mesh_t & meshIn,
+		       ghost_t & ghostLeft,
+		       ghost_t & ghostFront,
+		       ghost_t & ghostRight,
+		       ghost_t & ghostBack,
+                       const state_t & stateBcs,
+		       const graph_t & graphBcs)
+    : m_stencilSize(stencilSize),
+      m_numDofPerCell(numDofPerCell),
+      m_state(stateIn),
+      m_meshObj(meshIn),
+      m_ghostLeft(ghostLeft),
+      m_ghostFront(ghostFront),
+      m_ghostRight(ghostRight),
+      m_ghostBack(ghostBack),
+      m_stateBcs(stateBcs),
+      m_graphBcs(graphBcs)
+  {}
+
+  template<class index_t>
+  void operator()(index_t smPt, int gRow)
+  {
+    if (m_numDofPerCell == 4){
+      fourDofImpl(smPt, gRow);
+    }
+  }
+
+private:
+
+  template<class index_t>
+  void fourDofImpl(index_t smPt, int gRow)
+  {
+    const auto & graph = m_meshObj.graph();
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*m_numDofPerCell;
+
+    const auto left0  = graph(smPt, 1);
+    const auto front0 = graph(smPt, 2);
+    const auto right0 = graph(smPt, 3);
+    const auto back0  = graph(smPt, 4);
+
+    if (left0 == -1)
+    {
+      const auto bcIndex = m_graphBcs(gRow, 0);
+      if (bcIndex == -1) {
+        m_ghostLeft(gRow, 0) = m_state(uIndex);
+        m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+        m_ghostLeft(gRow, 2) = m_state(uIndex+2);
+        m_ghostLeft(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostLeft(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostLeft(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostLeft(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostLeft(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
+    }
+
+    if (front0 == -1)
+    {
+      const auto bcIndex = m_graphBcs(gRow, 1);
+      if (bcIndex == -1) {
+        m_ghostFront(gRow, 0) = m_state(uIndex);
+        m_ghostFront(gRow, 1) = m_state(uIndex+1);
+        m_ghostFront(gRow, 2) = m_state(uIndex+2);
+        m_ghostFront(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostFront(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostFront(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostFront(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostFront(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
+    }
+
+    if (right0 == -1)
+    {
+      const auto bcIndex = m_graphBcs(gRow, 2);
+      if (bcIndex == -1) {
+        m_ghostRight(gRow, 0) = m_state(uIndex);
+        m_ghostRight(gRow, 1) = m_state(uIndex+1);
+        m_ghostRight(gRow, 2) = m_state(uIndex+2);
+        m_ghostRight(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostRight(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostRight(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostRight(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostRight(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
+    }
+
+    if (back0 == -1)
+    {
+      const auto bcIndex = m_graphBcs(gRow, 3);
+      if (bcIndex == -1) {
+        m_ghostBack(gRow, 0) = m_state(uIndex);
+        m_ghostBack(gRow, 1) = m_state(uIndex+1);
+        m_ghostBack(gRow, 2) = m_state(uIndex+2);
+        m_ghostBack(gRow, 3) = m_state(uIndex+3);
+      }
+      else {
+        m_ghostBack(gRow, 0) = m_stateBcs(bcIndex+0);
+        m_ghostBack(gRow, 1) = m_stateBcs(bcIndex+1);
+        m_ghostBack(gRow, 2) = m_stateBcs(bcIndex+2);
+        m_ghostBack(gRow, 3) = m_stateBcs(bcIndex+3);
+      }
+    }
+
+    if (m_stencilSize >= 5){
+      throw std::runtime_error("Higher order BCs not implemented for Schwarz Neumann");
+    }
+
+  }
+
+private:
+  int m_stencilSize;
+  int m_numDofPerCell;
+  const state_t & m_state;
+  const mesh_t & m_meshObj;
+  ghost_t & m_ghostLeft;
+  ghost_t & m_ghostFront;
+  ghost_t & m_ghostRight;
+  ghost_t & m_ghostBack;
+
+  // Schwarz coupling
+  const state_t & m_stateBcs;
+  const graph_t & m_graphBcs;
+
+};
+
 }}
 #endif

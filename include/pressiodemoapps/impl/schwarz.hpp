@@ -24,7 +24,6 @@ namespace pressiodemoapps{ namespace impl {
     class prob_t,
     class order_t,
     class scheme_t
-    // class linsolver_t
   >
   class SchwarzDecomp
   {
@@ -48,7 +47,8 @@ namespace pressiodemoapps{ namespace impl {
           order_t order,
           scheme_t scheme,
           const std::string & meshRoot,
-          vector<double> & dtVec)
+          vector<double> & dtVec,
+          const int icflag = 1)
         {
 
           // get decomposition info
@@ -57,7 +57,7 @@ namespace pressiodemoapps{ namespace impl {
 
           // set up problem
           setup_controller(dtVec);
-          init_problem(probId, order, scheme, meshRoot);
+          init_problem(probId, order, scheme, meshRoot, icflag);
 
           // set up communication patterns
           bcStencilSize = (pda::reconstructionTypeToStencilSize(order) - 1) / 2;
@@ -171,7 +171,8 @@ namespace pressiodemoapps{ namespace impl {
         prob_t probId,
         order_t order,
         scheme_t scheme,
-        const string & meshRoot)
+        const string & meshRoot,
+        const int icflag)
       {
         // problem vectors initialization for each subdomain
 
@@ -187,7 +188,7 @@ namespace pressiodemoapps{ namespace impl {
           meshVec[domIdx]  = pda::load_cellcentered_uniform_mesh_eigen(meshRoot + "/domain_" + to_string(domIdx));
 
           // problem and state
-          appVec[domIdx]   = pda::create_problem_eigen(meshVec[domIdx], probId, order);
+          appVec[domIdx]   = pda::create_problem_eigen(meshVec[domIdx], probId, order, icflag);
           stateVec[domIdx] = appVec[domIdx].initialCondition();
           for (int histIdx = 0; histIdx < controlIters[domIdx] + 1; ++histIdx) {
             stateHistVec[domIdx].emplace_back(appVec[domIdx].initialCondition());

@@ -15,18 +15,18 @@ int main()
   plog::setVerbosity({pressio::log::level::debug});
 
   // +++++ USER INPUTS +++++
-  string meshRoot = "/home/crwentl/research/runs/pressio/double_mach/meshes/mesh_2x2";
-  string obsRoot = "doubleMach2d_solution";
+  string meshRoot = "/home/crwentl/research/runs/pressio/riemann/meshes/mesh_2x2_refx";
+  string obsRoot = "riemann2d_solution";
   const int obsFreq = 1;
 
   // problem definition
-  const auto probId = pda::Euler2d::DoubleMachReflection;
+  const auto probId = pda::Euler2d::Riemann;
   const auto order  = pda::InviscidFluxReconstruction::FirstOrder;
   const auto scheme = pode::StepScheme::CrankNicolson;
 
   // time stepping
-  const int numSteps = 100;
-  vector<double> dt(4, 0.002);
+  const int numSteps = 1000;
+  vector<double> dt(1, 0.001);
   const int convergeStepMax = 10;
   const double abs_err_tol = 1e-11;
   const double rel_err_tol = 1e-11;
@@ -38,7 +38,7 @@ int main()
     decltype(probId),
     decltype(order),
     decltype(scheme)
-  >(probId, order, scheme, meshRoot, dt);
+  >(probId, order, scheme, meshRoot, dt, 2);
 
   // observer
   using state_t = decltype(decomp)::state_t;

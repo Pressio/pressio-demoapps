@@ -393,19 +393,40 @@ private:
 	m_probEn == ::pressiodemoapps::Euler2d::Riemann or
 	m_probEn == ::pressiodemoapps::Euler2d::testingonlyneumann)
     {
-      using ghost_filler_t  = Ghost2dNeumannFiller<
-	U_t, MeshType, ghost_container_type>;
-      ghost_filler_t ghF(stencilSize, numDofPerCell,
-			 U, m_meshObj,
-			 m_ghostLeft, m_ghostFront,
-			 m_ghostRight, m_ghostBack);
+      if (m_stateBc){
+        using ghost_filler_t  = Ghost2dNeumannFillerWithCustomBc<
+	  U_t, MeshType, ghost_container_type>;
+        ghost_filler_t ghF(stencilSize, numDofPerCell,
+			   U, m_meshObj,
+			   m_ghostLeft, m_ghostFront,
+			   m_ghostRight, m_ghostBack,
+                           *m_stateBc, *m_ghostGraph);
 
-      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+        const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
-      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
-	ghF(rowsBd[it], it);
+        for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
+	  ghF(rowsBd[it], it);
+        }
+
+      }
+
+      else{
+        using ghost_filler_t  = Ghost2dNeumannFiller<
+	  U_t, MeshType, ghost_container_type>;
+        ghost_filler_t ghF(stencilSize, numDofPerCell,
+			   U, m_meshObj,
+			   m_ghostLeft, m_ghostFront,
+			   m_ghostRight, m_ghostBack);
+
+        const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+        for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
+	  ghF(rowsBd[it], it);
+        }
       }
     }
 
@@ -1037,6 +1058,7 @@ private:
 	m_probEn == ::pressiodemoapps::Euler2d::Riemann or
 	m_probEn == ::pressiodemoapps::Euler2d::testingonlyneumann)
     {
+      // CRW: something here messing with Schwarz?
       (void)graphRow;
       // homog neumann
       facs.fill(static_cast<scalar_type>(1));
