@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Run your first problem!" href="your_first_problem.html" /><link rel="prev" title="Full mesh" href="meshfull.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Sample Mesh Capabilty - pressio-demoapps v0.13.0</title>
+        <title>Sample Mesh Capabilty - pressio-demoapps v0.14.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.13.0</div></a>
+v0.14.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.13.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.13.0</span>
+v0.14.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -165,7 +165,7 @@ v0.13.0</span>
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Build/install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
@@ -294,11 +294,11 @@ is the subset color-coded yellow.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">pressio-demoapps/meshing/create_sample_mesh.py</span></code> is the script we use for this.
 This script accepts a path to a full mesh and a list of cell indices,
 and generates the new (reduced) mesh.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 create_sample_mesh.py <span class="se">\</span>
-             --fullMeshDir        &lt;path-to-the-FULL-mesh-dir-to-start-from&gt; <span class="se">\</span>
-             --sampleMeshIndices  &lt;path-to-ascii-file-with-desired-cell-indices-list&gt; <span class="se">\</span>
-             --outDir &lt;path-to-where-to-output-new-mesh&gt; <span class="se">\</span>
-             --debug  true/false <span class="c1"># default=false</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>create_sample_mesh.py<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--fullMeshDir<span class="w">        </span>&lt;path-to-the-FULL-mesh-dir-to-start-from&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--sampleMeshIndices<span class="w">  </span>&lt;path-to-ascii-file-with-desired-cell-indices-list&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--outDir<span class="w"> </span>&lt;path-to-where-to-output-new-mesh&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--debug<span class="w">  </span>true/false<span class="w"> </span><span class="c1"># default=false</span>
 </pre></div>
 </div>
 <p>where:</p>
@@ -315,16 +315,16 @@ and generates the new (reduced) mesh.</p>
 visualizing it, selecting a subset of cells, generating a sample mesh
 and visualizing the sample mesh.</p>
 <p>To simplify things, let’s set the following:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">REPODIR</span><span class="o">=</span>&lt;full-path-to-your-clone-of-pressiodemoapps&gt;
-<span class="nb">export</span> <span class="nv">WORKDIR</span><span class="o">=</span>/home/mesh_test
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">REPODIR</span><span class="o">=</span>&lt;full-path-to-your-clone-of-pressiodemoapps&gt;
+<span class="nb">export</span><span class="w"> </span><span class="nv">WORKDIR</span><span class="o">=</span>/home/mesh_test
 </pre></div>
 </div>
 <section id="a-generate-full-mesh">
 <h3>(A) Generate full mesh<a class="headerlink" href="#a-generate-full-mesh" title="Permalink to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_full_mesh.py <span class="se">\</span>
-             -n <span class="m">10</span> <span class="m">8</span> --outDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
-             --bounds <span class="m">0</span>.0 <span class="m">1</span>.2 <span class="m">0</span>.0 <span class="m">1</span>.0 <span class="se">\</span>
-             -s <span class="m">5</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span><span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_full_mesh.py<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>-n<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">8</span><span class="w"> </span>--outDir<span class="w"> </span><span class="nv">$WORKDIR</span>/full_mesh<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--bounds<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>-s<span class="w"> </span><span class="m">5</span>
 </pre></div>
 </div>
 <p>This creates the mesh files inside <code class="docutils literal notranslate"><span class="pre">${WORKDIR}/full_mesh</span></code>
@@ -338,7 +338,7 @@ If you look inside <code class="docutils literal notranslate"><span class="pre">
 y [in second column] coordinates for each <em>cell center</em></p></li>
 </ul>
 <p>If we then do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/full_mesh -p show <span class="m">9</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span><span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py<span class="w"> </span>--wdir<span class="w"> </span><span class="nv">$WORKDIR</span>/full_mesh<span class="w"> </span>-p<span class="w"> </span>show<span class="w"> </span><span class="m">9</span>
 </pre></div>
 </div>
 <p>where we use <cite>show</cite> to specify we want the figure plotted,
@@ -351,17 +351,17 @@ You should see this plot:</p>
 <p>Let’s say that we want our <strong>sample mesh</strong>
 to comprise cells 1, 26, 36, 52, 67.
 We can do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="m">1</span> <span class="m">26</span> <span class="m">36</span> <span class="m">52</span> <span class="m">67</span> &gt;&gt; <span class="si">${</span><span class="nv">WORKDIR</span><span class="si">}</span>/sample_gids.txt
-python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_sample_mesh.py <span class="se">\</span>
-             --outDir <span class="nv">$WORKDIR</span>/sample_mesh <span class="se">\</span>
-             --fullMeshDir <span class="nv">$WORKDIR</span>/full_mesh <span class="se">\</span>
-             --sampleMeshIndices <span class="nv">$WORKDIR</span>/sample_gids.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">26</span><span class="w"> </span><span class="m">36</span><span class="w"> </span><span class="m">52</span><span class="w"> </span><span class="m">67</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="si">${</span><span class="nv">WORKDIR</span><span class="si">}</span>/sample_gids.txt
+python3<span class="w"> </span><span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/create_sample_mesh.py<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--outDir<span class="w"> </span><span class="nv">$WORKDIR</span>/sample_mesh<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--fullMeshDir<span class="w"> </span><span class="nv">$WORKDIR</span>/full_mesh<span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>--sampleMeshIndices<span class="w"> </span><span class="nv">$WORKDIR</span>/sample_gids.txt
 </pre></div>
 </div>
 <p>this will generate, inside <code class="docutils literal notranslate"><span class="pre">$WORKDIR/sample_mesh</span></code>,
 the mesh files for this “reduced” mesh.</p>
 <p>Let’s visualize this reduced mesh:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 <span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py --wdir <span class="nv">$WORKDIR</span>/sample_mesh -p show <span class="m">9</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span><span class="si">${</span><span class="nv">REPODIR</span><span class="si">}</span>/meshing/plot_mesh.py<span class="w"> </span>--wdir<span class="w"> </span><span class="nv">$WORKDIR</span>/sample_mesh<span class="w"> </span>-p<span class="w"> </span>show<span class="w"> </span><span class="m">9</span>
 </pre></div>
 </div>
 <p>You should see this plot:</p>
@@ -418,7 +418,7 @@ This is because this new mesh is effectively a new, self-contained mesh.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Oct 18, 2022</div>
+              Last updated on Jun 14, 2023</div>
           </div>
           <div class="right-details">
             <div class="icons">

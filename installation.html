@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to use it in 3 steps!" href="howtouse.html" /><link rel="prev" title="Overview" href="index.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Installation - pressio-demoapps v0.13.0</title>
+        <title>Build/install - pressio-demoapps v0.14.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.13.0</div></a>
+v0.14.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.13.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.13.0</span>
+v0.14.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -165,7 +165,7 @@ v0.13.0</span>
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Build/install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
@@ -249,12 +249,12 @@ v0.13.0</span>
           </label>
         </div>
         <article role="main">
-          <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
+          <section id="build-install">
+<h1>Build/install<a class="headerlink" href="#build-install" title="Permalink to this heading">#</a></h1>
 <section id="c-library">
 <h2>C++ library<a class="headerlink" href="#c-library" title="Permalink to this heading">#</a></h2>
-<p>The C++ library is header-only so it does not need to be compiled and installed.</p>
-<p>To use it, you need a C++14 compiler and you have to:</p>
+<p><strong>The C++ library is header-only so it does not need to be compiled and installed.</strong></p>
+<p>To use it, you need a C++17 compiler and you have to:</p>
 <ol class="arabic simple">
 <li><p>include the <code class="docutils literal notranslate"><span class="pre">pressiodemoapps/include</span></code> subdirectory in your compilation line</p></li>
 <li><p>include the Eigen library (whose headers you can find inside <code class="docutils literal notranslate"><span class="pre">pressiodemoapps/tpls</span></code>).</p></li>
@@ -262,12 +262,12 @@ v0.13.0</span>
 <section id="building-the-test-suite">
 <h3>Building the test suite<a class="headerlink" href="#building-the-test-suite" title="Permalink to this heading">#</a></h3>
 <p>If you want to build the C++ tests, you need CMake &gt; 3.18.0 and then do:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
-<span class="nb">cd</span> pressio-demoapps <span class="o">&amp;&amp;</span> mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake -DPRESSIODEMOAPPS_ENABLE_TESTS<span class="o">=</span>On ..
-make -j4
-ctest -j4
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:Pressio/pressio-demoapps.git
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt;<span class="w"> </span><span class="c1">#must support C++17</span>
+<span class="nb">cd</span><span class="w"> </span>pressio-demoapps<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>-DPRESSIODEMOAPPS_ENABLE_TESTS<span class="o">=</span>On<span class="w"> </span>..
+make<span class="w"> </span>-j4
+ctest<span class="w"> </span>-j4
 </pre></div>
 </div>
 </section>
@@ -276,25 +276,25 @@ ctest -j4
 <h2>Python library<a class="headerlink" href="#python-library" title="Permalink to this heading">#</a></h2>
 <p>To build/install the bindings, you need:</p>
 <ul>
-<li><p>CMake &gt; 3.18.0 and a C++ compiler with C++14 support</p></li>
+<li><p>CMake &gt; 3.18.0 and a C++ compiler with C++17 support</p></li>
 <li><p>You also need these packages:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3 install build pytest numpy scipy matplotlib
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>build<span class="w"> </span>pytest<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>matplotlib
 </pre></div>
 </div>
 </li>
 </ul>
 <p>Then, you can do:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
-<span class="nb">cd</span> pressio-demoapps
-python3 cmake_build.py
-pip3 install .
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:Pressio/pressio-demoapps.git
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt;<span class="w"> </span><span class="c1">#must support C++17</span>
+<span class="nb">cd</span><span class="w"> </span>pressio-demoapps
+python3<span class="w"> </span>cmake_build.py
+pip3<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
 <p>This builds/installs pressiodemoapps with default options (build_mode=Release).</p>
 <p>You can run the tests to verify things:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> pressio-demoapps
-pytest -s
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>pressio-demoapps
+pytest<span class="w"> </span>-s
 </pre></div>
 </div>
 </section>
@@ -335,7 +335,7 @@ pytest -s
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Oct 18, 2022</div>
+              Last updated on Jun 14, 2023</div>
           </div>
           <div class="right-details">
             <div class="icons">
@@ -358,7 +358,7 @@ pytest -s
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#">Build/install</a><ul>
 <li><a class="reference internal" href="#c-library">C++ library</a><ul>
 <li><a class="reference internal" href="#building-the-test-suite">Building the test suite</a></li>
 </ul>

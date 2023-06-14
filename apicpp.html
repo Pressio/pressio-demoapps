@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Python API" href="apipy.html" /><link rel="prev" title="How to use it in 3 steps!" href="howtouse.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>C++ API - pressio-demoapps v0.13.0</title>
+        <title>C++ API - pressio-demoapps v0.14.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.13.0</div></a>
+v0.14.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.13.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.13.0</span>
+v0.14.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -165,7 +165,7 @@ v0.13.0</span>
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Build/install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
@@ -289,6 +289,12 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem8rhs_typeE">
+<span id="_CPPv3N7Problem8rhs_typeE"></span><span id="_CPPv2N7Problem8rhs_typeE"></span><span id="Problem::rhs_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rhs_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem8rhs_typeE" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>Shortcut for <code class="docutils literal notranslate"><span class="pre">right_hand_side_type</span></code></p>
+</dd></dl>
+
+<dl class="cpp type">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem13jacobian_typeE">
 <span id="_CPPv3N7Problem13jacobian_typeE"></span><span id="_CPPv2N7Problem13jacobian_typeE"></span><span id="Problem::jacobian_type"></span><span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian_type</span></span></span><a class="headerlink" href="#_CPPv4N7Problem13jacobian_typeE" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Data structure type to store the Jacobian: this depends on which specific implementation
@@ -310,6 +316,12 @@ For example, if you use <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem9createRhsEv">
+<span id="_CPPv3N7Problem9createRhsEv"></span><span id="_CPPv2N7Problem9createRhsEv"></span><span id="Problem::createRhs"></span><a class="reference internal" href="#_CPPv4N7Problem20right_hand_side_typeE" title="Problem::right_hand_side_type"><span class="n"><span class="pre">right_hand_side_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createRhs</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem9createRhsEv" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>Shortcut for <code class="docutils literal notranslate"><span class="pre">createRightHandSide()</span></code>.</p>
+</dd></dl>
+
+<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N7Problem14createJacobianEv">
 <span id="_CPPv3N7Problem14createJacobianEv"></span><span id="_CPPv2N7Problem14createJacobianEv"></span><span id="Problem::createJacobian"></span><a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createJacobian</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem14createJacobianEv" title="Permalink to this definition">#</a><br /></dt>
 <dd><p>Constructs and returns an instance of the jacobian.</p>
@@ -328,6 +340,14 @@ evaluates the RHS of the system overwriting <span class="math notranslate nohigh
 <dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
 evaluates the RHS of the system overwriting <span class="math notranslate nohighlight">\(v\)</span> and  if <code class="docutils literal notranslate"><span class="pre">computeJac</span> <span class="pre">==</span> <span class="pre">true</span></code>,
 its Jacobian and stores it into <span class="math notranslate nohighlight">\(J\)</span>.</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7Problem14rhsAndJacobianERK10state_type11scalar_typeR8rhs_typeNSt8optionalIP13jacobian_typeEE">
+<span id="_CPPv3N7Problem14rhsAndJacobianERK10state_type11scalar_typeR8rhs_typeNSt8optionalIP13jacobian_typeEE"></span><span id="_CPPv2N7Problem14rhsAndJacobianERK10state_type11scalar_typeR8rhs_typeNSt8optionalIP13jacobian_typeEE"></span><span id="Problem::rhsAndJacobian__state_typeCR.scalar_type.rhs_typeR.std::optional:jacobian_typeP:"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rhsAndJacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N7Problem10state_typeE" title="Problem::state_type"><span class="n"><span class="pre">state_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">y</span></span>, <a class="reference internal" href="#_CPPv4N7Problem11scalar_typeE" title="Problem::scalar_type"><span class="n"><span class="pre">scalar_type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="#_CPPv4N7Problem8rhs_typeE" title="Problem::rhs_type"><span class="n"><span class="pre">rhs_type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">v</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">optional</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N7Problem13jacobian_typeE" title="Problem::jacobian_type"><span class="n"><span class="pre">jacobian_type</span></span></a><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">J</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7Problem14rhsAndJacobianERK10state_type11scalar_typeR8rhs_typeNSt8optionalIP13jacobian_typeEE" title="Permalink to this definition">#</a><br /></dt>
+<dd><p>Given a state <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(time\)</span>,
+evaluates the RHS of the system overwriting <span class="math notranslate nohighlight">\(v\)</span> and if <code class="docutils literal notranslate"><span class="pre">J</span> <span class="pre">==</span> <span class="pre">true</span></code>,
+its Jacobian and stores it into <code class="docutils literal notranslate"><span class="pre">*(J.value())</span></code>.</p>
 </dd></dl>
 
 <dl class="cpp function">
@@ -498,7 +518,7 @@ The type of container returned by reference depends on the backend used.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Oct 18, 2022</div>
+              Last updated on Jun 14, 2023</div>
           </div>
           <div class="right-details">
             <div class="icons">

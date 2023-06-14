@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Step-by-step in C++" href="endtoend_cpp.html" /><link rel="prev" title="Run your first problem!" href="your_first_problem.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Step-by-step in Python - pressio-demoapps v0.13.0</title>
+        <title>Step-by-step in Python - pressio-demoapps v0.14.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.13.0</div></a>
+v0.14.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.13.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.13.0</span>
+v0.14.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -165,7 +165,7 @@ v0.13.0</span>
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Build/install</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howtouse.html">How to use it in 3 steps!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apicpp.html">C++ API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apipy.html">Python API</a></li>
@@ -264,20 +264,20 @@ appearing on the top-right corner.</p>
 <h2>Step 1: Prepare<a class="headerlink" href="#step-1-prepare" title="Permalink to this heading">#</a></h2>
 <p>You need CMake &gt; 3.18.0.
 Let’s make a directory to run things and export the C++ compiler:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt; <span class="c1">#must support C++14</span>
-<span class="nb">export</span> <span class="nv">MYTEST</span><span class="o">=</span>/home/myDemoTest
-mkdir <span class="nv">$MYTEST</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="nv">$MYTEST</span>
-git clone --recursive git@github.com:Pressio/pressio-demoapps.git
-<span class="nb">cd</span> pressio-demoapps
-python3 setup.py install
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt;<span class="w"> </span><span class="c1">#must support C++14</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MYTEST</span><span class="o">=</span>/home/myDemoTest
+mkdir<span class="w"> </span><span class="nv">$MYTEST</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$MYTEST</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:Pressio/pressio-demoapps.git
+<span class="nb">cd</span><span class="w"> </span>pressio-demoapps
+python3<span class="w"> </span>setup.py<span class="w"> </span>install
 </pre></div>
 </div>
 <p>After this step, <cite>pressio-demoapps</cite> should be installed in your Python distribution.</p>
 </section>
 <section id="step-2-generate-the-mesh">
 <h2>Step 2: Generate the mesh<a class="headerlink" href="#step-2-generate-the-mesh" title="Permalink to this heading">#</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 <span class="nv">$MYTEST</span>/pressio-demoapps/meshing_scripts/create_full_mesh_for.py <span class="se">\</span>
-        --problem sod1d_s7 --outdir <span class="si">${</span><span class="nv">MYTEST</span><span class="si">}</span>/mesh -n <span class="m">500</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span><span class="nv">$MYTEST</span>/pressio-demoapps/meshing_scripts/create_full_mesh_for.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--problem<span class="w"> </span>sod1d_s7<span class="w"> </span>--outdir<span class="w"> </span><span class="si">${</span><span class="nv">MYTEST</span><span class="si">}</span>/mesh<span class="w"> </span>-n<span class="w"> </span><span class="m">500</span>
 </pre></div>
 </div>
 <p>where via <code class="docutils literal notranslate"><span class="pre">sod1d_s7</span></code> we specified that we want Sod1d and
@@ -287,7 +287,7 @@ The mesh files are generated inside <code class="docutils literal notranslate"><
 <section id="step-3-main-file-and-run">
 <h2>Step 3: Main file and run<a class="headerlink" href="#step-3-main-file-and-run" title="Permalink to this heading">#</a></h2>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">main.py</span></code> as follows:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>touch <span class="nv">$MYTEST</span>/main.py
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>touch<span class="w"> </span><span class="nv">$MYTEST</span>/main.py
 </pre></div>
 </div>
 <p>and copy the following code in it:</p>
@@ -318,8 +318,8 @@ The mesh files are generated inside <code class="docutils literal notranslate"><
 </pre></div>
 </div>
 <p>And run it:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$MYTEST</span>
-python main.py
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$MYTEST</span>
+python<span class="w"> </span>main.py
 </pre></div>
 </div>
 <p>which should display the following figure:</p>
@@ -362,7 +362,7 @@ python main.py
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Oct 18, 2022</div>
+              Last updated on Jun 14, 2023</div>
           </div>
           <div class="right-details">
             <div class="icons">
