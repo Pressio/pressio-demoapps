@@ -4,13 +4,14 @@
 **pressio-demoapps** is a library of 1D, 2D and 3D demo problems
 of varying complexity, ranging from a simple 1D linear advection,
 to 2D reaction-diffusion, and 3D Euler equations, and more.
+
 Key features include:
 
 - support for both C++ and Python
 - cell-centered finite volume discretization with various numerical schemes and *exact Jacobians*
 - focus on providing self-contained and well-defined problems
 - built-in support for a sample mesh: this mean that one can evaluate the residual and Jacobian
-at a disjoint subset of the mesh cells (this is useful for intrusive ROMs)
+at a disjoint subset of the mesh cells (this is useful for intrusive ROMs, but in general for other purposes too)
 
 Click below to check the documentation for more details:
 
@@ -20,10 +21,9 @@ Click below to check the documentation for more details:
 
 ## Development status
 
-**pressio-demoapps** is planned to be a long-term maintained project.
-Therefore, more problems and features will be implemented.
-If you are interested in collaborating or would like to see a specific
-problem added, please reach out.
+**pressio-demoapps** is planned to be maintained in the long-term.
+Hopefully, more problems and features will be implemented.
+If you are interested in collaborating or would like to see a specific problem added, please reach out.
 
 ## Questions?
 Find us on Slack: https://pressioteam.slack.com or open an issue on [github](https://github.com/Pressio/pressio-demoapps).
