@@ -3,16 +3,25 @@ cmake_minimum_required(VERSION 3.18.0)
 project(pressiodemoapps CXX)
 
 #=====================================================================
-# we need c++14
-set(CMAKE_CXX_STANDARD 14)
+# versioning
+#=====================================================================
+file(READ "version.txt" PDA_VERSION)
+message("pressiodemoapps version = ${PDA_VERSION}")
+
+#=====================================================================
+# we need c++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # test if compiler supports standard
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORT_CPP14)
-if(NOT COMPILER_SUPPORT_CPP14)
-  message(FATAL_ERROR "Compiler does not support -std=c++14. This is required.")
+check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORT_CPP17)
+if(NOT COMPILER_SUPPORT_CPP17)
+  message(FATAL_ERROR "Compiler does not support -std=c++17. This is required.")
 endif()
+
+# force C++17 for pressio too
+set(PRESSIO_ENABLE_CXX17 ON)
 
 #=====================================================================
 # guard against in-source builds
