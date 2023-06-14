@@ -106,7 +106,7 @@ void nonlin_ls_solving_loop_impl(ProblemTag problemTag,
 
 
 template<class Tag, class StateType, class RegistryType, class ScalarType>
-class NonLinLeastSquares
+class NonLinLeastSquares : public RegistryType
 {
   static_assert(std::is_floating_point<ScalarType>::value,
 		"Impl currently only supporting floating point");
@@ -117,18 +117,19 @@ class NonLinLeastSquares
   ScalarType stopTolerance_ = static_cast<ScalarType>(0.000001);
   Update updateEnValue_ = Update::Standard;
 
-  RegistryType reg_;
-
   using diagnostics_container = DiagnosticsContainer<
     InternalDiagnosticDataWithAbsoluteRelativeTracking<ScalarType> >;
   diagnostics_container diagnostics_;
   DiagnosticsLogger diagnosticsLogger_ = {};
 
 public:
+  template<class ...Args>
   NonLinLeastSquares(Tag tagIn,
-		     RegistryType && reg,
-		     const std::vector<Diagnostic> & diags)
-    : tag_(tagIn), reg_(std::move(reg)), diagnostics_(diags)
+		     const std::vector<Diagnostic> & diags,
+		     Args && ...args)
+    : RegistryType(std::forward<Args>(args)...),
+      tag_(tagIn),
+      diagnostics_(diags)
   {
 
     // currently we don't have the diagonostics stuff all flushed out
@@ -166,11 +167,6 @@ public:
   template<class SystemType>
   void solve(const SystemType & system, StateType & solutionInOut)
   {
-    // the solve method potentially be called multiple times
-    // so we need to reset the data in the registry everytime
-    // if not applicable, this is a noop
-    reset_for_new_solve_loop(tag_, reg_);
-
     switch (updateEnValue_)
     {
       case Update::Standard:
@@ -198,7 +194,7 @@ public:
   // to the same system used for constructing it
   void solve(StateType & solutionInOut)
   {
-    auto * system = reg_.template get<SystemTag>();
+    auto * system = this->template get<SystemTag>();
     assert(system != nullptr);
     this->solve(*system, solutionInOut);
   }
@@ -209,7 +205,7 @@ private:
 				       StateType & solutionInOut)
   {
     auto extReg = reference_capture_registry_and_extend_with<
-      StateTag, StateType &>(reg_, solutionInOut);
+      StateTag, StateType &>(*this, solutionInOut);
 
     // the solve method potentially be called multiple times
     // so we need to reset the data in the registry everytime
@@ -228,7 +224,7 @@ private:
   {
     auto extReg = reference_capture_registry_and_extend_with<
       StateTag, LineSearchTrialStateTag,
-      StateType &, StateType>(reg_, solutionInOut, system.createState());
+      StateType &, StateType>(*this, solutionInOut, system.createState());
 
     // the solve method potentially be called multiple times
     // so we need to reset the data in the registry everytime
@@ -256,7 +252,11 @@ private:
   {
     auto extReg = reference_capture_registry_and_extend_with<
       StateTag, LineSearchTrialStateTag,
-      StateType &, StateType>(reg_, solutionInOut, system.createState());
+      StateType &, StateType>(*this, solutionInOut, system.createState());
+
+    // the solve method potentially be called multiple times
+    // so we need to reset the data in the registry everytime
+    reset_for_new_solve_loop(tag_, extReg);
 
     if (updateEnValue_ == Update::LMSchedule1){
       using up_t = LMSchedule1Updater<ScalarType, StateType>;
@@ -282,6 +282,7 @@ private:
   {
     throw std::runtime_error("invalid Update value");
   }
+
 };
 
 }}}

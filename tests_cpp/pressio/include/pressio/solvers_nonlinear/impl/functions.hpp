@@ -4,19 +4,6 @@
 
 namespace pressio{ namespace nonlinearsolvers{ namespace impl{
 
-template<class T>
-class LevenbergMarquardtDamping
-{
-  static_assert(std::is_floating_point<T>::value, "");
-  using value_type = T;
-  value_type v_{1};
-public:
-  LevenbergMarquardtDamping & operator = (T v){ v_ = v; return *this; }
-  LevenbergMarquardtDamping & operator *= (T v){ v_ *= v; return *this; }
-  operator value_type () const { return v_; }
-};
-
-
 #ifdef PRESSIO_ENABLE_CXX20
   template<class RegistryType, class StateType, class SystemType>
   requires NonlinearSystemFusingResidualAndJacobian<SystemType>
@@ -74,8 +61,6 @@ template<class RegistryType>
 void compute_gradient(RegistryType & reg)
 {
   constexpr auto pT  = ::pressio::transpose();
-  constexpr auto pnT = ::pressio::nontranspose();
-
   const auto & r = reg.template get<ResidualTag>();
   const auto & j = reg.template get<JacobianTag>();
   auto & g = reg.template get<GradientTag>();
@@ -383,7 +368,6 @@ void compute_correction(GaussNewtonQrTag /*tag*/,
   auto & QTr = reg.template get<QTransposeResidualTag>();
   auto & solver = reg.template get<InnerSolverTag>();
 
-  auto QTResid = ::pressio::ops::clone(c);
   // factorize J = QR
   solver.get().computeThin(J);
 

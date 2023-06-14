@@ -51,27 +51,27 @@
 
 namespace pressio{ namespace nonlinearsolvers{ namespace impl{
 
-template<class, class> struct TagBasedStaticRegistry;
+template<class, class> class TagBasedStaticRegistry;
 
 template<class ...Tags, class ...DataTypes>
-struct TagBasedStaticRegistry< std::tuple<Tags...>, std::tuple<DataTypes...> >
+class TagBasedStaticRegistry< std::tuple<Tags...>, std::tuple<DataTypes...> >
 {
   std::tuple<DataTypes...> d_;
 
+public:
   template<class ...CArgs>
-  TagBasedStaticRegistry(CArgs && ... cargs) : d_(std::forward<CArgs>(cargs)...){}
+  explicit TagBasedStaticRegistry(CArgs && ... cargs) : d_(std::forward<CArgs>(cargs)...){}
 
+  TagBasedStaticRegistry() = delete;
+  TagBasedStaticRegistry(TagBasedStaticRegistry &&) = default;
+  TagBasedStaticRegistry & operator=(TagBasedStaticRegistry &&) = default;
+  ~TagBasedStaticRegistry() = default;
+
+public:
   template<class TagToFind>
   static constexpr bool contains(){
     return (mpl::variadic::find_if_binary_pred_t<TagToFind, std::is_same, Tags...>::value)
       < mpl::size<Tags...>::value;
-  }
-
-  template<class TagToFind, class T>
-  void set(T && o){
-    constexpr int i = mpl::variadic::find_if_binary_pred_t<
-      TagToFind, std::is_same, Tags...>::value;
-    std::get<i>(d_) = std::forward<T>(o);
   }
 
   template<class TagToFind>
@@ -89,38 +89,29 @@ struct TagBasedStaticRegistry< std::tuple<Tags...>, std::tuple<DataTypes...> >
   }
 };
 
-template<class, class, class> struct TagBasedStaticRegistryExtension;
-
-template<class Extendable, class ...ETags, class ...EDataTypes>
-struct TagBasedStaticRegistryExtension<
-  Extendable, std::tuple<ETags...>, std::tuple<EDataTypes...>
-  >
+template<class Extendable, class ...Rest>
+class TagBasedStaticRegistryExtension
 {
   Extendable & reg_;
-  using extension_registry_type = TagBasedStaticRegistry<
-    std::tuple<ETags...>, std::tuple<EDataTypes...> >;
+
+  using extension_registry_type = TagBasedStaticRegistry<Rest...>;
   extension_registry_type newReg_;
 
+public:
   template<class ...CArgs>
-  TagBasedStaticRegistryExtension(Extendable & reg, CArgs && ... cargs)
+  explicit TagBasedStaticRegistryExtension(Extendable & reg, CArgs && ... cargs)
     : reg_(reg), newReg_(std::forward<CArgs>(cargs)...){}
 
+  TagBasedStaticRegistryExtension() = delete;
+  TagBasedStaticRegistryExtension(TagBasedStaticRegistryExtension &&) = default;
+  TagBasedStaticRegistryExtension & operator=(TagBasedStaticRegistryExtension &&) = default;
+  ~TagBasedStaticRegistryExtension() = default;
+
+public:
   template<class TagToFind>
   static constexpr bool contains(){
     return Extendable::template contains<TagToFind>() ||
       extension_registry_type::template contains<TagToFind>();
-  }
-
-  template<class TagToFind, class T>
-  mpl::enable_if_t< Extendable::template contains<TagToFind>() >
-  set(T && o){
-    reg_.template set<TagToFind>(std::forward<T>(o));
-  }
-
-  template<class TagToFind, class T>
-  mpl::enable_if_t< !Extendable::template contains<TagToFind>() >
-  set(T && o){
-    newReg_.template set<TagToFind>(std::forward<T>(o));
   }
 
   template<
@@ -165,9 +156,7 @@ auto reference_capture_registry_and_extend_with(Extendable & reg, CArgs && ... c
   static_assert(!Extendable::template contains<Tag>(),
 		"Registry not extendable: already contains tag");
 
-  using ret_t = TagBasedStaticRegistryExtension<
-    Extendable, std::tuple<Tag>, std::tuple<DataType>
-    >;
+  using ret_t = TagBasedStaticRegistryExtension<Extendable, std::tuple<Tag>, std::tuple<DataType>>;
   return ret_t(reg, std::forward<CArgs>(cargs)...);
 }
 
@@ -183,9 +172,7 @@ auto reference_capture_registry_and_extend_with(Extendable & reg, CArgs && ... c
   static_assert(!Extendable::template contains<T2>(),
 		"Registry not extendable: already contains tag");
 
-  using ret_t = TagBasedStaticRegistryExtension<
-    Extendable, std::tuple<T1,T2>, std::tuple<D1,D2>
-    >;
+  using ret_t = TagBasedStaticRegistryExtension<Extendable, std::tuple<T1,T2>, std::tuple<D1,D2>>;
   return ret_t(reg, std::forward<CArgs>(cargs)...);
 }
 
@@ -203,31 +190,7 @@ auto reference_capture_registry_and_extend_with(Extendable & reg, CArgs && ... c
   static_assert(!Extendable::template contains<T3>(),
 		"Registry not extendable: already contains tag");
 
-  using ret_t = TagBasedStaticRegistryExtension<
-    Extendable, std::tuple<T1,T2,T3>, std::tuple<D1,D2,D3>
-    >;
-  return ret_t(reg, std::forward<CArgs>(cargs)...);
-}
-
-template<
-  class T1, class T2, class T3, class T4,
-  class D1, class D2, class D3, class D4,
-  class Extendable, class ...CArgs
-  >
-auto reference_capture_registry_and_extend_with(Extendable & reg, CArgs && ... cargs)
-{
-  static_assert(!Extendable::template contains<T1>(),
-		"Registry not extendable: already contains tag");
-  static_assert(!Extendable::template contains<T2>(),
-		"Registry not extendable: already contains tag");
-  static_assert(!Extendable::template contains<T3>(),
-		"Registry not extendable: already contains tag");
-  static_assert(!Extendable::template contains<T4>(),
-		"Registry not extendable: already contains tag");
-
-  using ret_t = TagBasedStaticRegistryExtension<
-    Extendable, std::tuple<T1,T2,T3,T4>, std::tuple<D1,D2,D3,D4>
-    >;
+  using ret_t = TagBasedStaticRegistryExtension<Extendable, std::tuple<T1,T2,T3>, std::tuple<D1,D2,D3>>;
   return ret_t(reg, std::forward<CArgs>(cargs)...);
 }
 
