@@ -397,8 +397,8 @@ namespace pressiodemoapps{ namespace impl {
               int bcCellIdx = 0; // left boundary is the start
               for (int yIdx = 0; yIdx < ny; ++yIdx) {
                 for (int stencilIdx = 0; stencilIdx < bcStencil; ++stencilIdx) {
-                  // exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap - stencilIdx;
-                  exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap + 1 - stencilIdx; // toward boundary
+                  exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap - stencilIdx;
+                  // exchCellIdx = (nxNeigh * (yIdx + 1) - 1) - overlap + 1 - stencilIdx; // toward boundary
                   exchGraphs[domIdx](bcCellIdx, stencilIdx) = exchCellIdx;
                 }
                 bcCellIdx++;

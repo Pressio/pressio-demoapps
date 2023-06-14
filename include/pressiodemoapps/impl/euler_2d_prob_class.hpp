@@ -775,11 +775,11 @@ private:
 	const auto smPt = graphRows[it];
 
 	FillStencilX(smPt, it, numDofPerCell);
-	fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
+	fillJacFactorsForCellBd(smPt, it, xAxis, bcCellJacFactors);
 	funcx(smPt, numDofPerCell, bcCellJacFactors);
 
 	FillStencilY(smPt, it, numDofPerCell);
-	fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
+	fillJacFactorsForCellBd(smPt, it, yAxis, bcCellJacFactors);
 	funcy(smPt, numDofPerCell, bcCellJacFactors);
       }
   }
@@ -914,13 +914,13 @@ private:
       FillStencilVeloX(smPt, it, numDofPerCell);
       funcVeloX(smPt, numDofPerCell);
       FillStencilJacX(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
+      fillJacFactorsForCellBd(smPt, it, xAxis, bcCellJacFactors);
       funcJacX(smPt, numDofPerCell, bcCellJacFactors);
 
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
+      fillJacFactorsForCellBd(smPt, it, yAxis, bcCellJacFactors);
       funcJacY(smPt, numDofPerCell, bcCellJacFactors);
     }
   }
@@ -1050,16 +1050,41 @@ private:
     }
   }
 
-  void fillJacFactorsForCellBd(index_t graphRow, int axis,
+  void fillJacFactorsForCellBd(index_t smPt, int it, int axis,
 			       std::array<scalar_type, numDofPerCell> & facs) const
   {
+
+    // Schwarz boundary always Dirichlet, for now
+    // TODO: modify this if implementing non-overlapping
+    if (m_ghostGraph) {
+      if (axis == 1) {
+        if (m_meshObj.hasBdLeft2d(smPt) && ((*m_ghostGraph)(it, 0) != -1)) {
+          facs = {0., 0., 0., 0.};
+          return;
+        }
+        if (m_meshObj.hasBdRight2d(smPt) && ((*m_ghostGraph)(it, 2) != -1)) {
+          facs = {0., 0., 0., 0.};
+          return;
+        }
+      }
+      if (axis == 2) {
+        if (m_meshObj.hasBdFront2d(smPt) && ((*m_ghostGraph)(it, 1) != -1)) {
+          facs = {0., 0., 0., 0.};
+          return;
+        }
+        if (m_meshObj.hasBdBack2d(smPt) && ((*m_ghostGraph)(it, 3) != -1)) {
+          facs = {0., 0., 0., 0.};
+          return;
+        }
+      }
+    }
 
     if (m_probEn == ::pressiodemoapps::Euler2d::SedovFull or
 	m_probEn == ::pressiodemoapps::Euler2d::Riemann or
 	m_probEn == ::pressiodemoapps::Euler2d::testingonlyneumann)
     {
       // CRW: something here messing with Schwarz?
-      (void)graphRow;
+      (void)smPt;
       // homog neumann
       facs.fill(static_cast<scalar_type>(1));
       return;
@@ -1067,13 +1092,13 @@ private:
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
     {
-      if (axis == 1 && m_meshObj.hasBdLeft2d(graphRow)){
+      if (axis == 1 && m_meshObj.hasBdLeft2d(smPt)){
 	// relfective
 	facs = {1., -1., 1., 1.};
 	return;
       }
 
-      else if (axis == 2 && m_meshObj.hasBdBack2d(graphRow)){
+      else if (axis == 2 && m_meshObj.hasBdBack2d(smPt)){
 	// relfective
 	facs = {1., 1., -1., 1.};
 	return;
@@ -1105,7 +1130,7 @@ private:
 
       const scalar_type wedgePosition = static_cast<scalar_type>(1)/static_cast<scalar_type>(6);
       const auto & x = m_meshObj.viewX();
-      const auto cellGID = m_meshObj.graph()(graphRow, 0);
+      const auto cellGID = m_meshObj.graph()(smPt, 0);
       const auto myX = x(cellGID);
 
       if (axis == 1){
@@ -1114,13 +1139,13 @@ private:
 	return;
       }
 
-      if (axis == 2 && m_meshObj.hasBdBack2d(graphRow) && (myX < wedgePosition)){
+      if (axis == 2 && m_meshObj.hasBdBack2d(smPt) && (myX < wedgePosition)){
 	// homog neumann
 	facs = {1., 1., 1., 1.};
 	return;
       }
 
-      if (axis == 2 && m_meshObj.hasBdBack2d(graphRow) && (myX >= wedgePosition)){
+      if (axis == 2 && m_meshObj.hasBdBack2d(smPt) && (myX >= wedgePosition)){
 	// reflective
 	facs = {1., 1., -1., 1.};
 	return;
@@ -1133,26 +1158,26 @@ private:
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::CrossShock)
     {
-      if (axis == 1 && m_meshObj.hasBdLeft2d(graphRow)){
+      if (axis == 1 && m_meshObj.hasBdLeft2d(smPt)){
 	// dirichlet
 	facs = {0., 0., 0., 0.};
 	return;
       }
 
-      if (axis == 1 && m_meshObj.hasBdRight2d(graphRow)){
+      if (axis == 1 && m_meshObj.hasBdRight2d(smPt)){
 	// homog neumann
 	facs = {1., 1., 1., 1.};
 	return;
       }
 
-      if (axis == 2 && m_meshObj.hasBdBack2d(graphRow))
+      if (axis == 2 && m_meshObj.hasBdBack2d(smPt))
       {
 	// dirichlet for u,v, and homog neumann for rho and rho*E
 	facs = {1., 0., 0., 1.};
 	return;
       }
 
-      if (axis == 2 && m_meshObj.hasBdFront2d(graphRow))
+      if (axis == 2 && m_meshObj.hasBdFront2d(smPt))
       {
 	// homog neumann for rho and rho*E
 	facs = {1., 1., 1., 1.};
