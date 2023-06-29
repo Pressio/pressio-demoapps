@@ -19,7 +19,7 @@ Building the test suite
 
 If you want to build the C++ tests, you need CMake > 3.18.0 and then do::
 
-  git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+  git clone git@github.com:Pressio/pressio-demoapps.git
   export CXX=<path-to-your-CXX-compiler> #must support C++17
   cd pressio-demoapps && mkdir build && cd build
   cmake -DPRESSIODEMOAPPS_ENABLE_TESTS=On ..
@@ -32,7 +32,9 @@ Python library
 
 To build/install the bindings, you need:
 
-- CMake > 3.18.0 and a C++ compiler with C++17 support
+- Python >= 3.8
+
+- CMake >= 3.18.0 and a C++ compiler with C++17 support
 
 - You also need these packages::
 
@@ -42,7 +44,7 @@ Then, you can do:
 
 .. code-block:: shell
 
-   git clone --recursive git@github.com:Pressio/pressio-demoapps.git
+   git clone git@github.com:Pressio/pressio-demoapps.git
    export CXX=<path-to-your-CXX-compiler> #must support C++17
    cd pressio-demoapps
    python3 cmake_build.py
