@@ -10,7 +10,7 @@ set(MESHSRC ${CMAKE_CURRENT_SOURCE_DIR}/../meshing_scripts)
 
 include_directories(
   # include eigen, pressio-demoapps headers, and pressio
-  ${CMAKE_CURRENT_SOURCE_DIR}/../tpls/eigen
+  ${CMAKE_CURRENT_SOURCE_DIR}/../tpls/eigen3
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
   ${CMAKE_CURRENT_SOURCE_DIR}/pressio/include)
 
