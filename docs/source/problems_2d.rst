@@ -4,8 +4,9 @@
 .. toctree::
     :maxdepth: 1
 
-    diffusion_reaction_2d
+    advection_diffusion_reaction_2d
     burgers_2d_periodic
+    diffusion_reaction_2d
     grayscott_2d
     swe_2d
     euler_2d_smooth

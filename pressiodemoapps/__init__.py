@@ -24,7 +24,7 @@ try:
     ViscousFluxReconstruction, ViscousFluxScheme, \
     Advection1d, DiffusionReaction1d, Euler1d, \
     AdvectionDiffusion2d, DiffusionReaction2d,\
-    Swe2d, Euler2d, Euler3d
+    AdvectionDiffusionReaction2d, Swe2d, Euler2d, Euler3d
 except ImportError:
   raise ImportError("Unable to import enums from _pressiodemoappsimpl")
 
@@ -49,6 +49,13 @@ try:
 except ImportError:
   raise ImportError("Unable to import DiffusionReaction classes from _pressiodemoappsimpl")
 
+# advection-diffusion-reaction problems
+try:
+  from ._pressiodemoappsimpl \
+  import AdvectionDiffusionReaction2dProblem
+except ImportError:
+  raise ImportError("Unable to import AdvectionDiffusionReaction classes from _pressiodemoappsimpl")
+
 # euler problems
 try:
   from ._pressiodemoappsimpl \
@@ -70,6 +77,7 @@ try:
     create_diffusion_reaction_1d_problem_A,\
     create_periodic_burgers_2d_problem,\
     create_diffusion_reaction_2d_problem_A,\
+    create_adv_diff_reac_2d_problem_A, \
     create_gray_scott_2d_problem,\
     create_slip_wall_swe_2d_problem,\
     create_cross_shock_problem
