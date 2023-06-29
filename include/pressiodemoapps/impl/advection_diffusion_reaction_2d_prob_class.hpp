@@ -938,10 +938,6 @@ private:
     {
       const auto smPt        = rows[it];
       const auto uIndex	     = graph(smPt, 0);
-      const auto uIndexLeft  = graph(smPt, 1);
-      const auto uIndexFront = graph(smPt, 2);
-      const auto uIndexRight = graph(smPt, 3);
-      const auto uIndexBack  = graph(smPt, 4);
 
       // *** add X contribution of diffusion ***
       StencilFillerX(smPt, it, m_numDofPerCell);

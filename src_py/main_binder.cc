@@ -352,16 +352,14 @@ void bindAdvectionDiffusionReaction2d(pybind11::module & mParent)
   pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
 
   mParent.def("create_problem",
-	      &pda::create_advecdiffusionreac2d_problem_default_for_py<MeshType, py_problem_type>,
+	      &pda::create_advdiffreac_2d_problem_default_for_py<MeshType, py_problem_type>,
 	      pybind11::return_value_policy::take_ownership,
-	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert());
   mParent.def("create_adv_diff_reac_2d_problem_A",
-	      &pda::create_advecdiffusionreac2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      &pda::create_advdiffreac_2d_problem_A_ov1_for_py<MeshType, py_problem_type>,
 	      pybind11::return_value_policy::take_ownership,
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert());

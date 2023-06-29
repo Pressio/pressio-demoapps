@@ -43,6 +43,7 @@ add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
 add_subdirectory(eigen_2d_burgers_periodic_jacobian_fd)
 add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
 add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
+add_subdirectory(eigen_2d_advdiffreac_probA_jacobian_fd)
 
 # ---------------------------------------------------------
 # 1d problems
@@ -87,7 +88,7 @@ add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 add_subdirectory(eigen_2d_burgers_periodic_explicit)
 add_subdirectory(eigen_2d_burgers_periodic_sample_mesh_test)
 add_subdirectory(eigen_2d_advdiffreac_probA_explicit)
-add_subdirectory(eigen_2d_advdiffreac_probA_jacobian_fd)
+
 add_subdirectory(eigen_2d_advdiffreac_probA_sample_mesh_test)
 add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 

@@ -20,8 +20,7 @@ int main()
 #endif
 
   const auto probId  = pda::AdvectionDiffusionReaction2d::ProblemA;
-  auto appObj = pda::create_problem_eigen(meshObj, probId, order,
-					  pda::ViscousFluxReconstruction::FirstOrder);
+  auto appObj = pda::create_problem_eigen(meshObj, probId, order);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 

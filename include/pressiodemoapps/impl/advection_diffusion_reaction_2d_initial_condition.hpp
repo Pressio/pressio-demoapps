@@ -56,14 +56,7 @@ template<class state_type, class mesh_t>
 void problemAIC(state_type & state,
 		const mesh_t & meshObj)
 {
-  constexpr int numDofPerCell = 1;
-
-  const auto &x= meshObj.viewX();
-  const auto &y= meshObj.viewY();
-  for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
-    const auto ind = i*numDofPerCell;
-    state(ind) = 0.0;
-  }
+  state.setZero();
 }
 
 }}//end namespace

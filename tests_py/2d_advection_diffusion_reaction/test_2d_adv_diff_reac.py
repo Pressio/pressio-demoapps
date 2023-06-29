@@ -13,8 +13,7 @@ def test_default_coefficients():
   meshO    = pda.load_cellcentered_uniform_mesh(meshPath)
   probId   = pda.AdvectionDiffusionReaction2d.ProblemA
   inviscidScheme = pda.InviscidFluxReconstruction.Weno3
-  viscousScheme = pda.ViscousFluxReconstruction.FirstOrder
-  appObj   = pda.create_problem(meshO, probId, inviscidScheme, viscousScheme)
+  appObj   = pda.create_problem(meshO, probId, inviscidScheme)
 
   yn = appObj.initialCondition()
   dt = 0.005
@@ -36,7 +35,7 @@ def test_custom_coefficients():
   uy = 0.5*np.sin(np.pi/3)
   diff = 0.0005
   sigma = 2.0
-  appObj = pda.create_adv_diff_reac_2d_problem_A(meshO, probId, inviscidScheme, viscousScheme, ux, uy, diff, sigma)
+  appObj = pda.create_adv_diff_reac_2d_problem_A(meshO, inviscidScheme, ux, uy, diff, sigma)
 
   yn = appObj.initialCondition()
   dt = 0.005

@@ -115,14 +115,13 @@ template<
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 // bindings need unique naming or we get error associated with overloads
-create_advecdiffusionreac2d_problem_default_for_py
+  create_advdiffreac_2d_problem_default_for_py
 #else
-create_problem_eigen
+  create_problem_eigen
 #endif
 (const mesh_t & meshObj,
  AdvectionDiffusionReaction2d problemEnum,
- InviscidFluxReconstruction inviscidFluxRecEnum,
- ViscousFluxReconstruction viscFluxRecEnum)
+ InviscidFluxReconstruction inviscidFluxRecEnum)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
@@ -132,19 +131,18 @@ create_problem_eigen
     const auto ux = 0.5*std::cos( M_PI/3 );
     const auto uy = 0.5*std::sin( M_PI/3 );
     const auto diffusion = static_cast<scalar_t>(0.001);
-    const auto f_source  = static_cast<scalar_t>(1.0);
     const auto sigma_reaction = static_cast<scalar_t>(1.0);
 
     return RetType(impladvdiffreac2d::TagProblemA{},
 		   meshObj,
 		   inviscidFluxRecEnum,
 		   InviscidFluxScheme::Rusanov,
-		   viscFluxRecEnum,
+		   ViscousFluxReconstruction::FirstOrder,
 		   ux, uy, diffusion, sigma_reaction,
 		   impladvdiffreac2d::DefaultSourceProblemA<scalar_t>());
   }
   else{
-    throw std::runtime_error("advection-diffusion2d: invalid problem enum");
+    throw std::runtime_error("advection-diffusion-reaction2d: invalid problem enum");
   }
 }
 
@@ -158,35 +156,27 @@ template<
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 // bindings need unique naming or we get error associated with overloads
-create_advecdiffusionreac2d_problem_ov1_for_py
+  create_advdiffreac_2d_problem_A_ov1_for_py
 #else
-create_problem_eigen
+  create_advdiffreac_2d_problem_A_eigen
 #endif
 (const mesh_t & meshObj,
- AdvectionDiffusionReaction2d problemEnum,
  InviscidFluxReconstruction inviscidFluxRecEnum,
- ViscousFluxReconstruction viscFluxRecEnum,
  typename mesh_t::scalar_t ux,
  typename mesh_t::scalar_t uy,
  typename mesh_t::scalar_t diffusion,
- typename mesh_t::scalar_t sigmaReaction)
+ typename mesh_t::scalar_t sigma)
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  if (problemEnum == ::pressiodemoapps::AdvectionDiffusionReaction2d::ProblemA)
-  {
-    const auto f_source  = static_cast<scalar_t>(1.0);
-    return RetType(impladvdiffreac2d::TagProblemA{},
-		   meshObj,
-		   inviscidFluxRecEnum,
-		   InviscidFluxScheme::Rusanov,
-		   viscFluxRecEnum,
-		   ux, uy, diffusion, sigmaReaction,
-		   impladvdiffreac2d::DefaultSourceProblemA<scalar_t>());
-  }
-  else{
-    throw std::runtime_error("advection-diffusion2d: invalid problem enum");
-  }
+  const auto f_source  = static_cast<scalar_t>(1.0);
+  return RetType(impladvdiffreac2d::TagProblemA{},
+		 meshObj,
+		 inviscidFluxRecEnum,
+		 InviscidFluxScheme::Rusanov,
+		 ViscousFluxReconstruction::FirstOrder,
+		 ux, uy, diffusion, sigma,
+		 impladvdiffreac2d::DefaultSourceProblemA<scalar_t>());
 }
 
 } //end namespace pressiodemoapps

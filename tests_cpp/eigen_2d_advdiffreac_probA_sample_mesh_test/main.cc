@@ -42,9 +42,8 @@ int main()
   const auto inviscidScheme= pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  const auto viscousScheme = pda::ViscousFluxReconstruction::FirstOrder;
   const auto probId  = pda::AdvectionDiffusionReaction2d::ProblemA;
-  auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme, viscousScheme);
+  auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme);
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;
 
