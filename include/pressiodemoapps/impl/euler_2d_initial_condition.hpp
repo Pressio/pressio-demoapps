@@ -269,7 +269,7 @@ void riemann2dIC1(state_type & state,
   constexpr auto x0 = one/two;
   constexpr auto y0 = one/two;
 
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim = {};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
 
@@ -316,7 +316,7 @@ void riemann2dIC2(state_type & state,
 
   const auto & x= meshObj.viewX();
   const auto & y= meshObj.viewY();
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim = {};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       if (x(i) >= x0 and y(i) >= y0){

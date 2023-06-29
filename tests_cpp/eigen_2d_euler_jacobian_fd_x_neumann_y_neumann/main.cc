@@ -32,7 +32,7 @@ void modify_state(state_type & state,
   constexpr auto x0 = one/two;
   constexpr auto y0 = one/two;
 
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim = {};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto pert = 0.001*std::sin(8.*M_PI*x(i))*std::sin(8.*M_PI*y(i));
