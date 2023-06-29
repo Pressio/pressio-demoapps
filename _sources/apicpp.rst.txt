@@ -96,7 +96,7 @@ A *pressio-demoapps* C++ problem class meets the following API
       Returns the total number of degrees of freedom on the **stencil** mesh.
       Note that, in general, this is not the same as the number of stencil mesh cells.
       When you have multiple dofs/cell (for example Euler equations),
-      then the total # of dofs on stencil mesh = # dofs/cell times the # of sample mesh cells.
+      then the total # of dofs on stencil mesh = # dofs/cell times the # of stencil mesh cells.
 
 
 .. _Supported Backends And Types:
