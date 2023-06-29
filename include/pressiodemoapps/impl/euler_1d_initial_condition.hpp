@@ -62,7 +62,7 @@ void euler1dsineInitialCondition(state_type & state,
   constexpr auto one  = static_cast<scalar_type>(1);
 
   const auto & x= meshObj.viewX();
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim = {};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       prim[0] = one + static_cast<scalar_type>(0.2)*std::sin(M_PI*x(i));
@@ -87,7 +87,7 @@ void sod1dInitialCondition(state_type & state,
   constexpr auto one  = static_cast<scalar_type>(1);
 
   const auto & x= meshObj.viewX();
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim = {};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       if (x(i) <= zero){
@@ -119,7 +119,7 @@ void lax1dInitialCondition(state_type & state,
   constexpr auto zero = static_cast<scalar_type>(0);
 
   const auto & x= meshObj.viewX();
-  std::array<scalar_type, numDofPerCell> prim;
+  std::array<scalar_type, numDofPerCell> prim ={};
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto ind = i*numDofPerCell;
