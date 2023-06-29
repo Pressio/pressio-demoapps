@@ -65,6 +65,7 @@
 // 2d
 #include "pressiodemoapps/advection_diffusion2d.hpp"
 #include "pressiodemoapps/diffusion_reaction2d.hpp"
+#include "pressiodemoapps/advection_diffusion_reaction2d.hpp"
 #include "pressiodemoapps/euler2d.hpp"
 #include "pressiodemoapps/swe2d.hpp"
 // 3d
@@ -80,7 +81,6 @@ void bindCommonApiMethods(T & appObj)
 	     &p_t::totalDofSampleMesh);
   appObj.def("totalDofStencilMesh",
 	     &p_t::totalDofStencilMesh);
-
   appObj.def("initialCondition",
 	     &p_t::initialCondition,
 	     pybind11::return_value_policy::copy);
@@ -88,10 +88,8 @@ void bindCommonApiMethods(T & appObj)
   appObj.def("createRightHandSide",
 	     &p_t::createVelocity,
 	     pybind11::return_value_policy::automatic);
-
   appObj.def("rightHandSide",
 	     &p_t::velocity);
-
   appObj.def("createApplyJacobianResult",
 	     &p_t::createApplyJacobianResultRank1);
   appObj.def("createApplyJacobianResult",
@@ -170,6 +168,10 @@ void bind2dProblemEnums(pybind11::module & mParent)
 	   pda::DiffusionReaction2d::ProblemA)
     .value("GrayScott",
 	   pda::DiffusionReaction2d::GrayScott);
+
+  pybind11::enum_<pda::AdvectionDiffusionReaction2d>(mParent, "AdvectionDiffusionReaction2d")
+    .value("ProblemA",
+	   pda::AdvectionDiffusionReaction2d::ProblemA);
 
   pybind11::enum_<pda::Euler2d>(mParent, "Euler2d")
     .value("PeriodicSmooth",
@@ -333,6 +335,36 @@ void bindEuler1d(pybind11::module & mParent)
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert());
+}
+
+// -----------------------
+// advection-diffusion-reaction 2d
+// -----------------------
+template<class MeshType>
+void bindAdvectionDiffusionReaction2d(pybind11::module & mParent)
+{
+  namespace pda = pressiodemoapps;
+
+  using py_problem_type = pda::PublicProblemMixinPy<
+    pda::impladvdiffreac2d::EigenApp<MeshType>>;
+
+  pybind11::class_<py_problem_type> prob(mParent, "AdvectionDiffusionReaction2dProblem");
+  pressiodemoappspy::impl::bindCommonApiMethods<py_problem_type>(prob);
+
+  mParent.def("create_problem",
+	      &pda::create_advecdiffusionreac2d_problem_default_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert());
+  mParent.def("create_adv_diff_reac_2d_problem_A",
+	      &pda::create_advecdiffusionreac2d_problem_ov1_for_py<MeshType, py_problem_type>,
+	      pybind11::return_value_policy::take_ownership,
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
+	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
 }
 
 // -----------------------
@@ -533,6 +565,7 @@ PYBIND11_MODULE(MODNAME, mTopLevel)
   pdapyimpl::bindAdvection1d<ccumesh_t>(mTopLevel);
   pdapyimpl::bindDiffusionReaction1d<ccumesh_t>(mTopLevel);
   pdapyimpl::bindEuler1d<ccumesh_t>(mTopLevel);
+  pdapyimpl::bindAdvectionDiffusionReaction2d<ccumesh_t>(mTopLevel);
   pdapyimpl::bindAdvectionDiffusion2d<ccumesh_t>(mTopLevel);
   pdapyimpl::bindDiffusionReaction2d<ccumesh_t>(mTopLevel);
   pdapyimpl::bindEuler2d<ccumesh_t>(mTopLevel);

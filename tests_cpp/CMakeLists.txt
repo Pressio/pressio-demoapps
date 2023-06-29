@@ -86,6 +86,10 @@ add_subdirectory(eigen_2d_gray_scott_explicit)
 add_subdirectory(eigen_2d_gray_scott_sample_mesh_test)
 add_subdirectory(eigen_2d_burgers_periodic_explicit)
 add_subdirectory(eigen_2d_burgers_periodic_sample_mesh_test)
+add_subdirectory(eigen_2d_advdiffreac_probA_explicit)
+add_subdirectory(eigen_2d_advdiffreac_probA_jacobian_fd)
+add_subdirectory(eigen_2d_advdiffreac_probA_sample_mesh_test)
+add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 
 # ---------------------------------------------------------
 # 3d problems
