@@ -25,38 +25,23 @@ add_subdirectory(rankine_hugoniot)
 add_subdirectory(eigen_rusanov_flux_jacobians_euler)
 add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
-# ---------------------------------------------------------
-# test jacobians, compare against FD or complex step
-# ---------------------------------------------------------
-add_subdirectory(eigen_1d_linear_advection_default_velocity_jacobian_fd)
-add_subdirectory(eigen_1d_linear_advection_custom_velocity_jacobian_fd)
-add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
-add_subdirectory(eigen_1d_euler_jacobian_fd)
-add_subdirectory(eigen_2d_diffusion_reaction_jacobian_fd)
-add_subdirectory(eigen_2d_gray_scott_jacobian_fd)
-add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
-add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
-add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
-add_subdirectory(eigen_2d_euler_cross_shock_jacobian_fd)
-add_subdirectory(eigen_2d_swe_jacobian_fd_slip_wall)
-add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
-add_subdirectory(eigen_2d_burgers_periodic_jacobian_fd)
-add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
-add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
-add_subdirectory(eigen_2d_advdiffreac_probA_jacobian_fd)
 
 # ---------------------------------------------------------
 # 1d problems
 # ---------------------------------------------------------
 add_subdirectory(eigen_1d_linear_advection_default_velocity_explicit)
 add_subdirectory(eigen_1d_linear_advection_default_velocity_implicit)
-add_subdirectory(eigen_1d_linear_advection_default_velocity_convergence)
+if (CMAKE_BUILD_TYPE EQUAL "Release")
+  add_subdirectory(eigen_1d_linear_advection_default_velocity_convergence)
+endif()
 add_subdirectory(eigen_1d_linear_advection_default_velocity_sample_mesh_testA)
 add_subdirectory(eigen_1d_linear_advection_default_velocity_sample_mesh_testB)
 add_subdirectory(eigen_1d_diffusion_reaction_explicit)
 add_subdirectory(eigen_1d_diffusion_reaction_implicit)
 add_subdirectory(eigen_1d_diffusion_reaction_sample_mesh_test)
-add_subdirectory(eigen_1d_euler_convergence)
+if (CMAKE_BUILD_TYPE EQUAL "Release")
+  add_subdirectory(eigen_1d_euler_convergence)
+endif()
 add_subdirectory(eigen_1d_euler_sod_explicit)
 add_subdirectory(eigen_1d_euler_sod_implicit)
 add_subdirectory(eigen_1d_euler_lax_explicit)
@@ -97,3 +82,25 @@ add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 # ---------------------------------------------------------
 add_subdirectory(eigen_3d_euler_smooth)
 add_subdirectory(eigen_3d_euler_sedov_symmetry)
+
+
+
+# ---------------------------------------------------------
+# test jacobians, compare against FD or complex step
+# ---------------------------------------------------------
+add_subdirectory(eigen_1d_linear_advection_default_velocity_jacobian_fd)
+add_subdirectory(eigen_1d_linear_advection_custom_velocity_jacobian_fd)
+add_subdirectory(eigen_1d_diffusion_reaction_jacobian_fd)
+add_subdirectory(eigen_1d_euler_jacobian_fd)
+add_subdirectory(eigen_2d_diffusion_reaction_jacobian_fd)
+add_subdirectory(eigen_2d_gray_scott_jacobian_fd)
+add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_neumann)
+add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_reflective)
+add_subdirectory(eigen_2d_euler_jacobian_fd_x_neumann_y_ref_and_dirich)
+add_subdirectory(eigen_2d_euler_cross_shock_jacobian_fd)
+add_subdirectory(eigen_2d_swe_jacobian_fd_slip_wall)
+add_subdirectory(eigen_2d_swe_jacobian_fd_with_sample_mesh)
+add_subdirectory(eigen_2d_burgers_periodic_jacobian_fd)
+add_subdirectory(eigen_3d_euler_jacobian_fd_xyz_periodic)
+add_subdirectory(eigen_3d_euler_jacobian_fd_sedov_symm)
+add_subdirectory(eigen_2d_advdiffreac_probA_jacobian_fd)

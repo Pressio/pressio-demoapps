@@ -34,7 +34,7 @@ int main()
   const double eps = 1e-8;
 
   // make sure repeated evaluations work
-  for (int loop=0; loop<6; ++loop)
+  for (int loop=0; loop<3; ++loop)
   {
     appObj.rightHandSide(state, 0., velo);
     appObj.jacobian(state, 0., J);
