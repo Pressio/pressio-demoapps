@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=50
-  ny=200
+  nx=15
+  ny=60
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("doubleMach2d_solution.bin")

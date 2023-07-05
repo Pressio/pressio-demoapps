@@ -11,8 +11,8 @@ def computePressure(rho, u, v, E):
 if __name__== "__main__":
   # st = int(sys.argv[1])
 
-  nx=50
-  ny=50
+  nx=25
+  ny=25
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("sedov2d_solution.bin")
@@ -25,7 +25,7 @@ if __name__== "__main__":
   v   = D[:,2]/rho
   p   = computePressure(rho, u, v, D[:,3])
 
-  # np.savetxt("p.txt", p)
+  np.savetxt("p.txt", p)
   # import matplotlib.pyplot as plt
   # coords = np.loadtxt('coordinates.dat', dtype=float)
   # x_fom, y_fom = coords[:,1], coords[:,2]

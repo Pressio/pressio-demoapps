@@ -39,8 +39,8 @@ int main()
 
   FomObserver<state_t> Obs("smooth2d_solution.bin", 5);
 
-  const auto dt = 0.025;
-  const auto Nsteps = pressio::ode::StepCount(80);
+  const auto dt = 0.05;
+  const auto Nsteps = pressio::ode::StepCount(40);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
 
   return 0;

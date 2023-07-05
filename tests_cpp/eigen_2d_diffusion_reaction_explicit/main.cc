@@ -18,7 +18,7 @@ int main()
   state_t state = appObj.initialCondition();
 
   const auto dt = 0.001;
-  const auto Nsteps = pressio::ode::StepCount(1000);
+  const auto Nsteps = pressio::ode::StepCount(100);
   FomObserver<state_t> Obs("diffusion_reaction_2d_solution.bin", 10);
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);

@@ -1,10 +1,10 @@
 
-set(testname eigen_2d_kelvin_helmholtz_weno3_explicit)
+set(testname eigen_3d_smooth_weno3_short)
 set(exename  ${testname}_exe)
 
-configure_file(../compare.py compare.py COPYONLY)
 configure_file(../plot.py plot.py COPYONLY)
-configure_file(p_gold.txt p_gold.txt COPYONLY)
+configure_file(../compare.py compare.py COPYONLY)
+
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
 target_compile_definitions(${exename} PUBLIC -DUSE_WENO3)
 

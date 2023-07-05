@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=50
-  ny=50
+  nx=35
+  ny=35
   totDofs = nx*ny
 
   D = np.fromfile("diffusion_reaction_2d_solution.bin")

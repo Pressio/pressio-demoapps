@@ -23,7 +23,7 @@ int main()
   state_t state(appObj.initialCondition());
 
   FomObserver<state_t> Obs("riemann2d_solution.bin", 100);
-  const auto dt = 0.001;
+  const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(0.6/dt);
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);

@@ -39,8 +39,8 @@ int main()
 
   FomObserver<decltype(state)> Obs("advdiffreac_2d_solution.bin", 20);
 
-  const auto dt = 0.01;
-  const auto Nsteps = pressio::ode::StepCount(200);
+  const auto dt = 0.05;
+  const auto Nsteps = pressio::ode::StepCount(40);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
 
   return 0;

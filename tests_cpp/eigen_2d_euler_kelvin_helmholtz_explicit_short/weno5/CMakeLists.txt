@@ -1,5 +1,5 @@
 
-set(testname eigen_2d_kelvin_helmholtz_weno5_explicit)
+set(testname eigen_2d_kelvin_helmholtz_weno5_explicit_short)
 set(exename  ${testname}_exe)
 
 configure_file(../plot.py plot.py COPYONLY)

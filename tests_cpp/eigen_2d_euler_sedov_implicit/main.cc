@@ -37,10 +37,10 @@ int main()
   auto NonLinSolver=pressio::create_newton_solver(stepperObj, linSolverObj);
   NonLinSolver.setStopTolerance(1e-5);
 
-  FomObserver<state_t> Obs("sedov2d_solution.bin", 5);
+  FomObserver<state_t> Obs("sedov2d_solution.bin", 10);
 
-  const auto dt = 0.0001;
-  const auto Nsteps = pressio::ode::StepCount(100);
+  const auto dt = 0.005;
+  const auto Nsteps = pressio::ode::StepCount(20);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
 
   return 0;

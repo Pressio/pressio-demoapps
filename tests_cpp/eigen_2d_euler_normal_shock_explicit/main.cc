@@ -24,7 +24,7 @@ int main()
   using state_t = typename app_t::state_type;
   state_t state = appObj.initialCondition();
 
-  const auto dt = 0.0005;
+  const auto dt = 0.001;
   const auto Nsteps = pressio::ode::StepCount(0.1/dt);
   FomObserver<state_t> Obs("normalShock2d_solution.bin", 50);
 

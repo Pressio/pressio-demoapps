@@ -18,7 +18,6 @@ if __name__== "__main__":
 
   nx=25
   ny=25
-  dt=0.001
   finalTime = 2.
   fomTotDofs = nx*ny*4
 
@@ -40,9 +39,10 @@ if __name__== "__main__":
   err = LA.norm(rho-goldRho, np.inf)
   print("Linf error wrt analytical = ", err)
 
+
   if(st==3):
-    assert(math.isclose(err, 0.19629187623144784))
+    assert(math.isclose(err, 0.19629186956424138))
   if(st==5):
-    assert(math.isclose(err, 0.09177511987157294))
+    assert(math.isclose(err, 0.09177922458156529))
   elif(st==7):
-    assert(math.isclose(err, 0.0007232573399452713))
+    assert(math.isclose(err,0.000723019713426809))

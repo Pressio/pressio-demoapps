@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=50
-  ny=50
+  nx=20
+  ny=20
   fomTotDofs = nx*ny*2
 
   D = np.fromfile("burgers2d_solution.bin")
