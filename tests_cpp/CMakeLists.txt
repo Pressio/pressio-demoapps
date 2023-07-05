@@ -86,11 +86,10 @@ add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 # ---------------------------------------------------------
 if (CMAKE_BUILD_TYPE EQUAL "Release")
   add_subdirectory(eigen_3d_euler_smooth_long)
+  add_subdirectory(eigen_3d_euler_sedov_symmetry)
 else()
   add_subdirectory(eigen_3d_euler_smooth_short)
 endif()  
-add_subdirectory(eigen_3d_euler_sedov_symmetry)
-
 
 
 # ---------------------------------------------------------
