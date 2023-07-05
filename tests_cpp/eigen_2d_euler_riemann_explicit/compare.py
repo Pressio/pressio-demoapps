@@ -9,9 +9,8 @@ def computePressure(rho, u, v, E):
   return (gamma - 1.) * (E - rho*vel*0.5)
 
 if __name__== "__main__":
-  # st = int(sys.argv[1])
-  nx=50
-  ny=50
+  nx=20
+  ny=20
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("riemann2d_solution.bin")
@@ -24,8 +23,8 @@ if __name__== "__main__":
   v   = D[:,2]/rho
   p   = computePressure(rho, u, v, D[:,3])
 
-  # np.savetxt("rho.txt", rho)
-  # np.savetxt("p.txt", p)
+  np.savetxt("rho.txt", rho)
+  np.savetxt("p.txt", p)
   # import matplotlib.pyplot as plt
   # coords = np.loadtxt('coordinates.dat', dtype=float)
   # x_fom, y_fom = coords[:,1], coords[:,2]

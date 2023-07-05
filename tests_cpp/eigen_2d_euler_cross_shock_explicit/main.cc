@@ -24,7 +24,7 @@ int main()
   state_t state = appObj.initialCondition();
 
   const auto dt = 0.001;
-  const auto Nsteps = pressio::ode::StepCount(1./dt);
+  const auto Nsteps = pressio::ode::StepCount(0.1/dt);
   FomObserver<state_t> Obs("eulerCrossShock2d_solution.bin", 50);
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);

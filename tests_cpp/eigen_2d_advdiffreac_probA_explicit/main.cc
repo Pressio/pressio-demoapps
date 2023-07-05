@@ -26,7 +26,7 @@ int main()
 
   state_t state = appObj.initialCondition();
 
-  const auto dt = 0.005;
+  const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(5./dt);
   FomObserver<state_t> Obs("advdiffreac_2d_solution.bin", 100);
   auto stepperObj = pressio::ode::create_rk4_stepper(appObj);

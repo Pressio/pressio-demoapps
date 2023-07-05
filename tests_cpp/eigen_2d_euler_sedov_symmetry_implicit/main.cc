@@ -39,8 +39,8 @@ int main()
 
   FomObserver<state_t> Obs("sedov2dsym_solution.bin", 5);
 
-  const auto dt = 0.0001;
-  const auto Nsteps = pressio::ode::StepCount(100);
+  const auto dt = 0.001;
+  const auto Nsteps = pressio::ode::StepCount(30);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt,
     Nsteps, Obs, NonLinSolver);
 

@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=65
-  ny=65
+  nx=25
+  ny=25
   fomTotDofs = nx*ny*3
 
   D = np.fromfile("swe_slipWall2d_solution.bin")

@@ -39,7 +39,7 @@ int main()
 
   FomObserver<state_t> Obs("doubleMach2d_solution.bin", 10);
 
-  const auto dt = 0.0025;
+  const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(100);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs, NonLinSolver);
 

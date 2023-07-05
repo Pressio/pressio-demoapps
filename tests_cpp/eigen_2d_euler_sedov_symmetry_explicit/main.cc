@@ -26,7 +26,7 @@ int main()
   FomObserver<state_t> Obs("sedov2dsym_solution.bin", 10);
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
 
-  const auto dt = 0.0001;
+  const auto dt = 0.0005;
   const auto Nsteps = pressio::ode::StepCount(0.05/dt);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 

@@ -26,8 +26,8 @@ int main()
   using state_t = typename app_t::state_type;
   state_t state = appObj.initialCondition();
 
-  const auto dt = 0.005;
-  const auto Nsteps = pressio::ode::StepCount(10./dt);
+  const auto dt = 0.01;
+  const auto Nsteps = pressio::ode::StepCount(2./dt);
   FomObserver<state_t> Obs("burgers2d_solution.bin", 50);
 
   auto stepperObj = pressio::ode::create_rk4_stepper(appObj);

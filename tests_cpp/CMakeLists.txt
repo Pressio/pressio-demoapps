@@ -64,7 +64,11 @@ add_subdirectory(eigen_2d_euler_sedov_symmetry_implicit)
 add_subdirectory(eigen_2d_euler_sample_mesh_test1)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_explicit)
 add_subdirectory(eigen_2d_euler_double_mach_reflection_implicit)
-add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit)
+if (CMAKE_BUILD_TYPE EQUAL "Release")
+  add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit_long)
+else()
+  add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit_short)
+endif()  
 add_subdirectory(eigen_2d_euler_cross_shock_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
@@ -80,7 +84,11 @@ add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 # ---------------------------------------------------------
 # 3d problems
 # ---------------------------------------------------------
-add_subdirectory(eigen_3d_euler_smooth)
+if (CMAKE_BUILD_TYPE EQUAL "Release")
+  add_subdirectory(eigen_3d_euler_smooth_long)
+else()
+  add_subdirectory(eigen_3d_euler_smooth_short)
+endif()  
 add_subdirectory(eigen_3d_euler_sedov_symmetry)
 
 

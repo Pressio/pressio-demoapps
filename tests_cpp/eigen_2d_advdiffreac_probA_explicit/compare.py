@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=50
-  ny=50
+  nx=18
+  ny=18
   fomTotDofs = nx*ny
 
   D = np.fromfile("advdiffreac_2d_solution.bin")

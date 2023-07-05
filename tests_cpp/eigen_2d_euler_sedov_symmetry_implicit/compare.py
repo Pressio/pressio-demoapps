@@ -9,8 +9,8 @@ def computePressure(rho, u, v, E):
   return (gamma - 1.) * (E - rho*vel*0.5)
 
 if __name__== "__main__":
-  nx=50
-  ny=50
+  nx=18
+  ny=18
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("sedov2dsym_solution.bin")
