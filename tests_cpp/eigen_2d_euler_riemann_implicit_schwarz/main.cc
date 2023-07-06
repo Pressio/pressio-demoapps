@@ -17,7 +17,7 @@ int main()
   // +++++ USER INPUTS +++++
   string meshRoot = "/home/crwentl/research/runs/pressio/riemann/meshes/mesh_2x2_refx";
   string obsRoot = "riemann2d_solution";
-  const int obsFreq = 1;
+  //const int obsFreq = 1; //unused for now
 
   // problem definition
   const auto probId = pda::Euler2d::Riemann;

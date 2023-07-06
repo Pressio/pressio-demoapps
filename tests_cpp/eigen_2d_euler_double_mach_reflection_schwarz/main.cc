@@ -17,7 +17,7 @@ int main()
   // +++++ USER INPUTS +++++
   string meshRoot = "/home/crwentl/research/runs/pressio/double_mach/meshes/mesh_2x2";
   string obsRoot = "doubleMach2d_solution";
-  const int obsFreq = 1;
+  //const int obsFreq = 1;  // FR: commented out because unused
 
   // problem definition
   const auto probId = pda::Euler2d::DoubleMachReflection;

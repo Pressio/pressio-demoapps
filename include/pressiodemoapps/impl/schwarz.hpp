@@ -38,7 +38,7 @@ namespace pressiodemoapps{ namespace impl {
       using stepper_t      = decltype( pode::create_implicit_stepper(declval<scheme_t>(), declval<app_t &>()) );
       // TODO: generalize
       using linsolver_t    = pls::Solver<pls::iterative::Bicgstab, jacob_t>;
-      using nonlinsolver_t = decltype( pnls::create_newton_raphson( declval<stepper_t &>(), declval<linsolver_t&>()) );
+      using nonlinsolver_t = decltype( pressio::create_newton_solver( declval<stepper_t &>(), declval<linsolver_t&>()) );
 
     public:
 
@@ -146,7 +146,7 @@ namespace pressiodemoapps{ namespace impl {
         if (dt.size() == 1) {
           dt.resize(ndomains, dt[0]);
         } else {
-          if (dt.size() != ndomains) {
+          if (dt.size() != (std::size_t) ndomains) {
             cerr << "dt.size() must be 1 or ndomains, exiting" << endl;
             exit(-1);
           }
@@ -155,7 +155,7 @@ namespace pressiodemoapps{ namespace impl {
 
         // controller time step checks
         controlIters.resize(ndomains);
-        for (int domIdx = 0; domIdx < dt.size(); ++domIdx) {
+        for (int domIdx = 0; domIdx < (int) dt.size(); ++domIdx) {
           double niters = dtMax / dt[domIdx];
           if (round(niters) == niters) {
             controlIters[domIdx] = int(round(niters));
@@ -196,8 +196,8 @@ namespace pressiodemoapps{ namespace impl {
 
           // time stepping
           stepperVec.emplace_back( pode::create_implicit_stepper(scheme, appVec[domIdx]) );
-          nonlinSolverVec.emplace_back( pnls::create_newton_raphson(stepperVec.back(), *linSolverObj) );
-          nonlinSolverVec[domIdx].setTolerance(1e-5);
+          nonlinSolverVec.emplace_back( pressio::create_newton_solver(stepperVec.back(), *linSolverObj) );
+          nonlinSolverVec[domIdx].setStopTolerance(1e-5);
 
         }
       }
@@ -283,7 +283,7 @@ namespace pressiodemoapps{ namespace impl {
           int ny = domMesh.ny();
           int nz = domMesh.nz();
 
-          for (int neighIdx = 0; neighIdx < exchDomIdVec[domIdx].size(); ++neighIdx) {
+          for (int neighIdx = 0; neighIdx < (int) exchDomIdVec[domIdx].size(); ++neighIdx) {
 
             int neighDomIdx = exchDomIdVec[domIdx][neighIdx];
             if (neighDomIdx == -1) {
@@ -369,15 +369,15 @@ namespace pressiodemoapps{ namespace impl {
           int nx = domMesh.nx();
           int ny = domMesh.ny();
 
-          const auto & x = domMesh.viewX();
-          const auto & y = domMesh.viewY();
+          // const auto & x = domMesh.viewX();
+          // const auto & y = domMesh.viewY();
 
           // TODO: generalize to 3D
           pda::resize(exchGraphs[domIdx], 2*nx + 2*ny, bcStencil);
           exchGraphs[domIdx].fill(-1);
 
           // loop through neighboring domains
-          for (int neighIdx = 0; neighIdx < exchDomIds[domIdx].size(); ++neighIdx) {
+          for (int neighIdx = 0; neighIdx < (int) exchDomIds[domIdx].size(); ++neighIdx) {
 
             int neighDomIdx = exchDomIds[domIdx][neighIdx];
             if (neighDomIdx == -1) {
@@ -497,10 +497,10 @@ namespace pressiodemoapps{ namespace impl {
 
         const auto domState = stateVec[domIdx];
 
-        int exchCellIdx;
+        // int exchCellIdx;
         int startIdx;
         int endIdx;
-        for (int neighIdx = 0; neighIdx < exchDomIdVec[domIdx].size(); ++neighIdx) {
+        for (int neighIdx = 0; neighIdx < (int) exchDomIdVec[domIdx].size(); ++neighIdx) {
 
           int neighDomIdx = exchDomIdVec[domIdx][neighIdx];
           if (neighDomIdx == -1) {
@@ -510,7 +510,7 @@ namespace pressiodemoapps{ namespace impl {
           const auto neighMesh = appVec[neighDomIdx].getMesh();
           int nxNeigh = neighMesh.nx();
           int nyNeigh = neighMesh.ny();
-          int nzNeigh = neighMesh.nz();
+          //int nzNeigh = neighMesh.nz();
           auto * neighStateBc = &stateBcVec[neighDomIdx];
           const auto neighExchGraph = exchGraphVec[neighDomIdx];
 
@@ -574,7 +574,7 @@ namespace pressiodemoapps{ namespace impl {
           const auto intGraph = meshObj.graph();
           int nx = meshObj.nx();
           int ny = meshObj.ny();
-          int nz = meshObj.nz();
+          // int nz = meshObj.nz();
 
           const auto & rowsBd = meshObj.graphRowsOfCellsNearBd();
           pda::resize(ghostGraphs[domIdx], int(rowsBd.size()), 2 * dim);
@@ -592,7 +592,7 @@ namespace pressiodemoapps{ namespace impl {
             const auto right0 = intGraph(smPt, 3);
             const auto back0  = intGraph(smPt, 4);
 
-            int stencilIdx = 0; // first order
+            // int stencilIdx = 0; // first order
             int rowIdx = smPt / nx;
             int colIdx = smPt % nx;
             int bcCellIdx;

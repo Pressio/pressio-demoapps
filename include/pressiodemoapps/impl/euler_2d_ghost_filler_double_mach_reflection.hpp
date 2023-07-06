@@ -93,8 +93,6 @@ public:
 
     constexpr int numDofPerCell = 4;
     constexpr scalar_type zero{0};
-    constexpr scalar_type two{2};
-    constexpr scalar_type three{3};
 
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 0) >= 5);
