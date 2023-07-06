@@ -212,7 +212,9 @@ namespace pressiodemoapps{ namespace impl {
         for (int domIdx = 0; domIdx < ndomains; ++domIdx) {
 
           // subdomain indices
-          int i, j, k;
+          int i ={};
+          int j = {};
+          int k = {};
           i = domIdx % ndomX;
           if (dim > 1) {
             j = domIdx / ndomX;
