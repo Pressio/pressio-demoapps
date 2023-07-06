@@ -2,9 +2,6 @@
 cmake_minimum_required(VERSION 3.18.0)
 project(pressiodemoapps CXX)
 
-# setting where other cmake commands are
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
 #=====================================================================
 # versioning
 #=====================================================================
