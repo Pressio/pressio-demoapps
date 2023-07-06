@@ -22,7 +22,7 @@ int main()
 
   state_t state(appObj.initialCondition());
 
-  FomObserver<state_t> Obs("riemann2d_solution.bin", 100);
+  FomObserver<state_t> Obs("riemann2d_solution.bin", 10);
   const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(0.6/dt);
 
