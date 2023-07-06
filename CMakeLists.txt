@@ -8,13 +8,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 #=====================================================================
 # versioning
 #=====================================================================
-include(version_parse)
-get_version_number("version.txt" PressioDemoapps_VERSION_MAJOR)
-get_version_number("version.txt" PressioDemoapps_VERSION_MINOR)
-get_version_number("version.txt" PressioDemoapps_VERSION_PATCH)
-set(PressioDemoapps_VERSION
-"${PressioDemoapps_VERSION_MAJOR}.${PressioDemoapps_VERSION_MINOR}.${PressioDemoapps_VERSION_PATCH}")
-message("pressiodemoapps version = ${PressioDemoapps_VERSION}")
+file(READ "version.txt" PDA_VERSION)
+message("pressiodemoapps version = ${PDA_VERSION}")
 
 #=====================================================================
 # we need c++17
