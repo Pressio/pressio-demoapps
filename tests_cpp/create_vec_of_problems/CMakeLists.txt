@@ -4,7 +4,6 @@ set(exename ${testname}_exe)
 
 foreach(id RANGE 2)
   set(TMPDIR ${CMAKE_CURRENT_BINARY_DIR}/domain${id})
-  message(STATUS ${TMPDIR})
   file(MAKE_DIRECTORY ${TMPDIR})
   configure_file(info.dat         ${TMPDIR}/info.dat COPYONLY)
   configure_file(connectivity.dat ${TMPDIR}/connectivity.dat COPYONLY)
