@@ -88,8 +88,6 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
-  EigenApp() = default;
-
   EigenApp(TagLinearAdvection /*tag*/,
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
@@ -283,12 +281,12 @@ private:
 
     functor_type F(V, m_meshObj.get().dxInv(),
 		   /* end args for velo */
-		   J, xAxis, m_meshObj,
+		   J, xAxis, m_meshObj.get(),
 		   /* end args for jac */
 		   m_inviscidFluxSchemeEn, fluxL, fluxR,
 		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
@@ -333,7 +331,7 @@ private:
 		   /* end args for velo */
 		   m_inviscidFluxSchemeEn, fluxL, fluxR, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );

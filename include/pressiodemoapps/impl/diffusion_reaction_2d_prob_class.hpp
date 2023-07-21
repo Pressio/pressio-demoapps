@@ -103,13 +103,13 @@ public:
       m_probA_diffusionCoeff(diffusionCoeff),
       m_probA_reactionCoeff(reactionCoeff)
   {
-    if (m_meshObj.stencilSize() != 3){
+    if (m_meshObj.get().stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction2d currently, only supports 3-pt stencil");
     }
 
     m_probA_sourceFunctor  = sf;
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize()*m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize()*m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()*m_numDofPerCell;
     allocateGhosts();
   }
 
@@ -129,12 +129,12 @@ public:
       m_gs_feedRate(feedRate),
       m_gs_killRate(killRate)
   {
-    if (m_meshObj.stencilSize() != 3){
+    if (m_meshObj.get().stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction2d currently, only supports 3-pt stencil");
     }
 
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize()*m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize()*m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize()*m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()*m_numDofPerCell;
     // no ghosts needed since GS is periodic
   }
 
@@ -150,8 +150,8 @@ public:
 
     else if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::GrayScott)
     {
-      const auto &x= m_meshObj.viewX();
-      const auto &y= m_meshObj.viewY();
+      const auto &x= m_meshObj.get().viewX();
+      const auto &y= m_meshObj.get().viewY();
 
       for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
 	{
@@ -181,8 +181,8 @@ protected:
     std::vector<Tr> trList;
 
     const scalar_type zero = {0};
-    const auto & graph = m_meshObj.graph();
-    for (index_t smPt=0; smPt<m_meshObj.sampleMeshSize(); ++smPt)
+    const auto & graph = m_meshObj.get().graph();
+    for (index_t smPt=0; smPt<m_meshObj.get().sampleMeshSize(); ++smPt)
       {
 	const auto jacRowOfCurrCellFirstDof = smPt*m_numDofPerCell;
 	const auto jacColOfCurrCellFirstDof = graph(smPt, 0)*m_numDofPerCell;
@@ -282,11 +282,11 @@ private:
     {
       using ghost_filler_t = GhostFillerProblemA2d<U_t, MeshType, ghost_container_type>;
       const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_viscousFluxRecEn);
-      ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj,
+      ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj.get(),
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
 
-      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
@@ -315,24 +315,24 @@ private:
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, stencil_container_type, U_t,  MeshType, ghost_container_type>;
 
-    sfiller_t StencilFillerX(stencilSize, U, m_meshObj,
+    sfiller_t StencilFillerX(stencilSize, U, m_meshObj.get(),
 			     m_ghostLeft, m_ghostRight,
 			     stencilVals, xAxis);
-    sfiller_t StencilFillerY(stencilSize, U, m_meshObj,
+    sfiller_t StencilFillerY(stencilSize, U, m_meshObj.get(),
 			     m_ghostBack, m_ghostFront,
 			     stencilVals, yAxis);
 
-    const auto & x	    = m_meshObj.viewX();
-    const auto & y          = m_meshObj.viewY();
-    const auto & graph      = m_meshObj.graph();
+    const auto & x	    = m_meshObj.get().viewX();
+    const auto & y          = m_meshObj.get().viewY();
+    const auto & graph      = m_meshObj.get().graph();
     constexpr auto two      = static_cast<scalar_type>(2);
-    const auto dxInvSq	    = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq	    = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto twoReacCoeff = m_probA_reactionCoeff*two;
     const auto diffDxInvSq  = m_probA_diffusionCoeff*dxInvSq;
     const auto diffDyInvSq  = m_probA_diffusionCoeff*dyInvSq;
 
-    const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsNearBd();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
@@ -405,17 +405,17 @@ private:
   {
     // note that for ProblemA, m_numDofPerCell == 1, so we omit it below
 
-    const auto & x      = m_meshObj.viewX();
-    const auto & y      = m_meshObj.viewY();
-    const auto & graph  = m_meshObj.graph();
+    const auto & x      = m_meshObj.get().viewX();
+    const auto & y      = m_meshObj.get().viewY();
+    const auto & graph  = m_meshObj.get().graph();
     constexpr auto two  = static_cast<scalar_type>(2);
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq  = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto twoReacCoeff = m_probA_reactionCoeff*two;
     const auto diffDxInvSq  = m_probA_diffusionCoeff*dxInvSq;
     const auto diffDyInvSq  = m_probA_diffusionCoeff*dyInvSq;
 
-    const auto & rows   = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
@@ -460,19 +460,19 @@ private:
     constexpr auto one = static_cast<scalar_type>(1);
     constexpr auto two = static_cast<scalar_type>(2);
 
-    const auto dxInvSq = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto u_diffDxInvSq  = m_gs_diffusionCoeff_u*dxInvSq;
     const auto u_diffDyInvSq  = m_gs_diffusionCoeff_u*dyInvSq;
     const auto v_diffDxInvSq  = m_gs_diffusionCoeff_v*dxInvSq;
     const auto v_diffDyInvSq  = m_gs_diffusionCoeff_v*dyInvSq;
 
-    const auto & graph  = m_meshObj.graph();
+    const auto & graph  = m_meshObj.get().graph();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
 
-    for (index_t smPt=0; smPt<m_meshObj.sampleMeshSize(); ++smPt)
+    for (index_t smPt=0; smPt<m_meshObj.get().sampleMeshSize(); ++smPt)
     {
       const auto vIndexCurrentCellFirstDof = smPt*m_numDofPerCell;
 
@@ -529,7 +529,7 @@ private:
     const auto stencilSize    = reconstructionTypeToStencilSize(m_viscousFluxRecEn);
     const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
 
-    const index_t s1 = m_meshObj.numCellsBd();
+    const index_t s1 = m_meshObj.get().numCellsBd();
     ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostFront, s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
@@ -540,7 +540,8 @@ protected:
   int m_numDofPerCell = {};
   ::pressiodemoapps::DiffusionReaction2d m_probEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
   mutable ghost_container_type m_ghostLeft;

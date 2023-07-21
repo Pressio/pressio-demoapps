@@ -25,6 +25,7 @@ add_subdirectory(rankine_hugoniot)
 add_subdirectory(eigen_rusanov_flux_jacobians_euler)
 add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
+add_subdirectory(create_vec_of_problems)
 
 # ---------------------------------------------------------
 # 1d problems
@@ -69,7 +70,7 @@ if (CMAKE_BUILD_TYPE EQUAL "Release")
   add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit_long)
 else()
   add_subdirectory(eigen_2d_euler_kelvin_helmholtz_explicit_short)
-endif()  
+endif()
 add_subdirectory(eigen_2d_euler_cross_shock_explicit)
 add_subdirectory(eigen_2d_swe_slip_wall_explicit)
 add_subdirectory(eigen_2d_swe_sample_mesh_test1)
@@ -90,7 +91,7 @@ if (CMAKE_BUILD_TYPE EQUAL "Release")
   add_subdirectory(eigen_3d_euler_sedov_symmetry)
 else()
   add_subdirectory(eigen_3d_euler_smooth_short)
-endif()  
+endif()
 
 
 # ---------------------------------------------------------
