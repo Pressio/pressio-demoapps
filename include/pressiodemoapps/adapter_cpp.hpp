@@ -68,6 +68,7 @@ public:
   using rhs_type                  = typename T::velocity_type;
   using right_hand_side_type      = typename T::velocity_type;
   using jacobian_type             = typename T::jacobian_type;
+  using mesh_connectivity_graph_type = typename T::mesh_connectivity_graph_type;
 
 private:
   using typename T::index_t;

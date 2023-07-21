@@ -76,6 +76,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using mesh_connectivity_graph_type = typename Meshtype::graph_t;
 
 private:
   static constexpr int dimensionality{2};
@@ -251,7 +252,7 @@ protected:
       nonZerosCountBeforeComputing = J->nonZeros();
     }
     (void) nonZerosCountBeforeComputing;
-    
+
     if (m_probEn == ::pressiodemoapps::DiffusionReaction2d::ProblemA){
       velocityAndOptionalJacobianNearBdProblemA(U, currentTime, V, J);
       velocityAndOptionalJacobianInnerCellsProblemA(U, currentTime, V, J);
