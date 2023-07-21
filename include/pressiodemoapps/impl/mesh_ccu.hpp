@@ -83,7 +83,7 @@ private:
   using indices_v_t = std::vector<index_type>;
 
 public:
-  CellCenteredUniformMesh() = delete;
+  CellCenteredUniformMesh() = default;
 
 #if not defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   template<
@@ -416,14 +416,13 @@ private:
 
   /*
     graph:
-
     first col : contains GIDs of cells where we want velocity
     col 1,... : contains GIDs of neighboring cells needed for stencil
   */
   graph_t m_graph = {};
 
-  indices_v_t m_rowsForCellsInner;
-  indices_v_t m_rowsForCellsBd;
+  indices_v_t m_rowsForCellsInner = {};
+  indices_v_t m_rowsForCellsBd = {};
 
   bool m_meshIsFullyPeriodic = false;
 };
