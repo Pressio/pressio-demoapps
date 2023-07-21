@@ -71,18 +71,23 @@ T loadCellCenterUniformMesh(const std::string & meshFilesPath)
 
 #else
 
-template<class scalar_type = double>
-using cellcentered_uniform_mesh_eigen_type = impl::CellCenteredUniformMesh<
+namespace impl{
+template<class scalar_type>
+using cellcentered_uniform_mesh_eigen_impl_type = impl::CellCenteredUniformMesh<
   scalar_type,
   int32_t, // ordinal type
   Eigen::Matrix<scalar_type, -1, 1>, // coordinate storage type
   Eigen::Matrix<int32_t, -1, -1, Eigen::RowMajor> // graph type
   >;
+}
+
+using cellcentered_uniform_mesh_eigen_type =
+  impl::cellcentered_uniform_mesh_eigen_impl_type<double>;
 
 template<class scalar_type = double>
 auto load_cellcentered_uniform_mesh_eigen(const std::string & meshFilesPath)
 {
-  return cellcentered_uniform_mesh_eigen_type<scalar_type>(meshFilesPath);
+  return impl::cellcentered_uniform_mesh_eigen_impl_type<scalar_type>(meshFilesPath);
 }
 
 #endif
