@@ -83,7 +83,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
-  using mesh_connectivity_graph_type = typename Meshtype::graph_t;
+  using mesh_connectivity_graph_type = typename MeshType::graph_t;
 
 private:
   static constexpr int dimensionality{2};
