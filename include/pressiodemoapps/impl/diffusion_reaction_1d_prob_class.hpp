@@ -82,6 +82,8 @@ private:
 					     Eigen::RowMajor>;
 
 public:
+  EigenApp() = default;
+
   template<class SourceT>
   EigenApp(TagProblemA /*tag*/,
 	   const MeshType & meshObj,

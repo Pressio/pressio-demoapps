@@ -87,6 +87,8 @@ private:
   using stencil_container_type = Eigen::Matrix<scalar_type,Eigen::Dynamic, 1>;
 
 public:
+  EigenApp() = default;
+
   template<class SourceT>
   EigenApp(TagProblemA /*tag*/,
 	   const MeshType & meshObj,

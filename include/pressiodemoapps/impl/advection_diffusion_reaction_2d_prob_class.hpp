@@ -99,6 +99,7 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = default;
 
   //
   // constructor for ProblemA
