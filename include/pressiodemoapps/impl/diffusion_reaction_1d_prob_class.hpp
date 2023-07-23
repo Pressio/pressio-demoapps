@@ -82,7 +82,7 @@ private:
 					     Eigen::RowMajor>;
 
 public:
-  EigenApp() = default;
+  EigenApp() = delete;
 
   template<class SourceT>
   EigenApp(TagProblemA /*tag*/,

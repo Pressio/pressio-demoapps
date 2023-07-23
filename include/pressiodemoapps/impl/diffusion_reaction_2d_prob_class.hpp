@@ -87,7 +87,7 @@ private:
   using stencil_container_type = Eigen::Matrix<scalar_type,Eigen::Dynamic, 1>;
 
 public:
-  EigenApp() = default;
+  EigenApp() = delete;
 
   template<class SourceT>
   EigenApp(TagProblemA /*tag*/,
