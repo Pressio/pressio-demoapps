@@ -87,6 +87,9 @@ public:
     ::pressiodemoapps::set_zero(m_rhs);
   }
 
+  PublicProblemEigenMixinCpp & operator=(const PublicProblemEigenMixinCpp &) = delete;
+  PublicProblemEigenMixinCpp & operator=(PublicProblemEigenMixinCpp &&) = delete;
+
   typename T::index_t totalDofSampleMesh()  const{
     return T::m_numDofSampleMesh;
   }
