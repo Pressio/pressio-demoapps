@@ -99,6 +99,7 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = delete;
 
   //
   // constructor for ProblemA
@@ -126,8 +127,8 @@ public:
       m_probA_sigma_reaction(sigma_reaction)
   {
     m_probA_sourceFunctor  = sf;
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * m_numDofPerCell;
     allocateGhosts();
   }
 
@@ -233,10 +234,10 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     using ghost_filler_t  = ::pressiodemoapps::impladvdiffreac2d::GhostFillerProblemA<
       U_t, MeshType, ghost_container_type>;
-    ghost_filler_t ghF(stencilSize, U, m_meshObj,
+    ghost_filler_t ghF(stencilSize, U, m_meshObj.get(),
 		       m_ghostLeft, m_ghostFront,
 		       m_ghostRight, m_ghostBack);
-    const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -252,9 +253,9 @@ private:
     // the scheme wanted by the user, no special treatment needed
 
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
+    const auto & graph = m_meshObj.get().graph();
     // only grab the graph rows for INNER cells (i.e. AWAY from boundaries)
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
@@ -302,8 +303,8 @@ private:
   void initializeJacobianForNearBoundaryCells(std::vector<Tr> & trList)
   {
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & graph = m_meshObj.get().graph();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
@@ -451,36 +452,36 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    J, xAxis, m_meshObj,
+		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_probA_ux,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradLNeg, gradLPos, gradRNeg, gradRPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    J, yAxis, m_meshObj,
+		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos, m_probA_uy,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradBNeg, gradBPos, gradFNeg, gradFPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & x         = m_meshObj.viewX();
-    const auto & y         = m_meshObj.viewY();
-    const auto & graph     = m_meshObj.graph();
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & x         = m_meshObj.get().viewX();
+    const auto & y         = m_meshObj.get().viewY();
+    const auto & graph     = m_meshObj.get().graph();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
@@ -551,10 +552,10 @@ private:
     stencil_container_type stencilValsForV(m_numDofPerCell*stencilSizeForV);
 
     stencil_filler_t FillStencilVeloX(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				      state, m_meshObj, m_ghostLeft, m_ghostRight,
+				      state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				      stencilValsForV, xAxis);
     stencil_filler_t FillStencilVeloY(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				      state, m_meshObj, m_ghostBack, m_ghostFront,
+				      state, m_meshObj.get(), m_ghostBack, m_ghostFront,
 				      stencilValsForV, yAxis);
 
     using velo_functor_type =
@@ -566,7 +567,7 @@ private:
       V_t, scalar_type
       >;
 
-    velo_functor_type funcVeloX(V, m_meshObj.dxInv(),
+    velo_functor_type funcVeloX(V, m_meshObj.get().dxInv(),
 				/* end args for velo */
 				m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR, m_probA_ux,
 				/* end args for flux */
@@ -575,7 +576,7 @@ private:
 				/* end args for reconstructor */
 				);
 
-    velo_functor_type funcVeloY(V, m_meshObj.dyInv(),
+    velo_functor_type funcVeloY(V, m_meshObj.get().dyInv(),
 				/* end args for velo */
 				m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF, m_probA_uy,
 				/* end args for flux */
@@ -591,10 +592,10 @@ private:
     const auto stencilSizeForJ = reconstructionTypeToStencilSize(firstOrderRec);
     stencil_container_type stencilValsForJ(m_numDofPerCell*stencilSizeForJ);
     stencil_filler_t FillStencilJacX(stencilSizeForJ,
-				     state, m_meshObj, m_ghostLeft, m_ghostRight,
+				     state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				     stencilValsForJ, xAxis);
     stencil_filler_t FillStencilJacY(stencilSizeForJ,
-				     state, m_meshObj, m_ghostBack, m_ghostFront,
+				     state, m_meshObj.get(), m_ghostBack, m_ghostFront,
 				     stencilValsForJ, yAxis);
 
     using jac_functor_type =
@@ -606,7 +607,7 @@ private:
       dimensionality, MeshType, jacobian_type
       >;
 
-    jac_functor_type funcJacX(J, xAxis, m_meshObj,
+    jac_functor_type funcJacX(J, xAxis, m_meshObj.get(),
 			      /* end args for jac */
 			      m_probEn, m_inviscidFluxSchemeEn, normalX_,
 			      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_probA_ux,
@@ -616,7 +617,7 @@ private:
 			      /* end args for reconstructor */
 			      );
 
-    jac_functor_type funcJacY(J, yAxis, m_meshObj,
+    jac_functor_type funcJacY(J, yAxis, m_meshObj.get(),
 			      /* end args for jac */
 			      m_probEn, m_inviscidFluxSchemeEn, normalY_,
 			      fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos, m_probA_uy,
@@ -632,12 +633,12 @@ private:
     // ************
     // loop
     // ************
-    const auto & x	   = m_meshObj.viewX();
-    const auto & y         = m_meshObj.viewY();
-    const auto & graph     = m_meshObj.graph();
-    const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
-    const auto dxInvSq	   = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq	   = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto & x	   = m_meshObj.get().viewX();
+    const auto & y         = m_meshObj.get().viewY();
+    const auto & graph     = m_meshObj.get().graph();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
+    const auto dxInvSq	   = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	   = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq = m_probA_diff*dxInvSq;
     const auto diffDyInvSq = m_probA_diff*dyInvSq;
     constexpr auto two      = static_cast<scalar_type>(2);
@@ -752,11 +753,11 @@ private:
     using stencil_filler_t  = pda::impl::StencilFiller<
       dimensionality, stencil_container_type, state_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				   state, m_meshObj, m_ghostLeft, m_ghostRight,
+				   state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				   stencilVals, xAxis);
 
     stencil_filler_t FillStencilY(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				   state, m_meshObj, m_ghostBack, m_ghostFront,
+				   state, m_meshObj.get(), m_ghostBack, m_ghostFront,
 				   stencilVals, yAxis);
 
     using functor_type =
@@ -770,9 +771,9 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type funcx(V, m_meshObj.dxInv(),
+    functor_type funcx(V, m_meshObj.get().dxInv(),
 		       /* end args for velo */
-		       J, xAxis, m_meshObj,
+		       J, xAxis, m_meshObj.get(),
 		       /* end args for jac */
 		       m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_probA_ux,
@@ -782,9 +783,9 @@ private:
 		       /* end args for reconstructor */
 		       );
 
-    functor_type funcy(V, m_meshObj.dyInv(),
+    functor_type funcy(V, m_meshObj.get().dyInv(),
 		       /* end args for velo */
-		       J, yAxis, m_meshObj,
+		       J, yAxis, m_meshObj.get(),
 		       /* end args for jac */
 		       m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos, m_probA_uy,
@@ -799,13 +800,13 @@ private:
     bdCellJacFactorsX.fill(static_cast<scalar_type>(-1));
     bdCellJacFactorsY.fill(static_cast<scalar_type>(-1));
 
-    const auto & x	    = m_meshObj.viewX();
-    const auto & y          = m_meshObj.viewY();
-    const auto & graph      = m_meshObj.graph();
+    const auto & x	    = m_meshObj.get().viewX();
+    const auto & y          = m_meshObj.get().viewY();
+    const auto & graph      = m_meshObj.get().graph();
     constexpr auto two      = static_cast<scalar_type>(2);
-    const auto & graphRows  = m_meshObj.graphRowsOfCellsNearBd();
-    const auto dxInvSq	    = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq	    = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto & graphRows  = m_meshObj.get().graphRowsOfCellsNearBd();
+    const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq  = m_probA_diff*dxInvSq;
     const auto diffDyInvSq  = m_probA_diff*dyInvSq;
 
@@ -891,8 +892,8 @@ private:
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, stencil_container_type, state_t, MeshType, ghost_container_type>;
 
-    sfiller_t StencilFillerX(stencilSize, state, m_meshObj, m_ghostLeft, m_ghostRight, stencilVals, xAxis);
-    sfiller_t StencilFillerY(stencilSize, state, m_meshObj, m_ghostBack, m_ghostFront, stencilVals, yAxis);
+    sfiller_t StencilFillerX(stencilSize, state, m_meshObj.get(), m_ghostLeft, m_ghostRight, stencilVals, xAxis);
+    sfiller_t StencilFillerY(stencilSize, state, m_meshObj.get(), m_ghostBack, m_ghostFront, stencilVals, yAxis);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
@@ -903,7 +904,7 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR, m_probA_ux,
 		    /* end args for flux */
@@ -912,7 +913,7 @@ private:
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF, m_probA_uy,
 		    /* end args for flux */
@@ -921,16 +922,16 @@ private:
 		    /* end args for reconstructor */
 		    );
 
-    const auto & x	    = m_meshObj.viewX();
-    const auto & y          = m_meshObj.viewY();
-    const auto & graph      = m_meshObj.graph();
+    const auto & x	    = m_meshObj.get().viewX();
+    const auto & y          = m_meshObj.get().viewY();
+    const auto & graph      = m_meshObj.get().graph();
     constexpr auto two      = static_cast<scalar_type>(2);
-    const auto dxInvSq	    = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq	    = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq  = m_probA_diff*dxInvSq;
     const auto diffDyInvSq  = m_probA_diff*dyInvSq;
 
-    const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsNearBd();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 #pragma omp for schedule(static)
 #endif
@@ -1002,28 +1003,28 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR, m_probA_ux,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF, m_probA_uy,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), state, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & x         = m_meshObj.viewX();
-    const auto & y         = m_meshObj.viewY();
-    const auto & graph     = m_meshObj.graph();
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & x         = m_meshObj.get().viewX();
+    const auto & y         = m_meshObj.get().viewY();
+    const auto & graph     = m_meshObj.get().graph();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -1055,12 +1056,12 @@ private:
 							   index_t smPt) const
   {
     constexpr auto two     = static_cast<scalar_type>(2);
-    const auto dxInvSq     = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq     = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq     = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq     = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq = m_probA_diff*dxInvSq;
     const auto diffDyInvSq = m_probA_diff*dyInvSq;
 
-    const auto & graph     = m_meshObj.graph();
+    const auto & graph     = m_meshObj.get().graph();
     const auto vIndex      = smPt*m_numDofPerCell;
     const auto uIndex      = graph(smPt, 0)*m_numDofPerCell;
     const auto uIndexLeft  = graph(smPt, 1)*m_numDofPerCell;
@@ -1084,7 +1085,7 @@ private:
     const auto stencilSize    = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
 
-    const index_t s1 = m_meshObj.numCellsBd();
+    const index_t s1 = m_meshObj.get().numCellsBd();
     ::pressiodemoapps::resize(m_ghostLeft, s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostFront,s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight,s1, numGhostValues);
@@ -1099,7 +1100,7 @@ protected:
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
 
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
@@ -1108,8 +1109,8 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  const std::array<scalar_type, 2> normalX_{1, 0};
-  const std::array<scalar_type, 2> normalY_{0, 1};
+  std::array<scalar_type, 2> normalX_{1, 0};
+  std::array<scalar_type, 2> normalY_{0, 1};
 
   // parameters specific to problems
   // will need to handle this better later

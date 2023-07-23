@@ -102,6 +102,7 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = delete;
 
   //
   // constructor for Burgers2d periodic
@@ -128,8 +129,8 @@ public:
       m_burgers2d_x0(x0),
       m_burgers2d_y0(y0)
   {
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * m_numDofPerCell;
     // don't need to allocate ghosts because it is periodic
   }
 
@@ -139,7 +140,7 @@ public:
 
     if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
       {
-	burgers2d_gaussian(initialState, m_meshObj,
+	burgers2d_gaussian(initialState, m_meshObj.get(),
 			   m_burgers2d_icPulse,
 			   m_burgers2d_icSpread,
 			   m_burgers2d_x0,
@@ -235,9 +236,9 @@ private:
     // the scheme wanted by the user, no special treatment needed
 
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
+    const auto & graph = m_meshObj.get().graph();
     // only grab the graph rows for INNER cells (i.e. AWAY from boundaries)
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
@@ -378,33 +379,33 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    J, xAxis, m_meshObj,
+		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradLNeg, gradLPos, gradRNeg, gradRPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    J, yAxis, m_meshObj,
+		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradBNeg, gradBPos, gradFNeg, gradFPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -446,25 +447,25 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -485,12 +486,12 @@ private:
 					       index_t smPt) const
   {
     constexpr auto two  = static_cast<scalar_type>(2);
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq  = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
     const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
 
-    const auto & graph     = m_meshObj.graph();
+    const auto & graph     = m_meshObj.get().graph();
     const auto vIndex      = smPt*m_numDofPerCell;
     const auto uIndex      = graph(smPt, 0)*m_numDofPerCell;
     const auto uIndexLeft  = graph(smPt, 1)*m_numDofPerCell;
@@ -511,12 +512,12 @@ private:
 								   index_t smPt) const
   {
     constexpr auto two  = static_cast<scalar_type>(2);
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq  = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
     const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
     const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
 
-    const auto & graph     = m_meshObj.graph();
+    const auto & graph     = m_meshObj.get().graph();
     const auto vIndex      = smPt*m_numDofPerCell;
     const auto uIndex      = graph(smPt, 0)*m_numDofPerCell;
     const auto uIndexLeft  = graph(smPt, 1)*m_numDofPerCell;
@@ -549,7 +550,7 @@ protected:
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
 
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
@@ -558,8 +559,8 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  const std::array<scalar_type, 2> normalX_{1, 0};
-  const std::array<scalar_type, 2> normalY_{0, 1};
+  std::array<scalar_type, 2> normalX_{1, 0};
+  std::array<scalar_type, 2> normalY_{0, 1};
 
   // parameters specific to problems
   // will need to handle this better later
