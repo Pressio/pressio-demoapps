@@ -1303,9 +1303,6 @@ protected:
   // for cross-shock problem: density, inletXVel, bottomYVel
   std::array<scalar_type, 3> m_crossshock_params;
 
-  using graph_row_t = decltype( std::declval<const mesh_connectivity_graph_type &>().row(0) );
-  using ghost_dofs_row_t = decltype( std::declval<ghost_container_type &>().row(0) );
-
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
 
   std::conditional_t<
