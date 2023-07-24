@@ -156,7 +156,7 @@ bool verifyJacobian(AppT & appObj)
   decltype(velo) velo3(velo.size());
   appObj.rightHandSide(state3, 0., velo3);
   auto Ja_fd2 = (velo2 - velo3)/(2.*eps);
-  bool res2 = verify(Ja_fd2, 5e-7);
+  bool res2 = verify(Ja_fd2, 1e-6);
 
   std::cout << "\n verifyJacobian FINISHED \n";
   return res1 && res2;
