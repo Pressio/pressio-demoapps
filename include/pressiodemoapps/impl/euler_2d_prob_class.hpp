@@ -365,7 +365,10 @@ private:
       }
 
       case ::pressiodemoapps::Euler2d::Riemann:
-      case ::pressiodemoapps::Euler2d::RiemannCustomBCs:{
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+      case ::pressiodemoapps::Euler2d::RiemannCustomBCs:
+#endif
+      {
 	if( m_icIdentifier == 1){
 	  riemann2dIC1(initialState, m_meshObj.get(), m_gamma);
 	  return initialState;
@@ -428,7 +431,7 @@ private:
       }
     }
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
     else if (m_probEn == ::pressiodemoapps::Euler2d::RiemannCustomBCs)
     {
 
@@ -436,14 +439,15 @@ private:
       const auto & y = m_meshObj.get().viewY();
       const auto & graph = m_meshObj.get().graph();
       const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
       for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it)
       {
 	auto currentCellGraphRow = graph.row(rowsBd[it]);
 	const int cellGID = rowsBd[it];
 	const auto myX = x(cellGID);
 	const auto myY = y(cellGID);
-
-	std::cout << it << " " << cellGID << std::endl;
 
 	/* IMPORTANT: keep the following as separate ifs wihtout ORs
 	   because some cells might has ghosts on multiple sides so
@@ -477,7 +481,7 @@ private:
       }
 
     }
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#endif
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
     {
@@ -1087,6 +1091,7 @@ private:
       return;
     }
 
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
     else if (m_probEn == ::pressiodemoapps::Euler2d::RiemannCustomBCs)
     {
       const auto & x = m_meshObj.get().viewX();
@@ -1100,6 +1105,7 @@ private:
 		     numDofPerCell, axis, m_bcCellJacFactors);
       return;
     }
+#endif
 
     else if (m_probEn == ::pressiodemoapps::Euler2d::SedovSymmetry)
     {
