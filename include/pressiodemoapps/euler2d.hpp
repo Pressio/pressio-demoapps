@@ -118,9 +118,14 @@ create_problem_eigen(const mesh_t & meshObj,
 		     const CustomBCsFunctor & customBCs,
 		     int icId = 1)
 {
+
   if (problemEnum != Euler2d::RiemannCustomBCs){
     throw std::runtime_error("custom BCs only supported for Euler2d::RiemannCustomBCs");
   }
+  if (recEnum != InviscidFluxReconstruction::FirstOrder){
+    throw std::runtime_error("RiemannCustomBCs only supports InviscidFluxReconstruction::FirstOrder");
+  }
+
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov, customBCs, icId);
 }
