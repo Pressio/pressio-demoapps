@@ -56,6 +56,7 @@
 #include "./euler_compute_energy.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
+#include "./ghost_relative_locations.hpp"
 
 namespace pressiodemoapps{
 
@@ -68,6 +69,7 @@ enum class Euler2d{
   SedovFull,
   SedovSymmetry,
   Riemann,
+  RiemannCustomBCs,
   NormalShock,
   DoubleMachReflection,
   CrossShock,
@@ -102,6 +104,27 @@ RetType
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov, 1);
 }
+
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<
+  class mesh_t,
+  class CustomBCsFunctor,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t, CustomBCsFunctor>>
+  >
+RetType
+create_problem_eigen(const mesh_t & meshObj,
+		     Euler2d problemEnum,
+		     InviscidFluxReconstruction recEnum,
+		     const CustomBCsFunctor & customBCs,
+		     int icId = 1)
+{
+  if (problemEnum != Euler2d::RiemannCustomBCs){
+    throw std::runtime_error("custom BCs only supported for Euler2d::RiemannCustomBCs");
+  }
+  return RetType(meshObj, problemEnum, recEnum,
+		 InviscidFluxScheme::Rusanov, customBCs, icId);
+}
+#endif
 
 // ----------------------------------------------------------
 // create a default problem with specific initial condition

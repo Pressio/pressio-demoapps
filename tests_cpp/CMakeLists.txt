@@ -26,6 +26,7 @@ add_subdirectory(eigen_rusanov_flux_jacobians_euler)
 add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
 add_subdirectory(create_vec_of_problems)
+add_subdirectory(custom_bcs_sandbox)
 
 # ---------------------------------------------------------
 # 1d problems
