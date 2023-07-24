@@ -69,14 +69,15 @@ bool verifyJacobian(AppT & appObj)
     return true;
   };
 
+  std::cout << " doing first order FD \n" ;
   auto state2 = state+eps*a;
   decltype(velo) velo2(velo.size());
   appObj.rightHandSide(state2, 0., velo2);
   auto Ja_fd = (velo2 - velo)/eps;
   bool res1  = verify(Ja_fd, 1e-5);
 
-
   // second order FD
+  std::cout << " doing second order FD \n" ;
   auto state3 = state-eps*a;
   decltype(velo) velo3(velo.size());
   appObj.rightHandSide(state3, 0., velo3);
@@ -95,6 +96,7 @@ int main()
   const int initCond = 2;
 
   {
+    std::cout << " run on full mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./fullmesh");
     Func bcF;
     auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme, bcF, initCond);
@@ -106,6 +108,7 @@ int main()
   }
 
   {
+    std::cout << " \nrun on sample mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./samplemesh");
     Func bcF;
     auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme, bcF, initCond);
