@@ -3,10 +3,10 @@ xMin 0.00000000000000
 xMax 1.00000000000000
 yMin 0.00000000000000
 yMax 1.00000000000000
-dx 0.16666666666667
+dx 0.12500000000000
 dy 0.16666666666667
-sampleMeshSize       36
-stencilMeshSize       36
+sampleMeshSize       48
+stencilMeshSize       48
 stencilSize  3
-nx        6
+nx        8
 ny        6
