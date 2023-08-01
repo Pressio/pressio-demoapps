@@ -442,9 +442,6 @@ private:
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
     else if (m_probEn == ::pressiodemoapps::Euler2d::RiemannCustomBCs)
     {
-      // constexpr int xAxis = 1;
-      // constexpr int yAxis = 2;
-
       const auto & x = m_meshObj.get().viewX();
       const auto & y = m_meshObj.get().viewY();
       const auto & graph = m_meshObj.get().graph();
@@ -465,28 +462,28 @@ private:
 	*/
 	if (m_meshObj.get().hasBdLeft2d(cellGID)){
 	  auto ghostVals = m_ghostLeft.row(it);
-	  m_customBcFunc_left(it, currentCellGraphRow(0), myX, myY,
+	  m_customBcFunc_left(it, currentCellGraphRow, myX, myY,
 			      U, numDofPerCell, /*xAxis, GhostRelativeLocation::Left,*/
 			      m_meshObj.get().dx(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdRight2d(cellGID)){
 	  auto ghostVals = m_ghostRight.row(it);
-	  m_customBcFunc_right(it, currentCellGraphRow(0), myX, myY,
+	  m_customBcFunc_right(it, currentCellGraphRow, myX, myY,
 			       U, numDofPerCell, /*xAxis, GhostRelativeLocation::Right,*/
 			       m_meshObj.get().dx(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdBack2d(cellGID)){
 	  auto ghostVals = m_ghostBack.row(it);
-	  m_customBcFunc_back(it, currentCellGraphRow(0), myX, myY,
+	  m_customBcFunc_back(it, currentCellGraphRow, myX, myY,
 			      U, numDofPerCell, /*yAxis, GhostRelativeLocation::Back,*/
 			      m_meshObj.get().dy(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdFront2d(cellGID)){
 	  auto ghostVals = m_ghostFront.row(it);
-	  m_customBcFunc_front(it, currentCellGraphRow(0), myX, myY,
+	  m_customBcFunc_front(it, currentCellGraphRow, myX, myY,
 			       U, numDofPerCell, /*yAxis, GhostRelativeLocation::Front,*/
 			       m_meshObj.get().dy(), ghostVals);
 	}
@@ -1117,22 +1114,22 @@ private:
 
       if (axis==1){
 	if (m_meshObj.get().hasBdLeft2d(graphRow)){
-	  m_customBcFunc_left(currentCellGraphRow(0), myX, myY, numDofPerCell,
+	  m_customBcFunc_left(currentCellGraphRow, myX, myY, numDofPerCell,
 			      /*axis, GhostRelativeLocation::Left,*/ m_bcCellJacFactors);
 	}
 	if (m_meshObj.get().hasBdRight2d(graphRow)){
-	  m_customBcFunc_right(currentCellGraphRow(0), myX, myY, numDofPerCell,
+	  m_customBcFunc_right(currentCellGraphRow, myX, myY, numDofPerCell,
 			       /*axis, GhostRelativeLocation::Right,*/ m_bcCellJacFactors);
 	}
       }
       else{
 	if (m_meshObj.get().hasBdBack2d(graphRow)){
-	  m_customBcFunc_back(currentCellGraphRow(0), myX, myY, numDofPerCell,
+	  m_customBcFunc_back(currentCellGraphRow, myX, myY, numDofPerCell,
 			      /*axis, GhostRelativeLocation::Back,*/ m_bcCellJacFactors);
 	}
 
 	if (m_meshObj.get().hasBdFront2d(graphRow)){
-	  m_customBcFunc_front(currentCellGraphRow(0), myX, myY, numDofPerCell,
+	  m_customBcFunc_front(currentCellGraphRow, myX, myY, numDofPerCell,
 			       /*axis, GhostRelativeLocation::Front,*/ m_bcCellJacFactors);
 	}
       }

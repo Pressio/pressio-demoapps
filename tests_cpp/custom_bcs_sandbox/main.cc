@@ -8,8 +8,8 @@ struct Dirichlet
   mutable std::array<double, 4> prim = {};
   mutable std::array<double, 4> cons = {};
 
-  template<class StateT, class T>
-  void operator()(const int /*unused*/, const int cellGID,
+  template<class ConnecRowType, class StateT, class T>
+  void operator()(const int /*unused*/, ConnecRowType const & connectivityRow,
 		  const double cellX, const double cellY,
 		  const StateT & currentState, int numDofPerCell,
 		  const double cellWidth, T & ghostValues) const
@@ -32,8 +32,9 @@ struct Dirichlet
     ghostValues(3) = pressiodemoapps::eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
   }
 
-  template<class FactorsType>
-  void operator()(const int cellGID, const double cellX, const double cellY,
+  template<class ConnecRowType, class FactorsType>
+  void operator()(ConnecRowType const & connectivityRow,
+		  const double cellX, const double cellY,
 		  int numDofPerCell, FactorsType & factorsForBCJac) const
   {
     factorsForBCJac = {0.,0.,0.,0.};
@@ -42,12 +43,13 @@ struct Dirichlet
 
 struct HomogNeumann
 {
-  template<class StateT, class T>
-  void operator()(const int /*unused*/, const int cellGID,
+  template<class ConnecRowType, class StateT, class T>
+  void operator()(const int /*unused*/, ConnecRowType const & connectivityRow,
 		  const double cellX, const double cellY,
 		  const StateT & currentState, int numDofPerCell,
 		  const double cellWidth, T & ghostValues) const
   {
+    const int cellGID = connectivityRow[0];
     const auto uIndex  = cellGID*numDofPerCell;
     ghostValues[0] = currentState(uIndex);
     ghostValues[1] = currentState(uIndex+1);
@@ -55,8 +57,9 @@ struct HomogNeumann
     ghostValues[3] = currentState(uIndex+3);
   }
 
-  template<class FactorsType>
-  void operator()(const int cellGID, const double cellX, const double cellY,
+  template<class ConnecRowType, class FactorsType>
+  void operator()(ConnecRowType const & connectivityRow,
+		  const double cellX, const double cellY,
 		  int numDofPerCell, FactorsType & factorsForBCJac) const
   {
     factorsForBCJac = {1.,1.,1.,1.};
@@ -72,7 +75,6 @@ void my_initial_condition(state_type & state,
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one = static_cast<scalar_type>(1);
-
   const auto x0 = static_cast<scalar_type>(0.5);
   const auto gammaMinusOne = 1.4 - one;
   const auto gammaMinusOneInv = one/gammaMinusOne;
@@ -141,6 +143,7 @@ bool verifyJacobian(AppT & appObj, MeshT & meshObj)
   std::cout << "\n verifyJacobian FINISHED \n";
   return res1 && res2;
 }
+
 
 int main()
 {
