@@ -3,125 +3,105 @@
 #include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
 
-struct Func{
+struct Dirichlet
+{
+  mutable std::array<double, 4> prim = {};
+  mutable std::array<double, 4> cons = {};
 
-  /* this overload is called to set the ghost values */
-  template<class ConnecRowType, class StateT, class T>
-  void operator()(const int k,
-		  /*
-		    k:
-		    index enumerating the cells on boundary: 0, 1, 2, .., N
-		    where N is the number of cells that are near the boundary
-		    as per the definition of the mesh object.
-		    Not sure if we need this but just in case.
-		  */
-		  ConnecRowType const & connectivityRow,
-		  /*connectivityRow:
-		    contains the row of the connectivity graph of the cell being handled */
-
+  template<class StateT, class T>
+  void operator()(const int /*unused*/, const int cellGID,
 		  const double cellX, const double cellY,
-		  /* cellX, cellY: coordinates of the cell being handled */
-
-		  const StateT & currentState,
-		  /* currentState:
-		     a const ref to the state vector currently used inside the app object */
-
-		  int numDofPerCell,
-		  /*  numDofPerCell: self-explanatory */
-
-		  int workingAxis,
-		  /* can be 1 or 2:
-		     - if workingAxis=1, we are dealing with ghosts alogn x
-		     - if workingAxis=2, dealing with ghosts along y*/
-
-		  pressiodemoapps::GhostRelativeLocation ghostRelLoc,
-		  /* ghostRelLoc:
-		     this tells you the position of the ghost relative to the boundary cell we are dealing,
-		     it can have one of the values: Left,Right,Back,Front */
-
-		  const double cellWidth,
-		  /* cellWidth:
-		     - if workingAxis==1, then cellWidth = dx
-		     - if workingAxis==2, then cellWidth = dy */
-
-		  T & ghostValues
-		  /* the "vector" of ghost values to overwrite for all dofs */
-
-		  ) const
+		  const StateT & currentState, int numDofPerCell,
+		  const double cellWidth, T & ghostValues) const
   {
-
-    // preconditions
     assert(ghostValues.size() == numDofPerCell);
-    if (workingAxis==1){
-      assert(ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Left
-	     || ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Right);
+    const auto x0 = static_cast<double>(0.8);
+    const double gammaMinusOne = 1.4 - 1;
+    const double gammaMinusOneInv = 1/gammaMinusOne;
+
+    if (cellX >= x0){
+      prim = {1.5, 0., 0., 1.5};
     }
-    if (workingAxis==2){
-      assert(ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Back
-	     || ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Front);
-    }
-
-    const int cellGID = connectivityRow[0];
-    const auto uIndex  = cellGID*numDofPerCell;
-
-    /*
-      IMPORTANT: this code below is totally random,
-      we use kind of arbitrary numbers just to prove it works.
-      Just for testing, on left, back and right boundary we do something,
-      while on the top boundary we do something else.
-
-      Also, we set different BCs for each dofs, and we know here we
-      have 4 dofs because we are doing 2d Euler
-    */
-
-    if (ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Left){
-      ghostValues[0] = 0.2; // Dirichlet
-      ghostValues[1] = cellWidth*0.01 + currentState(uIndex+1); // non-homog Neumann
-      ghostValues[2] = currentState(uIndex+2); //homog Neumann
-      ghostValues[3] = currentState(uIndex+3); //homog Neumann
-    }
-
-    else if (ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Back){
-      ghostValues[0] = cellWidth*0.01 + currentState(uIndex); // non-homog Neumann
-      ghostValues[1] = 0.0001; // Dirichlet
-      ghostValues[2] = currentState(uIndex+2); //homog Neumann
-      ghostValues[3] = currentState(uIndex+3); //homog Neumann
-    }
-
     else{
-      for (int i=0; i<numDofPerCell; ++i){
-	ghostValues[i] = currentState(uIndex+i); // homog Neumann for all
-      }
+      prim = {0.5323, 1.206, 0., 0.3};
     }
+
+    ghostValues(0) = prim[0];
+    ghostValues(1) = prim[0]*prim[1];
+    ghostValues(2) = prim[0]*prim[2];
+    ghostValues(3) = pressiodemoapps::eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
   }
 
-  template<class ConnecRowType, class FactorsType>
-  void operator()(ConnecRowType const & connectivityRow,
-		  const double cellX, const double cellY,
-		  int numDofPerCell,
-		  int workingAxis,
-		  pressiodemoapps::GhostRelativeLocation ghostRelLoc,
-		  FactorsType & factorsForBCJac) const
+  template<class FactorsType>
+  void operator()(const int cellGID, const double cellX, const double cellY,
+		  int numDofPerCell, FactorsType & factorsForBCJac) const
   {
-    // 0 should always be set for Dirichlet
-    // 1 should always be used for Neumann
-
-    if (ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Left){
-      factorsForBCJac = {0.,1.,1.,1.};
-    }
-    else if (ghostRelLoc == pressiodemoapps::GhostRelativeLocation::Back){
-      factorsForBCJac = {1.,0.,1.,1.};
-    }
-    else{
-      factorsForBCJac = {1.,1.,1.,1.};
-    }
+    factorsForBCJac = {0.,0.,0.,0.};
   }
 };
 
-template<class AppT>
-bool verifyJacobian(AppT & appObj)
+struct HomogNeumann
+{
+  template<class StateT, class T>
+  void operator()(const int /*unused*/, const int cellGID,
+		  const double cellX, const double cellY,
+		  const StateT & currentState, int numDofPerCell,
+		  const double cellWidth, T & ghostValues) const
+  {
+    const auto uIndex  = cellGID*numDofPerCell;
+    ghostValues[0] = currentState(uIndex);
+    ghostValues[1] = currentState(uIndex+1);
+    ghostValues[2] = currentState(uIndex+2);
+    ghostValues[3] = currentState(uIndex+3);
+  }
+
+  template<class FactorsType>
+  void operator()(const int cellGID, const double cellX, const double cellY,
+		  int numDofPerCell, FactorsType & factorsForBCJac) const
+  {
+    factorsForBCJac = {1.,1.,1.,1.};
+  }
+};
+
+template<class state_type, class mesh_t>
+void my_initial_condition(state_type & state,
+			  const mesh_t & meshObj)
+{
+  using scalar_type = double;
+
+  constexpr int numDofPerCell = 4;
+  constexpr auto zero = static_cast<scalar_type>(0);
+  constexpr auto one = static_cast<scalar_type>(1);
+
+  const auto x0 = static_cast<scalar_type>(0.5);
+  const auto gammaMinusOne = 1.4 - one;
+  const auto gammaMinusOneInv = one/gammaMinusOne;
+
+  const auto & x= meshObj.viewX();
+  std::array<scalar_type, numDofPerCell> prim = {};
+  for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
+    {
+      if (x(i) >= x0){
+	prim = {1.5, zero, zero, 1.5};
+      }
+      else{
+	prim = {0.5323, 1.206, zero, 0.3};
+      }
+
+      const auto ind = i*numDofPerCell;
+      state(ind)   = prim[0];
+      state(ind+1) = prim[0]*prim[1];
+      state(ind+2) = prim[0]*prim[2];
+      state(ind+3) = pressiodemoapps::eulerEquationsComputeEnergyFromPrimitive2(gammaMinusOneInv, prim);
+    }
+}
+
+template<class AppT, class MeshT>
+bool verifyJacobian(AppT & appObj, MeshT & meshObj)
 {
   auto state = appObj.initialCondition();
+  my_initial_condition(state, meshObj);
+
   auto velo = appObj.createRightHandSide();
   auto J = appObj.createJacobian();
 
@@ -170,12 +150,16 @@ int main()
   const auto probId  = pda::Euler2d::RiemannCustomBCs;
   const int initCond = 2;
 
+  Dirichlet bcF1;
+  HomogNeumann bcF2;
+
   {
     std::cout << " run on full mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./fullmesh");
-    Func bcF;
-    auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme, bcF, initCond);
-    bool res = verifyJacobian(appObj);
+    auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme,
+					    bcF1, bcF1, bcF2, bcF2, initCond);
+
+    bool res = verifyJacobian(appObj, meshObj);
     if (!res){
       std::puts("\nFAILED");
       return 0;
@@ -185,9 +169,9 @@ int main()
   {
     std::cout << " \nrun on sample mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./samplemesh");
-    Func bcF;
-    auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme, bcF, initCond);
-    bool res = verifyJacobian(appObj);
+    auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme,
+					    bcF1, bcF1, bcF2, bcF2, initCond);
+    bool res = verifyJacobian(appObj, meshObj);
     if (!res){
       std::puts("\nFAILED");
       return 0;

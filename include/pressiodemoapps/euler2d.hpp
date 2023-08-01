@@ -56,7 +56,6 @@
 #include "./euler_compute_energy.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
-#include "./ghost_relative_locations.hpp"
 
 namespace pressiodemoapps{
 
@@ -108,14 +107,25 @@ RetType
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<
   class mesh_t,
-  class CustomBCsFunctor,
-  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t, CustomBCsFunctor>>
+  class CustomBCsFunctorLeft,
+  class CustomBCsFunctorFront,
+  class CustomBCsFunctorRight,
+  class CustomBCsFunctorBack,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t,
+								   CustomBCsFunctorLeft,
+								   CustomBCsFunctorFront,
+								   CustomBCsFunctorRight,
+								   CustomBCsFunctorBack>
+					     >
   >
 RetType
 create_problem_eigen(const mesh_t & meshObj,
 		     Euler2d problemEnum,
 		     InviscidFluxReconstruction recEnum,
-		     const CustomBCsFunctor & customBCs,
+		     const CustomBCsFunctorLeft & customBCsLeft,
+		     const CustomBCsFunctorFront & customBCsFront,
+		     const CustomBCsFunctorRight & customBCsRight,
+		     const CustomBCsFunctorBack & customBCsBack,
 		     int icId = 1)
 {
 
@@ -126,8 +136,8 @@ create_problem_eigen(const mesh_t & meshObj,
     throw std::runtime_error("RiemannCustomBCs only supports InviscidFluxReconstruction::FirstOrder");
   }
 
-  return RetType(meshObj, problemEnum, recEnum,
-		 InviscidFluxScheme::Rusanov, customBCs, icId);
+  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
+		 customBCsLeft, customBCsFront, customBCsRight, customBCsBack, icId);
 }
 #endif
 
