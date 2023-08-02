@@ -81,10 +81,7 @@ struct TagCrossShock{};
 
 template<
   class MeshType,
-  class CustomBCsFunctorLeftType  = impl::NoOperation<void>,
-  class CustomBCsFunctorFrontType = impl::NoOperation<void>,
-  class CustomBCsFunctorRightType = impl::NoOperation<void>,
-  class CustomBCsFunctorBackType  = impl::NoOperation<void>
+  class BCFunctorsHolderType = impl::NoOperation<void>
   >
 class EigenApp
 {
@@ -132,20 +129,14 @@ public:
 	   ::pressiodemoapps::Euler2d probEnum,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	   const CustomBCsFunctorLeftType & customBCsLeft,
-	   const CustomBCsFunctorFrontType & customBCsFront,
-	   const CustomBCsFunctorRightType & customBCsRight,
-	   const CustomBCsFunctorBackType & customBCsBack,
+	   BCFunctorsHolderType && bcHolder,
 	   int icIdentifier)
     : m_meshObj(meshObj),
       m_probEn(probEnum),
       m_recEn(recEnum),
       m_fluxEn(fluxEnum),
       m_icIdentifier(icIdentifier),
-      m_customBcFunc_left(customBCsLeft),
-      m_customBcFunc_front(customBCsFront),
-      m_customBcFunc_right(customBCsRight),
-      m_customBcFunc_back(customBCsBack)
+      m_bcFuncsHolder(std::move(bcHolder))
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -180,11 +171,6 @@ public:
   state_type initialCondition() const{
     return initialConditionImpl();
   }
-
-  // template<class F>
-  // void storeBcFunctor(F func){
-  //   m_customBcFunc = func;
-  // }
 
 protected:
   void initializeJacobian(jacobian_type & J)
@@ -462,33 +448,32 @@ private:
 	*/
 	if (m_meshObj.get().hasBdLeft2d(cellGID)){
 	  auto ghostVals = m_ghostLeft.row(it);
-	  m_customBcFunc_left(it, currentCellGraphRow, myX, myY,
-			      U, numDofPerCell, /*xAxis, GhostRelativeLocation::Left,*/
-			      m_meshObj.get().dx(), ghostVals);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Left,
+			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
+			  m_meshObj.get().dx(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdRight2d(cellGID)){
 	  auto ghostVals = m_ghostRight.row(it);
-	  m_customBcFunc_right(it, currentCellGraphRow, myX, myY,
-			       U, numDofPerCell, /*xAxis, GhostRelativeLocation::Right,*/
-			       m_meshObj.get().dx(), ghostVals);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Right,
+			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
+			  m_meshObj.get().dx(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdBack2d(cellGID)){
 	  auto ghostVals = m_ghostBack.row(it);
-	  m_customBcFunc_back(it, currentCellGraphRow, myX, myY,
-			      U, numDofPerCell, /*yAxis, GhostRelativeLocation::Back,*/
-			      m_meshObj.get().dy(), ghostVals);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Back,
+			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
+			  m_meshObj.get().dy(), ghostVals);
 	}
 
 	if (m_meshObj.get().hasBdFront2d(cellGID)){
 	  auto ghostVals = m_ghostFront.row(it);
-	  m_customBcFunc_front(it, currentCellGraphRow, myX, myY,
-			       U, numDofPerCell, /*yAxis, GhostRelativeLocation::Front,*/
-			       m_meshObj.get().dy(), ghostVals);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Front,
+			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
+			  m_meshObj.get().dy(), ghostVals);
 	}
       }
-
     }
 #endif
 
@@ -1114,23 +1099,27 @@ private:
 
       if (axis==1){
 	if (m_meshObj.get().hasBdLeft2d(graphRow)){
-	  m_customBcFunc_left(currentCellGraphRow, myX, myY, numDofPerCell,
-			      /*axis, GhostRelativeLocation::Left,*/ m_bcCellJacFactors);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Left,
+			  currentCellGraphRow, myX, myY, numDofPerCell,
+			  /*axis, ,*/ m_bcCellJacFactors);
 	}
 	if (m_meshObj.get().hasBdRight2d(graphRow)){
-	  m_customBcFunc_right(currentCellGraphRow, myX, myY, numDofPerCell,
-			       /*axis, GhostRelativeLocation::Right,*/ m_bcCellJacFactors);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Right,
+			  currentCellGraphRow, myX, myY, numDofPerCell,
+			  /*axis, ,*/ m_bcCellJacFactors);
 	}
       }
       else{
 	if (m_meshObj.get().hasBdBack2d(graphRow)){
-	  m_customBcFunc_back(currentCellGraphRow, myX, myY, numDofPerCell,
-			      /*axis, GhostRelativeLocation::Back,*/ m_bcCellJacFactors);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Back,
+			  currentCellGraphRow, myX, myY, numDofPerCell,
+			  /*axis, ,*/ m_bcCellJacFactors);
 	}
 
 	if (m_meshObj.get().hasBdFront2d(graphRow)){
-	  m_customBcFunc_front(currentCellGraphRow, myX, myY, numDofPerCell,
-			       /*axis, GhostRelativeLocation::Front,*/ m_bcCellJacFactors);
+	  m_bcFuncsHolder(impl::GhostRelativeLocation::Front,
+			  currentCellGraphRow, myX, myY, numDofPerCell,
+			  /*axis, ,*/ m_bcCellJacFactors);
 	}
       }
 
@@ -1306,29 +1295,11 @@ protected:
 
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
 
-  std::conditional_t<
-    std::is_same_v< CustomBCsFunctorLeftType, impl::NoOperation<void> >,
-    CustomBCsFunctorLeftType, std::reference_wrapper<const CustomBCsFunctorLeftType>
-    > m_customBcFunc_left;
-
-  std::conditional_t<
-    std::is_same_v< CustomBCsFunctorFrontType, impl::NoOperation<void> >,
-    CustomBCsFunctorFrontType, std::reference_wrapper<const CustomBCsFunctorFrontType>
-    > m_customBcFunc_front;
-
-  std::conditional_t<
-    std::is_same_v< CustomBCsFunctorRightType, impl::NoOperation<void> >,
-    CustomBCsFunctorRightType, std::reference_wrapper<const CustomBCsFunctorRightType>
-    > m_customBcFunc_right;
-
-  std::conditional_t<
-    std::is_same_v< CustomBCsFunctorBackType, impl::NoOperation<void> >,
-    CustomBCsFunctorBackType, std::reference_wrapper<const CustomBCsFunctorBackType>
-    > m_customBcFunc_back;
+  BCFunctorsHolderType m_bcFuncsHolder = {};
 };
 
-template<class T1, class T2, class T3, class T4, class T5> constexpr int EigenApp<T1,T2,T3,T4,T5>::numDofPerCell;
-template<class T1, class T2, class T3, class T4, class T5> constexpr int EigenApp<T1,T2,T3,T4,T5>::dimensionality;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::dimensionality;
 
 }}//end namespace
 #endif

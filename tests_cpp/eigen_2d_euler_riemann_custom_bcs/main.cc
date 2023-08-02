@@ -227,14 +227,11 @@ int main()
   const auto probId  = pda::Euler2d::RiemannCustomBCs;
   const int initCond = 2;
 
-  Dirichlet bcF1;
-  HomogNeumann bcF2;
-
   {
     std::cout << " run on full mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./fullmesh");
     auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme,
-					    bcF1, bcF1, bcF2, bcF2, initCond);
+					    Dirichlet(), Dirichlet(), HomogNeumann(), HomogNeumann(), initCond);
 
     bool res = verifyJacobian(appObj, meshObj);
     if (!res){
@@ -247,7 +244,7 @@ int main()
     std::cout << " \nrun on sample mesh \n" ;
     const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("./samplemesh");
     auto appObj = pda::create_problem_eigen(meshObj, probId, inviscidScheme,
-					    bcF1, bcF1, bcF2, bcF2, initCond);
+					    Dirichlet(), Dirichlet(), HomogNeumann(), HomogNeumann(), initCond);
     bool res = verifyJacobian(appObj, meshObj);
     if (!res){
       std::puts("\nFAILED");

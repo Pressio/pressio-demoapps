@@ -1,0 +1,12 @@
+dim 2
+xMin -5.00000000000000
+xMax 5.00000000000000
+yMin -5.00000000000000
+yMax 5.00000000000000
+dx 0.71428571428571
+dy 0.66666666666667
+sampleMeshSize      210
+stencilMeshSize      210
+stencilSize  3
+nx       14
+ny       15

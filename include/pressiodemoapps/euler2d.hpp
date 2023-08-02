@@ -53,6 +53,7 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
+#include "./impl/custom_bc_holder.hpp"
 #include "./euler_compute_energy.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
@@ -111,33 +112,34 @@ template<
   class CustomBCsFunctorFront,
   class CustomBCsFunctorRight,
   class CustomBCsFunctorBack,
-  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t,
-								   CustomBCsFunctorLeft,
-								   CustomBCsFunctorFront,
-								   CustomBCsFunctorRight,
-								   CustomBCsFunctorBack>
-					     >
+  class BCFunctorsHolderType = impl::CustomBCsHolder<
+    CustomBCsFunctorLeft, CustomBCsFunctorFront,
+    CustomBCsFunctorRight, CustomBCsFunctorBack>,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t, BCFunctorsHolderType>>
   >
 RetType
 create_problem_eigen(const mesh_t & meshObj,
 		     Euler2d problemEnum,
 		     InviscidFluxReconstruction recEnum,
-		     const CustomBCsFunctorLeft & customBCsLeft,
-		     const CustomBCsFunctorFront & customBCsFront,
-		     const CustomBCsFunctorRight & customBCsRight,
-		     const CustomBCsFunctorBack & customBCsBack,
+		     CustomBCsFunctorLeft && customBCsLeft,
+		     CustomBCsFunctorFront && customBCsFront,
+		     CustomBCsFunctorRight && customBCsRight,
+		     CustomBCsFunctorBack && customBCsBack,
 		     int icId = 1)
 {
 
   if (problemEnum != Euler2d::RiemannCustomBCs){
-    throw std::runtime_error("custom BCs only supported for Euler2d::RiemannCustomBCs");
+    throw std::runtime_error("Euler2d: custom BCs only supported for Euler2d::RiemannCustomBCs");
   }
   if (recEnum != InviscidFluxReconstruction::FirstOrder){
-    throw std::runtime_error("RiemannCustomBCs only supports InviscidFluxReconstruction::FirstOrder");
+    throw std::runtime_error("Euler2d::RiemannCustomBCs only supports InviscidFluxReconstruction::FirstOrder");
   }
 
-  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
-		 customBCsLeft, customBCsFront, customBCsRight, customBCsBack, icId);
+  BCFunctorsHolderType bcFuncs(std::forward<CustomBCsFunctorLeft>(customBCsLeft),
+			       std::forward<CustomBCsFunctorFront>(customBCsFront),
+			       std::forward<CustomBCsFunctorRight>(customBCsRight),
+			       std::forward<CustomBCsFunctorBack>(customBCsBack));
+  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov, std::move(bcFuncs), icId);
 }
 #endif
 

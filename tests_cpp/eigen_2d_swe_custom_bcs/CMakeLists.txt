@@ -1,5 +1,5 @@
 
-set(testname custom_bcs_sandbox)
+set(testname eigen_2d_swe_custom_bcs)
 set(exename ${testname}_exe)
 
 set(A "fullmesh;samplemesh")

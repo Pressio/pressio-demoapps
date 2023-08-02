@@ -26,7 +26,6 @@ add_subdirectory(eigen_rusanov_flux_jacobians_euler)
 add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
 add_subdirectory(create_vec_of_problems)
-add_subdirectory(custom_bcs_sandbox)
 
 # ---------------------------------------------------------
 # 1d problems
@@ -83,6 +82,9 @@ add_subdirectory(eigen_2d_advdiffreac_probA_explicit)
 
 add_subdirectory(eigen_2d_advdiffreac_probA_sample_mesh_test)
 add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
+
+add_subdirectory(eigen_2d_euler_riemann_custom_bcs)
+add_subdirectory(eigen_2d_swe_custom_bcs)
 
 # ---------------------------------------------------------
 # 3d problems

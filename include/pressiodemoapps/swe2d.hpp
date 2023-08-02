@@ -53,6 +53,7 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
+#include "./impl/custom_bc_holder.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
 
@@ -63,6 +64,7 @@ namespace pressiodemoapps{
 // ----------------------------------------------------------
 enum class Swe2d{
   SlipWall,
+  CustomBCs
 };
 
 }//end namespace pressiodemoapps
@@ -106,6 +108,45 @@ RetType
     throw std::runtime_error("2D swe: invalid problem enum");
   }
 }
+
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<
+  class mesh_t,
+  class CustomBCsFunctorLeft,
+  class CustomBCsFunctorFront,
+  class CustomBCsFunctorRight,
+  class CustomBCsFunctorBack,
+  class BCFunctorsHolderType = impl::CustomBCsHolder<
+    CustomBCsFunctorLeft, CustomBCsFunctorFront,
+    CustomBCsFunctorRight, CustomBCsFunctorBack>,
+  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t, BCFunctorsHolderType>>
+  >
+RetType
+create_problem_eigen(const mesh_t & meshObj,
+		     Swe2d problemEnum,
+		     InviscidFluxReconstruction recEnum,
+		     CustomBCsFunctorLeft && customBCsLeft,
+		     CustomBCsFunctorFront && customBCsFront,
+		     CustomBCsFunctorRight && customBCsRight,
+		     CustomBCsFunctorBack && customBCsBack)
+{
+
+  if (problemEnum != Swe2d::CustomBCs){
+    throw std::runtime_error("Swe2d: custom BCs only supported for Swe2d::CustomBCs");
+  }
+  if (recEnum != InviscidFluxReconstruction::FirstOrder){
+    throw std::runtime_error("Swe2d::CustomBCs: only supports InviscidFluxReconstruction::FirstOrder");
+  }
+
+  BCFunctorsHolderType bcFuncs(std::forward<CustomBCsFunctorLeft>(customBCsLeft),
+			       std::forward<CustomBCsFunctorFront>(customBCsFront),
+			       std::forward<CustomBCsFunctorRight>(customBCsRight),
+			       std::forward<CustomBCsFunctorBack>(customBCsBack));
+  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
+		 std::move(bcFuncs), 9.8 /*gravity*/, -3.0 /*coriolis*/, 0.125 /*pulse mag*/);
+}
+#endif
+
 
 // ----------------------------------------------------------
 // custom coeffs
