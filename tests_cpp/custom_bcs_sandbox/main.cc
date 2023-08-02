@@ -3,6 +3,80 @@
 #include "pressiodemoapps/euler2d.hpp"
 #include "../observer.hpp"
 
+#if 0
+// this is just for explanation but left inside "if 0" for readability
+struct ExampleBCFunctor
+{
+
+  template<class ConnecRowType, class StateT, class T>
+  void operator()(const int k,
+		  /*
+		    k:
+		    index enumerating the cells on boundary: 0, 1, 2, .., N
+		    where N is the number of cells that are near the boundary
+		    as per the definition of the mesh object.
+		    Not sure if we need this but just in case.
+		  */
+                  ConnecRowType const & connectivityRow,
+		  /*connectivityRow:
+		    contains the row of the connectivity graph of the cell being handled
+		  */
+
+		  const double cellX, const double cellY,
+		  /* cellX, cellY: coordinates of the cell being handled */
+
+		  const StateT & currentState,
+		  /* currentState:
+		     a const ref to the state vector currently used inside the app object */
+
+		  int numDofPerCell,
+		  /*  numDofPerCell: self-explanatory */
+
+		  const double cellWidth, T & ghostValues
+		  /* the "vector" of ghost values to overwrite for all dofs.
+		     Note this is not a vector per se, but behaves like a vector.
+		     Must be indexed as ghostValues[0], ...
+		     It has as many elements as the numDofPerCell
+		  */
+		  ) const
+  {
+    assert(ghostValues.size() == numDofPerCell);
+
+    // const int cellGID = connectivityRow[0];
+    // const auto uIndex  = cellGID*numDofPerCell;
+
+    /* just for the sake of explanation, assuming one dof percell,
+       here is how one can set different BCs:
+
+       ghostValues[0] = 0.2; // Dirichlet
+
+       // non-homog Neumann:
+       ghostValues[0] = cellWidth*some_target_value + currentState(uIndex+1); //
+
+       // homog Neumann:
+       ghostValues[0] = currentState(uIndex); //homog Neumann
+     */
+  }
+
+  template<class ConnecRowType, class FactorsType>
+  void operator()(ConnecRowType const & connectivityRow,
+		  const double cellX, const double cellY,
+		  int numDofPerCell,
+		  FactorsType & factorsForBCJac) const
+  {
+    assert(factorsForBCJac.size() == numDofPerCell);
+
+    // 0 should always be set for Dirichlet
+    // 1 should always be used for Neumann
+    //
+    // for example, for 2 dofs/percell both with Dirichlet BCs:
+    //    factorsForBCJac = {0.,0.};
+  }
+};
+#endif
+
+
+
 struct Dirichlet
 {
   mutable std::array<double, 4> prim = {};
