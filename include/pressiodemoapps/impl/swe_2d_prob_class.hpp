@@ -61,6 +61,7 @@
 #include "mixin_directional_flux_balance.hpp"
 #include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
+#include "custom_bcs_functions.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #include <omp.h>
@@ -219,7 +220,14 @@ protected:
 #endif
     }
 
-    fillGhosts(U);
+    if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+      fillGhosts(U);
+    }
+    else{
+      fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
+				  m_ghostLeft, m_ghostFront,
+				  m_ghostRight, m_ghostBack, numDofPerCell);
+    }
 
     if (J){
       velocityAndJacobianImpl(U, currentTime, V, *J,
@@ -339,58 +347,6 @@ private:
 	ghF(rowsBd[it], it);
       }
     }
-
-#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-    else if (m_probEn == ::pressiodemoapps::Swe2d::CustomBCs)
-    {
-      const auto & x = m_meshObj.get().viewX();
-      const auto & y = m_meshObj.get().viewY();
-      const auto & graph = m_meshObj.get().graph();
-      const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
-#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
-#pragma omp for schedule(static)
-#endif
-      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it)
-      {
-	auto currentCellGraphRow = graph.row(rowsBd[it]);
-	const int cellGID = rowsBd[it];
-	const auto myX = x(cellGID);
-	const auto myY = y(cellGID);
-
-	/* IMPORTANT: keep the following as separate ifs wihtout ORs
-	   because some cells might has ghosts on multiple sides so
-	   we need these ifs not exclusive
-	*/
-	if (m_meshObj.get().hasBdLeft2d(cellGID)){
-	  auto ghostVals = m_ghostLeft.row(it);
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Left,
-			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
-			  m_meshObj.get().dx(), ghostVals);
-	}
-
-	if (m_meshObj.get().hasBdRight2d(cellGID)){
-	  auto ghostVals = m_ghostRight.row(it);
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Right,
-			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
-			  m_meshObj.get().dx(), ghostVals);
-	}
-
-	if (m_meshObj.get().hasBdBack2d(cellGID)){
-	  auto ghostVals = m_ghostBack.row(it);
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Back,
-			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
-			  m_meshObj.get().dy(), ghostVals);
-	}
-
-	if (m_meshObj.get().hasBdFront2d(cellGID)){
-	  auto ghostVals = m_ghostFront.row(it);
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Front,
-			  it, currentCellGraphRow, myX, myY, U, numDofPerCell,
-			  m_meshObj.get().dy(), ghostVals);
-	}
-      }
-    }
-#endif
 
     else{
       // no op
@@ -627,13 +583,6 @@ private:
 		       /* end args for reconstructor */
 		       );
 
-    // std::array<scalar_type, numDofPerCell> bdCellJacFactorsX;
-    // std::array<scalar_type, numDofPerCell> bdCellJacFactorsY;
-    // bdCellJacFactorsX.fill(static_cast<scalar_type>(1));
-    // bdCellJacFactorsY.fill(static_cast<scalar_type>(1));
-    // bdCellJacFactorsX[1] = static_cast<scalar_type>(-1);
-    // bdCellJacFactorsY[2] = static_cast<scalar_type>(-1);
-
     const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
@@ -642,12 +591,26 @@ private:
     {
       const auto smPt = graphRows[it];
 
+      // deal with x
       FillStencilX(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, xAxis);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, xAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
       funcx(smPt, numDofPerCell, m_bcCellJacFactors);
 
+      // deal with y
       FillStencilY(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, yAxis);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, yAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
       funcy(smPt, numDofPerCell, m_bcCellJacFactors);
 
       addForcingContributionToVelocityAndJacobian(U, V, J, smPt);
@@ -769,13 +732,6 @@ private:
 			      /* end args for reconstructor */
 			      );
 
-    // std::array<scalar_type, numDofPerCell> bdCellJacFactorsX;
-    // std::array<scalar_type, numDofPerCell> bdCellJacFactorsY;
-    // bdCellJacFactorsX.fill(static_cast<scalar_type>(1));
-    // bdCellJacFactorsY.fill(static_cast<scalar_type>(1));
-    // bdCellJacFactorsX[1] = static_cast<scalar_type>(-1);
-    // bdCellJacFactorsY[2] = static_cast<scalar_type>(-1);
-
     // ************
     // loop
     // ************
@@ -786,16 +742,31 @@ private:
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
     {
       const auto smPt = graphRows[it];
+
+      // deal with x
       FillStencilVeloX(smPt, it, numDofPerCell);
       funcVeloX(smPt, numDofPerCell);
       FillStencilJacX(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, xAxis);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, xAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
       funcJacX(smPt, numDofPerCell, m_bcCellJacFactors);
 
+      // deal with y
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, yAxis);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, yAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
       funcJacY(smPt, numDofPerCell, m_bcCellJacFactors);
 
       addForcingContributionToVelocityAndJacobian(U, V, J, smPt);
@@ -817,47 +788,6 @@ private:
       }
       return;
     }
-
-#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-    else if (m_probEn == ::pressiodemoapps::Swe2d::CustomBCs)
-    {
-      const auto & x = m_meshObj.get().viewX();
-      const auto & y = m_meshObj.get().viewY();
-      const auto & graph = m_meshObj.get().graph();
-      auto currentCellGraphRow = graph.row(graphRow);
-      const int cellGID = currentCellGraphRow[0];
-      const auto myX = x(cellGID);
-      const auto myY = y(cellGID);
-
-      if (axis==1){
-	if (m_meshObj.get().hasBdLeft2d(graphRow)){
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Left,
-			  currentCellGraphRow, myX, myY, numDofPerCell,
-			  /*axis, ,*/ m_bcCellJacFactors);
-	}
-	if (m_meshObj.get().hasBdRight2d(graphRow)){
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Right,
-			  currentCellGraphRow, myX, myY, numDofPerCell,
-			  /*axis, ,*/ m_bcCellJacFactors);
-	}
-      }
-      else{
-	if (m_meshObj.get().hasBdBack2d(graphRow)){
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Back,
-			  currentCellGraphRow, myX, myY, numDofPerCell,
-			  /*axis, ,*/ m_bcCellJacFactors);
-	}
-
-	if (m_meshObj.get().hasBdFront2d(graphRow)){
-	  m_bcFuncsHolder(impl::GhostRelativeLocation::Front,
-			  currentCellGraphRow, myX, myY, numDofPerCell,
-			  /*axis, ,*/ m_bcCellJacFactors);
-	}
-      }
-
-      return;
-    }
-#endif
   }
 
   template<class U_t, class V_t>

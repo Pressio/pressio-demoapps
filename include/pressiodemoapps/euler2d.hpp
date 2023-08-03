@@ -69,7 +69,6 @@ enum class Euler2d{
   SedovFull,
   SedovSymmetry,
   Riemann,
-  RiemannCustomBCs,
   NormalShock,
   DoubleMachReflection,
   CrossShock,
@@ -128,11 +127,13 @@ create_problem_eigen(const mesh_t & meshObj,
 		     int icId = 1)
 {
 
-  if (problemEnum != Euler2d::RiemannCustomBCs){
-    throw std::runtime_error("Euler2d: custom BCs only supported for Euler2d::RiemannCustomBCs");
+  if (problemEnum != Euler2d::Riemann &&
+      problemEnum != Euler2d::NormalShock)
+  {
+    throw std::runtime_error("Euler2d: constructing an Euler2d problem with custom BCs is only supported for Euler2d::{Riemann, NormalShock}");
   }
   if (recEnum != InviscidFluxReconstruction::FirstOrder){
-    throw std::runtime_error("Euler2d::RiemannCustomBCs only supports InviscidFluxReconstruction::FirstOrder");
+    throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
   }
 
   BCFunctorsHolderType bcFuncs(std::forward<CustomBCsFunctorLeft>(customBCsLeft),

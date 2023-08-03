@@ -224,7 +224,7 @@ int main()
   namespace pda = pressiodemoapps;
 
   const auto inviscidScheme   = pda::InviscidFluxReconstruction::FirstOrder;
-  const auto probId  = pda::Euler2d::RiemannCustomBCs;
+  const auto probId  = pda::Euler2d::Riemann;
   const int initCond = 2;
 
   {
