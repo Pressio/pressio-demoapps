@@ -49,6 +49,7 @@
 #ifndef PRESSIODEMOAPPS_EULER2D_APP_HPP_
 #define PRESSIODEMOAPPS_EULER2D_APP_HPP_
 
+#include "noop.hpp"
 #include "euler_rankine_hugoniot.hpp"
 #include "euler_rusanov_flux_values_function.hpp"
 #include "euler_rusanov_flux_jacobian_function.hpp"
@@ -65,6 +66,7 @@
 #include "mixin_directional_flux_balance.hpp"
 #include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
+#include "custom_bcs_functions.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #include <omp.h>
@@ -78,7 +80,10 @@ namespace impleuler2d{
 // so add new ones if a new problem is added
 struct TagCrossShock{};
 
-template<class MeshType>
+template<
+  class MeshType,
+  class BCFunctorsHolderType = impl::NoOperation<void>
+  >
 class EigenApp
 {
 
@@ -119,6 +124,26 @@ public:
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
     allocateGhosts();
   }
+
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+  EigenApp(const MeshType & meshObj,
+	   ::pressiodemoapps::Euler2d probEnum,
+	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
+	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
+	   BCFunctorsHolderType && bcHolder,
+	   int icIdentifier)
+    : m_meshObj(meshObj),
+      m_probEn(probEnum),
+      m_recEn(recEnum),
+      m_fluxEn(fluxEnum),
+      m_icIdentifier(icIdentifier),
+      m_bcFuncsHolder(std::move(bcHolder))
+  {
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
+    allocateGhosts();
+  }
+#endif
 
   EigenApp(TagCrossShock /*tag*/,
 	   const MeshType & meshObj,
@@ -202,7 +227,14 @@ protected:
 #endif
     }
 
-    fillGhosts(U, currentTime);
+    if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+      fillGhosts(U, currentTime);
+    }
+    else{
+      fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
+				  m_ghostLeft, m_ghostFront,
+				  m_ghostRight, m_ghostBack, numDofPerCell);
+    }
 
     if (J){
       velocityAndJacobianImpl(U, currentTime, V, *J,
@@ -371,7 +403,6 @@ private:
 
     return initialState;
   }
-
 
   template<class U_t>
   void fillGhosts(const U_t & U, const scalar_type currentTime) const
@@ -710,8 +741,6 @@ private:
 		       /* end args for reconstructor */
 		       );
 
-    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
-
     const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
@@ -720,13 +749,27 @@ private:
       {
 	const auto smPt = graphRows[it];
 
+	// deal with x
 	FillStencilX(smPt, it, numDofPerCell);
-	fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
-	funcx(smPt, numDofPerCell, bcCellJacFactors);
+	if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	  fillJacFactorsForCellBd(smPt, xAxis);
+	}
+	else{
+	  fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				  m_bcCellJacFactors, numDofPerCell);
+	}
+	funcx(smPt, numDofPerCell, m_bcCellJacFactors);
 
+	// deal with y
 	FillStencilY(smPt, it, numDofPerCell);
-	fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
-	funcy(smPt, numDofPerCell, bcCellJacFactors);
+	if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	  fillJacFactorsForCellBd(smPt, yAxis);
+	}
+	else{
+	  fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				  m_bcCellJacFactors, numDofPerCell);
+	}
+	funcy(smPt, numDofPerCell, m_bcCellJacFactors);
       }
   }
 
@@ -844,8 +887,6 @@ private:
 			      /* end args for reconstructor */
 			      );
 
-    std::array<scalar_type, numDofPerCell> bcCellJacFactors;
-
     // ************
     // loop
     // ************
@@ -857,17 +898,35 @@ private:
     {
       const auto smPt = graphRows[it];
 
+      //
+      // deal with x
+      //
       FillStencilVeloX(smPt, it, numDofPerCell);
       funcVeloX(smPt, numDofPerCell);
       FillStencilJacX(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, xAxis, bcCellJacFactors);
-      funcJacX(smPt, numDofPerCell, bcCellJacFactors);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, xAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcJacX(smPt, numDofPerCell, m_bcCellJacFactors);
 
+      //
+      // deal with y
+      //
       FillStencilVeloY(smPt, it, numDofPerCell);
       funcVeloY(smPt, numDofPerCell);
       FillStencilJacY(smPt, it, numDofPerCell);
-      fillJacFactorsForCellBd(smPt, yAxis, bcCellJacFactors);
-      funcJacY(smPt, numDofPerCell, bcCellJacFactors);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, yAxis);
+      }
+      else{
+	fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcJacY(smPt, numDofPerCell, m_bcCellJacFactors);
     }
   }
 
@@ -996,17 +1055,17 @@ private:
     }
   }
 
-  void fillJacFactorsForCellBd(index_t graphRow, int axis,
-			       std::array<scalar_type, numDofPerCell> & facs) const
+  void fillJacFactorsForCellBd(index_t graphRow, int axis) const
   {
+    assert(axis <= 2);
 
     if (m_probEn == ::pressiodemoapps::Euler2d::SedovFull or
 	m_probEn == ::pressiodemoapps::Euler2d::Riemann or
 	m_probEn == ::pressiodemoapps::Euler2d::testingonlyneumann)
     {
       (void)graphRow;
-      // homog neumann
-      facs.fill(static_cast<scalar_type>(1));
+      // neumann
+      m_bcCellJacFactors.fill(static_cast<scalar_type>(1));
       return;
     }
 
@@ -1014,19 +1073,19 @@ private:
     {
       if (axis == 1 && m_meshObj.get().hasBdLeft2d(graphRow)){
 	// relfective
-	facs = {1., -1., 1., 1.};
+	m_bcCellJacFactors = {1., -1., 1., 1.};
 	return;
       }
 
       else if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow)){
 	// relfective
-	facs = {1., 1., -1., 1.};
+	m_bcCellJacFactors = {1., 1., -1., 1.};
 	return;
       }
 
       else{
-	// homog neumann
-	facs = {1., 1., 1., 1.};
+	// neumann
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
     }
@@ -1035,12 +1094,12 @@ private:
     {
       if (axis == 2){
 	// relfective
-	facs = {1., 1., -1., 1.};
+	m_bcCellJacFactors = {1., 1., -1., 1.};
 	return;
       }
       else{
-	// homog neumann
-	facs = {1., 1., 1., 1.};
+	// neumann
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
     }
@@ -1055,24 +1114,24 @@ private:
 
       if (axis == 1){
 	// homog neumann
-	facs = {1., 1., 1., 1.};
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
 
       if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow) && (myX < wedgePosition)){
 	// homog neumann
-	facs = {1., 1., 1., 1.};
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
 
       if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow) && (myX >= wedgePosition)){
 	// reflective
-	facs = {1., 1., -1., 1.};
+	m_bcCellJacFactors = {1., 1., -1., 1.};
 	return;
       }
 
       // dirichlet
-      facs = {0., 0., 0., 0.};
+      m_bcCellJacFactors = {0., 0., 0., 0.};
       return;
     }
 
@@ -1080,27 +1139,27 @@ private:
     {
       if (axis == 1 && m_meshObj.get().hasBdLeft2d(graphRow)){
 	// dirichlet
-	facs = {0., 0., 0., 0.};
+	m_bcCellJacFactors = {0., 0., 0., 0.};
 	return;
       }
 
       if (axis == 1 && m_meshObj.get().hasBdRight2d(graphRow)){
 	// homog neumann
-	facs = {1., 1., 1., 1.};
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
 
       if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow))
       {
 	// dirichlet for u,v, and homog neumann for rho and rho*E
-	facs = {1., 0., 0., 1.};
+	m_bcCellJacFactors = {1., 0., 0., 1.};
 	return;
       }
 
       if (axis == 2 && m_meshObj.get().hasBdFront2d(graphRow))
       {
 	// homog neumann for rho and rho*E
-	facs = {1., 1., 1., 1.};
+	m_bcCellJacFactors = {1., 1., 1., 1.};
 	return;
       }
 
@@ -1175,10 +1234,14 @@ protected:
 
   // for cross-shock problem: density, inletXVel, bottomYVel
   std::array<scalar_type, 3> m_crossshock_params;
+
+  mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
+
+  BCFunctorsHolderType m_bcFuncsHolder = {};
 };
 
-template<class MeshType> constexpr int EigenApp<MeshType>::numDofPerCell;
-template<class MeshType> constexpr int EigenApp<MeshType>::dimensionality;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::dimensionality;
 
 }}//end namespace
 #endif

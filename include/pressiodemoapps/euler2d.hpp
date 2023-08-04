@@ -53,6 +53,7 @@
 #include "./container_fncs/all.hpp"
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
+#include "./impl/custom_bc_holder.hpp"
 #include "./euler_compute_energy.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
@@ -102,6 +103,46 @@ RetType
   return RetType(meshObj, problemEnum, recEnum,
 		 InviscidFluxScheme::Rusanov, 1);
 }
+
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<
+  class mesh_t,
+  class CustomBCsFunctorLeft,
+  class CustomBCsFunctorFront,
+  class CustomBCsFunctorRight,
+  class CustomBCsFunctorBack,
+  class BCFunctorsHolderType = impl::CustomBCsHolder<
+    CustomBCsFunctorLeft, CustomBCsFunctorFront,
+    CustomBCsFunctorRight, CustomBCsFunctorBack>,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t, BCFunctorsHolderType>>
+  >
+RetType
+create_problem_eigen(const mesh_t & meshObj,
+		     Euler2d problemEnum,
+		     InviscidFluxReconstruction recEnum,
+		     CustomBCsFunctorLeft && customBCsLeft,
+		     CustomBCsFunctorFront && customBCsFront,
+		     CustomBCsFunctorRight && customBCsRight,
+		     CustomBCsFunctorBack && customBCsBack,
+		     int icId = 1)
+{
+
+  if (problemEnum != Euler2d::Riemann &&
+      problemEnum != Euler2d::NormalShock)
+  {
+    throw std::runtime_error("Euler2d: constructing an Euler2d problem with custom BCs is only supported for Euler2d::{Riemann, NormalShock}");
+  }
+  if (recEnum != InviscidFluxReconstruction::FirstOrder){
+    throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
+  }
+
+  BCFunctorsHolderType bcFuncs(std::forward<CustomBCsFunctorLeft>(customBCsLeft),
+			       std::forward<CustomBCsFunctorFront>(customBCsFront),
+			       std::forward<CustomBCsFunctorRight>(customBCsRight),
+			       std::forward<CustomBCsFunctorBack>(customBCsBack));
+  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov, std::move(bcFuncs), icId);
+}
+#endif
 
 // ----------------------------------------------------------
 // create a default problem with specific initial condition
