@@ -90,6 +90,10 @@ public:
   PublicProblemEigenMixinCpp & operator=(const PublicProblemEigenMixinCpp &) = delete;
   PublicProblemEigenMixinCpp & operator=(PublicProblemEigenMixinCpp &&) = delete;
 
+  int numDofPerCell() const {
+    return T::numDofPerCellImpl();
+  }
+
   typename T::index_t totalDofSampleMesh()  const{
     return T::m_numDofSampleMesh;
   }

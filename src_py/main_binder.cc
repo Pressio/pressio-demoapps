@@ -77,6 +77,9 @@ namespace impl{
 template<class p_t, class T>
 void bindCommonApiMethods(T & appObj)
 {
+  appObj.def("numDofPerCell",
+	     &p_t::numDofPerCell);
+
   appObj.def("totalDofSampleMesh",
 	     &p_t::totalDofSampleMesh);
   appObj.def("totalDofStencilMesh",
