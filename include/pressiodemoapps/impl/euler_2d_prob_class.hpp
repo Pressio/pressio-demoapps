@@ -174,6 +174,10 @@ public:
   }
 
 protected:
+  int numDofPerCellImpl() const {
+    return numDofPerCell;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
