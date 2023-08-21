@@ -62,6 +62,7 @@
 #include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
 #include "custom_bcs_functions.hpp"
+#include "ghost_relative_locations.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #include <omp.h>
@@ -165,6 +166,12 @@ public:
     };
 
     return initialState;
+  }
+
+public:
+  template <class T>
+  void setBCPointer(::pressiodemoapps::impl::GhostRelativeLocation rloc, T* ptr) {
+    m_bcFuncsHolder.setInternalPointer(rloc, ptr);
   }
 
 protected:
