@@ -129,7 +129,7 @@ create_problem_eigen(const mesh_t & meshObj,
 		     CustomBCsFunctorFront && customBCsFront,
 		     CustomBCsFunctorRight && customBCsRight,
 		     CustomBCsFunctorBack && customBCsBack,
-		     int /*unused*/)
+		     int icFlag = 0 )
 {
 
   if (problemEnum != Swe2d::CustomBCs){
