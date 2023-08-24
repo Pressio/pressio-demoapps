@@ -86,6 +86,22 @@ struct CustomBCsHolder
     }
   }
 
+  template<class T>
+  void setInternalPointer(GhostRelativeLocation rloc, T* ptr) {
+    if (rloc == GhostRelativeLocation::Left){
+      m_funcLeft.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Front){
+      m_funcFront.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Right){
+      m_funcRight.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Back) {
+      m_funcBack.setInternalPtr(ptr);
+    }
+  }
+
 private:
   FuncLeftT m_funcLeft;
   FuncFrontT m_funcFront;
@@ -116,6 +132,22 @@ struct CustomBCsHolder<FuncLeftT &, FuncFrontT &, FuncRightT &, FuncBackT &>
     }
     else{
       m_funcBack(std::forward<Types>(args)...);
+    }
+  }
+
+  template<class T>
+  void setInternalPointer(GhostRelativeLocation rloc, T* ptr) {
+    if (rloc == GhostRelativeLocation::Left){
+      m_funcLeft.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Front){
+      m_funcFront.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Right){
+      m_funcRight.setInternalPtr(ptr);
+    }
+    else if (rloc == GhostRelativeLocation::Back) {
+      m_funcBack.setInternalPtr(ptr);
     }
   }
 
