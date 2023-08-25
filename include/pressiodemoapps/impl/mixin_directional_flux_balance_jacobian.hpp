@@ -51,7 +51,6 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-namespace{
 template<int dim, class IndexT, class GraphType>
 void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
 				   const IndexT & smPt,
@@ -117,7 +116,6 @@ void _get_left_right_cells_indices(IndexT & l0, IndexT & r0,
     throw std::runtime_error("get_left_right_for_3dim_celljacweno MISSING");
   }
 }
-} // end anonymous namespace
 
 template<class Parent, int dim, class MeshType, class JacobianType>
 struct ComputeDirectionalFluxBalanceJacobianOnInteriorCell : Parent
