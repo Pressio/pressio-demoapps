@@ -51,8 +51,6 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-namespace{
-
 template<class ...Args> struct _ReconstructorMembers;
 
 // no gradients needed, only values
@@ -228,8 +226,6 @@ struct _ReconstructorMembers<
   ReconstructedGradType & m_gradRNeg ;
   ReconstructedGradType & m_gradRPos ;
 };
-} // anonym namespace
-
 
 template<int dim, class ...Args>
 class ReconstructorForDiscreteFunction;
