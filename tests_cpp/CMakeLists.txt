@@ -85,6 +85,7 @@ add_subdirectory(eigen_2d_advdiffreac_probA_implicit)
 
 add_subdirectory(eigen_2d_euler_riemann_custom_bcs)
 add_subdirectory(eigen_2d_swe_custom_bcs)
+add_subdirectory(eigen_2d_swe_slip_wall_parameters)
 
 # ---------------------------------------------------------
 # 3d problems

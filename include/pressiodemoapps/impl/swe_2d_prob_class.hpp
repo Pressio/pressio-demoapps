@@ -71,6 +71,72 @@
 namespace pressiodemoapps{
 namespace implswe2d{
 
+constexpr int gravity_i  = 0;
+constexpr int coriolis_i = 1;
+constexpr int pulseMagnitude_i = 2;
+constexpr int pulseX_i = 3;
+constexpr int pulseY_i = 4;
+
+template<class IntT>
+const std::string param_index_to_string(IntT index){
+  if      (index == gravity_i)       { return "gravity"; }
+  else if (index == coriolis_i)      { return "coriolis"; }
+  else if (index == pulseMagnitude_i){ return "pulseMagnitude"; }
+  else if (index == pulseX_i)        { return "pulseX"; }
+  else if (index == pulseY_i)        { return "pulseY"; }
+  return "null";
+}
+
+template<class T = void>
+int param_string_to_index(const std::string & s){
+  if      (s == "gravity")	 { return gravity_i; }
+  else if (s == "coriolis")	 { return coriolis_i; }
+  else if (s == "pulseMagnitude"){ return pulseMagnitude_i; }
+  else if (s == "pulseX")        { return pulseX_i; }
+  else if (s == "pulseY")        { return pulseY_i; }
+  else{ return std::numeric_limits<int>::max(); }
+}
+
+template<class ScalarType>
+auto create_vec_with_default_params(){
+  const auto gravity  = static_cast<ScalarType>(9.8);
+  const auto coriolis = static_cast<ScalarType>(-3);
+  const auto pulseMag = static_cast<ScalarType>(1)/8;
+  const auto pulseX   = static_cast<ScalarType>(1);
+  const auto pulseY   = pulseX;
+  return std::vector<ScalarType>({gravity, coriolis, pulseMag, pulseX, pulseY});
+}
+
+template<class ScalarType>
+auto param_unord_map_to_vector(const std::unordered_map<std::string, ScalarType> & map)
+{
+  // first create a vec with default params, and then loop over argument in map
+  // replacing whatever the map sets, while the rest remains default
+  auto result = create_vec_with_default_params<ScalarType>();
+  for (auto it = map.cbegin(); it != map.cend(); ++it){
+    const int index = param_string_to_index<>(it->first);
+    result[index] = it->second;
+  }
+  return result;
+}
+
+template<class ScalarType>
+auto param_vector_to_unord_map(const std::vector<ScalarType> & vec)
+{
+  std::unordered_map<std::string, ScalarType> result;
+  for (std::size_t i=0; i<vec.size(); ++i){
+    result[implswe2d::param_index_to_string(i)] = vec[i];
+  }
+  return result;
+}
+
+template<class ScalarType>
+auto create_map_with_default_params(){
+  const auto vec = create_vec_with_default_params<ScalarType>();
+  return param_vector_to_unord_map(vec);
+}
+
+
 // tags are used inside he public create function: create_problem_...()
 // in the file ../advection_diffusion.hpp
 // to dispatch to the proper problem
@@ -111,17 +177,14 @@ public:
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	   scalar_type gravity,
-	   scalar_type coriolis,
-	   scalar_type initialPulseMag)
+	   std::vector<scalar_type> && parameters)
     : m_probEn(::pressiodemoapps::Swe2d::SlipWall),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
       m_meshObj(meshObj),
-      m_gravity(gravity),
-      m_coriolis(coriolis),
-      m_initialPulseMagnitude(initialPulseMag)
+      m_parameters(std::move(parameters))
   {
+
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
     allocateGhosts();
@@ -133,26 +196,34 @@ public:
 	   ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   BCFunctorsHolderType && bcHolder,
-	   scalar_type gravity,
-	   scalar_type coriolis,
-	   scalar_type initialPulseMag)
+	   std::vector<scalar_type> && parameters)
     : m_probEn(probEn),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
       m_meshObj(meshObj),
-      m_gravity(gravity),
-      m_coriolis(coriolis),
-      m_initialPulseMagnitude(initialPulseMag),
+      m_parameters(std::move(parameters)),
       m_bcFuncsHolder(std::move(bcHolder))
   {
+
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
     allocateGhosts();
   }
 #endif
 
-  scalar_type gravity()         const{ return m_gravity; }
-  scalar_type coriolis()        const{ return m_coriolis; }
+  scalar_type gravity() const{
+    return m_parameters[gravity_i];
+  }
+
+  scalar_type coriolis() const{
+    return m_parameters[coriolis_i];
+  }
+
+  scalar_type queryParameter(const std::string & pname) const {
+    const int i = param_string_to_index(pname);
+    assert(i < (int) m_parameters.size());
+    return m_parameters[i];
+  }
 
   state_type initialCondition() const
   {
@@ -161,7 +232,9 @@ public:
       case ::pressiodemoapps::Swe2d::SlipWall:
       case ::pressiodemoapps::Swe2d::CustomBCs:
       {
-	GaussianPulse(initialState, m_meshObj.get(), m_initialPulseMagnitude);
+	GaussianPulse(initialState, m_meshObj.get(),
+		      m_parameters[pulseMagnitude_i],
+		      m_parameters[pulseX_i], m_parameters[pulseY_i]);
       }
     };
 
@@ -481,7 +554,7 @@ private:
 		    /* end args for velo */
 		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -494,7 +567,7 @@ private:
 		    /* end args for velo */
 		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -574,7 +647,7 @@ private:
 		       /* end args for velo */
 		       J, xAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
+		       m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
 		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -586,7 +659,7 @@ private:
 		       /* end args for velo */
 		       J, yAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
+		       m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
 		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -685,7 +758,7 @@ private:
 
     velo_functor_type funcVeloX(V, m_meshObj.get().dxInv(),
 				/* end args for velo */
-				m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
+				m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -694,7 +767,7 @@ private:
 
     velo_functor_type funcVeloY(V, m_meshObj.get().dyInv(),
 				/* end args for velo */
-				m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
+				m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -725,7 +798,7 @@ private:
 
     jac_functor_type funcJacX(J, xAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalX_, m_gravity,
+			      m_fluxEn, normalX_, m_parameters[gravity_i],
 			      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -735,7 +808,7 @@ private:
 
     jac_functor_type funcJacY(J, yAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalY_, m_gravity,
+			      m_fluxEn, normalY_, m_parameters[gravity_i],
 			      fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -842,7 +915,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -851,7 +924,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -900,7 +973,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_gravity, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -909,7 +982,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_gravity, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -933,10 +1006,12 @@ private:
 					V_t & V,
 					index_t smPt) const
   {
+
+    const auto coriolis = m_parameters[coriolis_i];
     const auto vIndex = smPt*numDofPerCell;
     const auto uIndex = m_meshObj.get().graph()(smPt, 0)*numDofPerCell;
-    V(vIndex+1) -= m_coriolis*U(uIndex+2)/U(uIndex);
-    V(vIndex+2) += m_coriolis*U(uIndex+1)/U(uIndex);
+    V(vIndex+1) -= coriolis*U(uIndex+2)/U(uIndex);
+    V(vIndex+2) += coriolis*U(uIndex+1)/U(uIndex);
   }
 
   template<class U_t, class V_t>
@@ -945,14 +1020,16 @@ private:
 						   jacobian_type & J,
 						   index_t smPt) const
   {
+
+    const auto coriolis = m_parameters[coriolis_i];
     const auto vIndex = smPt*numDofPerCell;
     const index_t col_i = m_meshObj.get().graph()(smPt, 0)*numDofPerCell;
-    V(vIndex+1) -= m_coriolis*U(col_i+2)/U(col_i);
-    V(vIndex+2) += m_coriolis*U(col_i+1)/U(col_i);
-    J.coeffRef(vIndex+1, col_i)   +=  m_coriolis*U(col_i+2)/(U(col_i)*U(col_i) );
-    J.coeffRef(vIndex+1, col_i+2) += -m_coriolis/U(col_i);
-    J.coeffRef(vIndex+2, col_i+1) +=  m_coriolis/U(col_i);
-    J.coeffRef(vIndex+2, col_i)   +=  -m_coriolis*U(col_i+1)/(U(col_i)*U(col_i) );
+    V(vIndex+1) -= coriolis*U(col_i+2)/U(col_i);
+    V(vIndex+2) += coriolis*U(col_i+1)/U(col_i);
+    J.coeffRef(vIndex+1, col_i)   +=  coriolis*U(col_i+2)/(U(col_i)*U(col_i) );
+    J.coeffRef(vIndex+1, col_i+2) += -coriolis/U(col_i);
+    J.coeffRef(vIndex+2, col_i+1) +=  coriolis/U(col_i);
+    J.coeffRef(vIndex+2, col_i)   +=  -coriolis*U(col_i+1)/(U(col_i)*U(col_i) );
   }
 
 private:
@@ -981,10 +1058,8 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  scalar_type m_gravity  = {};
-  scalar_type m_coriolis = {};
-  scalar_type m_initialPulseMagnitude = {};
-
+  // gravity, coriolis, pulseMagnitude, pulseCenterX, pulseCenterY
+  std::vector<scalar_type> m_parameters;
   std::array<scalar_type, 2> normalX_{1, 0};
   std::array<scalar_type, 2> normalY_{0, 1};
 

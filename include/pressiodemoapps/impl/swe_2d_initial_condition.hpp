@@ -54,23 +54,22 @@ namespace implswe2d{
 
 template<class state_type, class mesh_t, class scalar_type>
 void GaussianPulse(state_type & state,
-		  const mesh_t & meshObj,
-		  const scalar_type pulseMag)
+		   const mesh_t & meshObj,
+		   const scalar_type pulseMag,
+		   const scalar_type pulseX,
+		   const scalar_type pulseY)
 {
   constexpr int numDofPerCell = 3;
-  constexpr auto one  = static_cast<scalar_type>(1);
-  constexpr auto zero = static_cast<scalar_type>(0);
-
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
 
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       const auto ind = i*numDofPerCell;
-      auto r = std::sqrt( (x(i) - one)*(x(i) - one) + (y(i) - one)*(y(i) - one) );
+      auto r = std::sqrt( (x(i) - pulseX)*(x(i) - pulseX) + (y(i) - pulseY)*(y(i) - pulseY) );
       state(ind)   = static_cast<scalar_type>(1) + pulseMag*std::exp( -(r*r) );
-      state(ind+1) = zero;
-      state(ind+2) = zero;
+      state(ind+1) = static_cast<scalar_type>(0);
+      state(ind+2) = static_cast<scalar_type>(0);
     }
 }
 
