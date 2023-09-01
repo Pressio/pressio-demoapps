@@ -77,16 +77,6 @@ constexpr int pulseMagnitude_i = 2;
 constexpr int pulseX_i = 3;
 constexpr int pulseY_i = 4;
 
-template<class ScalarType>
-auto create_vec_with_default_params(){
-  const auto gravity  = static_cast<ScalarType>(9.8);
-  const auto coriolis = static_cast<ScalarType>(-3);
-  const auto pulseMag = static_cast<ScalarType>(1)/8;
-  const auto pulseX   = static_cast<ScalarType>(1);
-  const auto pulseY   = pulseX;
-  return std::vector<ScalarType>({gravity, coriolis, pulseMag, pulseX, pulseY});
-}
-
 template<class IntT>
 const std::string param_index_to_string(IntT index){
   if      (index == gravity_i)       { return "gravity"; }
@@ -105,6 +95,16 @@ int param_string_to_index(const std::string & s){
   else if (s == "pulseX")        { return pulseX_i; }
   else if (s == "pulseY")        { return pulseY_i; }
   else{ return std::numeric_limits<int>::max(); }
+}
+
+template<class ScalarType>
+auto create_vec_with_default_params(){
+  const auto gravity  = static_cast<ScalarType>(9.8);
+  const auto coriolis = static_cast<ScalarType>(-3);
+  const auto pulseMag = static_cast<ScalarType>(1)/8;
+  const auto pulseX   = static_cast<ScalarType>(1);
+  const auto pulseY   = pulseX;
+  return std::vector<ScalarType>({gravity, coriolis, pulseMag, pulseX, pulseY});
 }
 
 template<class ScalarType>
@@ -129,6 +129,13 @@ auto param_vector_to_unord_map(const std::vector<ScalarType> & vec)
   }
   return result;
 }
+
+template<class ScalarType>
+auto create_map_with_default_params(){
+  const auto vec = create_vec_with_default_params<ScalarType>();
+  return param_vector_to_unord_map(vec);
+}
+
 
 // tags are used inside he public create function: create_problem_...()
 // in the file ../advection_diffusion.hpp

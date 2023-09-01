@@ -34,7 +34,7 @@ int main()
   const auto flsc = pda::InviscidFluxReconstruction::FirstOrder;
 
   {
-    std::cout << "\ntesting overload 1\n";
+    std::cout << "\ntesting overload \n";
     const auto probId  = pda::Swe2d::SlipWall;
     auto appObj = pda::create_problem_eigen(meshObj, probId, flsc);
     std::unordered_map<std::string, double> gold;
@@ -47,7 +47,21 @@ int main()
   }
 
   {
-    std::cout << "\ntesting overload 2\n";
+    std::cout << "\ntesting overload \n";
+    const auto probId  = pda::Swe2d::SlipWall;
+    std::unordered_map<std::string, double> myparams;
+    myparams["gravity"] = 10;
+    myparams["coriolis"] = static_cast<double>(-5);
+    myparams["pulseMagnitude"] = static_cast<double>(1.5)/8;
+    myparams["pulseX"] = static_cast<double>(1.5);
+    myparams["pulseY"] = static_cast<double>(1.5);
+
+    auto appObj = pda::create_problem_eigen(meshObj, probId, flsc, myparams);
+    check(appObj, myparams);
+  }
+
+  {
+    std::cout << "\ntesting overload \n";
     auto appObj = pda::  create_slip_wall_swe_2d_problem_eigen(meshObj, flsc,
 							       12., 4.4, 0.5);
     std::unordered_map<std::string, double> gold;
@@ -60,7 +74,7 @@ int main()
   }
 
   {
-    std::cout << "\ntesting overload 3\n";
+    std::cout << "\ntesting overload \n";
     const auto probId  = pda::Swe2d::CustomBCs;
     auto noop = pda::impl::NoOperation<void>();
     auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
@@ -75,7 +89,7 @@ int main()
   }
 
   {
-    std::cout << "\ntesting overload 4\n";
+    std::cout << "\ntesting overload \n";
     const auto probId  = pda::Swe2d::CustomBCs;
     auto noop = pda::impl::NoOperation<void>();
     std::unordered_map<std::string, double> myparams;

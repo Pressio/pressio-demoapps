@@ -78,22 +78,15 @@ namespace pressiodemoapps{
 // create default problem
 // ----------------------------------------------------------
 
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<
   class mesh_t,
   class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
   >
-RetType
-// bindings need unique naming or we get error associated with overloads
-#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-  create_swe2d_problem_default_for_py
-#else
-  create_problem_eigen
-#endif
-(const mesh_t & meshObj,
- Swe2d problemEnum,
- InviscidFluxReconstruction inviscRecEn)
+RetType create_swe2d_problem_default_for_py(const mesh_t & meshObj,
+					    Swe2d problemEnum,
+					    InviscidFluxReconstruction inviscRecEn)
 {
-
   if (problemEnum == Swe2d::SlipWall){
     return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
 		   ::pressiodemoapps::InviscidFluxScheme::Rusanov,
@@ -103,6 +96,31 @@ RetType
     throw std::runtime_error("2D swe: invalid problem enum");
   }
 }
+
+#else
+
+template<
+  class mesh_t,
+  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
+  >
+RetType
+create_problem_eigen(const mesh_t & meshObj,
+		     Swe2d problemEnum,
+		     InviscidFluxReconstruction inviscRecEn,
+		     const std::unordered_map<std::string, typename mesh_t::scalar_t> & paramsMap
+		       = implswe2d::create_map_with_default_params<typename mesh_t::scalar_t>())
+{
+
+  if (problemEnum == Swe2d::SlipWall){
+    auto paramsVec = implswe2d::param_unord_map_to_vector(paramsMap);
+    return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		   ::pressiodemoapps::InviscidFluxScheme::Rusanov, std::move(paramsVec));
+  }
+  else{
+    throw std::runtime_error("2D swe: invalid problem enum");
+  }
+}
+#endif
 
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<
