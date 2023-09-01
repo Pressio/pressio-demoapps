@@ -94,16 +94,11 @@ RetType
  InviscidFluxReconstruction inviscRecEn)
 {
 
-  if (problemEnum == Swe2d::SlipWall)
-  {
-    return RetType(implswe2d::TagProblemSlipWall{},
-		   meshObj, inviscRecEn,
+  if (problemEnum == Swe2d::SlipWall){
+    return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
 		   ::pressiodemoapps::InviscidFluxScheme::Rusanov,
-		   9.8,  // gravity
-		   -3.0, // coriolis
-		   0.125); // pulse mag
+		   implswe2d::create_vec_with_default_params<typename RetType::scalar_type>());
   }
-
   else{
     throw std::runtime_error("2D swe: invalid problem enum");
   }
@@ -129,7 +124,7 @@ create_problem_eigen(const mesh_t & meshObj,
 		     CustomBCsFunctorFront && customBCsFront,
 		     CustomBCsFunctorRight && customBCsRight,
 		     CustomBCsFunctorBack && customBCsBack,
-		     [[maybe_unused]] int icFlag = 0 )
+		     const std::unordered_map<std::string, typename mesh_t::scalar_t> & paramsMap)
 {
 
   if (problemEnum != Swe2d::CustomBCs){
@@ -144,7 +139,33 @@ create_problem_eigen(const mesh_t & meshObj,
 			       std::forward<CustomBCsFunctorRight>(customBCsRight),
 			       std::forward<CustomBCsFunctorBack>(customBCsBack));
   return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
-		 std::move(bcFuncs), 9.8 /*gravity*/, -3.0 /*coriolis*/, 0.125 /*pulse mag*/);
+		 std::move(bcFuncs), implswe2d::param_unord_map_to_vector(paramsMap));
+}
+
+template<
+  class mesh_t,
+  class CustomBCsFunctorLeft,
+  class CustomBCsFunctorFront,
+  class CustomBCsFunctorRight,
+  class CustomBCsFunctorBack>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  Swe2d problemEnum,
+			  InviscidFluxReconstruction recEnum,
+			  CustomBCsFunctorLeft && customBCsLeft,
+			  CustomBCsFunctorFront && customBCsFront,
+			  CustomBCsFunctorRight && customBCsRight,
+			  CustomBCsFunctorBack && customBCsBack,
+			  [[maybe_unused]] int icFlag = 0 )
+{
+
+  auto paramsVec = implswe2d::create_vec_with_default_params<typename mesh_t::scalar_t>();
+  auto paramsMap = implswe2d::param_vector_to_unord_map(paramsVec);
+  return create_problem_eigen(meshObj, problemEnum, recEnum,
+			      std::forward<CustomBCsFunctorLeft>(customBCsLeft),
+			      std::forward<CustomBCsFunctorFront>(customBCsFront),
+			      std::forward<CustomBCsFunctorRight>(customBCsRight),
+			      std::forward<CustomBCsFunctorBack>(customBCsBack),
+			      paramsMap);
 }
 #endif
 
@@ -171,10 +192,13 @@ RetType
  typename mesh_t::scalar_t pulseMagnitude)
 {
 
-  return RetType(implswe2d::TagProblemSlipWall{},
-		 meshObj, inviscRecEn,
-		 ::pressiodemoapps::InviscidFluxScheme::Rusanov,
-		 gravity, coriolis, pulseMagnitude);
+  auto paramsVec = implswe2d::create_vec_with_default_params<typename RetType::scalar_type>();
+  paramsVec[implswe2d::param_string_to_index<>("gravity")] = gravity;
+  paramsVec[implswe2d::param_string_to_index<>("coriolis")] = coriolis;
+  paramsVec[implswe2d::param_string_to_index<>("pulseMagnitude")] = pulseMagnitude;
+
+  return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		 ::pressiodemoapps::InviscidFluxScheme::Rusanov, std::move(paramsVec));
 }
 
 }//end namespace pressiodemoapps
