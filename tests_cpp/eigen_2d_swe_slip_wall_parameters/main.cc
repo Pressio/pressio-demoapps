@@ -48,7 +48,6 @@ int main()
 
   {
     std::cout << "\ntesting overload 2\n";
-    auto noop = pda::impl::NoOperation<void>();
     auto appObj = pda::  create_slip_wall_swe_2d_problem_eigen(meshObj, flsc,
 							       12., 4.4, 0.5);
     std::unordered_map<std::string, double> gold;
