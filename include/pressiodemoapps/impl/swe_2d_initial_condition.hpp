@@ -63,14 +63,47 @@ void GaussianPulse(state_type & state,
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
 
+  for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
+    const auto ind = i*numDofPerCell;
+    const scalar_type dx1 = x(i) - pulseX;
+    const scalar_type dy1 = y(i) - pulseY;
+    const auto r = std::sqrt(dx1*dx1 + dy1*dy1);
+    state(ind)   = static_cast<scalar_type>(1) + pulseMag*std::exp( -(r*r) );
+    state(ind+1) = static_cast<scalar_type>(0);
+    state(ind+2) = static_cast<scalar_type>(0);
+  }
+}
+
+template<class state_type, class mesh_t, class scalar_type>
+void DoubleGaussianPulse(state_type & state,
+			 const mesh_t & meshObj,
+			 const scalar_type pulseMag1,
+			 const scalar_type pulseX1,
+			 const scalar_type pulseY1,
+			 const scalar_type pulseMag2,
+			 const scalar_type pulseX2,
+			 const scalar_type pulseY2)
+{
+  constexpr int numDofPerCell = 3;
+  const auto &x= meshObj.viewX();
+  const auto &y= meshObj.viewY();
+  std::cout << "here\n";
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
-    {
-      const auto ind = i*numDofPerCell;
-      auto r = std::sqrt( (x(i) - pulseX)*(x(i) - pulseX) + (y(i) - pulseY)*(y(i) - pulseY) );
-      state(ind)   = static_cast<scalar_type>(1) + pulseMag*std::exp( -(r*r) );
-      state(ind+1) = static_cast<scalar_type>(0);
-      state(ind+2) = static_cast<scalar_type>(0);
-    }
+  {
+    const auto ind = i*numDofPerCell;
+    const scalar_type dx1 = x(i) - pulseX1;
+    const scalar_type dy1 = y(i) - pulseY1;
+    const auto r1 = std::sqrt(dx1*dx1 + dy1*dy1);
+
+    const scalar_type dx2 = x(i) - pulseX2;
+    const scalar_type dy2 = y(i) - pulseY2;
+    const auto r2 = std::sqrt(dx2*dx2 + dy2*dy2);
+    state(ind) = static_cast<scalar_type>(1) +
+		 pulseMag1*std::exp(-(r1*r1)) +
+		 pulseMag2*std::exp(-(r2*r2));
+    state(ind+1) = static_cast<scalar_type>(0);
+    state(ind+2) = static_cast<scalar_type>(0);
+  }
 }
 
 }}//end namespace

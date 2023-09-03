@@ -50,6 +50,7 @@
 #define PRESSIODEMOAPPS_SWE2D_IMPL_HPP_
 
 #include "noop.hpp"
+#include "swe_2d_parametrization_helpers.hpp"
 #include "swe_rusanov_flux_values_function.hpp"
 #include "swe_rusanov_flux_jacobian_function.hpp"
 #include "swe_2d_initial_condition.hpp"
@@ -71,78 +72,15 @@
 namespace pressiodemoapps{
 namespace implswe2d{
 
-constexpr int gravity_i  = 0;
-constexpr int coriolis_i = 1;
-constexpr int pulseMagnitude_i = 2;
-constexpr int pulseX_i = 3;
-constexpr int pulseY_i = 4;
-
-template<class IntT>
-const std::string param_index_to_string(IntT index){
-  if      (index == gravity_i)       { return "gravity"; }
-  else if (index == coriolis_i)      { return "coriolis"; }
-  else if (index == pulseMagnitude_i){ return "pulseMagnitude"; }
-  else if (index == pulseX_i)        { return "pulseX"; }
-  else if (index == pulseY_i)        { return "pulseY"; }
-  return "null";
-}
-
 template<class T = void>
-int param_string_to_index(const std::string & s){
-  if      (s == "gravity")	 { return gravity_i; }
-  else if (s == "coriolis")	 { return coriolis_i; }
-  else if (s == "pulseMagnitude"){ return pulseMagnitude_i; }
-  else if (s == "pulseX")        { return pulseX_i; }
-  else if (s == "pulseY")        { return pulseY_i; }
-  else{ return std::numeric_limits<int>::max(); }
+bool valid_ic_flag(const int flag){
+  return (flag >= 1 && flag <= 2);
 }
-
-template<class ScalarType>
-auto create_vec_with_default_params(){
-  const auto gravity  = static_cast<ScalarType>(9.8);
-  const auto coriolis = static_cast<ScalarType>(-3);
-  const auto pulseMag = static_cast<ScalarType>(1)/8;
-  const auto pulseX   = static_cast<ScalarType>(1);
-  const auto pulseY   = pulseX;
-  return std::vector<ScalarType>({gravity, coriolis, pulseMag, pulseX, pulseY});
-}
-
-template<class ScalarType>
-auto param_unord_map_to_vector(const std::unordered_map<std::string, ScalarType> & map)
-{
-  // first create a vec with default params, and then loop over argument in map
-  // replacing whatever the map sets, while the rest remains default
-  auto result = create_vec_with_default_params<ScalarType>();
-  for (auto it = map.cbegin(); it != map.cend(); ++it){
-    const int index = param_string_to_index<>(it->first);
-    result[index] = it->second;
-  }
-  return result;
-}
-
-template<class ScalarType>
-auto param_vector_to_unord_map(const std::vector<ScalarType> & vec)
-{
-  std::unordered_map<std::string, ScalarType> result;
-  for (std::size_t i=0; i<vec.size(); ++i){
-    result[implswe2d::param_index_to_string(i)] = vec[i];
-  }
-  return result;
-}
-
-template<class ScalarType>
-auto create_map_with_default_params(){
-  const auto vec = create_vec_with_default_params<ScalarType>();
-  return param_vector_to_unord_map(vec);
-}
-
 
 // tags are used inside he public create function: create_problem_...()
-// in the file ../advection_diffusion.hpp
-// to dispatch to the proper problem
-// so add new ones if a new problem is added
+// in the parent file ../swe2d.hpp to dispatch to the proper problem
 struct TagProblemSlipWall{};
-
+struct TagProblemCustomBCs{};
 
 template<
   class MeshType,
@@ -177,12 +115,16 @@ public:
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	   std::vector<scalar_type> && parameters)
+	   const int icIdentifier,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
     : m_probEn(::pressiodemoapps::Swe2d::SlipWall),
+      m_icIdentifier(icIdentifier),
+      m_meshObj(meshObj),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
-      m_meshObj(meshObj),
-      m_parameters(std::move(parameters))
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters)
   {
 
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
@@ -191,17 +133,21 @@ public:
   }
 
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-  EigenApp(const MeshType & meshObj,
-	   ::pressiodemoapps::Swe2d probEn,
+  EigenApp(TagProblemCustomBCs /*tag*/,
+	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEn,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   BCFunctorsHolderType && bcHolder,
-	   std::vector<scalar_type> && parameters)
-    : m_probEn(probEn),
+	   const int icIdentifier,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
+    : m_probEn(::pressiodemoapps::Swe2d::CustomBCs),
+      m_icIdentifier(icIdentifier),
+      m_meshObj(meshObj),
       m_recEn(recEn),
       m_fluxEn(fluxEnum),
-      m_meshObj(meshObj),
-      m_parameters(std::move(parameters)),
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters),
       m_bcFuncsHolder(std::move(bcHolder))
   {
 
@@ -212,32 +158,57 @@ public:
 #endif
 
   scalar_type gravity() const{
-    return m_parameters[gravity_i];
+    return m_phys_parameters[gravity_i];
   }
 
   scalar_type coriolis() const{
-    return m_parameters[coriolis_i];
+    return m_phys_parameters[coriolis_i];
   }
 
   scalar_type queryParameter(const std::string & pname) const {
-    const int i = param_string_to_index(pname);
-    assert(i < (int) m_parameters.size());
-    return m_parameters[i];
+    if (is_physical(pname)){
+      //assert(valid_phys_parameter_name<>(pname));
+      return m_phys_parameters[phys_param_string_to_index(pname)];
+    }
+    else{
+      //assert(valid_ic_parameter_name<>(m_icIdentifier, pname));
+      return m_ic_parameters[ic_param_string_to_index(m_icIdentifier, pname)];
+    }
   }
 
   state_type initialCondition() const
   {
     state_type initialState(m_numDofStencilMesh);
+
     switch(m_probEn){
       case ::pressiodemoapps::Swe2d::SlipWall:
       case ::pressiodemoapps::Swe2d::CustomBCs:
       {
-	GaussianPulse(initialState, m_meshObj.get(),
-		      m_parameters[pulseMagnitude_i],
-		      m_parameters[pulseX_i], m_parameters[pulseY_i]);
-      }
-    };
+	if( m_icIdentifier == 1 ){
+	  GaussianPulse(initialState, m_meshObj.get(),
+			m_ic_parameters[ic1_pulseMag_i],
+			m_ic_parameters[ic1_pulseX_i],
+			m_ic_parameters[ic1_pulseY_i]);
+	}
 
+	else if( m_icIdentifier == 2){
+	  DoubleGaussianPulse(initialState, m_meshObj.get(),
+			      m_ic_parameters[ic2_pulseMag1_i],
+			      m_ic_parameters[ic2_pulseX1_i],
+			      m_ic_parameters[ic2_pulseY1_i],
+			      m_ic_parameters[ic2_pulseMag2_i],
+			      m_ic_parameters[ic2_pulseX2_i],
+			      m_ic_parameters[ic2_pulseY2_i]);
+	}
+	else{
+	  throw std::runtime_error("SWE2d: invalid IC identifier");
+	}
+	return initialState;
+      }
+
+      default:
+	throw std::runtime_error("swe2dimpl: invalid problem enum");
+    };
     return initialState;
   }
 
@@ -554,7 +525,7 @@ private:
 		    /* end args for velo */
 		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gravity_i], fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -567,7 +538,7 @@ private:
 		    /* end args for velo */
 		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gravity_i], fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -647,7 +618,7 @@ private:
 		       /* end args for velo */
 		       J, xAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
+		       m_fluxEn, normalX_, m_phys_parameters[gravity_i], fluxL, fluxR,
 		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -659,7 +630,7 @@ private:
 		       /* end args for velo */
 		       J, yAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
+		       m_fluxEn, normalY_, m_phys_parameters[gravity_i], fluxB, fluxF,
 		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -758,7 +729,7 @@ private:
 
     velo_functor_type funcVeloX(V, m_meshObj.get().dxInv(),
 				/* end args for velo */
-				m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
+				m_fluxEn, normalX_, m_phys_parameters[gravity_i], fluxL, fluxR,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -767,7 +738,7 @@ private:
 
     velo_functor_type funcVeloY(V, m_meshObj.get().dyInv(),
 				/* end args for velo */
-				m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
+				m_fluxEn, normalY_, m_phys_parameters[gravity_i], fluxB, fluxF,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -798,7 +769,7 @@ private:
 
     jac_functor_type funcJacX(J, xAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalX_, m_parameters[gravity_i],
+			      m_fluxEn, normalX_, m_phys_parameters[gravity_i],
 			      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -808,7 +779,7 @@ private:
 
     jac_functor_type funcJacY(J, yAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalY_, m_parameters[gravity_i],
+			      m_fluxEn, normalY_, m_phys_parameters[gravity_i],
 			      fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -915,7 +886,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gravity_i], fluxL, fluxR,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -924,7 +895,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gravity_i], fluxB, fluxF,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn),stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -973,7 +944,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_parameters[gravity_i], fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gravity_i], fluxL, fluxR,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -982,7 +953,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_parameters[gravity_i], fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gravity_i], fluxB, fluxF,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -1007,7 +978,7 @@ private:
 					index_t smPt) const
   {
 
-    const auto coriolis = m_parameters[coriolis_i];
+    const auto coriolis = m_phys_parameters[coriolis_i];
     const auto vIndex = smPt*numDofPerCell;
     const auto uIndex = m_meshObj.get().graph()(smPt, 0)*numDofPerCell;
     V(vIndex+1) -= coriolis*U(uIndex+2)/U(uIndex);
@@ -1021,7 +992,7 @@ private:
 						   index_t smPt) const
   {
 
-    const auto coriolis = m_parameters[coriolis_i];
+    const auto coriolis = m_phys_parameters[coriolis_i];
     const auto vIndex = smPt*numDofPerCell;
     const index_t col_i = m_meshObj.get().graph()(smPt, 0)*numDofPerCell;
     V(vIndex+1) -= coriolis*U(col_i+2)/U(col_i);
@@ -1047,9 +1018,14 @@ private:
 
 protected:
   ::pressiodemoapps::Swe2d m_probEn;
+  int m_icIdentifier = 1;
+
+  std::reference_wrapper<const MeshType> m_meshObj;
   ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
-  std::reference_wrapper<const MeshType> m_meshObj;
+  std::vector<scalar_type> m_ic_parameters;
+  std::vector<scalar_type> m_phys_parameters;
+  BCFunctorsHolderType m_bcFuncsHolder = {};
 
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
@@ -1058,13 +1034,10 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  // gravity, coriolis, pulseMagnitude, pulseCenterX, pulseCenterY
-  std::vector<scalar_type> m_parameters;
   std::array<scalar_type, 2> normalX_{1, 0};
   std::array<scalar_type, 2> normalY_{0, 1};
 
   mutable std::array<scalar_type, 3> m_bcCellJacFactors;
-  BCFunctorsHolderType m_bcFuncsHolder = {};
 };
 
 template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;
