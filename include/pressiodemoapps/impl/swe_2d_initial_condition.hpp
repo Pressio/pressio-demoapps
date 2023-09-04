@@ -87,7 +87,6 @@ void DoubleGaussianPulse(state_type & state,
   constexpr int numDofPerCell = 3;
   const auto &x= meshObj.viewX();
   const auto &y= meshObj.viewY();
-  std::cout << "here\n";
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
   {
     const auto ind = i*numDofPerCell;
