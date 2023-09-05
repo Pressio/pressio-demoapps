@@ -17,7 +17,7 @@ int main()
   const auto recEnum   = pda::InviscidFluxReconstruction::FirstOrder;
 #endif
 
-  auto appObj= pda::create_cross_shock_problem_eigen(meshObj, recEnum, 0.1, 10., 1.);
+  auto appObj= pda::create_cross_shock_problem_eigen(meshObj, recEnum);// 0.1, 10., 1.);
 
   using app_t = decltype(appObj);
   using state_t = typename app_t::state_type;

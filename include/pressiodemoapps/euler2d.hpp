@@ -84,10 +84,9 @@ namespace pressiodemoapps{
 // ----------------------------------------------------------
 // create a default problem
 // ----------------------------------------------------------
-
 template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
+  class MeshType,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType>>
   >
 RetType
 // bindings need unique nameing or we get error associated with overloads
@@ -96,14 +95,58 @@ RetType
 #else
   create_problem_eigen
 #endif
-(const mesh_t & meshObj,
+(const MeshType & meshObj,
  Euler2d problemEnum,
  InviscidFluxReconstruction recEnum)
 {
+  // currently only normal shock allow user IC parametrization
+  // while the other problem are hard-wired
+  using sc_t = typename MeshType::scalar_t;
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
+
   return RetType(meshObj, problemEnum, recEnum,
-		 InviscidFluxScheme::Rusanov, 1);
+		 InviscidFluxScheme::Rusanov, 1,
+		 defaultICParams,
+		 impleuler2d::defaultPhysicalParams<sc_t>);
 }
 
+// ----------------------------------------------------------
+// create a default problem with specific initial condition
+// ----------------------------------------------------------
+
+template<
+  class MeshType,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType>>
+  >
+RetType
+// bindings need unique nameing or we get error associated with overloads
+#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+  create_euler_2d_problem_ov1_for_py
+#else
+  create_problem_eigen
+#endif
+(const MeshType & meshObj,
+ Euler2d problemEnum,
+ InviscidFluxReconstruction recEnum,
+ int icFlag)
+{
+
+  // currently only normal shock allow user IC parametrization
+  // while the other problem are hard-wired
+  using sc_t = typename MeshType::scalar_t;
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
+
+  return RetType(meshObj, problemEnum, recEnum,
+		 InviscidFluxScheme::Rusanov, icFlag,
+		 defaultICParams,
+		 impleuler2d::defaultPhysicalParams<sc_t>);
+}
+
+//
+// custom BCs
+//
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 template<class MeshType, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
 auto create_problem_eigen(const MeshType & meshObj,
@@ -113,60 +156,83 @@ auto create_problem_eigen(const MeshType & meshObj,
 			  BCsFuncF && BCsFront,
 			  BCsFuncR && BCsRight,
 			  BCsFuncB && BCsBack,
-			  const int icId = 1)
+			  const int icFlag = 1)
 {
 
-  if (problemEnum != Euler2d::Riemann &&
-      problemEnum != Euler2d::NormalShock)
-  {
-    throw std::runtime_error("Euler2d: Euler2d with custom BCs is only valid for Euler2d::{Riemann, NormalShock}");
+  if (problemEnum != Euler2d::Riemann && problemEnum != Euler2d::NormalShock){
+    throw std::runtime_error("Euler2d: custom BCs only valid for Euler2d::{Riemann, NormalShock}");
+  }
+  if (!impleuler2d::valid_ic_flag<>(problemEnum, icFlag)){
+    throw std::runtime_error("Euler2d: invalid icFlag for the given problem enum");
   }
   if (recEnum != InviscidFluxReconstruction::FirstOrder){
     throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
   }
 
+  using sc_t = typename MeshType::scalar_t;
   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
   using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
+
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
 
   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
 			       std::forward<BCsFuncF>(BCsFront),
 			       std::forward<BCsFuncR>(BCsRight),
 			       std::forward<BCsFuncB>(BCsBack));
   return return_type(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
-		     std::move(bcFuncs), icId);
+		     std::move(bcFuncs), icFlag,
+		     defaultICParams,
+		     impleuler2d::defaultPhysicalParams<sc_t>);
 }
-#endif
 
-// ----------------------------------------------------------
-// create a default problem with specific initial condition
-// ----------------------------------------------------------
-
-template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
-  >
-RetType
-// bindings need unique nameing or we get error associated with overloads
-#if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-  create_euler_2d_problem_ov1_for_py
-#else
-  create_problem_eigen
-#endif
-(const mesh_t & meshObj,
- Euler2d problemEnum,
- InviscidFluxReconstruction recEnum,
- int icId)
+template<class MeshType, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
+auto create_problem_eigen(const MeshType & meshObj,
+			  Euler2d problemEnum,
+			  InviscidFluxReconstruction recEnum,
+			  BCsFuncL && BCsLeft,
+			  BCsFuncF && BCsFront,
+			  BCsFuncR && BCsRight,
+			  BCsFuncB && BCsBack,
+			  const int icFlag,
+			  const std::unordered_map<std::string, typename MeshType::scalar_t> & userParams)
 {
-  return RetType(meshObj, problemEnum, recEnum,
-		 InviscidFluxScheme::Rusanov, icId);
+
+  if (problemEnum != Euler2d::Riemann && problemEnum != Euler2d::NormalShock){
+    throw std::runtime_error("Euler2d: custom BCs only valid for Euler2d::{Riemann, NormalShock}");
+  }
+  if (!impleuler2d::valid_ic_flag<>(problemEnum, icFlag)){
+    throw std::runtime_error("Euler2d: invalid icFlag for the given problem enum");
+  }
+  if (recEnum != InviscidFluxReconstruction::FirstOrder){
+    throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
+  }
+
+  using sc_t = typename MeshType::scalar_t;
+  using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
+  using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
+
+  auto physParamsVec = impleuler2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec = (problemEnum == Euler2d::NormalShock)
+    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
+  impleuler2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
+
+  BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
+			       std::forward<BCsFuncF>(BCsFront),
+			       std::forward<BCsFuncR>(BCsRight),
+			       std::forward<BCsFuncB>(BCsBack));
+  return return_type(meshObj, problemEnum, recEnum,
+		     InviscidFluxScheme::Rusanov, std::move(bcFuncs),
+		     icFlag, icParamsVec, physParamsVec);
 }
+#endif
 
 
 // this crossshock one should really just be experimental
 // and it is not documented on the website
 template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<mesh_t>>
+  class MeshType,
+  class RetType = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType>>
   >
 RetType
 // bindings need unique nameing or we get error associated with overloads
@@ -175,17 +241,40 @@ RetType
 #else
   create_cross_shock_problem_eigen
 #endif
-(const mesh_t & meshObj,
+(const MeshType & meshObj,
  InviscidFluxReconstruction recEnum,
- typename mesh_t::scalar_t density,
- typename mesh_t::scalar_t inletXVel,
- typename mesh_t::scalar_t bottomYVel)
+ typename MeshType::scalar_t density,
+ typename MeshType::scalar_t inletXVel,
+ typename MeshType::scalar_t bottomYVel)
 {
-  return RetType(impleuler2d::TagCrossShock{},
-		 meshObj, recEnum,
-		 InviscidFluxScheme::Rusanov, 1,
-		 inletXVel, bottomYVel, density);
+
+  using sc_t = typename MeshType::scalar_t;
+  auto physParamsVec = impleuler2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec   = impleuler2d::defaultInitCondParams<sc_t>;
+
+  const auto i1 = impleuler2d::ic_param_string_to_index<>(Euler2d::CrossShock, 1, "crossShockDensity");
+  const auto i2 = impleuler2d::ic_param_string_to_index<>(Euler2d::CrossShock, 1, "crossShockInletXVel");
+  const auto i3 = impleuler2d::ic_param_string_to_index<>(Euler2d::CrossShock, 1, "crossShockBottomYVel");
+  icParamsVec[i1] = density;
+  icParamsVec[i2] = inletXVel;
+  icParamsVec[i3] = bottomYVel;
+
+  return RetType(impleuler2d::TagCrossShock{}, meshObj, recEnum,
+		 InviscidFluxScheme::Rusanov, 1, icParamsVec, physParamsVec);
 }
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class MeshType>
+auto create_cross_shock_problem_eigen(const MeshType & meshObj,
+				       InviscidFluxReconstruction recEnum)
+{
+  using sc_t = typename MeshType::scalar_t;
+  using result_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType>>;
+  return result_type(impleuler2d::TagCrossShock{}, meshObj, recEnum,
+		     InviscidFluxScheme::Rusanov, 1,
+		     impleuler2d::defaultInitCondParams<sc_t>,
+		     impleuler2d::defaultPhysicalParams<sc_t>);
+}
+#endif
 
 }//end namespace pressiodemoapps
 #endif

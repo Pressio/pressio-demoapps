@@ -53,6 +53,7 @@
 #include "euler_rankine_hugoniot.hpp"
 #include "euler_rusanov_flux_values_function.hpp"
 #include "euler_rusanov_flux_jacobian_function.hpp"
+#include "euler_2d_parametrization_helpers.hpp"
 #include "euler_2d_initial_condition.hpp"
 #include "euler_2d_ghost_filler_neumann.hpp"
 #include "euler_2d_ghost_filler_sedov2d_sym.hpp"
@@ -75,6 +76,23 @@
 
 namespace pressiodemoapps{
 namespace impleuler2d{
+
+template<class T = void>
+bool valid_ic_flag(const Euler2d probEn, const int flag)
+{
+  switch(probEn){
+  case Euler2d::PeriodicSmooth:       return flag == 1;
+  case Euler2d::KelvinHelmholtz:      return flag == 1;
+  case Euler2d::SedovFull:            return flag == 1;
+  case Euler2d::SedovSymmetry:        return flag == 1;
+  case Euler2d::Riemann:              return (flag == 1 || flag == 2);
+  case Euler2d::NormalShock:          return flag == 1;
+  case Euler2d::DoubleMachReflection: return flag == 1;
+  case Euler2d::CrossShock:           return flag == 1;
+  default: return false;
+  }
+}
+
 
 // tags are used inside he public create function: create_problem_...()
 // to dispatch to the proper problem
@@ -114,9 +132,13 @@ public:
 	   ::pressiodemoapps::Euler2d probEnum,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	   int icIdentifier)
+	   const int icIdentifier,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
     : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
-      m_recEn(recEnum), m_fluxEn(fluxEnum)
+      m_recEn(recEnum), m_fluxEn(fluxEnum),
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -129,9 +151,14 @@ public:
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   BCFunctorsHolderType && bcHolder,
-	   int icIdentifier)
+	   const int icIdentifier,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
     : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
-      m_recEn(recEnum), m_fluxEn(fluxEnum), m_bcFuncsHolder(std::move(bcHolder))
+      m_recEn(recEnum), m_fluxEn(fluxEnum),
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters),
+      m_bcFuncsHolder(std::move(bcHolder))
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -143,14 +170,15 @@ public:
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
-	   int icIdentifier,
-	   scalar_type inletXVel,
-	   scalar_type bottomYVel,
-	   scalar_type density)
+	   const int icIdentifier,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
+	   // scalar_type inletXVel,, scalar_type bottomYVel, scalar_type density)
     : m_probEn(::pressiodemoapps::Euler2d::CrossShock),
       m_icIdentifier(icIdentifier), m_meshObj(meshObj),
       m_recEn(recEnum), m_fluxEn(fluxEnum),
-      m_crossshock_params{density, inletXVel, bottomYVel}
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -158,11 +186,20 @@ public:
   }
 
   scalar_type gamma() const{
-    return m_gamma;
+    return m_phys_parameters[gamma_i];
   }
 
   state_type initialCondition() const{
     return initialConditionImpl();
+  }
+
+  scalar_type queryParameter(const std::string & pname) const {
+    if (is_physical(pname)){
+      return m_phys_parameters[phys_param_string_to_index(pname)];
+    }
+    else{
+      return m_ic_parameters[ic_param_string_to_index(m_probEn, m_icIdentifier, pname)];
+    }
   }
 
 public:
@@ -344,37 +381,38 @@ private:
 
   state_type initialConditionImpl() const
   {
+    const auto gamma = m_phys_parameters[gamma_i];
     state_type initialState(m_numDofStencilMesh);
 
     switch(m_probEn)
       {
       case ::pressiodemoapps::Euler2d::PeriodicSmooth:{
-	sin2dEulerIC(initialState, m_meshObj.get(), m_gamma);
+	sin2dEulerIC(initialState, m_meshObj.get(),  gamma);
 	return initialState;
       }
 
       case ::pressiodemoapps::Euler2d::KelvinHelmholtz:{
-	KelvinHelmholtzIC(initialState, m_meshObj.get(), m_gamma);
+	KelvinHelmholtzIC(initialState, m_meshObj.get(), gamma);
 	return initialState;
       }
 
       case ::pressiodemoapps::Euler2d::SedovFull:{
-	sedov2dIC(initialState, m_meshObj.get(), m_gamma);
+	sedov2dIC(initialState, m_meshObj.get(), gamma);
 	return initialState;
       }
 
       case ::pressiodemoapps::Euler2d::SedovSymmetry:{
-	sedov2dsymmetryIC(initialState, m_meshObj.get(), m_gamma);
+	sedov2dsymmetryIC(initialState, m_meshObj.get(), gamma);
 	return initialState;
       }
 
       case ::pressiodemoapps::Euler2d::Riemann:{
 	if( m_icIdentifier == 1){
-	  riemann2dIC1(initialState, m_meshObj.get(), m_gamma);
+	  riemann2dIC1(initialState, m_meshObj.get(), gamma);
 	  return initialState;
 	}
 	else if (m_icIdentifier == 2){
-	  riemann2dIC2(initialState, m_meshObj.get(), m_gamma);
+	  riemann2dIC2(initialState, m_meshObj.get(), gamma);
 	  return initialState;
 	}
 	else{
@@ -383,12 +421,13 @@ private:
       }
 
       case ::pressiodemoapps::Euler2d::NormalShock:{
-	normalShock2dIC(initialState, m_meshObj.get(), m_gamma);
+	normalShock2dIC(initialState, m_meshObj.get(), gamma,
+			m_ic_parameters[icNormalShock_mach_i]);
 	return initialState;
       }
 
       case ::pressiodemoapps::Euler2d::DoubleMachReflection:{
-	doubleMachReflection2dIC(initialState, m_meshObj.get(), m_gamma);
+	doubleMachReflection2dIC(initialState, m_meshObj.get(), gamma);
 	return initialState;
       }
 
@@ -397,8 +436,11 @@ private:
       }
 
       case ::pressiodemoapps::Euler2d::CrossShock:{
-	crossShockIC(initialState, m_meshObj.get(), m_gamma,
-		     m_crossshock_params[0], m_crossshock_params[1]);
+	crossShockIC(initialState, m_meshObj.get(), gamma,
+		     m_ic_parameters[icCrossShock_density_i],
+		     m_ic_parameters[icCrossShock_inletXVel_i]);
+
+	//m_crossshock_params[0], m_crossshock_params[1]);
 	return initialState;
       }
       };
@@ -452,7 +494,7 @@ private:
       using ghost_filler_t = NormalShock2dGhostFiller<
 	U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, U,
-			 currentTime, m_gamma, m_meshObj.get(),
+			 currentTime, m_phys_parameters[gamma_i], m_meshObj.get(),
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
 
@@ -470,7 +512,7 @@ private:
       using ghost_filler_t = DoubleMachReflection2dGhostFiller<
 	U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, U,
-			 currentTime, m_gamma, m_meshObj.get(),
+			 currentTime, m_phys_parameters[gamma_i], m_meshObj.get(),
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
 
@@ -487,10 +529,10 @@ private:
     {
       using ghost_filler_t  = CrossShock2dGhostFiller<
 	U_t, MeshType, ghost_container_type>;
-      ghost_filler_t ghF(stencilSize, U, m_gamma,
-			 m_crossshock_params[0],
-			 m_crossshock_params[1],
-			 m_crossshock_params[2],
+      ghost_filler_t ghF(stencilSize, U, m_phys_parameters[gamma_i],
+			 m_ic_parameters[icCrossShock_density_i],
+			 m_ic_parameters[icCrossShock_inletXVel_i],
+			 m_ic_parameters[icCrossShock_bottomYVel_i],
 			 m_meshObj.get(),
 			 m_ghostLeft, m_ghostFront,
 			 m_ghostRight, m_ghostBack);
@@ -631,7 +673,7 @@ private:
 		    /* end args for velo */
 		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalX_, m_gamma, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gamma_i], fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -644,7 +686,7 @@ private:
 		    /* end args for velo */
 		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
-		    m_fluxEn, normalY_, m_gamma, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gamma_i], fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
@@ -723,7 +765,7 @@ private:
 		       /* end args for velo */
 		       J, xAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalX_, m_gamma, fluxL, fluxR,
+		       m_fluxEn, normalX_, m_phys_parameters[gamma_i], fluxL, fluxR,
 		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -735,7 +777,7 @@ private:
 		       /* end args for velo */
 		       J, yAxis, m_meshObj.get(),
 		       /* end args for jac */
-		       m_fluxEn, normalY_, m_gamma, fluxB, fluxF,
+		       m_fluxEn, normalY_, m_phys_parameters[gamma_i], fluxB, fluxF,
 		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		       /* end args for flux */
 		       toReconstructionScheme(m_recEn), stencilVals,
@@ -831,7 +873,7 @@ private:
 
     velo_functor_type funcVeloX(V, m_meshObj.get().dxInv(),
 				/* end args for velo */
-				m_fluxEn, normalX_, m_gamma, fluxL, fluxR,
+				m_fluxEn, normalX_, m_phys_parameters[gamma_i], fluxL, fluxR,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -840,7 +882,7 @@ private:
 
     velo_functor_type funcVeloY(V, m_meshObj.get().dyInv(),
 				/* end args for velo */
-				m_fluxEn, normalY_, m_gamma, fluxB, fluxF,
+				m_fluxEn, normalY_, m_phys_parameters[gamma_i], fluxB, fluxF,
 				/* end args for flux */
 				toReconstructionScheme(m_recEn), stencilValsForV,
 				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -871,7 +913,7 @@ private:
 
     jac_functor_type funcJacX(J, xAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalX_, m_gamma,
+			      m_fluxEn, normalX_, m_phys_parameters[gamma_i],
 			      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -881,7 +923,7 @@ private:
 
     jac_functor_type funcJacY(J, yAxis, m_meshObj.get(),
 			      /* end args for jac */
-			      m_fluxEn, normalY_, m_gamma,
+			      m_fluxEn, normalY_, m_phys_parameters[gamma_i],
 			      fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 			      /* end args for flux */
 			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
@@ -960,7 +1002,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_gamma, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gamma_i], fluxL, fluxR,
 		    /* end args for flux */
 		    xAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -969,7 +1011,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_gamma, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gamma_i], fluxB, fluxF,
 		    /* end args for flux */
 		    yAxis, toReconstructionScheme(m_recEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
@@ -1028,7 +1070,7 @@ private:
 
     functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalX_, m_gamma, fluxL, fluxR,
+		    m_fluxEn, normalX_, m_phys_parameters[gamma_i], fluxL, fluxR,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn), stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -1037,7 +1079,7 @@ private:
 
     functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    m_fluxEn, normalY_, m_gamma, fluxB, fluxF,
+		    m_fluxEn, normalY_, m_phys_parameters[gamma_i], fluxB, fluxF,
 		    /* end args for flux */
 		    toReconstructionScheme(m_recEn), stencilVals,
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
@@ -1213,11 +1255,10 @@ protected:
   ::pressiodemoapps::Euler2d m_probEn;
   int m_icIdentifier = 1;
 
-  scalar_type m_gamma = static_cast<scalar_type>(1.4);
-
   std::reference_wrapper<const MeshType> m_meshObj;
   ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
+  std::vector<scalar_type> m_ic_parameters;
   std::vector<scalar_type> m_phys_parameters;
   BCFunctorsHolderType m_bcFuncsHolder = {};
 
@@ -1233,9 +1274,6 @@ protected:
 
   std::array<scalar_type, 2> normalX_{1, 0};
   std::array<scalar_type, 2> normalY_{0, 1};
-
-  // for cross-shock problem: density, inletXVel, bottomYVel
-  std::array<scalar_type, 3> m_crossshock_params;
 
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
 };

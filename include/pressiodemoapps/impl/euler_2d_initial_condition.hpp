@@ -346,14 +346,14 @@ void riemann2dIC2(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void normalShock2dIC(state_type & state,
 		     const mesh_t & meshObj,
-		     const scalar_type gamma)
+		     const scalar_type gamma,
+		     const scalar_type machShock)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one  = static_cast<scalar_type>(1);
   constexpr auto six  = static_cast<scalar_type>(6);
 
-  constexpr scalar_type machShock{9};
   constexpr auto angle = zero;
   constexpr auto xShock = one/six;
 
