@@ -115,11 +115,8 @@ public:
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   int icIdentifier)
-    : m_meshObj(meshObj),
-      m_probEn(probEnum),
-      m_recEn(recEnum),
-      m_fluxEn(fluxEnum),
-      m_icIdentifier(icIdentifier)
+    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
+      m_recEn(recEnum), m_fluxEn(fluxEnum)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -133,12 +130,8 @@ public:
 	   ::pressiodemoapps::InviscidFluxScheme fluxEnum,
 	   BCFunctorsHolderType && bcHolder,
 	   int icIdentifier)
-    : m_meshObj(meshObj),
-      m_probEn(probEnum),
-      m_recEn(recEnum),
-      m_fluxEn(fluxEnum),
-      m_icIdentifier(icIdentifier),
-      m_bcFuncsHolder(std::move(bcHolder))
+    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
+      m_recEn(recEnum), m_fluxEn(fluxEnum), m_bcFuncsHolder(std::move(bcHolder))
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -154,11 +147,9 @@ public:
 	   scalar_type inletXVel,
 	   scalar_type bottomYVel,
 	   scalar_type density)
-    : m_meshObj(meshObj),
-      m_probEn(::pressiodemoapps::Euler2d::CrossShock),
-      m_recEn(recEnum),
-      m_fluxEn(fluxEnum),
-      m_icIdentifier(icIdentifier),
+    : m_probEn(::pressiodemoapps::Euler2d::CrossShock),
+      m_icIdentifier(icIdentifier), m_meshObj(meshObj),
+      m_recEn(recEnum), m_fluxEn(fluxEnum),
       m_crossshock_params{density, inletXVel, bottomYVel}
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
@@ -1219,22 +1210,22 @@ private:
   }
 
 protected:
+  ::pressiodemoapps::Euler2d m_probEn;
+  int m_icIdentifier = 1;
+
   scalar_type m_gamma = static_cast<scalar_type>(1.4);
 
   std::reference_wrapper<const MeshType> m_meshObj;
-  ::pressiodemoapps::Euler2d m_probEn;
   ::pressiodemoapps::InviscidFluxReconstruction m_recEn;
   ::pressiodemoapps::InviscidFluxScheme m_fluxEn;
-
-  // which initial condition to use by default
-  int m_icIdentifier = 1;
+  std::vector<scalar_type> m_phys_parameters;
+  BCFunctorsHolderType m_bcFuncsHolder = {};
 
   // note that dof refers to the degress of freedom,
   // which is NOT same as grid points.
   // SampleMesh_ identifies the velocity/residual locations
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
-
   mutable ghost_container_type m_ghostLeft;
   mutable ghost_container_type m_ghostFront;
   mutable ghost_container_type m_ghostRight;
@@ -1247,8 +1238,6 @@ protected:
   std::array<scalar_type, 3> m_crossshock_params;
 
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
-
-  BCFunctorsHolderType m_bcFuncsHolder = {};
 };
 
 template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;
