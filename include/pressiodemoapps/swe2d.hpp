@@ -74,149 +74,236 @@ enum class Swe2d{
 
 namespace pressiodemoapps{
 
+/*
+create_problem_eigen(meshObj, Swe2d en, InviscidFluxReconstruction);
+
+  - default init condition, default coefficients
+
+create_problem_eigen(meshObj, Swe2d en, InviscidFluxReconstruction, IC = 1);
+
+  - IC: integer specifying the init condition
+    - IC = 1: single gaussian pulse, IC = 2: two gaussian pulses
+  - default parameters
+
+create_problem_eigen(meshObj, Swe2d en, InviscidFluxReconstruction, IC, params);
+
+  - IC: integer specifying the init condition
+    - IC = 1: single gaussian pulse
+    - IC = 2: two gaussian pulses
+  - params: can contain both physical and params customizing the IC
+    - if IC = 1, user can set any of {gravity, coriolis, mag and loc of pulse}
+    - if IC = 2, user can set any of {gravity, coriolis, mag and loc for both pulses}
+    if a param is not set, we use default value
+
+create_problem_eigen(meshObj, Swe2d en, InviscidFluxReconstruction, customBCs, IC = 0);
+
+  - IC: integer specifying the init condition
+    - IC = 1: single gaussian pulse, IC = 2: two gaussian pulses
+  - default parameters
+  - customBCs
+
+create_problem_eigen(meshObj, Swe2d en, InviscidFluxReconstruction, customBCs, IC, params);
+
+  - IC: integer specifying the init condition
+    - IC = 1: single gaussian pulse, IC = 2: two gaussian pulses
+  - params: can contain both physical and params customizing the IC
+    - if IC = 1, user can set any of {gravity, coriolis, mag and loc of pulse}
+    - if IC = 2, user can set any of {gravity, coriolis, mag and loc for both pulses}
+    if a param is not set, we use default value
+  - customBCs
+*/
+
+
 // ----------------------------------------------------------
-// create default problem
+// default problem:
+//	default init condition, default phys coefficients
 // ----------------------------------------------------------
 
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
-  >
-RetType create_swe2d_problem_default_for_py(const mesh_t & meshObj,
+template<class MeshType, class ReturnType>
+ReturnType create_swe2d_problem_default_for_py(const MeshType & meshObj,
 					    Swe2d problemEnum,
 					    InviscidFluxReconstruction inviscRecEn)
 {
-  if (problemEnum == Swe2d::SlipWall){
-    return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
-		   ::pressiodemoapps::InviscidFluxScheme::Rusanov,
-		   implswe2d::create_vec_with_default_params<typename RetType::scalar_type>());
-  }
-  else{
-    throw std::runtime_error("2D swe: invalid problem enum");
-  }
-}
 
+  if (problemEnum != Swe2d::SlipWall){
+    throw std::runtime_error("2D swe: create_swe2d_problem_default_for_py: only supports Swed2d::SlipWall");
+  }
+
+  using sc_t = typename MeshType::scalar_t;
+  const int icFlag = 1;
+  return ReturnType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		    InviscidFluxScheme::Rusanov, icFlag,
+		    implswe2d::defaultInitCondParams<sc_t>,
+		    implswe2d::defaultPhysicalParams<sc_t>);
+}
 #else
 
-template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
-  >
-RetType
-create_problem_eigen(const mesh_t & meshObj,
-		     Swe2d problemEnum,
-		     InviscidFluxReconstruction inviscRecEn,
-		     const std::unordered_map<std::string, typename mesh_t::scalar_t> & paramsMap
-		       = implswe2d::create_map_with_default_params<typename mesh_t::scalar_t>())
+template<class MeshType>
+auto create_problem_eigen(const MeshType & meshObj,
+			  Swe2d problemEnum,
+			  InviscidFluxReconstruction inviscRecEn,
+			  const int icFlag = 1)
 {
+  // preconditions
+  if (problemEnum != Swe2d::SlipWall){
+    throw std::runtime_error("2D swe: create_problem_eigen: overload only supporting Swed2d::SlipWall");
+  }
+  if (!implswe2d::valid_ic_flag<>(icFlag)){
+    throw std::runtime_error("2D swe: create_problem_eigen: for Swed2d::SlipWall, invalid icFlag");
+  }
 
-  if (problemEnum == Swe2d::SlipWall){
-    auto paramsVec = implswe2d::param_unord_map_to_vector(paramsMap);
-    return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
-		   ::pressiodemoapps::InviscidFluxScheme::Rusanov, std::move(paramsVec));
+  // create problem
+  using sc_t = typename MeshType::scalar_t;
+  using return_type = PublicProblemEigenMixinCpp<implswe2d::EigenApp<MeshType>>;
+  return return_type(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		     InviscidFluxScheme::Rusanov, icFlag,
+		     implswe2d::defaultInitCondParams<sc_t>,
+		     implswe2d::defaultPhysicalParams<sc_t>);
+}
+
+template<class MeshType>
+auto create_problem_eigen(const MeshType & meshObj,
+			  Swe2d problemEnum,
+			  InviscidFluxReconstruction inviscRecEn,
+			  const int icFlag,
+			  const std::unordered_map<std::string, typename MeshType::scalar_t> & userParams)
+{
+  // preconditions
+  if (problemEnum != Swe2d::SlipWall){
+    throw std::runtime_error("2D swe: create_problem_eigen: overload only supporting Swed2d::SlipWall");
   }
-  else{
-    throw std::runtime_error("2D swe: invalid problem enum");
+  if (!implswe2d::valid_ic_flag<>(icFlag)){
+    throw std::runtime_error("2D swe: create_problem_eigen: for Swed2d::SlipWall, invalid icFlag");
   }
+
+  if (!implswe2d::contains_valid_parameter_names(userParams)){
+    throw std::runtime_error("2D swe: create_problem_eigen: one or more params in user-provided map is invalid");
+  }
+
+  using sc_t = typename MeshType::scalar_t;
+  using return_type = PublicProblemEigenMixinCpp<implswe2d::EigenApp<MeshType>>;
+
+  // create vec with phys and IC params and then replace those with user defined ones
+  auto physParamsVec = implswe2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec   = implswe2d::defaultInitCondParams<sc_t>;
+  implswe2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, icFlag, userParams);
+
+  return return_type(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		     InviscidFluxScheme::Rusanov, icFlag, icParamsVec, physParamsVec);
 }
 #endif
 
 #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-template<
-  class mesh_t,
-  class CustomBCsFunctorLeft,
-  class CustomBCsFunctorFront,
-  class CustomBCsFunctorRight,
-  class CustomBCsFunctorBack,
-  class BCFunctorsHolderType = impl::CustomBCsHolder<
-    CustomBCsFunctorLeft, CustomBCsFunctorFront,
-    CustomBCsFunctorRight, CustomBCsFunctorBack>,
-  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t, BCFunctorsHolderType>>
-  >
-RetType
-create_problem_eigen(const mesh_t & meshObj,
-		     Swe2d problemEnum,
-		     InviscidFluxReconstruction recEnum,
-		     CustomBCsFunctorLeft && customBCsLeft,
-		     CustomBCsFunctorFront && customBCsFront,
-		     CustomBCsFunctorRight && customBCsRight,
-		     CustomBCsFunctorBack && customBCsBack,
-		     const std::unordered_map<std::string, typename mesh_t::scalar_t> & paramsMap)
+template<class MeshType, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
+auto create_problem_eigen(const MeshType & meshObj,
+			  Swe2d problemEnum,
+			  InviscidFluxReconstruction recEnum,
+			  BCsFuncL && BCsLeft,
+			  BCsFuncF && BCsFront,
+			  BCsFuncR && BCsRight,
+			  BCsFuncB && BCsBack,
+			  const int icFlag = 1)
 {
 
   if (problemEnum != Swe2d::CustomBCs){
-    throw std::runtime_error("Swe2d: custom BCs only supported for Swe2d::CustomBCs");
+    throw std::runtime_error("2D swe: passing custom BCs requires Swed2d::CustomBCs");
   }
-  if (recEnum != InviscidFluxReconstruction::FirstOrder){
-    throw std::runtime_error("Swe2d::CustomBCs: only supports InviscidFluxReconstruction::FirstOrder");
+  if (!implswe2d::valid_ic_flag<>(icFlag)){
+    throw std::runtime_error("2D swe: for Swed2d::CustomBCs, invalid icFlag");
   }
 
-  BCFunctorsHolderType bcFuncs(std::forward<CustomBCsFunctorLeft>(customBCsLeft),
-			       std::forward<CustomBCsFunctorFront>(customBCsFront),
-			       std::forward<CustomBCsFunctorRight>(customBCsRight),
-			       std::forward<CustomBCsFunctorBack>(customBCsBack));
-  return RetType(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
-		 std::move(bcFuncs), implswe2d::param_unord_map_to_vector(paramsMap));
+  using sc_t = typename MeshType::scalar_t;
+  using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
+  using return_type = PublicProblemEigenMixinCpp<implswe2d::EigenApp<MeshType, BCFunctorsHolderType>>;
+
+  BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
+			       std::forward<BCsFuncF>(BCsFront),
+			       std::forward<BCsFuncR>(BCsRight),
+			       std::forward<BCsFuncB>(BCsBack));
+
+  return return_type(implswe2d::TagProblemCustomBCs{}, meshObj, recEnum,
+		     InviscidFluxScheme::Rusanov, std::move(bcFuncs), icFlag,
+		     implswe2d::defaultInitCondParams<sc_t>,
+		     implswe2d::defaultPhysicalParams<sc_t>);
 }
 
-template<
-  class mesh_t,
-  class CustomBCsFunctorLeft,
-  class CustomBCsFunctorFront,
-  class CustomBCsFunctorRight,
-  class CustomBCsFunctorBack>
-auto create_problem_eigen(const mesh_t & meshObj,
+template<class MeshType, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
+auto create_problem_eigen(const MeshType & meshObj,
 			  Swe2d problemEnum,
 			  InviscidFluxReconstruction recEnum,
-			  CustomBCsFunctorLeft && customBCsLeft,
-			  CustomBCsFunctorFront && customBCsFront,
-			  CustomBCsFunctorRight && customBCsRight,
-			  CustomBCsFunctorBack && customBCsBack,
-			  [[maybe_unused]] int icFlag = 0 )
+			  BCsFuncL && BCsLeft,
+			  BCsFuncF && BCsFront,
+			  BCsFuncR && BCsRight,
+			  BCsFuncB && BCsBack,
+			  const int icFlag,
+			  const std::unordered_map<std::string, typename MeshType::scalar_t> & userParams)
 {
 
-  auto paramsVec = implswe2d::create_vec_with_default_params<typename mesh_t::scalar_t>();
-  auto paramsMap = implswe2d::param_vector_to_unord_map(paramsVec);
-  return create_problem_eigen(meshObj, problemEnum, recEnum,
-			      std::forward<CustomBCsFunctorLeft>(customBCsLeft),
-			      std::forward<CustomBCsFunctorFront>(customBCsFront),
-			      std::forward<CustomBCsFunctorRight>(customBCsRight),
-			      std::forward<CustomBCsFunctorBack>(customBCsBack),
-			      paramsMap);
+  // preconditions
+  if (problemEnum != Swe2d::CustomBCs){
+    throw std::runtime_error("2D swe: passing custom BCs requires Swed2d::CustomBCs");
+  }
+  if (!implswe2d::valid_ic_flag<>(icFlag)){
+    throw std::runtime_error("2D swe: for Swed2d::CustomBCs, invalid icFlag");
+  }
+  if (!implswe2d::contains_valid_parameter_names(userParams)){
+    throw std::runtime_error("2D swe: create_problem_eigen: one or more params in user-provided map is invalid");
+  }
+
+  using sc_t = typename MeshType::scalar_t;
+  using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
+  using return_type = PublicProblemEigenMixinCpp<implswe2d::EigenApp<MeshType, BCFunctorsHolderType>>;
+
+  auto physParamsVec = implswe2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec   = implswe2d::defaultInitCondParams<sc_t>;
+  implswe2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, icFlag, userParams);
+
+  BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
+			       std::forward<BCsFuncF>(BCsFront),
+			       std::forward<BCsFuncR>(BCsRight),
+			       std::forward<BCsFuncB>(BCsBack));
+
+  return return_type(implswe2d::TagProblemCustomBCs{}, meshObj, recEnum,
+		     InviscidFluxScheme::Rusanov, std::move(bcFuncs),
+		     icFlag, icParamsVec, physParamsVec);
 }
 #endif
 
-
 // ----------------------------------------------------------
-// custom coeffs
+// custom coeffs: legacy one to deprecate
 // ----------------------------------------------------------
 
 template<
-  class mesh_t,
-  class RetType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<mesh_t>>
+  class MeshType,
+  class ReturnType = PublicProblemEigenMixinCpp<implswe2d::EigenApp<MeshType>>
   >
-RetType
+ReturnType
 // bindings need unique naming or we get error associated with overloads
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
   create_slip_wall_swe2d_problem_ov1_for_py
 #else
   create_slip_wall_swe_2d_problem_eigen
 #endif
-(const mesh_t & meshObj,
+(const MeshType & meshObj,
  InviscidFluxReconstruction inviscRecEn,
- typename mesh_t::scalar_t gravity,
- typename mesh_t::scalar_t coriolis,
- typename mesh_t::scalar_t pulseMagnitude)
+ typename MeshType::scalar_t gravity,
+ typename MeshType::scalar_t coriolis,
+ typename MeshType::scalar_t pulseMagnitude)
 {
 
-  auto paramsVec = implswe2d::create_vec_with_default_params<typename RetType::scalar_type>();
-  paramsVec[implswe2d::param_string_to_index<>("gravity")] = gravity;
-  paramsVec[implswe2d::param_string_to_index<>("coriolis")] = coriolis;
-  paramsVec[implswe2d::param_string_to_index<>("pulseMagnitude")] = pulseMagnitude;
+  const int icFlag = 1;
 
-  return RetType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
-		 ::pressiodemoapps::InviscidFluxScheme::Rusanov, std::move(paramsVec));
+  using sc_t = typename MeshType::scalar_t;
+  auto physParamsVec = implswe2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec   = implswe2d::defaultInitCondParams<sc_t>;
+  physParamsVec[implswe2d::phys_param_string_to_index<>("gravity")] = gravity;
+  physParamsVec[implswe2d::phys_param_string_to_index<>("coriolis")] = coriolis;
+  icParamsVec[implswe2d::ic_param_string_to_index<>(icFlag, "pulseMagnitude")] = pulseMagnitude;
+
+  return ReturnType(implswe2d::TagProblemSlipWall{}, meshObj, inviscRecEn,
+		    ::pressiodemoapps::InviscidFluxScheme::Rusanov,
+		    icFlag, icParamsVec, physParamsVec);
 }
 
 }//end namespace pressiodemoapps
