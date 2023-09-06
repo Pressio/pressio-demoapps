@@ -255,7 +255,8 @@ void sedov2dsymmetryIC(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC1(state_type & state,
 		  const mesh_t & meshObj,
-		  const scalar_type gamma)
+		  const scalar_type gamma,
+		  const scalar_type topRightPressure)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
@@ -274,7 +275,7 @@ void riemann2dIC1(state_type & state,
     {
 
       if (x(i) >= x0 and y(i) >= y0){
-	prim = {0.5313, zero, zero, 0.4};
+	prim = {0.5313, zero, zero, topRightPressure};
       }
       else if (x(i) < x0 and y(i) >= y0){
 	prim = {one, 0.7276, zero, one};
@@ -303,7 +304,8 @@ void riemann2dIC1(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC2(state_type & state,
 		  const mesh_t & meshObj,
-		  const scalar_type gamma)
+		  const scalar_type gamma,
+		  const scalar_type topRightPressure)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
@@ -320,7 +322,7 @@ void riemann2dIC2(state_type & state,
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       if (x(i) >= x0 and y(i) >= y0){
-	prim = {1.5, zero, zero, 1.5};
+	prim = {1.5, zero, zero, topRightPressure};
       }
       else if (x(i) < x0 and y(i) >= y0){
 	prim = {0.5323, 1.206, zero, 0.3};

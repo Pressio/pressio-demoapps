@@ -99,10 +99,10 @@ RetType
  Euler2d problemEnum,
  InviscidFluxReconstruction recEnum)
 {
-  // currently only normal shock allow user IC parametrization
+  // currently only normal shock and Riemann allow user IC parametrization
   // while the other problem are hard-wired
   using sc_t = typename MeshType::scalar_t;
-  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
     ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
 
   return RetType(meshObj, problemEnum, recEnum,
@@ -132,10 +132,10 @@ RetType
  int icFlag)
 {
 
-  // currently only normal shock allow user IC parametrization
+  // currently only normal shock and Riemann allow user IC parametrization
   // while the other problem are hard-wired
   using sc_t = typename MeshType::scalar_t;
-  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
     ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
 
   return RetType(meshObj, problemEnum, recEnum,
@@ -173,7 +173,7 @@ auto create_problem_eigen(const MeshType & meshObj,
   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
   using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
 
-  const auto defaultICParams = (problemEnum == Euler2d::NormalShock)
+  const auto defaultICParams = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
     ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
 
   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
@@ -213,7 +213,7 @@ auto create_problem_eigen(const MeshType & meshObj,
   using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
 
   auto physParamsVec = impleuler2d::defaultPhysicalParams<sc_t>;
-  auto icParamsVec = (problemEnum == Euler2d::NormalShock)
+  auto icParamsVec = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
     ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
   impleuler2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
 

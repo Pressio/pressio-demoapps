@@ -62,6 +62,8 @@ constexpr int icNormalShock_mach_i          = 0;
 constexpr int icCrossShock_density_i        = 1;
 constexpr int icCrossShock_inletXVel_i      = 2;
 constexpr int icCrossShock_bottomYVel_i     = 3;
+constexpr int icRiemann1_topRightPressure_i  = 4;
+constexpr int icRiemann2_topRightPressure_i  = 5;
 
 // IMPORTANT: we need to fill the vectors with default vaues
 // with ALL default paramters **consistently** with the indexing defined above
@@ -74,16 +76,19 @@ const std::vector<ScalarType> defaultPhysicalParams
 template<class ScalarType>
 const std::vector<ScalarType> defaultInitCondParams
 ({
-  static_cast<ScalarType>(9),      //normalShockMach
-  static_cast<ScalarType>(0.1),    //cross shock density
-  static_cast<ScalarType>(10.),    //cross shock inlet X valoc
-  static_cast<ScalarType>(1.)      //cross shock bottom Y veloc
+    static_cast<ScalarType>(9)    //normalShockMach
+  , static_cast<ScalarType>(0.1)  //cross shock density
+  , static_cast<ScalarType>(10.)  //cross shock inlet X valoc
+  , static_cast<ScalarType>(1.)   //cross shock bottom Y veloc
+  , static_cast<ScalarType>(0.4)  //this is for riemann IC 1
+  , static_cast<ScalarType>(1.5)  //this is for riemann IC 2
 });
 
 const std::vector<std::string> paramNames({
     "gamma",
     "normalShockMach",
-    "crossShockDensity", "crossShockInletXVel", "crossShockBottomYVel"
+    "crossShockDensity", "crossShockInletXVel", "crossShockBottomYVel",
+    "riemannTopRightPressure"
   });
 
 template<class T = void>
@@ -116,6 +121,17 @@ int ic_param_string_to_index(const Euler2d probEn, const int icFlag, const std::
       else if (s == "crossShockInletXVel")  { return icCrossShock_inletXVel_i; }
       else if (s == "crossShockBottomYVel") { return icCrossShock_bottomYVel_i; }
       else                                  { return invalidIndex; }
+    default: return invalidIndex;
+    }
+
+  case Euler2d::Riemann:
+    switch(icFlag){
+    case 1:
+      if      (s == "riemannTopRightPressure") { return icRiemann1_topRightPressure_i; }
+      else                                     { return invalidIndex; }
+    case 2:
+      if      (s == "riemannTopRightPressure") { return icRiemann2_topRightPressure_i; }
+      else                                     { return invalidIndex; }
     default: return invalidIndex;
     }
 

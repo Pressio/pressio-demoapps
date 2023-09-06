@@ -408,11 +408,13 @@ private:
 
       case ::pressiodemoapps::Euler2d::Riemann:{
 	if( m_icIdentifier == 1){
-	  riemann2dIC1(initialState, m_meshObj.get(), gamma);
+	  riemann2dIC1(initialState, m_meshObj.get(), gamma,
+		       m_ic_parameters[icRiemann1_topRightPressure_i]);
 	  return initialState;
 	}
 	else if (m_icIdentifier == 2){
-	  riemann2dIC2(initialState, m_meshObj.get(), gamma);
+	  riemann2dIC2(initialState, m_meshObj.get(), gamma,
+		       m_ic_parameters[icRiemann2_topRightPressure_i]);
 	  return initialState;
 	}
 	else{

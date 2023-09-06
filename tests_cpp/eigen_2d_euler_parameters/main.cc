@@ -33,36 +33,38 @@ int main()
   const auto flsc = pda::InviscidFluxReconstruction::FirstOrder;
 
   {
+    const auto probId = pda::Euler2d::NormalShock;
+
     for (int api=0; api<4; ++api){
-      if      (api==0){ std::cout << "\ntesting overload: default params \n"; }
-      else if (api==1){ std::cout << "\ntesting overload: default params, customBCs \n"; }
-      else if (api==2){ std::cout << "\ntesting overload: default params, icFlag = 1 \n"; }
-      else if (api==3){ std::cout << "\ntesting overload: default params, icFlag = 1, customBCs \n"; }
+      if      (api==0){ std::cout << "\nNormalShock: testing overload: default params \n"; }
+      else if (api==1){ std::cout << "\nNormalShock: testing overload: default params, customBCs \n"; }
+      else if (api==2){ std::cout << "\nNormalShock: testing overload: default params, icFlag = 1 \n"; }
+      else if (api==3){ std::cout << "\nNormalShock: testing overload: default params, icFlag = 1, customBCs \n"; }
 
       std::unordered_map<std::string, double> gold;
       gold["gamma"] = 1.4;
       gold["mach"] = 9.;
 
       if (api==0){
-	auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::NormalShock, flsc);
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc);
 	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
       }
 
       else if (api==1){
 	auto noop = pda::impl::NoOperation<void>();
-	auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::NormalShock, flsc,
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
 						noop, noop, noop, noop);
 	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
       }
 
       else if (api==2){
-	auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::NormalShock, flsc, 1);
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc, 1);
 	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
       }
 
       else if (api==3){
 	auto noop = pda::impl::NoOperation<void>();
-	auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::NormalShock, flsc,
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
 						noop, noop, noop, noop, 1);
 	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
       }
@@ -70,9 +72,10 @@ int main()
   }
 
   {
+    const auto probId = pda::Euler2d::NormalShock;
     const int icFlag = 1;
     for (int api=0; api<4; ++api){
-      if      (api==0){ std::cout << "\ntesting overload: custom params, icFlag =1, customBCs \n"; }
+      if      (api==0){ std::cout << "\nNormalShock: testing overload: custom params, icFlag =1, customBCs \n"; }
 
       // loop over each param and only change one at a time
       for (int i=0; i<2; ++i)
@@ -87,9 +90,96 @@ int main()
 
 	if (api==0){
 	  auto noop = pda::impl::NoOperation<void>();
-	  auto appObj = pda::create_problem_eigen(meshObj, pda::Euler2d::NormalShock, flsc,
+	  auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
 						  noop, noop, noop, noop, icFlag, myparams);
 	  if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+	}
+      }
+    }
+  }
+
+  {
+    const auto probId = pda::Euler2d::Riemann;
+
+    for (int api=0; api<6; ++api){
+      if      (api==0){ std::cout << "\nRiemann: testing overload: default params \n"; }
+      else if (api==1){ std::cout << "\nRiemann: testing overload: default params, customBCs \n"; }
+      else if (api==2){ std::cout << "\nRiemann: testing overload: default params, icFlag = 1 \n"; }
+      else if (api==3){ std::cout << "\nRiemann: testing overload: default params, icFlag = 1, customBCs \n"; }
+      else if (api==4){ std::cout << "\nRiemann: testing overload: default params, icFlag = 2 \n"; }
+      else if (api==5){ std::cout << "\nRiemann: testing overload: default params, icFlag = 2, customBCs \n"; }
+
+      std::unordered_map<std::string, double> gold;
+      gold["gamma"] = 1.4;
+
+      if (api==0){
+	gold["riemannTopRightPressure"] = 0.4;
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+
+      else if (api==1){
+	gold["riemannTopRightPressure"] = 0.4;
+	auto noop = pda::impl::NoOperation<void>();
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
+						noop, noop, noop, noop);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+
+      else if (api==2){
+	gold["riemannTopRightPressure"] = 0.4;
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc, 1);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+
+      else if (api==3){
+	gold["riemannTopRightPressure"] = 0.4;
+	auto noop = pda::impl::NoOperation<void>();
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
+						noop, noop, noop, noop, 1);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+
+      else if (api==4){
+	gold["riemannTopRightPressure"] = 1.5;
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc, 2);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+
+      else if (api==5){
+	gold["riemannTopRightPressure"] = 1.5;
+	auto noop = pda::impl::NoOperation<void>();
+	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
+						noop, noop, noop, noop, 2);
+	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+      }
+    }
+  }
+
+  {
+    const auto probId = pda::Euler2d::Riemann;
+    for (int icFlag = 1; icFlag <= 2; ++icFlag){
+      for (int api=0; api<4; ++api){
+	if (api==0){
+	  std::cout << "\nRiemann: testing overload: custom params, icFlag = " << icFlag << " , customBCs \n";
+	}
+
+	// loop over each param and only change one at a time
+	for (int i=0; i<2; ++i){
+	  std::unordered_map<std::string, double> myparams;
+	  if (i==0) myparams["gamma"] = 1.8;
+	  if (i==1) myparams["riemannTopRightPressure"] = 8.3;
+
+	  std::unordered_map<std::string, double> gold;
+	  gold["gamma"]  = (i==0) ? 1.8 : 1.4;
+	  gold["riemannTopRightPressure"] = (i==1) ? 8.3 : (icFlag == 1) ? 0.4 : 1.5;
+
+	  if (api==0){
+	    auto noop = pda::impl::NoOperation<void>();
+	    auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
+						    noop, noop, noop, noop, icFlag, myparams);
+	    if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
+	  }
 	}
       }
     }
