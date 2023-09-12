@@ -139,8 +139,9 @@ public:
     return m_rowsForCellsInner;
   }
 
-  // all the other cells, i.e. those that are close enough to a BD
-  auto numCellsBd() const   { return m_rowsForCellsBd.size(); }
+  // number of cells for which at least one neighbor within the stencil width
+  // falls outside of the domain boundary
+  auto numCellsNearBd() const   { return m_rowsForCellsBd.size(); }
 
   // the rows of the graph that pertain "non-inner" cells
   const indices_v_t & graphRowsOfCellsNearBd() const{

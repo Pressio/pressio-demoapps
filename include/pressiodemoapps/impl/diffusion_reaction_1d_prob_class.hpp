@@ -308,7 +308,7 @@ private:
   {
     const auto stencilSize    = reconstructionTypeToStencilSize(m_viscousFluxRecEn);
     const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
-    const index_t s1 = m_meshObj.get().numCellsBd();
+    const index_t s1 = m_meshObj.get().numCellsNearBd();
     ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
   }
