@@ -27,6 +27,8 @@ add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 
 add_subdirectory(create_vec_of_problems)
 
+add_subdirectory(gradients)
+
 # ---------------------------------------------------------
 # 1d problems
 # ---------------------------------------------------------
