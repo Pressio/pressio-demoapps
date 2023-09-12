@@ -295,29 +295,33 @@ public:
     return false;
   }
 
-  bool cell_has_left_face_on_boundary(const index_type rowInd){
+  bool cellHasLeftFaceOnBoundary2d(const index_type rowInd){
     // true if the first order neighboring cell index is -1
     return (m_graph(rowInd,1)==-1);
   }
 
-  bool cell_has_front_face_on_boundary(const index_type rowInd){
+  bool cellHasFrontFaceOnBoundary2d(const index_type rowInd){
     return (m_graph(rowInd,2)==-1);
   }
 
-  bool cell_has_right_face_on_boundary(const index_type rowInd){
+  bool cellHasRightFaceOnBoundary2d(const index_type rowInd){
     return (m_graph(rowInd,3)==-1);
   }
 
-  bool cell_has_back_face_on_boundary(const index_type rowInd){
+  bool cellHasBackFaceOnBoundary2d(const index_type rowInd){
     return (m_graph(rowInd,4)==-1);
   }
 
-  bool cell_is_strictly_next_to_boundary(const index_type rowInd)
+  bool cellIsStrictlyNextToBoundary(const index_type rowInd)
   {
-    const auto bL = cell_has_left_face_on_boundary(rowInd);
-    const auto bF = cell_has_front_face_on_boundary(rowInd);
-    const auto bR = cell_has_right_face_on_boundary(rowInd);
-    const auto bB = cell_has_back_face_on_boundary(rowInd);
+    if (m_dim != 2){
+      throw std::runtime_error("cellIsStrictlyNextToBoundary2d only currently supported for 2d");
+    }
+
+    const auto bL = cellHasLeftFaceOnBoundary2d(rowInd);
+    const auto bF = cellHasFrontFaceOnBoundary2d(rowInd);
+    const auto bR = cellHasRightFaceOnBoundary2d(rowInd);
+    const auto bB = cellHasBackFaceOnBoundary2d(rowInd);
     return bL || bF || bR || bB;
   }
 
@@ -434,10 +438,12 @@ private:
       }
     }
 
-    assert(m_rowsForCellsStrictlyOnBd.size() == 0);
-    for (auto rowInd : m_rowsForCellsNearBd){
-      const bool b = this->cell_is_strictly_next_to_boundary(rowInd);
-      if (b){ m_rowsForCellsStrictlyOnBd.push_back(rowInd); }
+    if (m_dim == 2){
+      assert(m_rowsForCellsStrictlyOnBd.size() == 0);
+      for (auto rowInd : m_rowsForCellsNearBd){
+	const bool b = this->cellIsStrictlyNextToBoundary(rowInd);
+	if (b){ m_rowsForCellsStrictlyOnBd.push_back(rowInd); }
+      }
     }
   }
 
