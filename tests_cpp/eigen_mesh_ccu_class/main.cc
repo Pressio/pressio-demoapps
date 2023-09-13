@@ -46,7 +46,7 @@ auto test_default_constr()
   v.push_back( meshObj.dz() == 0 );
   v.push_back( meshObj.dzInv() == 0 );
   v.push_back( meshObj.numCellsInner()==0);
-  v.push_back( meshObj.numCellsBd()==0);
+  v.push_back( meshObj.numCellsNearBd()==0);
 
   const auto g1 = meshObj.graphRowsOfCellsAwayFromBd();
   const auto g2 = meshObj.graphRowsOfCellsNearBd();

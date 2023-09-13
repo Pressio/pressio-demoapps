@@ -139,12 +139,19 @@ public:
     return m_rowsForCellsInner;
   }
 
-  // all the other cells, i.e. those that are close enough to a BD
-  auto numCellsBd() const   { return m_rowsForCellsBd.size(); }
+  // number of cells for which at least one neighbor within the stencil width
+  // falls outside of the domain boundary
+  auto numCellsNearBd() const   { return m_rowsForCellsNearBd.size(); }
 
   // the rows of the graph that pertain "non-inner" cells
   const indices_v_t & graphRowsOfCellsNearBd() const{
-    return m_rowsForCellsBd;
+    return m_rowsForCellsNearBd;
+  }
+
+  // the rows of the graph tagging all cells that are strictly on a boundary
+  // i.e. those that have at least one face on the domain boundary
+  const indices_v_t & graphRowsOfCellsStrictlyOnBd() const{
+    return m_rowsForCellsStrictlyOnBd;
   }
 
   bool isFullyPeriodic() const{
@@ -288,6 +295,35 @@ public:
     return false;
   }
 
+  bool cellHasLeftFaceOnBoundary2d(const index_type rowInd){
+    // true if the first order neighboring cell index is -1
+    return (m_graph(rowInd,1)==-1);
+  }
+
+  bool cellHasFrontFaceOnBoundary2d(const index_type rowInd){
+    return (m_graph(rowInd,2)==-1);
+  }
+
+  bool cellHasRightFaceOnBoundary2d(const index_type rowInd){
+    return (m_graph(rowInd,3)==-1);
+  }
+
+  bool cellHasBackFaceOnBoundary2d(const index_type rowInd){
+    return (m_graph(rowInd,4)==-1);
+  }
+
+  bool cellIsStrictlyNextToBoundary(const index_type rowInd)
+  {
+    if (m_dim != 2){
+      throw std::runtime_error("cellIsStrictlyNextToBoundary2d only currently supported for 2d");
+    }
+
+    const auto bL = cellHasLeftFaceOnBoundary2d(rowInd);
+    const auto bF = cellHasFrontFaceOnBoundary2d(rowInd);
+    const auto bR = cellHasRightFaceOnBoundary2d(rowInd);
+    const auto bB = cellHasBackFaceOnBoundary2d(rowInd);
+    return bL || bF || bR || bB;
+  }
 
 private:
   // mesh connectivity is periodic if for each mesh cell,
@@ -355,7 +391,7 @@ private:
 	// if either is true, this cell is near the BD, so
 	// add its graph row to corresponding list
 	if (b1 or b2){
-	  m_rowsForCellsBd.push_back(it);
+	  m_rowsForCellsNearBd.push_back(it);
 	}
 	else{
 	  m_rowsForCellsInner.push_back(it);
@@ -372,7 +408,7 @@ private:
 	// if either is true, this cell is near the BD, so
 	// add its graph row to corresponding list
 	if (b1 or b2 or b3 or b4){
-	  m_rowsForCellsBd.push_back(it);
+	  m_rowsForCellsNearBd.push_back(it);
 	}
 	else{
 	  m_rowsForCellsInner.push_back(it);
@@ -391,7 +427,7 @@ private:
 	// if either is true, this cell is near the BD, so
 	// add its graph row to corresponding list
 	if (b1 or b2 or b3 or b4 or b5 or b6){
-	  m_rowsForCellsBd.push_back(it);
+	  m_rowsForCellsNearBd.push_back(it);
 	}
 	else{
 	  m_rowsForCellsInner.push_back(it);
@@ -399,6 +435,14 @@ private:
       }
       else{
 	throw std::runtime_error("Invalid dimension");
+      }
+    }
+
+    if (m_dim == 2){
+      assert(m_rowsForCellsStrictlyOnBd.size() == 0);
+      for (auto rowInd : m_rowsForCellsNearBd){
+	const bool b = this->cellIsStrictlyNextToBoundary(rowInd);
+	if (b){ m_rowsForCellsStrictlyOnBd.push_back(rowInd); }
       }
     }
   }
@@ -422,7 +466,8 @@ private:
   graph_t m_graph = {};
 
   indices_v_t m_rowsForCellsInner = {};
-  indices_v_t m_rowsForCellsBd = {};
+  indices_v_t m_rowsForCellsNearBd = {};
+  indices_v_t m_rowsForCellsStrictlyOnBd = {};
 
   bool m_meshIsFullyPeriodic = false;
 };
