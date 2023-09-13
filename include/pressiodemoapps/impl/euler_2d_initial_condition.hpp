@@ -299,7 +299,11 @@ void riemann2dIC1(state_type & state,
 
 /*
   IC2:
+  Defaults are as given by Configuration 3 in:
   http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf
+
+  Unspecified states are computed according to the compatibility relations given by Configuration 3 in:
+  https://epubs.siam.org/doi/pdf/10.1137/0524006
 */
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC2(state_type & state,
