@@ -316,7 +316,6 @@ void riemann2dIC2(state_type & state,
 		  const scalar_type botLeftPressure)
 {
   constexpr int numDofPerCell = 4;
-  constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one = static_cast<scalar_type>(1);
   constexpr auto two = static_cast<scalar_type>(2);
   constexpr auto four = static_cast<scalar_type>(4);
