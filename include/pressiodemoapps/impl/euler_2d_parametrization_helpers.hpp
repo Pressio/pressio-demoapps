@@ -62,8 +62,12 @@ constexpr int icNormalShock_mach_i          = 0;
 constexpr int icCrossShock_density_i        = 1;
 constexpr int icCrossShock_inletXVel_i      = 2;
 constexpr int icCrossShock_bottomYVel_i     = 3;
-constexpr int icRiemann1_topRightPressure_i  = 4;
-constexpr int icRiemann2_topRightPressure_i  = 5;
+constexpr int icRiemann1_topRightPressure_i = 4;
+constexpr int icRiemann2_topRightPressure_i = 5;
+constexpr int icRiemann2_topRightXVel_i     = 6;
+constexpr int icRiemann2_topRightYVel_i     = 7;
+constexpr int icRiemann2_topRightDensity_i  = 8;
+constexpr int icRiemann2_botLeftPressure_i  = 9;
 
 // IMPORTANT: we need to fill the vectors with default vaues
 // with ALL default paramters **consistently** with the indexing defined above
@@ -81,14 +85,19 @@ const std::vector<ScalarType> defaultInitCondParams
   , static_cast<ScalarType>(10.)  //cross shock inlet X valoc
   , static_cast<ScalarType>(1.)   //cross shock bottom Y veloc
   , static_cast<ScalarType>(0.4)  //this is for riemann IC 1
-  , static_cast<ScalarType>(1.5)  //this is for riemann IC 2
+  , static_cast<ScalarType>(1.5)  //riemann IC 2 top right pressure
+  , static_cast<ScalarType>(0.0)  //riemann IC 2 top right x-velocity
+  , static_cast<ScalarType>(0.0)  //riemann IC 2 top right y-velocity
+  , static_cast<ScalarType>(1.5)  //riemann IC 2 top right density
+  , static_cast<ScalarType>(0.029)  //riemann IC 2 bottom left pressure
 });
 
 const std::vector<std::string> paramNames({
     "gamma",
     "normalShockMach",
     "crossShockDensity", "crossShockInletXVel", "crossShockBottomYVel",
-    "riemannTopRightPressure"
+    "riemannTopRightPressure", "riemannTopRightXVel", "riemannTopRightYVel",
+    "riemannTopRightDensity", "riemannBotLeftPressure",
   });
 
 template<class T = void>
@@ -131,6 +140,10 @@ int ic_param_string_to_index(const Euler2d probEn, const int icFlag, const std::
       else                                     { return invalidIndex; }
     case 2:
       if      (s == "riemannTopRightPressure") { return icRiemann2_topRightPressure_i; }
+      else if (s == "riemannTopRightXVel")     { return icRiemann2_topRightXVel_i; }
+      else if (s == "riemannTopRightYVel")     { return icRiemann2_topRightYVel_i; }
+      else if (s == "riemannTopRightDensity")  { return icRiemann2_topRightDensity_i; }
+      else if (s == "riemannBotLeftPressure")  { return icRiemann2_botLeftPressure_i; }
       else                                     { return invalidIndex; }
     default: return invalidIndex;
     }

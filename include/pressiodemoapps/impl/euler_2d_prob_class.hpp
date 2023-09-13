@@ -414,7 +414,11 @@ private:
 	}
 	else if (m_icIdentifier == 2){
 	  riemann2dIC2(initialState, m_meshObj.get(), gamma,
-		       m_ic_parameters[icRiemann2_topRightPressure_i]);
+		       m_ic_parameters[icRiemann2_topRightPressure_i],
+		       m_ic_parameters[icRiemann2_topRightXVel_i],
+		       m_ic_parameters[icRiemann2_topRightYVel_i],
+		       m_ic_parameters[icRiemann2_topRightDensity_i],
+		       m_ic_parameters[icRiemann2_botLeftPressure_i]);
 	  return initialState;
 	}
 	else{
