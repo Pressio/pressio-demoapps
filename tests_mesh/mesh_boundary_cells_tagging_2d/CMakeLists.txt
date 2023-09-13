@@ -2,7 +2,7 @@
 set(testname boundary_cells_tagging_2d)
 set(exename ${testname}_exe)
 
-set(A "fullmesh_s3;fullmesh_s5;fullmesh_s7")
+set(A "fullmesh_s3;fullmesh_s5;fullmesh_s7;samplemesh_s3;samplemesh_s5;samplemesh_s7")
 foreach(id IN LISTS A)
   set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/${id})
   set(TMPDIR ${CMAKE_CURRENT_BINARY_DIR}/${id})
