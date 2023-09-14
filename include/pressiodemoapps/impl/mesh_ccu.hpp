@@ -295,24 +295,24 @@ public:
     return false;
   }
 
-  bool cellHasLeftFaceOnBoundary2d(const index_type rowInd){
+  bool cellHasLeftFaceOnBoundary2d(const index_type rowInd) const{
     // true if the first order neighboring cell index is -1
     return (m_graph(rowInd,1)==-1);
   }
 
-  bool cellHasFrontFaceOnBoundary2d(const index_type rowInd){
+  bool cellHasFrontFaceOnBoundary2d(const index_type rowInd) const{
     return (m_graph(rowInd,2)==-1);
   }
 
-  bool cellHasRightFaceOnBoundary2d(const index_type rowInd){
+  bool cellHasRightFaceOnBoundary2d(const index_type rowInd) const{
     return (m_graph(rowInd,3)==-1);
   }
 
-  bool cellHasBackFaceOnBoundary2d(const index_type rowInd){
+  bool cellHasBackFaceOnBoundary2d(const index_type rowInd) const{
     return (m_graph(rowInd,4)==-1);
   }
 
-  bool cellIsStrictlyNextToBoundary(const index_type rowInd)
+  bool cellIsStrictlyNextToBoundary(const index_type rowInd) const
   {
     if (m_dim != 2){
       throw std::runtime_error("cellIsStrictlyNextToBoundary2d only currently supported for 2d");
