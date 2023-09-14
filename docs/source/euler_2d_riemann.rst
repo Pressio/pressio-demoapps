@@ -43,7 +43,7 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
       - ``riemannTopRightDensity``: density in upper right quadrant (default: 1.5)
 
-      - ``riemannBotLeftPressure``: pressure in lower right quadrant (default: 0.029)
+      - ``riemannBotLeftPressure``: pressure in lower left quadrant (default: 0.029)
 
     - The remaining, unspecified primitive state values are computed following the compatibility relations provided by Configuration 3 of `paper2 <https://epubs.siam.org/doi/pdf/10.1137/0524006>`_
 
