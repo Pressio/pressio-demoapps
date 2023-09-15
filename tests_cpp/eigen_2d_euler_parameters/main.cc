@@ -12,7 +12,7 @@ bool check(const AppT & app,
     const auto value = app.queryParameter(it->first);
     const auto diff = std::abs(value - it->second);
     if ( diff > 1e-13 ){
-      std::cout << "*ERROR*: comparison failed for"
+      std::cout << "*ERROR*: comparison failed for "
 		<< it->first << " : "
 		<< " found = " << value << " gold  = " << it->second
 		<< '\n';
@@ -142,12 +142,20 @@ int main()
 
       else if (api==4){
 	gold["riemannTopRightPressure"] = 1.5;
+	gold["riemannTopRightXVel"] = 0.0;
+	gold["riemannTopRightYVel"] = 0.0;
+	gold["riemannTopRightDensity"] = 1.5;
+	gold["riemannBotLeftPressure"] = 0.029;
 	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc, 2);
 	if (!check(appObj, gold)){ std::puts("FAILED"); return 0; }
       }
 
       else if (api==5){
 	gold["riemannTopRightPressure"] = 1.5;
+	gold["riemannTopRightXVel"] = 0.0;
+	gold["riemannTopRightYVel"] = 0.0;
+	gold["riemannTopRightDensity"] = 1.5;
+	gold["riemannBotLeftPressure"] = 0.029;
 	auto noop = pda::impl::NoOperation<void>();
 	auto appObj = pda::create_problem_eigen(meshObj, probId, flsc,
 						noop, noop, noop, noop, 2);
@@ -165,14 +173,27 @@ int main()
 	}
 
 	// loop over each param and only change one at a time
-	for (int i=0; i<2; ++i){
+	const int nparams = (icFlag == 1) ? 2 : 6;
+	for (int i=0; i<nparams; ++i){
 	  std::unordered_map<std::string, double> myparams;
 	  if (i==0) myparams["gamma"] = 1.8;
 	  if (i==1) myparams["riemannTopRightPressure"] = 8.3;
+	  if (icFlag == 2) {
+	    if (i==2) myparams["riemannTopRightXVel"] = 0.7;
+	    if (i==3) myparams["riemannTopRightYVel"] = 1.2;
+	    if (i==4) myparams["riemannTopRightDensity"] = 2.3;
+	    if (i==5) myparams["riemannBotLeftPressure"] = 0.014;
+	  }
 
 	  std::unordered_map<std::string, double> gold;
 	  gold["gamma"]  = (i==0) ? 1.8 : 1.4;
 	  gold["riemannTopRightPressure"] = (i==1) ? 8.3 : (icFlag == 1) ? 0.4 : 1.5;
+	  if (icFlag == 2) {
+	    gold["riemannTopRightXVel"] = (i==2) ? 0.7 : 0.0;
+	    gold["riemannTopRightYVel"] = (i==3) ? 1.2 : 0.0;
+	    gold["riemannTopRightDensity"] = (i==4) ? 2.3 : 1.5;
+	    gold["riemannBotLeftPressure"] = (i==5) ? 0.014 : 0.029;
+	  }
 
 	  if (api==0){
 	    auto noop = pda::impl::NoOperation<void>();
