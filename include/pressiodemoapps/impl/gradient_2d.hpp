@@ -205,8 +205,7 @@ private:
       const auto fpos = it->first.pos;
       auto & face = it->second;
       const int parentCellRowInd = face.parentCellGraphRow;
-      const int fIndex = G(parentCellRowInd, 0)*nDofPerCell;
-      const auto currCellConnec = G.row(parentCellRowInd);
+      const auto currCellConnec  = G.row(parentCellRowInd);
 
       GradFdMode fdMode =
 	(fpos == FacePosition::Left) ? RightSided
