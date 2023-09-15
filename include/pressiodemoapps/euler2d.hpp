@@ -144,6 +144,35 @@ RetType
 		 impleuler2d::defaultPhysicalParams<sc_t>);
 }
 
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class MeshType>
+auto create_problem_eigen(const MeshType & meshObj,
+			  Euler2d problemEnum,
+			  InviscidFluxReconstruction recEnum,
+			  const int icFlag,
+			  const std::unordered_map<std::string, typename MeshType::scalar_t> & userParams)
+{
+
+  if (problemEnum != Euler2d::Riemann && problemEnum != Euler2d::NormalShock){
+    throw std::runtime_error("Euler2d: custom parametrization only valid for Euler2d::{Riemann, NormalShock}");
+  }
+  if (!impleuler2d::valid_ic_flag<>(problemEnum, icFlag)){
+    throw std::runtime_error("Euler2d: invalid icFlag for the given problem enum");
+  }
+
+  using sc_t = typename MeshType::scalar_t;
+  using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType>>;
+
+  auto physParamsVec = impleuler2d::defaultPhysicalParams<sc_t>;
+  auto icParamsVec   = impleuler2d::defaultInitCondParams<sc_t>;
+  impleuler2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
+
+  return return_type(meshObj, problemEnum, recEnum, InviscidFluxScheme::Rusanov,
+		     icFlag, icParamsVec, physParamsVec);
+}
+#endif
+
+
 //
 // custom BCs
 //
@@ -173,9 +202,7 @@ auto create_problem_eigen(const MeshType & meshObj,
   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
   using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
 
-  const auto defaultICParams = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
-    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
-
+  const auto defaultICParams = impleuler2d::defaultInitCondParams<sc_t>;
   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
 			       std::forward<BCsFuncF>(BCsFront),
 			       std::forward<BCsFuncR>(BCsRight),
@@ -213,8 +240,7 @@ auto create_problem_eigen(const MeshType & meshObj,
   using return_type = PublicProblemEigenMixinCpp<impleuler2d::EigenApp<MeshType, BCFunctorsHolderType>>;
 
   auto physParamsVec = impleuler2d::defaultPhysicalParams<sc_t>;
-  auto icParamsVec = (problemEnum == Euler2d::NormalShock || problemEnum == Euler2d::Riemann)
-    ? impleuler2d::defaultInitCondParams<sc_t> : std::vector<sc_t>();
+  auto icParamsVec   = impleuler2d::defaultInitCondParams<sc_t>;
   impleuler2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
 
   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
