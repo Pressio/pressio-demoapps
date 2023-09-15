@@ -109,6 +109,20 @@ bool stencilSizeCompatibleWithViscousFluxReconstruction(ViscousFluxReconstructio
   return false;
 }
 
+enum class FacePosition{
+  Left, Front, Right, Back, Bottom, Top
+};
+
+enum class GradFdMode{
+  ForwardTwoPt, BackwardTwoPt, CenterThreePt,
+  ForwardThreePt, BackwardThreePt, CenterFivePt
+};
+
+enum class BoundaryFacesGradientScheme{
+  OneSidedFdAutoStencil, // this selects the stencil cells automatically using the connectivity
+  LSQAutoStencil
+};
+
 }//end namespace pressiodemoapps
 
 #include "./weno.hpp"

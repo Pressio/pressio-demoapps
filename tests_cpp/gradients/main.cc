@@ -1,128 +1,13 @@
 #include <vector>
 #include "pressiodemoapps/mesh.hpp"
+#include "pressiodemoapps/gradient.hpp"
 #include <iomanip>
-
-    // double x0 = cellX;
-    // double x1 = cellX + dx;
-    // double y1 = cellY;
-    // double f0 = f(row[0]);
-    // double f1 = f(row[3]);
-    // double alfa = -(f0-f1)/dx;
-    // double beta = f0 - alfa*x0;
-    // double fleft  = alfa * bdFaceX + beta;
-    // gradVals.push_back( (-fleft + f1)/(2.*dx) );
-
-template<class MeshType>
-bool cell_has_left_face_on_boundary(const MeshType & mesh,
-				    int graphRow){
-  // true if the first order neighboring cell index is -1
-  const auto & G = mesh.graph();
-  return (G(graphRow,1)==-1);
-}
-
-template<class MeshType>
-bool cell_has_front_face_on_boundary(const MeshType & mesh,
-				     int graphRow){
-  const auto & G = mesh.graph();
-  return (G(graphRow,2)==-1);
-}
-
-template<class MeshType>
-bool cell_has_right_face_on_boundary(const MeshType & mesh,
-				     int graphRow){
-  const auto & G = mesh.graph();
-  return (G(graphRow,3)==-1);
-}
-
-template<class MeshType>
-bool cell_has_back_face_on_boundary(const MeshType & mesh,
-				     int graphRow){
-  const auto & G = mesh.graph();
-  return (G(graphRow,4)==-1);
-}
-
-template<class MeshType>
-bool cell_is_strictly_next_to_boundary(const MeshType & mesh,
-				       int graphRow)
-{
-  const auto bL = cell_has_left_face_on_boundary(mesh, graphRow);
-  const auto bF = cell_has_front_face_on_boundary(mesh, graphRow);
-  const auto bR = cell_has_right_face_on_boundary(mesh, graphRow);
-  const auto bB = cell_has_back_face_on_boundary(mesh, graphRow);
-  return bL || bF || bR || bB;
-}
 
 template<class T, class StateType>
 void sinef(const T & x, const T & y, StateType & f)
 {
   for (int i=0; i<x.size(); ++i){
     f(i) = std::sin(M_PI * x(i) * y(i));
-  }
-}
-
-enum class Skew{Right2, Left2, Center3, Right3, Left3, Center5};
-
-template<class Connect>
-double fd_gradient_x(Skew direction,
-		     int stencilSize,
-		     const Connect & conn,
-		     const double h,
-		     const Eigen::VectorXd & f)
-{
-  if (stencilSize != 3 && stencilSize!=5){
-    throw std::runtime_error("invalid stencil size");
-  }
-
-  // https://web.media.mit.edu/~crtaylor/calculator.html
-  switch(direction){
-  case Skew::Right2:
-    return (-f(conn[0]) + f(conn[3]))/h;
-  case Skew::Left2:
-    return ( f(conn[0]) - f(conn[1]))/h;
-  case Skew::Center3:
-    return (-f(conn[1]) + f(conn[3]))/(2*h);
-
-  case Skew::Right3:
-    return (-2.*f(conn[0]) + 3.*f(conn[3]) - 1.*f(conn[7]))/h;
-  case Skew::Left3:
-    return ( 2.*f(conn[0]) - 3.*f(conn[1]) + 1.*f(conn[5]))/h;
-  case Skew::Center5:
-    return (-f(conn[5]) - 8.*f(conn[1]) + 8.*f(conn[3]) - f(conn[7]))/(12.*h);
-
-  default:
-    return 0;
-  }
-}
-
-template<class Connect>
-double fd_gradient_y(Skew direction,
-		     int stencilSize,
-		     const Connect & conn,
-		     const double h,
-		     const Eigen::VectorXd & f)
-{
-  if (stencilSize != 3 && stencilSize!=5){
-    throw std::runtime_error("invalid stencil size");
-  }
-
-  // https://web.media.mit.edu/~crtaylor/calculator.html
-  switch(direction){
-  case Skew::Right2:
-    return (-f(conn[0]) + f(conn[2]))/h;
-  case Skew::Left2:
-    return ( f(conn[0]) - f(conn[4]))/h;
-  case Skew::Center3:
-    return (-f(conn[4]) + f(conn[2]))/(2*h);
-
-  case Skew::Right3:
-    return (-2.*f(conn[0]) + 3.*f(conn[2]) - 1.*f(conn[6]))/h;
-  case Skew::Left3:
-    return ( 2.*f(conn[0]) - 3.*f(conn[4]) + 1.*f(conn[8]))/h;
-  case Skew::Center5:
-    return (-f(conn[8]) - 8.*f(conn[4]) + 8.*f(conn[2]) - f(conn[6]))/(12.*h);
-
-  default:
-    return 0;
   }
 }
 
@@ -143,6 +28,7 @@ auto one_sided_fd_normal_gradient_at_boundary_faces(const MeshType & mesh,
 						    const Eigen::VectorXd & f,
 						    int order)
 {
+  namespace pda  = pressiodemoapps;
 
   const int ss = mesh.stencilSize();
   const auto & x = mesh.viewX();
@@ -150,20 +36,15 @@ auto one_sided_fd_normal_gradient_at_boundary_faces(const MeshType & mesh,
   const auto dx  = mesh.dx();
   const auto dy  = mesh.dy();
 
+  const auto & rowsForLoop = mesh.graphRowsOfCellsStrictlyOnBd();
   const auto & G = mesh.graph();
-  std::vector<int> rowsForLoop;
-  for (auto it : mesh.graphRowsOfCellsNearBd()){
-    const bool b = cell_is_strictly_next_to_boundary(mesh, it);
-    if (b) rowsForLoop.push_back(it);
-  }
-
   std::vector<Face> result;
   for (auto rowInd : rowsForLoop)
   {
-    const bool bdL = cell_has_left_face_on_boundary(mesh,  rowInd);
-    const bool bdF = cell_has_front_face_on_boundary(mesh, rowInd);
-    const bool bdR = cell_has_right_face_on_boundary(mesh, rowInd);
-    const bool bdB = cell_has_back_face_on_boundary(mesh,  rowInd);
+    const bool bdL = mesh.cellHasLeftFaceOnBoundary2d(rowInd);
+    const bool bdF = mesh.cellHasFrontFaceOnBoundary2d(rowInd);
+    const bool bdR = mesh.cellHasRightFaceOnBoundary2d(rowInd);
+    const bool bdB = mesh.cellHasBackFaceOnBoundary2d(rowInd);
     std::cout << "row = " << rowInd << " " << G(rowInd,0) << std::endl;
 
     const auto graphRow = G.row(rowInd);
@@ -171,9 +52,8 @@ auto one_sided_fd_normal_gradient_at_boundary_faces(const MeshType & mesh,
     const auto cellX    = x(cellGID);
     const auto cellY    = y(cellGID);
 
-    const auto SkewRight  = (order == 1) ? Skew::Right2  : Skew::Right3;
-    const auto SkewLeft   = (order == 1) ? Skew::Left2   : Skew::Left3;
-
+    const auto SkewRight  = (order == 1) ? pda::GradFdMode::ForwardTwoPt  : pda::GradFdMode::ForwardThreePt;
+    const auto SkewLeft   = (order == 1) ? pda::GradFdMode::BackwardTwoPt : pda::GradFdMode::BackwardThreePt;
     Face face;
     face.parentCellGID = cellGID;
     face.parentCellGraphRow = rowInd;
@@ -181,73 +61,45 @@ auto one_sided_fd_normal_gradient_at_boundary_faces(const MeshType & mesh,
     if (bdL){
       face.x = cellX-dx*0.5;
       face.y = cellY;
-      face.gradValue = fd_gradient_x(SkewRight, ss, graphRow, dx, f);
+      face.gradValue = pda::impl::fd_face_normal_gradient_for_cell_centered_state_2d(f, graphRow, 'x',
+										     SkewRight, dx);
       face.gradDirection = grad_x;
       result.push_back(face);
-
-      if (bdB){
-	face.x = cellX;
-	face.y = cellY-dy*0.5;
-	face.gradValue = fd_gradient_y(SkewRight, ss, graphRow, dy, f);
-	face.gradDirection = grad_y;
-	result.push_back(face);
-      }
-
-      if (bdF){
-	face.x = cellX;
-	face.y = cellY+dy*0.5;
-	face.gradValue = fd_gradient_y(SkewLeft, ss, graphRow, dy, f);
-	face.gradDirection = grad_y;
-	result.push_back(face);
-      }
     }
 
-    if (bdF && !bdL && !bdR){
-      face.x = cellX;
-      face.y = cellY+dy*0.5;
-      face.gradValue = fd_gradient_y(SkewLeft, ss, graphRow, dy, f);
-      face.gradDirection = grad_y;
-      result.push_back(face);
-    }
+    // if (bdF){
+    //   face.x = cellX;
+    //   face.y = cellY+dy*0.5;
+    //   face.gradValue = pda::impl::fd_face_normal_gradient_for_cell_centered_state_2d(f, graphRow, 'y',
+    // 										     SkewLeft, dy);
+    //   face.gradDirection = grad_y;
+    //   result.push_back(face);
+    // }
 
     if (bdR){
       face.x = cellX+dx*0.5;
       face.y = cellY;
-      face.gradValue = fd_gradient_x(SkewLeft, ss, graphRow, dx, f);
+      face.gradValue = pda::impl::fd_face_normal_gradient_for_cell_centered_state_2d(f, graphRow, 'x',
+										     SkewLeft, dx);
       face.gradDirection = grad_x;
       result.push_back(face);
-
-      if (bdB){
-	face.x = cellX;
-	face.y = cellY-dy*0.5;
-	face.gradValue = fd_gradient_y(SkewRight, ss, graphRow, dy, f);
-	face.gradDirection = grad_y;
-	result.push_back(face);
-      }
-
-      if (bdF){
-	face.x = cellX;
-	face.y = cellY+dy*0.5;
-	face.gradValue = fd_gradient_y(SkewLeft, ss, graphRow, dy, f);
-	face.gradDirection = grad_y;
-	result.push_back(face);
-      }
     }
 
-    if (bdB && !bdL && !bdR){
-      face.x = cellX;
-      face.y = cellY-dy*0.5;
-      face.gradValue = fd_gradient_y(SkewRight, ss, graphRow, dy, f);
-      face.gradDirection = grad_y;
-      result.push_back(face);
-    }
+    // if (bdB){
+    //   face.x = cellX;
+    //   face.y = cellY-dy*0.5;
+    //   face.gradValue = pda::impl::fd_face_normal_gradient_for_cell_centered_state_2d(f, graphRow, 'y',
+    // 										     SkewRight, dy);
+    //   face.gradDirection = grad_y;
+    //   result.push_back(face);
+    // }
   }
 
   return result;
 }
 
 void write_result(const std::vector<Face> & M,
-		   const std::string & filename)
+		  const std::string & filename)
 {
   std::ofstream file; file.open(filename);
   for (auto & it : M){
@@ -258,8 +110,8 @@ void write_result(const std::vector<Face> & M,
 	 << it.gradDirection
 	 << std::endl;
   }
+  file.close();
 };
-//file << std::setprecision(14);
 
 int main()
 {
@@ -275,22 +127,45 @@ int main()
   const auto fd_result1 = one_sided_fd_normal_gradient_at_boundary_faces(mesh, f, 1);
   write_result(fd_result1, "fd_results_1.txt");
 
-  const auto fd_result2 = one_sided_fd_normal_gradient_at_boundary_faces(mesh, f, 2);
-  write_result(fd_result2, "fd_results_2.txt");
+  // const auto fd_result2 = one_sided_fd_normal_gradient_at_boundary_faces(mesh, f, 2);
+  // write_result(fd_result2, "fd_results_2.txt");
 
-  // std::vector< std::array<double, 3> > fd_grads;
-  // const auto & G = mesh.graph();
-  // for (int i=0; i<G.rows(); ++i){
-  //   one_sided_gradient_fd(i, mesh, fd_grads);
-  //   for (int j=1; j<G.cols(); ++j){
-  //     std::cout << G(i,j ) << " ";
-  //   }
-  //   std::cout << '\n';
-  // }
+  pda::GradientEvaluator grads(mesh);
+  grads.compute(f);
+  const auto & G = mesh.graph();
+  const auto & rowsCellsOnBD = mesh.graphRowsOfCellsStrictlyOnBd();
+  std::ofstream file; file.open("pda_result.txt");
+  for (auto rowInd : rowsCellsOnBD){
+    const bool bdL = mesh.cellHasLeftFaceOnBoundary2d(rowInd);
+    const bool bdF = mesh.cellHasFrontFaceOnBoundary2d(rowInd);
+    const bool bdR = mesh.cellHasRightFaceOnBoundary2d(rowInd);
+    const bool bdB = mesh.cellHasBackFaceOnBoundary2d(rowInd);
+    const int cellGID = G(rowInd, 0);
 
-  // write_vector_to_ascii(std::string("grad_x.txt"), gradXs);
-  // write_vector_to_ascii(std::string("grad_y.txt"), gradYs);
-  // write_vector_to_ascii(std::string("grad_v.txt"), gradVals);
+    pda::FacePosition fp ={};
+
+    // const auto fp = bdL ? pda::FacePosition::Left
+    //   : bdF ? pda::FacePosition::Front
+    //   : bdR ? pda::FacePosition::Right
+    //   : pda::FacePosition::Back;
+    int gradDirection = (bdL || bdR ) ? grad_x : grad_y;
+
+    if (bdR){
+      auto & f = grads.queryFace(cellGID, fp);
+      std::cout << cellGID << " "
+		<< f.centerCoords[0] << " "
+		<< f.centerCoords[1]
+		<< '\n';
+      file << cellGID << " "
+	   << 0 << " "
+	   << f.centerCoords[0] << " "
+	   << f.centerCoords[1] << " "
+	   << f.normalGradValue[0] << " "
+	   << gradDirection
+	   << std::endl;
+    }
+  }
+  file.close();
 
   // std::puts("FAILED");
   // std::puts("PASS");
