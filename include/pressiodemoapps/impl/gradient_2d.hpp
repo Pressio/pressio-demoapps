@@ -152,8 +152,8 @@ public:
   // constructor for when we only want the normal grad at domain boundaries' faces
   GradientEvaluatorInternal(const MeshType & mesh,
 			    BoundaryFacesNormalGradientScheme schemeAtBoundaryFaces)
-    : m_meshObj(mesh),
-      m_schemeAtBoundaryFaces(schemeAtBoundaryFaces)
+    : m_schemeAtBoundaryFaces(schemeAtBoundaryFaces),
+      m_meshObj(mesh)
   {
     initializeForStoringNormalGradsAtBoundaryFaces(mesh);
   }
