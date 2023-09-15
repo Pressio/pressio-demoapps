@@ -255,7 +255,8 @@ void sedov2dsymmetryIC(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC1(state_type & state,
 		  const mesh_t & meshObj,
-		  const scalar_type gamma)
+		  const scalar_type gamma,
+		  const scalar_type topRightPressure)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
@@ -274,7 +275,7 @@ void riemann2dIC1(state_type & state,
     {
 
       if (x(i) >= x0 and y(i) >= y0){
-	prim = {0.5313, zero, zero, 0.4};
+	prim = {0.5313, zero, zero, topRightPressure};
       }
       else if (x(i) < x0 and y(i) >= y0){
 	prim = {one, 0.7276, zero, one};
@@ -298,16 +299,26 @@ void riemann2dIC1(state_type & state,
 
 /*
   IC2:
+  Defaults are as given by Configuration 3 in:
   http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf
+
+  Unspecified states are computed according to the compatibility relations given by Configuration 3 in:
+  https://epubs.siam.org/doi/pdf/10.1137/0524006
 */
 template<class state_type, class mesh_t, class scalar_type>
 void riemann2dIC2(state_type & state,
 		  const mesh_t & meshObj,
-		  const scalar_type gamma)
+		  const scalar_type gamma,
+		  const scalar_type topRightPressure,
+		  const scalar_type topRightXVel,
+		  const scalar_type topRightYVel,
+		  const scalar_type topRightDensity,
+		  const scalar_type botLeftPressure)
 {
   constexpr int numDofPerCell = 4;
-  constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one = static_cast<scalar_type>(1);
+  constexpr auto two = static_cast<scalar_type>(2);
+  constexpr auto four = static_cast<scalar_type>(4);
 
   const auto x0 = static_cast<scalar_type>(0.8);
   const auto y0 = static_cast<scalar_type>(0.8);
@@ -317,19 +328,53 @@ void riemann2dIC2(state_type & state,
   const auto & x= meshObj.viewX();
   const auto & y= meshObj.viewY();
   std::array<scalar_type, numDofPerCell> prim = {};
+
+  // some checks
+  if (topRightPressure <= botLeftPressure) {
+    throw std::runtime_error("INVALID: riemannTopRightPressure <= riemannBotLeftPressure");
+  }
+
+  // compute remaining quantities
+  // compatibility equations
+  const auto eps = (gamma - one) / (gamma + one);
+  const auto fac13 = topRightPressure / botLeftPressure;
+  const auto fac43 = (one / (two * (one + two * eps))) * (eps * (fac13 + one) + std::sqrt(std::pow(eps * (fac13 + one), 2) + four * (one + two * eps) * fac13));
+  const auto topLeftPressure = fac43 * botLeftPressure;
+
+  const auto botRightPressure = topLeftPressure; // p4 = p2
+  const auto topLeftYVel = topRightYVel; // v2 = v1
+  const auto botRightXVel = topRightXVel; // u4 = u1
+
+  const auto topLeftDensity = topRightDensity * (topLeftPressure / topRightPressure + eps) / (1 + eps * topLeftPressure / topRightDensity); // rho2 / rho1 = gamma21
+  const auto botRightDensity = topLeftDensity; // rho4 = rho2
+
+  // u2 = psi21 + u1
+  const auto psi21_sq = (topLeftPressure - topRightPressure) * (topLeftDensity - topRightDensity) / (topLeftDensity * topRightDensity);
+  const auto topLeftXVel = std::sqrt(psi21_sq) + topRightXVel;
+
+  // v4 = psi41 + v1
+  const auto psi41_sq = (botRightPressure - topRightPressure) * (botRightDensity - topRightDensity) / (botRightDensity * topRightDensity);
+  const auto botRightYVel = std::sqrt(psi41_sq) + topRightYVel;
+
+  const auto botLeftXVel = topLeftXVel;
+  const auto botLeftYVel = botRightYVel;
+
+  // psi32 = psi41
+  const auto botLeftDensity = topLeftDensity * (botLeftPressure - topLeftPressure) / ((botLeftPressure - topLeftPressure) - psi41_sq * topLeftDensity);
+
   for (int i=0; i<::pressiodemoapps::extent(x,0); ++i)
     {
       if (x(i) >= x0 and y(i) >= y0){
-	prim = {1.5, zero, zero, 1.5};
+	prim = {topRightDensity, topRightXVel, topRightYVel, topRightPressure};
       }
       else if (x(i) < x0 and y(i) >= y0){
-	prim = {0.5323, 1.206, zero, 0.3};
+	prim = {topLeftDensity, topLeftXVel, topLeftYVel, topLeftPressure};
       }
       else if (x(i) < x0 and y(i) < y0){
-	prim = {0.138, 1.206, 1.206, 0.029};
+	prim = {botLeftDensity, botLeftXVel, botLeftYVel, botLeftPressure};
       }
       else if (x(i) > x0 and y(i) < y0){
-	prim = {0.5323, zero, 1.206, 0.3};
+	prim = {botRightDensity, botRightXVel, botRightYVel, botRightPressure};
       }
 
       const auto ind = i*numDofPerCell;
@@ -346,14 +391,14 @@ void riemann2dIC2(state_type & state,
 template<class state_type, class mesh_t, class scalar_type>
 void normalShock2dIC(state_type & state,
 		     const mesh_t & meshObj,
-		     const scalar_type gamma)
+		     const scalar_type gamma,
+		     const scalar_type machShock)
 {
   constexpr int numDofPerCell = 4;
   constexpr auto zero = static_cast<scalar_type>(0);
   constexpr auto one  = static_cast<scalar_type>(1);
   constexpr auto six  = static_cast<scalar_type>(6);
 
-  constexpr scalar_type machShock{9};
   constexpr auto angle = zero;
   constexpr auto xShock = one/six;
 

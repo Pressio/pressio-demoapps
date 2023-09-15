@@ -53,6 +53,7 @@ add_subdirectory(eigen_1d_euler_shu_osher_explicit)
 # ---------------------------------------------------------
 add_subdirectory(eigen_2d_diffusion_reaction_explicit)
 add_subdirectory(eigen_2d_diffusion_reaction_sample_mesh_test)
+add_subdirectory(eigen_2d_euler_parameters)
 add_subdirectory(eigen_2d_euler_smooth_explicit)
 add_subdirectory(eigen_2d_euler_smooth_implicit)
 add_subdirectory(eigen_2d_euler_normal_shock_explicit)
