@@ -118,7 +118,7 @@ enum class GradFdMode{
   ForwardThreePt, BackwardThreePt, CenterFivePt
 };
 
-enum class BoundaryFacesGradientScheme{
+enum class BoundaryFacesNormalGradientScheme{
   OneSidedFdAutoStencil, // this selects the stencil cells automatically using the connectivity
   LSQAutoStencil
 };

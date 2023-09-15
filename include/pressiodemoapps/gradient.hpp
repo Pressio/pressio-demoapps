@@ -55,29 +55,64 @@
 
 namespace pressiodemoapps{
 
-constexpr BoundaryFacesGradientScheme defaultGradSchemeForBoundaryFaces =
-  BoundaryFacesGradientScheme::OneSidedFdAutoStencil;
+constexpr BoundaryFacesNormalGradientScheme defaultGradSchemeForBoundaryFaces =
+  BoundaryFacesNormalGradientScheme::OneSidedFdAutoStencil;
 
-template<class MeshType, std::size_t numDofsPerCell = 1>
+template<class MeshType, std::size_t MaxNumDofsPerCell = 1>
 class GradientEvaluator
 {
 public:
   explicit GradientEvaluator(const MeshType & mesh)
     : m_impl(mesh, defaultGradSchemeForBoundaryFaces)
-  {}
-
-  template<class StateType>
-  void compute(const StateType & state){
-    m_impl.compute(state);
+  {
+    if (mesh.dimensionality() != 2){
+      throw std::runtime_error("gradients currently only supported for 2D");
+    }
   }
 
+  // this overload is for when the field has one dof/value per cell
+  template<class FieldType>
+  void operator()(const FieldType & field){
+    constexpr int numDofsPerCell = 1;
+    m_impl.compute(field, numDofsPerCell);
+  }
+
+  // this overload is for when the field has more than one dof/value per cell
+  template<class FieldType>
+  void operator()(const FieldType & field, int numDofsPerCell){
+    assert(numDofsPerCell > 1);
+    m_impl.compute(field, numDofsPerCell);
+  }
+
+  /* return a reference to a struct that meets the following API.
+
+     - if MaxNumDofsPerCell == 1
+
+	struct FaceApiExpositionOnly{
+	  std::array<scalar_type, 3> centerCoordinates;
+	  scalar_type normalGradient;
+	  int normalDirection; // == 1 for normal along x, == 2 for normal along y
+	};
+
+     - if MaxNumDofsPerCell >= 2
+
+	struct FaceApiExpositionOnly{
+	  std::array<scalar_type, 3> centerCoordinates;
+	  std::array<scalar_type, MaxNumDofsPerCell> normalGradient;
+	  int normalDirection; // == 1 for normal along x, == 2 for normal along y
+	};
+
+     NOTE: this is just for exposition-only to show what it offers,
+     it is not the actual name of the class.
+     You do not need to know the actual type, just use auto.
+  */
   const auto & queryFace(int cellGID, FacePosition fp) const{
     return m_impl.queryFace(cellGID, fp);
   }
 
 private:
-  using face_t = impl::Face<typename MeshType::scalar_type, numDofsPerCell>;
-  impl::GradientInternal<MeshType, face_t> m_impl;
+  using face_t = impl::Face<typename MeshType::scalar_type, MaxNumDofsPerCell>;
+  impl::GradientEvaluatorInternal<MeshType, face_t> m_impl;
 };
 
 }//end namespace pressiodemoapps
