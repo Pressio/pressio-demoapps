@@ -5,9 +5,9 @@
 
 namespace pda = pressiodemoapps;
 
-template<class MeshType, class AppType>
+template<class MeshType, class T>
 void write_gradients_fo_file(const MeshType & mesh,
-			     const AppType & app,
+			     const T & o,
 			     const std::string & fileId)
 {
   const std::string ssStr = std::to_string(mesh.stencilSize());
@@ -18,6 +18,7 @@ void write_gradients_fo_file(const MeshType & mesh,
   auto toFile = [&](int cellGID, auto const & faceIn){
     file << faceIn.centerCoordinates[0] << " "
 	 << faceIn.centerCoordinates[1] << " "
+	 << std::setprecision(14)
 	 << faceIn.normalGradient[0] << " "
 	 << faceIn.normalGradient[1] << " "
 	 << faceIn.normalGradient[2] << " "
@@ -34,23 +35,33 @@ void write_gradients_fo_file(const MeshType & mesh,
     const int cellGID = G(rowInd, 0);
 
     if (bL){
-      auto & face = app.queryFace(cellGID, pda::FacePosition::Left);
+      auto & face = o.queryFace(cellGID, pda::FacePosition::Left);
       toFile(cellGID, face);
     }
     if (bF){
-      auto & face = app.queryFace(cellGID, pda::FacePosition::Front);
+      auto & face = o.queryFace(cellGID, pda::FacePosition::Front);
       toFile(cellGID, face);
     }
     if (bR){
-      auto & face = app.queryFace(cellGID, pda::FacePosition::Right);
+      auto & face = o.queryFace(cellGID, pda::FacePosition::Right);
       toFile(cellGID, face);
     }
     if (bB){
-      auto & face = app.queryFace(cellGID, pda::FacePosition::Back);
+      auto & face = o.queryFace(cellGID, pda::FacePosition::Back);
       toFile(cellGID, face);
     }
   }
   file.close();
+}
+
+
+template<class StateType>
+void write_state_to_file(const StateType & state,
+			 const std::string & filename)
+{
+  std::ofstream file1; file1.open(filename);
+  for (int i=0;i <state.size(); ++i){ file1 << std::setprecision(14) << state(i) << '\n'; }
+  file1.close();
 }
 
 int main()
@@ -68,24 +79,23 @@ int main()
   const auto probId = pda::Euler2d::Riemann;
   auto appObj       = pda::create_problem_eigen(meshObj, probId, order, 2);
 
+  constexpr int nDofPerCell = 4;
+  pda::GradientEvaluator<decltype(meshObj), nDofPerCell> grads(meshObj);
+
   const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(0.5/dt);
-  auto state = appObj.initialCondition();
-  auto rhs = appObj.createRhs();
-  appObj.rhs(state, 0., rhs); //needed otherwise gradients are not computed
+  Eigen::VectorXd state = appObj.initialCondition();
 
-  std::ofstream file1; file1.open("state_init.txt");
-  write_gradients_fo_file(meshObj, appObj, "init");
-  for (int i=0;i <state.size(); ++i){ file1 << state(i) << '\n'; }
-  file1.close();
+  write_state_to_file(state, "state_init.txt");
+  grads(state, nDofPerCell);
+  write_gradients_fo_file(meshObj, grads, "init");
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps);
-  write_gradients_fo_file(meshObj, appObj, "final");
 
-  std::ofstream file; file.open("state_final.txt");
-  for (int i=0;i <state.size(); ++i){ file << state(i) << '\n'; }
-  file.close();
+  write_state_to_file(state, "state_final.txt");
+  grads(state, nDofPerCell);
+  write_gradients_fo_file(meshObj, grads, "final");
 
   return 0;
 }

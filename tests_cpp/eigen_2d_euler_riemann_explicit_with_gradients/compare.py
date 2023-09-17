@@ -11,8 +11,8 @@ if __name__== "__main__":
 
   assert(np.allclose(goldInit.shape, Dinit.shape))
   assert(np.isnan(Dinit).all() == False)
-  assert(np.allclose(goldInit, Dinit, rtol=1e-6, atol=1e-8))
+  assert(np.allclose(goldInit, Dinit, rtol=1e-8, atol=1e-8))
 
   assert(np.allclose(goldFinal.shape, Dfinal.shape))
   assert(np.isnan(Dfinal).all() == False)
-  assert(np.allclose(goldFinal, Dfinal, rtol=1e-6, atol=1e-8))
+  assert(np.allclose(goldFinal, Dfinal, rtol=1e-8, atol=1e-8))

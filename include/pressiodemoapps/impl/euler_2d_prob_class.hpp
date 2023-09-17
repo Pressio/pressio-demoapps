@@ -139,9 +139,6 @@ public:
     , m_recEn(recEnum), m_fluxEn(fluxEnum)
     , m_ic_parameters(icParameters)
     , m_phys_parameters(physParameters)
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-    , m_gradEval(meshObj)
-#endif
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -162,9 +159,6 @@ public:
     , m_ic_parameters(icParameters)
     , m_phys_parameters(physParameters)
     , m_bcFuncsHolder(std::move(bcHolder))
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-    , m_gradEval(meshObj)
-#endif
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -185,9 +179,6 @@ public:
     , m_recEn(recEnum), m_fluxEn(fluxEnum)
     , m_ic_parameters(icParameters)
     , m_phys_parameters(physParameters)
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-    , m_gradEval(meshObj)
-#endif
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -210,12 +201,6 @@ public:
       return m_ic_parameters[ic_param_string_to_index(m_probEn, m_icIdentifier, pname)];
     }
   }
-
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-  const auto & queryFace(index_t cellGID, FacePosition fp) const{
-    return m_gradEval.queryFace(cellGID, fp);
-  }
-#endif
 
 public:
   template <class T>
@@ -309,10 +294,6 @@ protected:
 				 fluxL, fluxF, fluxR, fluxB,
 				 uMinusHalfNeg, uMinusHalfPos,
 				 uPlusHalfNeg,  uPlusHalfPos);
-
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-      m_gradEval(U, numDofPerCell);
-#endif
     }
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -1301,10 +1282,6 @@ protected:
   std::array<scalar_type, 2> normalY_{0, 1};
 
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
-
-#if defined PRESSIODEMOAPPS_ENABLE_GRADIENTS
-  mutable ::pressiodemoapps::GradientEvaluator<MeshType, 4> m_gradEval;
-#endif
 };
 
 template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;

@@ -61,8 +61,10 @@ constexpr BoundaryFacesNormalGradientScheme defaultGradSchemeForBoundaryFaces =
 template<class MeshType, std::size_t MaxNumDofPerCell = 1>
 class GradientEvaluator
 {
+  using mesh_type = std::remove_cv_t<MeshType>;
+
 public:
-  explicit GradientEvaluator(const MeshType & mesh)
+  explicit GradientEvaluator(const mesh_type & mesh)
     : m_impl(mesh, defaultGradSchemeForBoundaryFaces)
   {
     if (mesh.dimensionality() != 2){
@@ -110,13 +112,13 @@ public:
      it is not the actual name of the class.
      You do not need to know the actual type, just use auto.
   */
-  const auto & queryFace(typename MeshType::index_t cellGID, FacePosition fp) const{
+  const auto & queryFace(typename mesh_type::index_t cellGID, FacePosition fp) const{
     return m_impl.queryFace(cellGID, fp);
   }
 
 private:
-  using face_t = impl::Face<typename MeshType::scalar_type, typename MeshType::index_t, MaxNumDofPerCell>;
-  impl::GradientEvaluatorInternal<MeshType, face_t> m_impl;
+  using face_t = impl::Face<typename mesh_type::scalar_type, typename mesh_type::index_t, MaxNumDofPerCell>;
+  impl::GradientEvaluatorInternal<mesh_type, face_t> m_impl;
 };
 
 }//end namespace pressiodemoapps
