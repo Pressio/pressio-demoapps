@@ -110,12 +110,12 @@ public:
      it is not the actual name of the class.
      You do not need to know the actual type, just use auto.
   */
-  const auto & queryFace(int cellGID, FacePosition fp) const{
+  const auto & queryFace(typename MeshType::index_t cellGID, FacePosition fp) const{
     return m_impl.queryFace(cellGID, fp);
   }
 
 private:
-  using face_t = impl::Face<typename MeshType::scalar_type, MaxNumDofPerCell>;
+  using face_t = impl::Face<typename MeshType::scalar_type, typename MeshType::index_t, MaxNumDofPerCell>;
   impl::GradientEvaluatorInternal<MeshType, face_t> m_impl;
 };
 
