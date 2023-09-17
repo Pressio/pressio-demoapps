@@ -119,8 +119,7 @@ enum class GradFdMode{
 };
 
 enum class BoundaryFacesNormalGradientScheme{
-  OneSidedFdAutoStencil, // this selects the stencil cells automatically using the connectivity
-  LSQAutoStencil
+  OneSidedFdAutoStencil // this selects the stencil cells automatically using the connectivity
 };
 
 }//end namespace pressiodemoapps
