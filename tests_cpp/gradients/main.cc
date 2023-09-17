@@ -136,15 +136,6 @@ auto do_test_api_B(const MeshType& mesh,
   const auto & rowsCellsOnBD = mesh.graphRowsOfCellsStrictlyOnBd();
   std::ofstream file; file.open("pda_result" + ss + ".txt");
 
-  auto toFile = [&](int cellGID, auto const & faceIn, auto gold){
-      file << faceIn.centerCoordinates[0] << " "
-	   << faceIn.centerCoordinates[1] << "\n";
-      for (int j=0; j<numDofPerCell; ++j){
-	file << faceIn.normalGradient[j] << " ";
-      }
-      file << gold << " " << faceIn.normalDirection << "\n";
-  };
-
   std::array<double, MaxNumDofPerCell> errorGradX = {};
   std::array<double, MaxNumDofPerCell> errorGradY = {};
   int count = 0;
@@ -158,7 +149,6 @@ auto do_test_api_B(const MeshType& mesh,
     if (bL){
       auto & face = grads.queryFace(cellGID, pda::FacePosition::Left);
       const auto gold = gradsinex(face.centerCoordinates[0], face.centerCoordinates[1]);
-      toFile(cellGID, face, gold);
       assert(face.normalGradient.size() == MaxNumDofPerCell);
       for (int j=0; j<numDofPerCell; ++j){
 	const auto err = face.normalGradient[j] - gold;
@@ -170,7 +160,6 @@ auto do_test_api_B(const MeshType& mesh,
     if (bF){
       auto & face = grads.queryFace(cellGID, pda::FacePosition::Front);
       const auto gold = gradsiney(face.centerCoordinates[0], face.centerCoordinates[1]);
-      toFile(cellGID, face, gold);
       assert(face.normalGradient.size() == MaxNumDofPerCell);
       for (int j=0; j<numDofPerCell; ++j){
 	const auto err  = face.normalGradient[j] - gold;
@@ -182,7 +171,6 @@ auto do_test_api_B(const MeshType& mesh,
     if (bR){
       auto & face = grads.queryFace(cellGID, pda::FacePosition::Right);
       const auto gold = gradsinex(face.centerCoordinates[0], face.centerCoordinates[1]);
-      toFile(cellGID, face, gold);
       assert(face.normalGradient.size() == MaxNumDofPerCell);
       for (int j=0; j<numDofPerCell; ++j){
 	const auto err  = face.normalGradient[j] - gold;
@@ -194,7 +182,6 @@ auto do_test_api_B(const MeshType& mesh,
     if (bB){
       auto & face = grads.queryFace(cellGID, pda::FacePosition::Back);
       const auto gold = gradsiney(face.centerCoordinates[0], face.centerCoordinates[1]);
-      toFile(cellGID, face, gold);
       assert(face.normalGradient.size() == MaxNumDofPerCell);
       for (int j=0; j<numDofPerCell; ++j){
 	const auto err  = face.normalGradient[j] - gold;
