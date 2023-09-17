@@ -14,6 +14,10 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
   ${CMAKE_CURRENT_SOURCE_DIR}/pressio/include)
 
+if(PRESSIODEMOAPPS_ENABLE_GRADIENTS)
+  add_compile_definitions(PRIVATE PRESSIODEMOAPPS_ENABLE_GRADIENTS)
+endif()
+
 # ---------------------------------------------------------
 # various
 # ---------------------------------------------------------

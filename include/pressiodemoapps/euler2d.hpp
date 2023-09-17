@@ -54,6 +54,7 @@
 #include "./mesh.hpp"
 #include "./schemes_info.hpp"
 #include "./impl/custom_bc_holder.hpp"
+#include "./gradient.hpp"
 #include "./euler_compute_energy.hpp"
 #include "./adapter_cpp.hpp"
 #include "./adapter_py.hpp"
