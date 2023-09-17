@@ -12,16 +12,31 @@ def gradX(x,y):
 def gradY(x,y):
     return math.pi*x*np.cos(math.pi * x * y)
 
-def extractN(ns):
+def extractN(ns,meshPath):
   reg = re.compile(r''+ns+'.+')
-  file1 = open('info.dat', 'r')
+  file1 = open(meshPath+'/info.dat', 'r')
   strings = re.search(reg, file1.read())
   file1.close()
   assert(strings)
   return int(strings.group().split()[1])
 
-nx = extractN('nx')
-ny = extractN('ny')
+D = np.loadtxt("pda_resultsample_mesh_ss_7.txt")
+mask_gx = (D[:,4] == 1)
+mask_gy = (D[:,4] == 2)
+Xpt_gx = D[mask_gx,0]
+Ypt_gx = D[mask_gx,1]
+Xpt_gy = D[mask_gy,0]
+Ypt_gy = D[mask_gy,1]
+comp_gx_V = D[mask_gx,2]
+comp_gy_V = D[mask_gy,2]
+gold_gx_V = D[mask_gx,3]
+gold_gy_V = D[mask_gy,3]
+
+
+
+meshPath = "./fullmesh_s3"
+nx = extractN('nx',meshPath)
+ny = extractN('ny',meshPath)
 print(nx, ny)
 
 x = np.linspace(0, 1., nx)
@@ -46,45 +61,20 @@ ax2.view_init(21, -32)
 ax2.plot_surface(xv, yv, gx, linewidth=0, antialiased=False, alpha=0.5)
 ax2.set_title("grad_Y")
 
-
-fig, ax3 = plt.subplots()
-ax3.set_title("grad_X")
-fig, ax4 = plt.subplots()
-ax4.set_title("grad_Y")
-
-mylabels = ['computed_ss3']#, 'computed_ss5']
-for i in range(1,2):
-  myresults = np.loadtxt("fd_results_"+str(i)+".txt")
-  mask_gx = (myresults[:,4] == 1)
-  mask_gy = (myresults[:,4] == 2)
-  comp_gx_X = myresults[mask_gx,1]
-  comp_gx_Y = myresults[mask_gx,2]
-  comp_gx_V = myresults[mask_gx,3]
-  comp_gy_X = myresults[mask_gy,1]
-  comp_gy_Y = myresults[mask_gy,2]
-  comp_gy_V = myresults[mask_gy,3]
-  ax1.scatter3D(comp_gx_X, comp_gx_Y, comp_gx_V, label=mylabels[0], alpha=0.5, s=15)
-  ax2.scatter3D(comp_gy_X, comp_gy_Y, comp_gy_V, label=mylabels[0], alpha=0.5, s=15)
-  ax3.plot(comp_gx_V,'o', label=mylabels[0])
-  ax4.plot(comp_gy_V,'o', label=mylabels[0])
-
-mylabels = ['pda_computed']
-myresults = np.loadtxt("pda_result.txt")
-mask_gx = (myresults[:,4] == 1)
-mask_gy = (myresults[:,4] == 2)
-comp_gx_X = myresults[mask_gx,1]
-comp_gx_Y = myresults[mask_gx,2]
-comp_gx_V = myresults[mask_gx,3]
-comp_gy_X = myresults[mask_gy,1]
-comp_gy_Y = myresults[mask_gy,2]
-comp_gy_V = myresults[mask_gy,3]
-ax1.scatter3D(comp_gx_X, comp_gx_Y, comp_gx_V, label=mylabels[0], alpha=0.9)
-ax2.scatter3D(comp_gy_X, comp_gy_Y, comp_gy_V, label=mylabels[0], alpha=0.9)
-ax3.plot(comp_gx_V,'*', label=mylabels[0])
-ax4.plot(comp_gy_V,'*', label=mylabels[0])
-
+ax1.scatter3D(Xpt_gx, Ypt_gx, comp_gx_V, alpha=0.9)
+ax2.scatter3D(Xpt_gy, Ypt_gy, comp_gy_V, alpha=0.9)
 ax1.legend()
 ax2.legend()
+
+fig, ax3 = plt.subplots()
+fig, ax4 = plt.subplots()
+ax3.plot(gold_gx_V,'o', label="gold")
+ax3.plot(comp_gx_V,'*', label="computed")
+ax4.plot(gold_gy_V,'o', label="gold")
+ax4.plot(comp_gy_V,'*', label="computed")
+ax3.set_title("grad_X")
+ax4.set_title("grad_Y")
 ax3.legend()
 ax4.legend()
+
 plt.show()
