@@ -58,7 +58,7 @@ namespace pressiodemoapps{ namespace impl{
   this is intentionally just impl details, the actual public API is kept separate
 */
 
-template<class ScalarType, class CellConnectivity, class FType>
+template<class IntType, class ScalarType, class CellConnectivity, class FType>
 ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
 							      const CellConnectivity & cc,
 							      char axis,
@@ -75,11 +75,11 @@ ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
   // fd rules taken from https://web.media.mit.edu/~crtaylor/calculator.html
   // manually verified only the 2pt one
 
-  const int i_05  = cc[0]; // this always exists
-  const int i_p15 = (axis=='x') ? cc[3] : (axis=='y') ? cc[2] : -1;
-  const int i_m15 = (axis=='x') ? cc[1] : (axis=='y') ? cc[4] : -1;
-  const int i_p30 = (graphNumCols>=9) ? ((axis=='x') ? cc[7] : ((axis=='y') ? cc[6] : -1)) : -1;
-  const int i_m30 = (graphNumCols>=9) ? ((axis=='x') ? cc[5] : ((axis=='y') ? cc[8] : -1)) : -1;
+  const IntType i_05  = cc[0]; // this always exists
+  const IntType i_p15 = (axis=='x') ? cc[3] : (axis=='y') ? cc[2] : -1;
+  const IntType i_m15 = (axis=='x') ? cc[1] : (axis=='y') ? cc[4] : -1;
+  const IntType i_p30 = (graphNumCols>=9) ? ((axis=='x') ? cc[7] : ((axis=='y') ? cc[6] : -1)) : -1;
+  const IntType i_m30 = (graphNumCols>=9) ? ((axis=='x') ? cc[5] : ((axis=='y') ? cc[8] : -1)) : -1;
 
   const auto f_05  = f(i_05*numDofPerCell + dofShift);
   const auto f_p15 = (i_p15 != -1) ? f(i_p15*numDofPerCell + dofShift) : 0;
@@ -103,28 +103,29 @@ ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
 constexpr int _faceNormalX = 1;
 constexpr int _faceNormalY = 2;
 
-template<class ScT, std::size_t N>
+template<class ScT, class IndexType, std::size_t N>
 struct Face{
   std::array<ScT, 3> centerCoordinates = {};
   std::array<ScT, N> normalGradient = {};
-  int parentCellGraphRow = {};
+  IndexType parentCellGraphRow = {};
   int normalDirection = {}; //1 for x, 2 for y
 
   static constexpr std::size_t N_ = N;
 };
 
-template<class ScT>
-struct Face<ScT, 1>{
+template<class ScT, class IndexType>
+struct Face<ScT, IndexType, 1>{
   std::array<ScT, 3> centerCoordinates = {};
   ScT normalGradient = {};
-  int parentCellGraphRow = {};
+  IndexType parentCellGraphRow = {};
   int normalDirection = {}; //1 for x, 2 for y
 
   static constexpr std::size_t N_ = 1;
 };
 
+template<class IndexType>
 struct MyKey{
-  int parentCellGID;
+  IndexType parentCellGID;
   FacePosition pos;
 
   bool operator==(const MyKey & p) const {
@@ -133,8 +134,9 @@ struct MyKey{
 };
 
 struct HashFnc{
-  std::size_t operator() (const MyKey & k) const{
-    const std::size_t h1 = std::hash<int>()(k.parentCellGID);
+  template<class IndexType>
+  std::size_t operator() (const MyKey<IndexType> & k) const{
+    const std::size_t h1 = std::hash<IndexType>()(k.parentCellGID);
     const std::size_t h2 = std::hash<int>()(static_cast<int>(k.pos));
     return h1 ^ h2;
   }
@@ -145,6 +147,8 @@ template<class MeshType, class FaceType>
 class GradientEvaluatorInternal
 {
   using sc_t = typename MeshType::scalar_type;
+  using index_t	= typename MeshType::index_t;
+  using key_t = MyKey<index_t>;
 
 public:
   // constructor for when we only want the normal grad at domain boundaries' faces
@@ -156,8 +160,8 @@ public:
     initializeForStoringNormalGradsAtBoundaryFaces(mesh);
   }
 
-  const auto & queryFace(int cellGID, FacePosition fp) const{
-    const MyKey key{cellGID, fp};
+  const auto & queryFace(index_t cellGID, FacePosition fp) const{
+    const key_t key{cellGID, fp};
     assert(m_data.count(key) == 1);
     auto it = m_data.find(key);
     return it->second;
@@ -216,14 +220,14 @@ private:
 
       if constexpr (FaceType::N_ == 1){
 	face.normalGradient =
-	  face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
+	  face_normal_gradient_for_cell_centered_function_2d<index_t>(field, currCellConnec, axis,
 							     fdMode, h, numDofPerCell, 0);
       }
       else{
 	for (int j=0; j<numDofPerCell; ++j){
 	  face.normalGradient[j] =
-	    face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
-							       fdMode, h, numDofPerCell, j);
+	    face_normal_gradient_for_cell_centered_function_2d<index_t>(field, currCellConnec, axis,
+									fdMode, h, numDofPerCell, j);
 	}
       }
     }
@@ -255,25 +259,25 @@ private:
       if (bL){
 	const auto faceCX = cellX-dxHalf;
 	const auto faceCY = cellY;
-	m_data[MyKey{cellGID, FacePosition::Left}] =
+	m_data[key_t{cellGID, FacePosition::Left}] =
 	  FaceType{{faceCX, faceCY, faceCZ}, {}, rowInd, _faceNormalX};
       }
       if (bF){
 	const auto faceCX = cellX;
 	const auto faceCY = cellY+dyHalf;
-	m_data[MyKey{cellGID, FacePosition::Front}] =
+	m_data[key_t{cellGID, FacePosition::Front}] =
 	  FaceType{{faceCX, faceCY, faceCZ}, {}, rowInd, _faceNormalY};
       }
       if (bR){
 	const auto faceCX = cellX+dxHalf;
 	const auto faceCY = cellY;
-	m_data[MyKey{cellGID, FacePosition::Right}] =
+	m_data[key_t{cellGID, FacePosition::Right}] =
 	  FaceType{{faceCX, faceCY, faceCZ}, {}, rowInd, _faceNormalX};
       }
       if (bB){
 	const auto faceCX = cellX;
 	const auto faceCY = cellY-dyHalf;
-	m_data[MyKey{cellGID, FacePosition::Back}] =
+	m_data[key_t{cellGID, FacePosition::Back}] =
 	  FaceType{{faceCX, faceCY, faceCZ}, {}, rowInd, _faceNormalY};
       }
     }
@@ -282,7 +286,7 @@ private:
 private:
   BoundaryFacesNormalGradientScheme m_schemeAtBoundaryFaces;
   std::reference_wrapper<const MeshType> m_meshObj;
-  std::unordered_map<MyKey, FaceType, HashFnc> m_data = {};
+  std::unordered_map<key_t, FaceType, HashFnc> m_data = {};
 };
 
 }}
