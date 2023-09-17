@@ -80,7 +80,7 @@ public:
   // this overload is for when the field has more than one dof/value per cell
   template<class FieldType>
   void operator()(const FieldType & field, int numDofPerCell){
-    if (numDofPerCell > MaxNumDofPerCell){
+    if (numDofPerCell > (int) MaxNumDofPerCell){
       const std::string msg = "GradientEvaluator: cannot call operator() with numDofPerCell > MaxNumDofPerCell: "
 	+ std::to_string(numDofPerCell)  + " > " + std::to_string(MaxNumDofPerCell);
       throw std::runtime_error(msg);
