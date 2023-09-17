@@ -8,7 +8,6 @@ configure_file(grad_gold_init.txt grad_gold_init.txt COPYONLY)
 configure_file(grad_gold_final.txt grad_gold_final.txt COPYONLY)
 
 add_executable(${exename} ${CMAKE_CURRENT_SOURCE_DIR}/../main.cc)
-target_compile_definitions(${exename} PRIVATE PRESSIODEMOAPPS_ENABLE_GRADIENTS)
 
 add_test(NAME ${testname}
 COMMAND ${CMAKE_COMMAND}
