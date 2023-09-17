@@ -36,7 +36,7 @@ std::pair<double, double> do_test_api_A(const MeshType& mesh, const std::string 
   }
 
   // evaluate gradients
-  pda::GradientEvaluator grads(mesh);
+  pda::GradientEvaluator<MeshType> grads(mesh);
   grads(f);
 
   const auto & G = mesh.graph();
