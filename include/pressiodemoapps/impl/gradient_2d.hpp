@@ -58,7 +58,7 @@ namespace pressiodemoapps{ namespace impl{
   this is intentionally just impl details, the actual public API is kept separate
 */
 
-template<class ScalarType, class CellConnectivity, class FType>
+template<class IntType, class ScalarType, class CellConnectivity, class FType>
 ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
 							      const CellConnectivity & cc,
 							      char axis,
@@ -75,11 +75,11 @@ ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
   // fd rules taken from https://web.media.mit.edu/~crtaylor/calculator.html
   // manually verified only the 2pt one
 
-  const auto i_05  = cc[0]; // this always exists
-  const auto i_p15 = (axis=='x') ? cc[3] : (axis=='y') ? cc[2] : -1;
-  const auto i_m15 = (axis=='x') ? cc[1] : (axis=='y') ? cc[4] : -1;
-  const auto i_p30 = (graphNumCols>=9) ? ((axis=='x') ? cc[7] : ((axis=='y') ? cc[6] : -1)) : -1;
-  const auto i_m30 = (graphNumCols>=9) ? ((axis=='x') ? cc[5] : ((axis=='y') ? cc[8] : -1)) : -1;
+  const IntType i_05  = cc[0]; // this always exists
+  const IntType i_p15 = (axis=='x') ? cc[3] : (axis=='y') ? cc[2] : -1;
+  const IntType i_m15 = (axis=='x') ? cc[1] : (axis=='y') ? cc[4] : -1;
+  const IntType i_p30 = (graphNumCols>=9) ? ((axis=='x') ? cc[7] : ((axis=='y') ? cc[6] : -1)) : -1;
+  const IntType i_m30 = (graphNumCols>=9) ? ((axis=='x') ? cc[5] : ((axis=='y') ? cc[8] : -1)) : -1;
 
   const auto f_05  = f(i_05*numDofPerCell + dofShift);
   const auto f_p15 = (i_p15 != -1) ? f(i_p15*numDofPerCell + dofShift) : 0;
@@ -220,14 +220,14 @@ private:
 
       if constexpr (FaceType::N_ == 1){
 	face.normalGradient =
-	  face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
+	  face_normal_gradient_for_cell_centered_function_2d<index_t>(field, currCellConnec, axis,
 							     fdMode, h, numDofPerCell, 0);
       }
       else{
 	for (int j=0; j<numDofPerCell; ++j){
 	  face.normalGradient[j] =
-	    face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
-							       fdMode, h, numDofPerCell, j);
+	    face_normal_gradient_for_cell_centered_function_2d<index_t>(field, currCellConnec, axis,
+									fdMode, h, numDofPerCell, j);
 	}
       }
     }
