@@ -14,10 +14,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
   ${CMAKE_CURRENT_SOURCE_DIR}/pressio/include)
 
-if(PRESSIODEMOAPPS_ENABLE_GRADIENTS)
-  add_compile_definitions(PRIVATE PRESSIODEMOAPPS_ENABLE_GRADIENTS)
-endif()
-
 # ---------------------------------------------------------
 # various
 # ---------------------------------------------------------
@@ -65,6 +61,7 @@ add_subdirectory(eigen_2d_euler_smooth_implicit)
 add_subdirectory(eigen_2d_euler_normal_shock_explicit)
 add_subdirectory(eigen_2d_euler_normal_shock_implicit)
 add_subdirectory(eigen_2d_euler_riemann_explicit)
+add_subdirectory(eigen_2d_euler_riemann_explicit_with_gradients)
 add_subdirectory(eigen_2d_euler_riemann_implicit)
 add_subdirectory(eigen_2d_euler_sedov_explicit)
 add_subdirectory(eigen_2d_euler_sedov_implicit)
