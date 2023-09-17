@@ -58,7 +58,7 @@ namespace pressiodemoapps{
 constexpr BoundaryFacesNormalGradientScheme defaultGradSchemeForBoundaryFaces =
   BoundaryFacesNormalGradientScheme::OneSidedFdAutoStencil;
 
-template<class MeshType, std::size_t MaxNumDofsPerCell = 1>
+template<class MeshType, std::size_t MaxNumDofPerCell = 1>
 class GradientEvaluator
 {
 public:
@@ -73,20 +73,24 @@ public:
   // this overload is for when the field has one dof/value per cell
   template<class FieldType>
   void operator()(const FieldType & field){
-    constexpr int numDofsPerCell = 1;
-    m_impl.compute(field, numDofsPerCell);
+    constexpr int numDofPerCell = 1;
+    m_impl.compute(field, numDofPerCell);
   }
 
   // this overload is for when the field has more than one dof/value per cell
   template<class FieldType>
-  void operator()(const FieldType & field, int numDofsPerCell){
-    assert(numDofsPerCell > 1);
-    m_impl.compute(field, numDofsPerCell);
+  void operator()(const FieldType & field, int numDofPerCell){
+    if (numDofPerCell > MaxNumDofPerCell){
+      const std::string msg = "GradientEvaluator: cannot call operator() with numDofPerCell > MaxNumDofPerCell: "
+	+ std::to_string(numDofPerCell)  + " > " + std::to_string(MaxNumDofPerCell);
+      throw std::runtime_error(msg);
+    }
+    m_impl.compute(field, numDofPerCell);
   }
 
   /* return a reference to a struct that meets the following API.
 
-     - if MaxNumDofsPerCell == 1
+     - if MaxNumDofPerCell == 1
 
 	struct FaceApiExpositionOnly{
 	  std::array<scalar_type, 3> centerCoordinates;
@@ -94,11 +98,11 @@ public:
 	  int normalDirection; // == 1 for normal along x, == 2 for normal along y
 	};
 
-     - if MaxNumDofsPerCell >= 2
+     - if MaxNumDofPerCell >= 2
 
 	struct FaceApiExpositionOnly{
 	  std::array<scalar_type, 3> centerCoordinates;
-	  std::array<scalar_type, MaxNumDofsPerCell> normalGradient;
+	  std::array<scalar_type, MaxNumDofPerCell> normalGradient;
 	  int normalDirection; // == 1 for normal along x, == 2 for normal along y
 	};
 
@@ -111,7 +115,7 @@ public:
   }
 
 private:
-  using face_t = impl::Face<typename MeshType::scalar_type, MaxNumDofsPerCell>;
+  using face_t = impl::Face<typename MeshType::scalar_type, MaxNumDofPerCell>;
   impl::GradientEvaluatorInternal<MeshType, face_t> m_impl;
 };
 

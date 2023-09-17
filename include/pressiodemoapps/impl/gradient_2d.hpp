@@ -53,12 +53,10 @@ namespace pressiodemoapps{ namespace impl{
 
 /*
   FRIZZI: Sept 15, 2023
-  this code below is very much WIP and is put together fairly quickly
-  so not much thought has gone into how to best do things, but this is
-  a starting point and note that all this is intentionally just impl details,
-  the actual public API is kept separate
+  the code below has been done fairly quickly so not much thought has gone
+  into how to best do things, but this is a starting point and note that all
+  this is intentionally just impl details, the actual public API is kept separate
 */
-
 
 template<class ScalarType, class CellConnectivity, class FType>
 ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
@@ -66,7 +64,7 @@ ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
 							      char axis,
 							      GradFdMode mode,
 							      const ScalarType & h,
-							      int nDofPerCell,
+							      int numDofPerCell,
 							      int dofShift)
 {
 
@@ -83,11 +81,11 @@ ScalarType face_normal_gradient_for_cell_centered_function_2d(const FType & f,
   const int i_p30 = (graphNumCols>=9) ? ((axis=='x') ? cc[7] : ((axis=='y') ? cc[6] : -1)) : -1;
   const int i_m30 = (graphNumCols>=9) ? ((axis=='x') ? cc[5] : ((axis=='y') ? cc[8] : -1)) : -1;
 
-  const auto f_05  = f(i_05*nDofPerCell + dofShift);
-  const auto f_p15 = (i_p15 != -1) ? f(i_p15*nDofPerCell + dofShift) : 0;
-  const auto f_m15 = (i_m15 != -1) ? f(i_m15*nDofPerCell + dofShift) : 0;
-  const auto f_p30 = (i_p30 != -1) ? f(i_p30*nDofPerCell + dofShift) : 0;
-  const auto f_m30 = (i_m30 != -1) ? f(i_m30*nDofPerCell + dofShift) : 0;
+  const auto f_05  = f(i_05*numDofPerCell + dofShift);
+  const auto f_p15 = (i_p15 != -1) ? f(i_p15*numDofPerCell + dofShift) : 0;
+  const auto f_m15 = (i_m15 != -1) ? f(i_m15*numDofPerCell + dofShift) : 0;
+  const auto f_p30 = (i_p30 != -1) ? f(i_p30*numDofPerCell + dofShift) : 0;
+  const auto f_m30 = (i_m30 != -1) ? f(i_m30*numDofPerCell + dofShift) : 0;
 
   switch(mode){
   case GradFdMode::ForwardTwoPt:  return (-f_05 + f_p15)/h;
@@ -179,7 +177,7 @@ public:
 private:
   template<class FieldType>
   void normalGradBoundaryFacesOneSidedFdAutoStencil(const FieldType & field,
-						    int nDofPerCell)
+						    int numDofPerCell)
   {
     /*
       compute normal gradients using ond-sided FD where the width of
@@ -219,13 +217,13 @@ private:
       if constexpr (FaceType::N_ == 1){
 	face.normalGradient =
 	  face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
-							     fdMode, h, nDofPerCell, 0);
+							     fdMode, h, numDofPerCell, 0);
       }
       else{
-	for (int j=0; j<nDofPerCell; ++j){
+	for (int j=0; j<numDofPerCell; ++j){
 	  face.normalGradient[j] =
 	    face_normal_gradient_for_cell_centered_function_2d(field, currCellConnec, axis,
-							       fdMode, h, nDofPerCell, j);
+							       fdMode, h, numDofPerCell, j);
 	}
       }
     }
