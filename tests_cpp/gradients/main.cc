@@ -259,7 +259,7 @@ int main()
   // which, indeed, yields higher error.
 
   std::vector<bool> flags;
-  for (auto ss : {3}){//,5,7}){
+  for (auto ss : {3,5,7}){
     flags.push_back(test_driver_A(goldData, "fullmesh",   ss));
     flags.push_back(test_driver_A(goldData, "samplemesh", ss));
 
