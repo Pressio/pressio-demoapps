@@ -135,10 +135,10 @@ public:
 	   const int icIdentifier,
 	   const std::vector<scalar_type> & icParameters,
 	   const std::vector<scalar_type> & physParameters)
-    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
-      m_recEn(recEnum), m_fluxEn(fluxEnum),
-      m_ic_parameters(icParameters),
-      m_phys_parameters(physParameters)
+    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj)
+    , m_recEn(recEnum), m_fluxEn(fluxEnum)
+    , m_ic_parameters(icParameters)
+    , m_phys_parameters(physParameters)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -154,11 +154,11 @@ public:
 	   const int icIdentifier,
 	   const std::vector<scalar_type> & icParameters,
 	   const std::vector<scalar_type> & physParameters)
-    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj),
-      m_recEn(recEnum), m_fluxEn(fluxEnum),
-      m_ic_parameters(icParameters),
-      m_phys_parameters(physParameters),
-      m_bcFuncsHolder(std::move(bcHolder))
+    : m_probEn(probEnum), m_icIdentifier(icIdentifier), m_meshObj(meshObj)
+    , m_recEn(recEnum), m_fluxEn(fluxEnum)
+    , m_ic_parameters(icParameters)
+    , m_phys_parameters(physParameters)
+    , m_bcFuncsHolder(std::move(bcHolder))
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;
@@ -174,11 +174,11 @@ public:
 	   const std::vector<scalar_type> & icParameters,
 	   const std::vector<scalar_type> & physParameters)
 	   // scalar_type inletXVel,, scalar_type bottomYVel, scalar_type density)
-    : m_probEn(::pressiodemoapps::Euler2d::CrossShock),
-      m_icIdentifier(icIdentifier), m_meshObj(meshObj),
-      m_recEn(recEnum), m_fluxEn(fluxEnum),
-      m_ic_parameters(icParameters),
-      m_phys_parameters(physParameters)
+    : m_probEn(::pressiodemoapps::Euler2d::CrossShock)
+    , m_icIdentifier(icIdentifier), m_meshObj(meshObj)
+    , m_recEn(recEnum), m_fluxEn(fluxEnum)
+    , m_ic_parameters(icParameters)
+    , m_phys_parameters(physParameters)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * numDofPerCell;

@@ -191,6 +191,9 @@ private:
       if the mesh stencil size == 7, we use a three point one-sided FD
         - we could make this bigger later
      */
+    // std::ofstream file1; file1.open("gigi.txt");
+    // for (int i=0;i <field.size(); ++i){ file1 << std::setprecision(14) << field(i) << '\n'; }
+    // file1.close();
 
     // determine the FD stencil using mesh stencil size
     const int ss = m_meshObj.get().stencilSize();
