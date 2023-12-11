@@ -195,9 +195,6 @@ auto create_problem_eigen(const MeshType & meshObj,
   if (!impleuler2d::valid_ic_flag<>(problemEnum, icFlag)){
     throw std::runtime_error("Euler2d: invalid icFlag for the given problem enum");
   }
-  if (recEnum != InviscidFluxReconstruction::FirstOrder){
-    throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
-  }
 
   using sc_t = typename MeshType::scalar_t;
   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
@@ -231,9 +228,6 @@ auto create_problem_eigen(const MeshType & meshObj,
   }
   if (!impleuler2d::valid_ic_flag<>(problemEnum, icFlag)){
     throw std::runtime_error("Euler2d: invalid icFlag for the given problem enum");
-  }
-  if (recEnum != InviscidFluxReconstruction::FirstOrder){
-    throw std::runtime_error("Euler2d: using custom BCs is only supported with InviscidFluxReconstruction::FirstOrder");
   }
 
   using sc_t = typename MeshType::scalar_t;
