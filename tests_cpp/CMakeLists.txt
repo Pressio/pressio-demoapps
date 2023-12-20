@@ -28,6 +28,8 @@ add_subdirectory(eigen_rusanov_flux_jacobians_swe)
 add_subdirectory(create_vec_of_problems)
 
 add_subdirectory(gradients)
+add_subdirectory(eigen_2d_euler_riemann_ghost_fill_check)
+add_subdirectory(eigen_2d_swe_ghost_fill_check)
 
 # ---------------------------------------------------------
 # 1d problems

@@ -144,6 +144,8 @@ private:
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 9);
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*numDofPerCell;
 
     stencilThreeImpl(smPt, gRow);
     const auto left0 = graph(smPt, 1);
@@ -156,28 +158,40 @@ private:
     const auto back1 = graph(smPt, 8);
 
     if (left1 == -1){
-      const auto ind = right0*numDofPerCell;
+      auto ind = uIndex;
+      if (left0==-1){ ind = right0*numDofPerCell; }
+      else { ind = left0*numDofPerCell; }
+
       m_ghostLeft(gRow, 3) = m_state(ind);
       m_ghostLeft(gRow, 4) = -m_state(ind+1);
       m_ghostLeft(gRow, 5) = m_state(ind+2);
     }
 
     if (front1 == -1){
-      const auto ind = back0*numDofPerCell;
+      auto ind = uIndex;
+      if (front0==-1){ ind = back0*numDofPerCell; }
+      else { ind = front0*numDofPerCell; }
+
       m_ghostFront(gRow, 3) = m_state(ind);
       m_ghostFront(gRow, 4) = m_state(ind+1);
       m_ghostFront(gRow, 5) = -m_state(ind+2);
     }
 
     if (right1 == -1){
-      const auto ind = left0*numDofPerCell;
+      auto ind = uIndex;
+      if (right0==-1){ ind = left0*numDofPerCell; }
+      else { ind = right0*numDofPerCell; }
+
       m_ghostRight(gRow, 3) = m_state(ind);
       m_ghostRight(gRow, 4) = -m_state(ind+1);
       m_ghostRight(gRow, 5) = m_state(ind+2);
     }
 
     if (back1 == -1){
-      const auto ind = front0*numDofPerCell;
+      auto ind = uIndex;
+      if (back0==-1){ ind = front0*numDofPerCell; }
+      else { ind = back0*numDofPerCell; }
+
       m_ghostBack(gRow, 3) = m_state(ind);
       m_ghostBack(gRow, 4) = m_state(ind+1);
       m_ghostBack(gRow, 5) = -m_state(ind+2);
@@ -190,8 +204,14 @@ private:
     constexpr int numDofPerCell = 3;
     const auto & graph = m_meshObj.graph();
     assert(::pressiodemoapps::extent(graph, 1) >= 13);
+    const auto cellGID = graph(smPt, 0);
+    const auto uIndex  = cellGID*numDofPerCell;
 
     stencilFiveImpl(smPt, gRow);
+    const auto left0  = graph(smPt, 1);
+    const auto front0 = graph(smPt, 2);
+    const auto right0 = graph(smPt, 3);
+    const auto back0  = graph(smPt, 4);
     const auto left1  = graph(smPt, 5);
     const auto front1 = graph(smPt, 6);
     const auto right1 = graph(smPt, 7);
@@ -202,28 +222,44 @@ private:
     const auto back2  = graph(smPt, 12);
 
     if (left2 == -1){
-      const auto ind = right1*numDofPerCell;
+      auto ind = uIndex; ;
+      if (left1!=-1 && left0!=-1){ ind = left1*numDofPerCell; }
+      if (left1==-1 && left0!=-1){ ind = uIndex; }
+      if (left1==-1 && left0==-1){ ind = right1*numDofPerCell; }
+
       m_ghostLeft(gRow, 6)  = m_state(ind);
       m_ghostLeft(gRow, 7)  = -m_state(ind+1);
       m_ghostLeft(gRow, 8) = m_state(ind+2);
     }
 
     if (front2 == -1){
-      const auto ind = back1*numDofPerCell;
+      auto ind = uIndex; ;
+      if (front1!=-1 && front0!=-1){ ind = front1*numDofPerCell; }
+      if (front1==-1 && front0!=-1){ ind = uIndex; }
+      if (front1==-1 && front0==-1){ ind = back1*numDofPerCell; }
+
       m_ghostFront(gRow, 6)  = m_state(ind);
       m_ghostFront(gRow, 7)  = m_state(ind+1);
       m_ghostFront(gRow, 8) = -m_state(ind+2);
     }
 
     if (right2 == -1){
-      const auto ind = left1*numDofPerCell;
+      auto ind = uIndex; ;
+      if (right1!=-1 && right0!=-1){ ind = right1*numDofPerCell; }
+      if (right1==-1 && right0!=-1){ ind = uIndex; }
+      if (right1==-1 && right0==-1){ ind = left1*numDofPerCell; }
+
       m_ghostRight(gRow, 6)  = m_state(ind);
       m_ghostRight(gRow, 7)  = -m_state(ind+1);
       m_ghostRight(gRow, 8) = m_state(ind+2);
     }
 
     if (back2 == -1){
-      const auto ind = front1*numDofPerCell;
+      auto ind = uIndex; ;
+      if (back1!=-1 && back0!=-1){ ind = back1*numDofPerCell; }
+      if (back1==-1 && back0!=-1){ ind = uIndex; }
+      if (back1==-1 && back0==-1){ ind = front1*numDofPerCell; }
+
       m_ghostBack(gRow, 6)  = m_state(ind);
       m_ghostBack(gRow, 7)  = m_state(ind+1);
       m_ghostBack(gRow, 8) = -m_state(ind+2);

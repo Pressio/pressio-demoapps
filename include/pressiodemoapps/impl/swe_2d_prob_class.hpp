@@ -212,6 +212,13 @@ public:
     return initialState;
   }
 
+#ifdef PRESSIODEMOAPPS_ENABLE_TESTS
+  const auto & viewGhostLeft() const{ return m_ghostLeft; }
+  const auto & viewGhostFront() const{ return m_ghostFront; }
+  const auto & viewGhostRight() const{ return m_ghostRight; }
+  const auto & viewGhostBack() const{ return m_ghostBack; }
+#endif
+
 public:
   template <class T>
   void setBCPointer(::pressiodemoapps::impl::GhostRelativeLocation rloc, T* ptr) {
@@ -1014,6 +1021,12 @@ private:
     ::pressiodemoapps::resize(m_ghostFront,s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight,s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostBack, s1, numGhostValues);
+
+    constexpr auto val = std::numeric_limits<scalar_type>::min();
+    m_ghostLeft.setConstant(val);
+    m_ghostFront.setConstant(val);
+    m_ghostRight.setConstant(val);
+    m_ghostBack.setConstant(val);
   }
 
 protected:
