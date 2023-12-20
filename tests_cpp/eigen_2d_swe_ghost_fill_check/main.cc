@@ -45,7 +45,7 @@ bool test_sample_s5()
   const auto & GB = appObj.viewGhostBack();
 
   auto checkLam = [](auto const & from, auto const & gold) ->bool{
-    for (int i=0; i< gold.size(); ++i){
+    for (int i=0; i< (int) gold.size(); ++i){
       if (gold[i] != from[i]){ return false; }
     }
     return true;
