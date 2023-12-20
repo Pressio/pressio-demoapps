@@ -43,6 +43,7 @@ def test_run():
 
   fomS = np.reshape(yn, (nx*ny, 3))
   h = fomS[:,0]
+  # np.savetxt("h.txt", h)
   goldD = np.loadtxt(str(file_path)+"/h_gold.txt")
   assert(np.allclose(h.shape, goldD.shape))
   assert(np.isnan(h).all() == False)
