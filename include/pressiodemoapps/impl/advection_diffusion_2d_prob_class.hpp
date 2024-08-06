@@ -52,6 +52,7 @@
 #include "advection_diffusion_2d_flux_functions.hpp"
 #include "advection_diffusion_2d_initial_condition.hpp"
 #include "advection_diffusion_2d_ghost_filler_outflow.hpp"
+#include "advection_diffusion_2d_parametrization_helpers.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -68,6 +69,16 @@
 #endif
 
 namespace pressiodemoapps{ namespace impladvdiff2d{
+
+template<class T = void>
+bool valid_ic_flag(const AdvectionDiffusion2d probEn, const int flag)
+{
+  switch(probEn){
+    case AdvectionDiffusion2d::BurgersPeriodic: return flag == 1;
+    case AdvectionDiffusion2d::BurgersOutflow:  return flag == 1;
+    default: return false;
+  }
+}
 
 // tags are used inside he public create function: create_problem_...()
 // in the file ../advection_diffusion.hpp
@@ -121,21 +132,15 @@ public:
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
 	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
-	   scalar_type icPulseMagnitude,
-	   scalar_type icSpread,
-	   scalar_type diffusionCoeff,
-	   scalar_type x0,
-	   scalar_type y0)
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
     : m_probEn(probEnum),
       m_inviscidFluxRecEn(inviscidFluxRecEn),
       m_inviscidFluxSchemeEn(invFluxSchemeEn),
       m_viscousFluxRecEn(visFluxRecEn),
       m_meshObj(meshObj),
-      m_burgers2d_icPulse(icPulseMagnitude),
-      m_burgers2d_icSpread(icSpread),
-      m_burgers2d_diffusion(diffusionCoeff),
-      m_burgers2d_x0(x0),
-      m_burgers2d_y0(y0)
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters)
   {
     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()  * numDofPerCell;
@@ -146,39 +151,33 @@ public:
 
   }
 
-// #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-//   EigenApp(const MeshType & meshObj,
-// 	   ::pressiodemoapps::AdvectionDiffusion2d probEnum,
-// 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
-// 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
-// 	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
-// 	   scalar_type icPulseMagnitude,
-// 	   scalar_type icSpread,
-// 	   scalar_type diffusionCoeff,
-// 	   scalar_type x0,
-// 	   scalar_type y0,
-// 	   BCFunctorsHolderType && bcHolder)
-//     : m_probEn(probEnum),
-//       m_inviscidFluxRecEn(inviscidFluxRecEn),
-//       m_inviscidFluxSchemeEn(invFluxSchemeEn),
-//       m_viscousFluxRecEn(visFluxRecEn),
-//       m_meshObj(meshObj),
-//       m_burgers2d_icPulse(icPulseMagnitude),
-//       m_burgers2d_icSpread(icSpread),
-//       m_burgers2d_diffusion(diffusionCoeff),
-//       m_burgers2d_x0(x0),
-//       m_burgers2d_y0(y0),
-//       m_bcFuncsHolder(std::move(bcHolder))
-//   {
-//     m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
-//     m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()  * numDofPerCell;
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+  EigenApp(const MeshType & meshObj,
+	   ::pressiodemoapps::AdvectionDiffusion2d probEnum,
+	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
+	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
+	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
+	   BCFunctorsHolderType && bcHolder,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
+    : m_probEn(probEnum),
+      m_inviscidFluxRecEn(inviscidFluxRecEn),
+      m_inviscidFluxSchemeEn(invFluxSchemeEn),
+      m_viscousFluxRecEn(visFluxRecEn),
+      m_meshObj(meshObj),
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters),
+      m_bcFuncsHolder(std::move(bcHolder))
+  {
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()  * numDofPerCell;
 
-//     if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
-// 	allocateGhosts();
-//     }
+    if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
+	allocateGhosts();
+    }
 
-//   }
-// #endif
+  }
+#endif
 
   state_type initialCondition() const
   {
@@ -188,20 +187,20 @@ public:
 	m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow)
       {
 	burgers2d_gaussian(initialState, m_meshObj.get(),
-			   m_burgers2d_icPulse,
-			   m_burgers2d_icSpread,
-			   m_burgers2d_x0,
-			   m_burgers2d_y0);
+			   m_ic_parameters[ic1_pulseMag_i],
+			   m_ic_parameters[ic1_pulseSpread_i],
+			   m_ic_parameters[ic1_pulseX_i],
+			   m_ic_parameters[ic1_pulseY_i]);
       }
 
     return initialState;
   }
 
-// public:
-//   template <class T>
-//   void setBCPointer(::pressiodemoapps::impl::GhostRelativeLocation rloc, T* ptr) {
-//     m_bcFuncsHolder.setInternalPointer(rloc, ptr);
-//   }
+public:
+  template <class T>
+  void setBCPointer(::pressiodemoapps::impl::GhostRelativeLocation rloc, T* ptr) {
+    m_bcFuncsHolder.setInternalPointer(rloc, ptr);
+  }
 
 protected:
   int numDofPerCellImpl() const {
@@ -264,10 +263,9 @@ protected:
         fillGhosts(U, currentTime);
       }
       else {
-	throw std::runtime_error("Custom BCs not implemented yet");
-      	// fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
-	// 			    m_ghostLeft, m_ghostFront,
-	// 			    m_ghostRight, m_ghostBack, numDofPerCell);
+      	fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
+				    m_ghostLeft, m_ghostFront,
+				    m_ghostRight, m_ghostBack, numDofPerCell);
       }
 
       if (J){
@@ -698,8 +696,8 @@ private:
     const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     const auto dxInvSq	   = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
     const auto dyInvSq	   = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
-    const auto diffDxInvSq = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq = m_burgers2d_diffusion*dyInvSq;
+    const auto diffDxInvSq = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq = m_phys_parameters[diffusion_i]*dyInvSq;
     constexpr auto two      = static_cast<scalar_type>(2);
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
@@ -867,8 +865,8 @@ private:
     const auto & graphRows  = m_meshObj.get().graphRowsOfCellsNearBd();
     const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
     const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
-    const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
@@ -889,7 +887,8 @@ private:
         fillJacFactorsForCellBd(smPt, xAxis);
       }
       else {
-        throw std::runtime_error("Custom BC Jacobian factors not implemented");
+        fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
       }
       funcx(smPt, numDofPerCell, m_bcCellJacFactors);
       // u diffusion velocity contributions
@@ -902,10 +901,11 @@ private:
 	fillJacFactorsForCellBd(smPt, yAxis);
       }
       else {
-        throw std::runtime_error("Custom BC Jacobian factors not implemented");
+        fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
       }
       funcy(smPt, numDofPerCell, m_bcCellJacFactors);
-      // y-direction diffusion velocity contributions
+      // v diffusion velocity contributions
       V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
       V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
 
@@ -1008,8 +1008,8 @@ private:
     constexpr auto two      = static_cast<scalar_type>(2);
     const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
     const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
-    const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
 
     const auto & rows   = m_meshObj.get().graphRowsOfCellsNearBd();
 #if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
@@ -1161,8 +1161,8 @@ private:
     constexpr auto two  = static_cast<scalar_type>(2);
     const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
     const auto dyInvSq  = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
-    const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
 
     const auto & graph     = m_meshObj.get().graph();
     const auto vIndex      = smPt*numDofPerCell;
@@ -1210,9 +1210,11 @@ protected:
   ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
-//   BCFunctorsHolderType m_bcFuncsHolder = {};
-
   std::reference_wrapper<const MeshType> m_meshObj;
+  std::vector<scalar_type> m_ic_parameters;
+  std::vector<scalar_type> m_phys_parameters;
+  BCFunctorsHolderType m_bcFuncsHolder = {};
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
@@ -1223,14 +1225,6 @@ protected:
 
   std::array<scalar_type, 2> normalX_{1, 0};
   std::array<scalar_type, 2> normalY_{0, 1};
-
-  // parameters specific to problems
-  // will need to handle this better later
-  scalar_type m_burgers2d_icPulse = {};
-  scalar_type m_burgers2d_icSpread = {};
-  scalar_type m_burgers2d_diffusion = {};
-  scalar_type m_burgers2d_x0 = {};
-  scalar_type m_burgers2d_y0 = {};
 
   mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
 };

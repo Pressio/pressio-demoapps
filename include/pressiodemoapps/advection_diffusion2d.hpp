@@ -95,27 +95,17 @@ create_problem_eigen
 {
 
   using scalar_t = typename mesh_t::scalar_t;
-  if (problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
-      problemEnum == ::pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow)
-  {
-    // default parameters
-    const auto icPulseMagnitude = static_cast<scalar_t>(0.5);
-    const auto icSpread = static_cast<scalar_t>(0.15);
-    const auto diffusion = static_cast<scalar_t>(0.00001);
-    const auto icCenterX = static_cast<scalar_t>(0.0);
-    const auto icCenterY = static_cast<scalar_t>(-0.2);
+  auto defaultPhsParams = impladvdiff2d::defaultPhysicalParams<scalar_t>;
+  const auto defaultICParams = (problemEnum == AdvectionDiffusion2d::BurgersPeriodic || problemEnum == AdvectionDiffusion2d::BurgersOutflow)
+    ? impladvdiff2d::defaultInitCondParams<scalar_t> : std::vector<scalar_t>();
 
-    return RetType(meshObj,
-		   problemEnum,
-		   inviscidFluxRecEnum,
-		   InviscidFluxScheme::Rusanov,
-		   viscFluxRecEnum,
-		   icPulseMagnitude, icSpread, diffusion,
-		   icCenterX, icCenterY);
-  }
-  else{
-    throw std::runtime_error("advection-diffusion2d: invalid problem enum");
-  }
+  return RetType(meshObj,
+  		 problemEnum,
+		 inviscidFluxRecEnum,
+		 InviscidFluxScheme::Rusanov,
+		 viscFluxRecEnum,
+		 defaultICParams,
+		 defaultPhsParams);
 }
 
 // ----------------------------------------------------------
@@ -129,110 +119,116 @@ template<
 RetType
 #if defined PRESSIODEMOAPPS_ENABLE_BINDINGS
 // bindings need unique naming or we get error associated with overloads
-create_periodic_burgers_2d_problem_ov1_for_py
+create_burgers_2d_problem_ov1_for_py
 #else
-create_periodic_burgers_2d_problem_eigen
+create_problem_eigen
 #endif
 (const mesh_t & meshObj,
  AdvectionDiffusion2d problemEnum,
  InviscidFluxReconstruction inviscidFluxRecEnum,
  ViscousFluxReconstruction viscFluxRecEnum,
- typename mesh_t::scalar_t icPulseMagnitude,
- typename mesh_t::scalar_t icSpread,
- typename mesh_t::scalar_t diffusion,
- typename mesh_t::scalar_t icCenterX,
- typename mesh_t::scalar_t icCenterY)
+ const std::unordered_map<std::string, typename mesh_t::scalar_t> & userParams)
 {
+
+  // only one IC for now
+  int icFlag = 1;
+
+  using scalar_t = typename mesh_t::scalar_t;
+  auto physParamsVec = impladvdiff2d::defaultPhysicalParams<scalar_t>;
+  auto icParamsVec   = impladvdiff2d::defaultInitCondParams<scalar_t>;
+  impladvdiff2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
 
   return RetType(meshObj,
 		 problemEnum,
 		 inviscidFluxRecEnum,
 		 InviscidFluxScheme::Rusanov,
 		 viscFluxRecEnum,
-		 icPulseMagnitude, icSpread, diffusion,
-		 icCenterX, icCenterY);
+		 icParamsVec,
+		 physParamsVec);
 }
 
 //
 // custom BCs
 //
 
-// #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-// template<class mesh_t, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
-// auto create_problem_eigen
-// (const mesh_t & meshObj,
-//  AdvectionDiffusion2d problemEnum,
-//  InviscidFluxReconstruction inviscidFluxRecEnum,
-//  ViscousFluxReconstruction viscFluxRecEnum,
-//  BCsFuncL && BCsLeft,
-//  BCsFuncF && BCsFront,
-//  BCsFuncR && BCsRight,
-//  BCsFuncB && BCsBack)
-// {
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  AdvectionDiffusion2d problemEnum,
+			  InviscidFluxReconstruction inviscidFluxRecEnum,
+			  BCsFuncL && BCsLeft,
+			  BCsFuncF && BCsFront,
+			  BCsFuncR && BCsRight,
+			  BCsFuncB && BCsBack,
+			  const int icFlag = 1)
+{
 
-//   using scalar_t = typename mesh_t::scalar_t;
-//   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
-//   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
-// 			       std::forward<BCsFuncF>(BCsFront),
-// 			       std::forward<BCsFuncR>(BCsRight),
-// 			       std::forward<BCsFuncB>(BCsBack));
+  // default viscous flux order
+  // TODO: generalize
+  ViscousFluxReconstruction viscFluxRecEnum = ViscousFluxReconstruction::FirstOrder;
 
-//   // default parameters
-//   const auto icPulseMagnitude = static_cast<scalar_t>(0.5);
-//   const auto icSpread = static_cast<scalar_t>(0.15);
-//   const auto diffusion = static_cast<scalar_t>(0.00001);
-//   const auto icCenterX = static_cast<scalar_t>(0.0);
-//   const auto icCenterY = static_cast<scalar_t>(-0.2);
+  using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
+  BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
+			       std::forward<BCsFuncF>(BCsFront),
+			       std::forward<BCsFuncR>(BCsRight),
+			       std::forward<BCsFuncB>(BCsBack));
 
-//   using return_type = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>;
-//   return return_type(meshObj,
-// 		 problemEnum,
-// 		 inviscidFluxRecEnum,
-// 		 InviscidFluxScheme::Rusanov,
-// 		 viscFluxRecEnum,
-// 		 icPulseMagnitude, icSpread, diffusion,
-// 		 icCenterX, icCenterY,
-// 		 std::move(bcFuncs));
+  using scalar_t = typename mesh_t::scalar_t;
+  const auto defaultPhsParams = impladvdiff2d::defaultPhysicalParams<scalar_t>;
+  const auto defaultICParams = impladvdiff2d::defaultInitCondParams<scalar_t>;
 
-// }
-// #endif
+  using return_type = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t, BCFunctorsHolderType>>;
+  return return_type(meshObj,
+		     problemEnum,
+		     inviscidFluxRecEnum,
+		     InviscidFluxScheme::Rusanov,
+		     viscFluxRecEnum,
+		     std::move(bcFuncs),
+		     defaultPhsParams,
+		     defaultICParams);
 
-// #if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
-// template<class mesh_t, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
-// auto create_periodic_burgers_2d_problem_eigen
-// (const mesh_t & meshObj,
-//  AdvectionDiffusion2d problemEnum,
-//  InviscidFluxReconstruction inviscidFluxRecEnum,
-//  ViscousFluxReconstruction viscFluxRecEnum,
-//  typename mesh_t::scalar_t icPulseMagnitude,
-//  typename mesh_t::scalar_t icSpread,
-//  typename mesh_t::scalar_t diffusion,
-//  typename mesh_t::scalar_t icCenterX,
-//  typename mesh_t::scalar_t icCenterY,
-//  BCsFuncL && BCsLeft,
-//  BCsFuncF && BCsFront,
-//  BCsFuncR && BCsRight,
-//  BCsFuncB && BCsBack
-//  )
-// {
+}
+#endif
 
-//   using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
-//   BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
-// 			       std::forward<BCsFuncF>(BCsFront),
-// 			       std::forward<BCsFuncR>(BCsRight),
-// 			       std::forward<BCsFuncB>(BCsBack));
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+template<class mesh_t, class BCsFuncL, class BCsFuncF, class BCsFuncR, class BCsFuncB>
+auto create_problem_eigen(const mesh_t & meshObj,
+			  AdvectionDiffusion2d problemEnum,
+			  InviscidFluxReconstruction inviscidFluxRecEnum,
+			  BCsFuncL && BCsLeft,
+			  BCsFuncF && BCsFront,
+			  BCsFuncR && BCsRight,
+			  BCsFuncB && BCsBack,
+			  const int icFlag,
+			  const std::unordered_map<std::string, typename mesh_t::scalar_t> & userParams)
+{
 
-//   using return_type = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>;
-//   return return_type(meshObj,
-// 		 problemEnum,
-// 		 inviscidFluxRecEnum,
-// 		 InviscidFluxScheme::Rusanov,
-// 		 viscFluxRecEnum,
-// 		 icPulseMagnitude, icSpread, diffusion,
-// 		 icCenterX, icCenterY,
-// 		 std::move(bcFuncs));
-// }
-// #endif
+  // default viscous flux order
+  // TODO: generalize
+  ViscousFluxReconstruction viscFluxRecEnum = ViscousFluxReconstruction::FirstOrder;
+
+  using BCFunctorsHolderType = impl::CustomBCsHolder<BCsFuncL, BCsFuncF, BCsFuncR, BCsFuncB>;
+  BCFunctorsHolderType bcFuncs(std::forward<BCsFuncL>(BCsLeft),
+			       std::forward<BCsFuncF>(BCsFront),
+			       std::forward<BCsFuncR>(BCsRight),
+			       std::forward<BCsFuncB>(BCsBack));
+
+  using scalar_t = typename mesh_t::scalar_t;
+  auto physParamsVec = impladvdiff2d::defaultPhysicalParams<scalar_t>;
+  auto icParamsVec   = impladvdiff2d::defaultInitCondParams<scalar_t>;
+  impladvdiff2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
+
+  using return_type = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t, BCFunctorsHolderType>>;
+  return return_type(meshObj,
+		     problemEnum,
+		     inviscidFluxRecEnum,
+		     InviscidFluxScheme::Rusanov,
+		     viscFluxRecEnum,
+		     std::move(bcFuncs),
+		     icParamsVec,
+		     physParamsVec);
+}
+#endif
 
 } //end namespace pressiodemoapps
 #endif

@@ -75,7 +75,7 @@ try:
     import create_problem, \
     create_linear_advection_1d_problem, \
     create_diffusion_reaction_1d_problem_A,\
-    create_periodic_burgers_2d_problem,\
+    create_burgers_2d_problem,\
     create_diffusion_reaction_2d_problem_A,\
     create_adv_diff_reac_2d_problem_A, \
     create_gray_scott_2d_problem,\
