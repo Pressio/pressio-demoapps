@@ -264,7 +264,7 @@ protected:
         fillGhosts(U, currentTime);
       }
       else {
-	throw std::runtime_error("Custom BCs not implemented yet")
+	throw std::runtime_error("Custom BCs not implemented yet");
       	// fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
 	// 			    m_ghostLeft, m_ghostFront,
 	// 			    m_ghostRight, m_ghostBack, numDofPerCell);
