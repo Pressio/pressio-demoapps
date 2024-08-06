@@ -51,7 +51,7 @@
 
 #include "advection_diffusion_2d_flux_functions.hpp"
 #include "advection_diffusion_2d_initial_condition.hpp"
-#include "advection_diffusion_2d_ghost_filler_neumann.hpp"
+#include "advection_diffusion_2d_ghost_filler_outflow.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -303,7 +303,7 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow)
     {
-      using ghost_filler_t  = Ghost2dNeumannFiller<
+      using ghost_filler_t  = Ghost2dOutflowFiller<
 	U_t, MeshType, ghost_container_type>;
       ghost_filler_t ghF(stencilSize, numDofPerCell,
 			 U, m_meshObj.get(),
@@ -919,8 +919,10 @@ private:
         J.coeffRef(vIndex+1, uIndexLeft+1) += diffDxInvSq;
       }
       else{
-        J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
-        J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+	// TODO: generalize this
+	// no op for Dirichlet BC
+	// J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+	// J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
       }
 
       if (uIndexFront > -1){
@@ -946,8 +948,10 @@ private:
         J.coeffRef(vIndex+1, uIndexBack+1) += diffDyInvSq;
       }
       else{
-	J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
-        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+	// TODO: generalize this
+	// no op for Dirichlet BC
+	// J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        // J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
       }
     }
   }
@@ -1119,8 +1123,31 @@ private:
     assert(axis <= 2);
 
     if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
-        // homogeneous Neumann
-        m_bcCellJacFactors.fill(static_cast<scalar_type>(1));
+	if (axis == 1 && m_meshObj.get().hasBdLeft2d(graphRow)){
+	  // homogeneous dirichlet
+	  m_bcCellJacFactors = {0., 0.};
+	  return;
+	}
+
+	if (axis == 1 && m_meshObj.get().hasBdRight2d(graphRow)){
+	  // homogeneous neumann
+	  m_bcCellJacFactors = {1., 1.};
+	  return;
+	}
+
+	if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow))
+	{
+	  // homogeneous dirichlet
+	  m_bcCellJacFactors = {0., 0.};
+	  return;
+        }
+
+	if (axis == 2 && m_meshObj.get().hasBdFront2d(graphRow))
+	{
+	  // homogeneous neumann
+	  m_bcCellJacFactors = {1., 1.};
+	  return;
+	}
     }
     else if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic) {
         throw std::runtime_error("Should not be getting Jacobian factors for fully periodic problem.");

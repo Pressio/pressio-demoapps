@@ -2,7 +2,7 @@
 //@HEADER
 // ************************************************************************
 //
-// advection_diffusion_2d_ghost_filler_neumann.hpp
+// advection_diffusion_2d_ghost_filler_outflow.hpp
 //                     		  Pressio
 //                             Copyright 2019
 //    National Technology & Engineering Solutions of Sandia, LLC (NTESS)
@@ -46,19 +46,19 @@
 //@HEADER
 */
 
-#ifndef PRESSIODEMOAPPS_GHOST_FILLER_AD2D_NEUMANN_HPP_
-#define PRESSIODEMOAPPS_GHOST_FILLER_AD2D_NEUMANN_HPP_
+#ifndef PRESSIODEMOAPPS_GHOST_FILLER_AD2D_OUTFLOW_HPP_
+#define PRESSIODEMOAPPS_GHOST_FILLER_AD2D_OUTFLOW_HPP_
 
 namespace pressiodemoapps{
 namespace impladvdiff2d{
 
 template<class state_t, class mesh_t, class ghost_t>
-class Ghost2dNeumannFiller
+class Ghost2dOutflowFiller
 {
 
 public:
-  Ghost2dNeumannFiller() = delete;
-  Ghost2dNeumannFiller(const int stencilSize,
+  Ghost2dOutflowFiller() = delete;
+  Ghost2dOutflowFiller(const int stencilSize,
 		       int numDofPerCell,
 		       const state_t & stateIn,
 		       const mesh_t & meshIn,
@@ -112,8 +112,8 @@ private:
 
     if (left0 == -1)
     {
-      m_ghostLeft(gRow, 0) = m_state(uIndex);
-      m_ghostLeft(gRow, 1) = m_state(uIndex+1);
+      m_ghostLeft(gRow, 0) = 0.0;
+      m_ghostLeft(gRow, 1) = 0.0;
     }
 
     if (front0 == -1)
@@ -130,8 +130,8 @@ private:
 
     if (back0 == -1)
     {
-      m_ghostBack(gRow, 0) = m_state(uIndex);
-      m_ghostBack(gRow, 1) = m_state(uIndex+1);
+      m_ghostBack(gRow, 0) = 0.0;
+      m_ghostBack(gRow, 1) = 0.0;
     }
   }
 
@@ -153,12 +153,8 @@ private:
     const auto back1  = graph(smPt, 8);
 
     if (left1 == -1){
-      auto ind = uIndex;
-      if (left0==-1){ ind = right0*m_numDofPerCell; }
-      else { ind = left0*m_numDofPerCell; }
-
-      m_ghostLeft(gRow, 4) = m_state(ind);
-      m_ghostLeft(gRow, 5) = m_state(ind+1);
+      m_ghostLeft(gRow, 4) = 0.0;
+      m_ghostLeft(gRow, 5) = 0.0;
     }
 
     if (front1 == -1){
@@ -180,12 +176,8 @@ private:
     }
 
     if (back1 == -1){
-      auto ind = uIndex;
-      if (back0==-1){ ind = front0*m_numDofPerCell; }
-      else { ind = back0*m_numDofPerCell; }
-
-      m_ghostBack(gRow, 4) = m_state(ind);
-      m_ghostBack(gRow, 5) = m_state(ind+1);
+      m_ghostBack(gRow, 4) = 0.0;
+      m_ghostBack(gRow, 5) = 0.0;
     }
   }
 
@@ -197,10 +189,8 @@ private:
     const auto uIndex  = cellGID*m_numDofPerCell;
 
     stencilFiveImpl(smPt, gRow);
-    const auto left0  = graph(smPt, 1);
     const auto front0 = graph(smPt, 2);
     const auto right0 = graph(smPt, 3);
-    const auto back0  = graph(smPt, 4);
     const auto left1  = graph(smPt, 5);
     const auto front1 = graph(smPt, 6);
     const auto right1 = graph(smPt, 7);
@@ -211,13 +201,8 @@ private:
     const auto back2  = graph(smPt, 12);
 
     if (left2 == -1){
-      auto ind = uIndex; ;
-      if (left1!=-1 && left0!=-1){ ind = left1*m_numDofPerCell; }
-      if (left1==-1 && left0!=-1){ ind = uIndex; }
-      if (left1==-1 && left0==-1){ ind = right1*m_numDofPerCell; }
-
-      m_ghostLeft(gRow, 8)  = m_state(ind);
-      m_ghostLeft(gRow, 9)  = m_state(ind+1);
+      m_ghostLeft(gRow, 8)  = 0.0;
+      m_ghostLeft(gRow, 9)  = 0.0;
     }
 
     if (front2 == -1){
@@ -241,13 +226,8 @@ private:
     }
 
     if (back2 == -1){
-      auto ind = uIndex; ;
-      if (back1!=-1 && back0!=-1){ ind = back1*m_numDofPerCell; }
-      if (back1==-1 && back0!=-1){ ind = uIndex; }
-      if (back1==-1 && back0==-1){ ind = front1*m_numDofPerCell; }
-
-      m_ghostBack(gRow, 8) = m_state(ind);
-      m_ghostBack(gRow, 9) = m_state(ind+1);
+      m_ghostBack(gRow, 8) = 0.0;
+      m_ghostBack(gRow, 9) = 0.0;
     }
   }
 
