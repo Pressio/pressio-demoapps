@@ -910,7 +910,6 @@ private:
       V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
 
       // diffusion Jacobian contributions
-      // self
       J.coeffRef(vIndex,   uIndex)   += -two*diffDxInvSq - two*diffDyInvSq;
       J.coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
 
@@ -919,10 +918,8 @@ private:
         J.coeffRef(vIndex+1, uIndexLeft+1) += diffDxInvSq;
       }
       else{
-	// TODO: generalize this
-	// no op for Dirichlet BC
-	// J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
-	// J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+	J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
       }
 
       if (uIndexFront > -1){
@@ -948,10 +945,8 @@ private:
         J.coeffRef(vIndex+1, uIndexBack+1) += diffDyInvSq;
       }
       else{
-	// TODO: generalize this
-	// no op for Dirichlet BC
-	// J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
-        // J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+	J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
       }
     }
   }
