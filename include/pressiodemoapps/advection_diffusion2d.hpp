@@ -147,6 +147,37 @@ create_problem_eigen
 		 physParamsVec);
 }
 
+// repeat above with default viscous flux scheme and icFlag to fit other problems
+template<
+  class mesh_t,
+  class RetType = PublicProblemEigenMixinCpp<impladvdiff2d::EigenApp<mesh_t>>
+  >
+RetType
+create_problem_eigen(const mesh_t & meshObj,
+		     AdvectionDiffusion2d problemEnum,
+		     InviscidFluxReconstruction inviscidFluxRecEnum,
+		     int icFlag,
+		     const std::unordered_map<std::string, typename mesh_t::scalar_t> & userParams)
+{
+
+  // defaults
+  ViscousFluxReconstruction viscFluxRecEnum = ViscousFluxReconstruction::FirstOrder;
+  icFlag = 1;
+
+  using scalar_t = typename mesh_t::scalar_t;
+  auto physParamsVec = impladvdiff2d::defaultPhysicalParams<scalar_t>;
+  auto icParamsVec   = impladvdiff2d::defaultInitCondParams<scalar_t>;
+  impladvdiff2d::replace_params_from_map_if_present(physParamsVec, icParamsVec, problemEnum, icFlag, userParams);
+
+  return RetType(meshObj,
+		 problemEnum,
+		 inviscidFluxRecEnum,
+		 InviscidFluxScheme::Rusanov,
+		 viscFluxRecEnum,
+		 icParamsVec,
+		 physParamsVec);
+}
+
 //
 // custom BCs
 //
