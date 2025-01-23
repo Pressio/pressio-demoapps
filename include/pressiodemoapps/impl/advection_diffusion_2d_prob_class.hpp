@@ -179,8 +179,7 @@ public:
   }
 #endif
 
-  state_type initialCondition() const
-  {
+  state_type initialCondition() const{
     state_type initialState(m_numDofStencilMesh);
 
     if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
@@ -216,7 +215,6 @@ protected:
     initializeJacobianForNearBoundaryCells(trList);
     initializeJacobianForInnerCells(trList);
     J.setFromTriplets(trList.begin(), trList.end());
-
     // compress to make it Csr
     if (!J.isCompressed()){
       J.makeCompressed();
@@ -315,9 +313,6 @@ private:
 	      ghF(rowsBd[it], it);
       }
     }
-    else {
-      // no op
-    }
   }
 
   template<class Tr>
@@ -411,17 +406,17 @@ private:
 
   template<class U_t, class V_t>
   void velocityAndJacobianImpl(const U_t & U,
-				       const scalar_type currentTime,
-				       V_t & V,
-				       jacobian_type & J,
-				       flux_type & fluxL,
-				       flux_type & fluxF,
-				       flux_type & fluxR,
-				       flux_type & fluxB,
-				       edge_rec_type & uMinusHalfNeg,
-				       edge_rec_type & uMinusHalfPos,
-				       edge_rec_type & uPlusHalfNeg,
-				       edge_rec_type & uPlusHalfPos) const
+			       const scalar_type currentTime,
+			       V_t & V,
+			       jacobian_type & J,
+			       flux_type & fluxL,
+			       flux_type & fluxF,
+			       flux_type & fluxR,
+			       flux_type & fluxB,
+			       edge_rec_type & uMinusHalfNeg,
+			       edge_rec_type & uMinusHalfPos,
+			       edge_rec_type & uPlusHalfNeg,
+			       edge_rec_type & uPlusHalfPos) const
   {
 
     // flux jacobians
@@ -439,23 +434,24 @@ private:
     if (!m_meshObj.get().isFullyPeriodic()){
       if (m_inviscidFluxRecEn == InviscidFluxReconstruction::FirstOrder){
 	velocityAndJacNearBDCellsImplFirstOrder(U, currentTime, V, J,
-						fluxL, fluxF, fluxR, fluxB,
-						fluxJacLNeg, fluxJacLPos,
-						fluxJacFNeg, fluxJacFPos,
-						fluxJacRNeg, fluxJacRPos,
-						fluxJacBNeg, fluxJacBPos,
-						uMinusHalfNeg, uMinusHalfPos,
-						uPlusHalfNeg,  uPlusHalfPos);
+					      fluxL, fluxF, fluxR, fluxB,
+					      fluxJacLNeg, fluxJacLPos,
+					      fluxJacFNeg, fluxJacFPos,
+					      fluxJacRNeg, fluxJacRPos,
+					      fluxJacBNeg, fluxJacBPos,
+					      uMinusHalfNeg, uMinusHalfPos,
+					      uPlusHalfNeg,  uPlusHalfPos);
       }
       else{
-	velocityAndJacNearBDCellsImplDifferentSchemeNotFirstOrderInviscid(U, currentTime, V, J,
-									  fluxL, fluxF, fluxR, fluxB,
-									  fluxJacLNeg, fluxJacLPos,
-									  fluxJacFNeg, fluxJacFPos,
-									  fluxJacRNeg, fluxJacRPos,
-									  fluxJacBNeg, fluxJacBPos,
-									  uMinusHalfNeg, uMinusHalfPos,
-									  uPlusHalfNeg,  uPlusHalfPos);
+        velocityAndJacNearBDCellsImplDifferentSchemeNotFirstOrderInviscid(
+	 U, currentTime, V, J,
+	 fluxL, fluxF, fluxR, fluxB,
+	 fluxJacLNeg, fluxJacLPos,
+	 fluxJacFNeg, fluxJacFPos,
+	 fluxJacRNeg, fluxJacRPos,
+	 fluxJacBNeg, fluxJacBPos,
+	 uMinusHalfNeg, uMinusHalfPos,
+	 uPlusHalfNeg,  uPlusHalfPos);
       }
     }
 
@@ -563,7 +559,6 @@ private:
       Fx(smPt, numDofPerCell);
       Fy(smPt, numDofPerCell);
 
-      // diffusion contribution
       addBurgersDiffusionToVelocityAndOptionalJacobianInnerCells(U, V, &J, smPt);
     }
   }
@@ -594,8 +589,6 @@ private:
     namespace pda = ::pressiodemoapps;
     constexpr int xAxis = 1;
     constexpr int yAxis = 2;
-
-    throw std::runtime_error("Higher order not fixed");
 
     // if here, then the velocity must be computed with Weno,
     /// while the jacobian must be computed with first order
@@ -720,7 +713,8 @@ private:
         fillJacFactorsForCellBd(smPt, xAxis);
       }
       else{
-        throw std::runtime_error("Need to fix higher order custom BCs");
+        fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
       }
       funcJacX(smPt, numDofPerCell, m_bcCellJacFactors);
       // diffusion contribution to velocity
@@ -739,7 +733,8 @@ private:
         fillJacFactorsForCellBd(smPt, yAxis);
       }
       else{
-        throw std::runtime_error("Need to fix higher order custom BCs");
+        fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
       }
       funcJacY(smPt, numDofPerCell, m_bcCellJacFactors);
       // diffusion contribution to velocity
@@ -1028,28 +1023,28 @@ private:
         V(vIndex) += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
       }
       else if (stencilSize == 5){
-        throw std::runtime_error("Higher order not fixed yet");
-	V(vIndex) += diffDxInvSq*( stencilVals(3) -two*stencilVals(2) +stencilVals(1) );
+        V(vIndex) += diffDxInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
+        V(vIndex) += diffDyInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
       }
       else if (stencilSize == 7){
-        throw std::runtime_error("Higher order not fixed yet");
-	V(vIndex) += diffDxInvSq*( stencilVals(4) -two*stencilVals(3) +stencilVals(2) );
+        V(vIndex) += diffDxInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
+        V(vIndex) += diffDyInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
       }
 
+      // *** add Y contribution of diffusion ***
       StencilFillerY(smPt, it, numDofPerCell);
       Fy(smPt, numDofPerCell);
-      // *** add Y contribution of diffusion ***
       if (stencilSize == 3){
 	V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
         V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
       }
       else if (stencilSize == 5){
-        throw std::runtime_error("Higher order not fixed yet");
-	V(smPt) += diffDyInvSq*( stencilVals(3) -two*stencilVals(2) +stencilVals(1) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
+        V(vIndex+1) += diffDyInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
       }
       else if (stencilSize == 7){
-        throw std::runtime_error("Higher order not fixed yet");
-	V(smPt) += diffDyInvSq*( stencilVals(4) -two*stencilVals(3) +stencilVals(2) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
+        V(vIndex+1) += diffDyInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
       }
     }
   }
