@@ -153,8 +153,8 @@ private:
     const auto back1  = graph(smPt, 8);
 
     if (left1 == -1){
-      m_ghostLeft(gRow, 4) = 0.0;
-      m_ghostLeft(gRow, 5) = 0.0;
+      m_ghostLeft(gRow, 2) = 0.0;
+      m_ghostLeft(gRow, 3) = 0.0;
     }
 
     if (front1 == -1){
@@ -162,8 +162,8 @@ private:
       if (front0==-1){ ind = back0*m_numDofPerCell; }
       else { ind = front0*m_numDofPerCell; }
 
-      m_ghostFront(gRow, 4) = m_state(ind);
-      m_ghostFront(gRow, 5) = m_state(ind+1);
+      m_ghostFront(gRow, 2) = m_state(ind);
+      m_ghostFront(gRow, 3) = m_state(ind+1);
     }
 
     if (right1 == -1){
@@ -171,13 +171,13 @@ private:
       if (right0==-1){ ind = left0*m_numDofPerCell; }
       else { ind = right0*m_numDofPerCell; }
 
-      m_ghostRight(gRow, 4) = m_state(ind);
-      m_ghostRight(gRow, 5) = m_state(ind+1);
+      m_ghostRight(gRow, 2) = m_state(ind);
+      m_ghostRight(gRow, 3) = m_state(ind+1);
     }
 
     if (back1 == -1){
-      m_ghostBack(gRow, 4) = 0.0;
-      m_ghostBack(gRow, 5) = 0.0;
+      m_ghostBack(gRow, 2) = 0.0;
+      m_ghostBack(gRow, 3) = 0.0;
     }
   }
 
@@ -201,8 +201,8 @@ private:
     const auto back2  = graph(smPt, 12);
 
     if (left2 == -1){
-      m_ghostLeft(gRow, 8)  = 0.0;
-      m_ghostLeft(gRow, 9)  = 0.0;
+      m_ghostLeft(gRow, 4)  = 0.0;
+      m_ghostLeft(gRow, 5)  = 0.0;
     }
 
     if (front2 == -1){
@@ -211,8 +211,8 @@ private:
       if (front1==-1 && front0!=-1){ ind = uIndex; }
       if (front1==-1 && front0==-1){ ind = back1*m_numDofPerCell; }
 
-      m_ghostFront(gRow, 8) = m_state(ind);
-      m_ghostFront(gRow, 9) = m_state(ind+1);
+      m_ghostFront(gRow, 4) = m_state(ind);
+      m_ghostFront(gRow, 5) = m_state(ind+1);
     }
 
     if (right2 == -1){
@@ -221,13 +221,13 @@ private:
       if (right1==-1 && right0!=-1){ ind = uIndex; }
       if (right1==-1 && right0==-1){ ind = left1*m_numDofPerCell; }
 
-      m_ghostRight(gRow, 8) = m_state(ind);
-      m_ghostRight(gRow, 9) = m_state(ind+1);
+      m_ghostRight(gRow, 4) = m_state(ind);
+      m_ghostRight(gRow, 5) = m_state(ind+1);
     }
 
     if (back2 == -1){
-      m_ghostBack(gRow, 8) = 0.0;
-      m_ghostBack(gRow, 9) = 0.0;
+      m_ghostBack(gRow, 4) = 0.0;
+      m_ghostBack(gRow, 5) = 0.0;
     }
   }
 

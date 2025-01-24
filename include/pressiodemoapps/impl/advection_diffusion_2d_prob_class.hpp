@@ -209,11 +209,12 @@ protected:
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
-
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
+
     initializeJacobianForNearBoundaryCells(trList);
     initializeJacobianForInnerCells(trList);
+
     J.setFromTriplets(trList.begin(), trList.end());
     // compress to make it Csr
     if (!J.isCompressed()){
@@ -377,13 +378,13 @@ private:
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
-	const auto jacRowOfCurrCellRho = smPt*numDofPerCell;
-	const auto jacColOfCurrCellRho = graph(smPt, 0)*numDofPerCell;
+	const auto jacRowOfCurrCell = smPt*numDofPerCell;
+	const auto jacColOfCurrCell = graph(smPt, 0)*numDofPerCell;
 
 	// wrt current cell's dofs
 	for (int k=0; k<numDofPerCell; ++k){
 	  for (int j=0; j<numDofPerCell; ++j){
-	    trList.push_back( Tr(jacRowOfCurrCellRho+k, jacColOfCurrCellRho+j, zero) );
+	    trList.push_back( Tr(jacRowOfCurrCell+k, jacColOfCurrCell+j, zero) );
 	  }
 	}
 
@@ -395,7 +396,7 @@ private:
 	    const auto ci = nID*numDofPerCell;
 	    for (int k=0; k<numDofPerCell; ++k){
 	      for (int j=0; j<numDofPerCell; ++j){
-		trList.push_back( Tr(jacRowOfCurrCellRho+k, ci+j, zero) );
+		trList.push_back( Tr(jacRowOfCurrCell+k, ci+j, zero) );
 	      }
 	    }
 	  }
@@ -699,11 +700,12 @@ private:
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
     {
       const auto smPt = graphRows[it];
-      const auto uIndex	= graph(smPt, 0);
-      const auto uIndexLeft  = graph(smPt, 1);
-      const auto uIndexFront = graph(smPt, 2);
-      const auto uIndexRight = graph(smPt, 3);
-      const auto uIndexBack  = graph(smPt, 4);
+      const auto vIndex = smPt*numDofPerCell;
+      const auto uIndex	= graph(smPt, 0)*numDofPerCell;
+      const auto uIndexLeft  = graph(smPt, 1)*numDofPerCell;
+      const auto uIndexFront = graph(smPt, 2)*numDofPerCell;
+      const auto uIndexRight = graph(smPt, 3)*numDofPerCell;
+      const auto uIndexBack  = graph(smPt, 4)*numDofPerCell;
 
       // x-direction
       FillStencilVeloX(smPt, it, numDofPerCell);
@@ -719,10 +721,12 @@ private:
       funcJacX(smPt, numDofPerCell, m_bcCellJacFactors);
       // diffusion contribution to velocity
       if (stencilSizeForV == 5){
-	V(smPt) += diffDxInvSq*( stencilValsForV(3) - two*stencilValsForV(2) + stencilValsForV(1) );
+	V(vIndex)   += diffDxInvSq*( stencilValsForV(6) - two*stencilValsForV(4) + stencilValsForV(2) );
+	V(vIndex+1) += diffDxInvSq*( stencilValsForV(7) - two*stencilValsForV(5) + stencilValsForV(3) );
       }
       else if (stencilSizeForV == 7){
-	V(smPt) += diffDxInvSq*( stencilValsForV(4) - two*stencilValsForV(3) + stencilValsForV(2) );
+	V(vIndex)   += diffDxInvSq*( stencilValsForV(8) - two*stencilValsForV(6) + stencilValsForV(4) );
+	V(vIndex+1) += diffDxInvSq*( stencilValsForV(9) - two*stencilValsForV(7) + stencilValsForV(5) );
       }
 
       // y-direction
@@ -739,41 +743,53 @@ private:
       funcJacY(smPt, numDofPerCell, m_bcCellJacFactors);
       // diffusion contribution to velocity
       if (stencilSizeForV == 5){
-	V(smPt) += diffDyInvSq*( stencilValsForV(3) -two*stencilValsForV(2) +stencilValsForV(1) );
+	V(vIndex)   += diffDyInvSq*( stencilValsForV(6) - two*stencilValsForV(4) + stencilValsForV(2) );
+	V(vIndex+1) += diffDyInvSq*( stencilValsForV(7) - two*stencilValsForV(5) + stencilValsForV(3) );
       }
       else if (stencilSizeForV == 7){
-	V(smPt) += diffDyInvSq*( stencilValsForV(4) -two*stencilValsForV(3) +stencilValsForV(2) );
+	V(vIndex)   += diffDyInvSq*( stencilValsForV(8) - two*stencilValsForV(6) + stencilValsForV(4) );
+	V(vIndex+1) += diffDyInvSq*( stencilValsForV(9) - two*stencilValsForV(7) + stencilValsForV(5) );
       }
 
       // diffusion contribution to Jacobian
-      auto selfValue = -two*diffDxInvSq -two*diffDyInvSq;
-      if (uIndexLeft != -1){
-	J.coeffRef(smPt, uIndexLeft) += diffDxInvSq;
+      J.coeffRef(vIndex,   uIndex)   += -two*diffDxInvSq - two*diffDyInvSq;
+      J.coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
+
+      if (uIndexLeft > -1){
+	J.coeffRef(vIndex,   uIndexLeft)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexLeft+1) += diffDxInvSq;
       }
       else{
-	selfValue += -diffDxInvSq;
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+	J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
       }
 
-      if (uIndexFront != -1){
-	J.coeffRef(smPt, uIndexFront) += diffDyInvSq;
-      }else{
-	selfValue += -diffDyInvSq;
-      }
-
-      if (uIndexRight != -1){
-	J.coeffRef(smPt, uIndexRight) += diffDxInvSq;
+      if (uIndexFront > -1){
+	J.coeffRef(vIndex,   uIndexFront)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexFront+1) += diffDyInvSq;
       }
       else{
-	selfValue += -diffDxInvSq;
+        J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
       }
 
-      if (uIndexBack != -1){
-	J.coeffRef(smPt, uIndexBack) += diffDyInvSq;
+      if (uIndexRight > -1){
+	J.coeffRef(vIndex,   uIndexRight)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexRight+1) += diffDxInvSq;
       }
       else{
-	selfValue += -diffDyInvSq;
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
       }
-      J.coeffRef(smPt, uIndex) += selfValue;
+
+      if (uIndexBack > -1){
+	J.coeffRef(vIndex,   uIndexBack)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexBack+1) += diffDyInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+      }
     }
   }
 
@@ -886,9 +902,9 @@ private:
 				m_bcCellJacFactors, numDofPerCell);
       }
       funcx(smPt, numDofPerCell, m_bcCellJacFactors);
-      // u diffusion velocity contributions
-      V(vIndex) += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
-      V(vIndex) += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+      // x-direction velocity contributions
+      V(vIndex)   += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+      V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
 
       // y-direction inviscid contributions
       FillStencilY(smPt, it, numDofPerCell);
@@ -900,8 +916,8 @@ private:
 				m_bcCellJacFactors, numDofPerCell);
       }
       funcy(smPt, numDofPerCell, m_bcCellJacFactors);
-      // v diffusion velocity contributions
-      V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+      // y-direction velocity contributions
+      V(vIndex)   += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
       V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
 
       // diffusion Jacobian contributions
@@ -1019,31 +1035,31 @@ private:
       Fx(smPt, numDofPerCell);
       // *** add X contribution of diffusion ***
       if (stencilSize == 3){
-	V(vIndex) += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
-        V(vIndex) += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+	V(vIndex)   += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
       }
       else if (stencilSize == 5){
-        V(vIndex) += diffDxInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
-        V(vIndex) += diffDyInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
+        V(vIndex)   += diffDxInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
       }
       else if (stencilSize == 7){
-        V(vIndex) += diffDxInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
-        V(vIndex) += diffDyInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
+        V(vIndex)   += diffDxInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
       }
 
       // *** add Y contribution of diffusion ***
       StencilFillerY(smPt, it, numDofPerCell);
       Fy(smPt, numDofPerCell);
       if (stencilSize == 3){
-	V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+	V(vIndex)   += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
         V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
       }
       else if (stencilSize == 5){
-        V(vIndex+1) += diffDxInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
+        V(vIndex)   += diffDyInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
         V(vIndex+1) += diffDyInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
       }
       else if (stencilSize == 7){
-        V(vIndex+1) += diffDxInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
+        V(vIndex)   += diffDyInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
         V(vIndex+1) += diffDyInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
       }
     }
