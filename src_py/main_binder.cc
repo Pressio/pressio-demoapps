@@ -164,7 +164,7 @@ void bind2dProblemEnums(pybind11::module & mParent)
 
   pybind11::enum_<pda::AdvectionDiffusion2d>(mParent, "AdvectionDiffusion2d")
     .value("BurgersPeriodic",
-	   pda::AdvectionDiffusion2d::BurgersPeriodic);
+	   pda::AdvectionDiffusion2d::BurgersPeriodic)
     .value("BurgersOutflow",
 	   pda::AdvectionDiffusion2d::BurgersOutflow);
 
