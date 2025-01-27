@@ -96,7 +96,7 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ matrix.config.mode }} \
             -DPRESSIODEMOAPPS_ENABLE_TESTS:BOOL=ON \
             -DPRESSIODEMOAPPS_ENABLE_BINDINGS:BOOL=OFF \
-            -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-variable -Werror" \
+            -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-but-set-variable -Werror" \
             -B $BUILD_DIR -S $DEMOAPPS_HOME
 
       # NOTE: -j2 caused g++ crash (out of memory)

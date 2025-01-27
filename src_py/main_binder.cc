@@ -396,7 +396,6 @@ void bindAdvectionDiffusion2d(pybind11::module & mParent)
 	      pybind11::return_value_policy::take_ownership,
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
-	      pybind11::arg().noconvert(), pybind11::arg().noconvert(),
 	      pybind11::arg().noconvert(), pybind11::arg().noconvert());
 }
 
