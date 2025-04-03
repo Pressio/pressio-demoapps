@@ -58,7 +58,7 @@ Includes
 First, we need to include Pressio's explicit steppers. These are abstractions that
 represent "how" to take a step when applying an explicit scheme to initial value problems.
 
-You can read more about them in the `Pressio-ROM documentation <https://pressio.github.io/pressio-rom/components/ode_steppers_explicit.html>`_.
+You can read more about them in the `pressio-rom documentation <https://pressio.github.io/pressio-rom/components/ode_steppers_explicit.html>`_.
 
 .. code-block:: cpp
 
