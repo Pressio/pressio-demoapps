@@ -42,7 +42,7 @@ int main()
   FomObserver<state_t> Obs("linadv_1d_solution.bin", 1);
 
   const auto dt = 0.001;
-  const auto Nsteps = pressio::ode::StepCount(2000);
+  const auto Nsteps = pressio::ode::StepCount(200);
   pressio::ode::advance_n_steps(stepperObj, state, 0.,
 					    dt, Nsteps, Obs, NonLinSolver);
 

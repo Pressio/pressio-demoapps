@@ -51,6 +51,8 @@
 
 #include "advection_diffusion_2d_flux_functions.hpp"
 #include "advection_diffusion_2d_initial_condition.hpp"
+#include "advection_diffusion_2d_ghost_filler_outflow.hpp"
+#include "advection_diffusion_2d_parametrization_helpers.hpp"
 #include "functor_fill_stencil.hpp"
 #include "functor_reconstruct_from_stencil.hpp"
 #include "functor_reconstruct_from_state.hpp"
@@ -58,12 +60,25 @@
 #include "mixin_directional_flux_balance.hpp"
 #include "mixin_directional_flux_balance_jacobian.hpp"
 #include "Eigen/Sparse"
+#include "noop.hpp"
+#include "custom_bcs_functions.hpp"
+#include "ghost_relative_locations.hpp"
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #include <omp.h>
 #endif
 
 namespace pressiodemoapps{ namespace impladvdiff2d{
+
+template<class T = void>
+bool valid_ic_flag(const AdvectionDiffusion2d probEn, const int flag)
+{
+  switch(probEn){
+    case AdvectionDiffusion2d::BurgersPeriodic: return flag == 1;
+    case AdvectionDiffusion2d::BurgersOutflow:  return flag == 1;
+    default: return false;
+  }
+}
 
 // tags are used inside he public create function: create_problem_...()
 // in the file ../advection_diffusion.hpp
@@ -75,7 +90,10 @@ struct TagBurgersPeriodic{};
 /////////////////////////
 // eigen class
 /////////////////////////
-template<class MeshType>
+template<
+  class MeshType,
+  class BCFunctorsHolderType = impl::NoOperation<void>
+  >
 class EigenApp
 {
 
@@ -86,80 +104,118 @@ public:
   using state_type    = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using mesh_connectivity_graph_type = typename MeshType::graph_t;
+
+  static constexpr int dimensionality{2};
+  static constexpr int numDofPerCell{2};
 
 private:
-  static constexpr int dimensionality{2};
 
   using ghost_container_type      = Eigen::Matrix<scalar_type,
 						  Eigen::Dynamic,
 						  Eigen::Dynamic,
 						  Eigen::RowMajor>;
   using stencil_container_type    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
-  using flux_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
-  using edge_rec_type	          = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
-  using flux_jac_type             = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
+  using flux_type	          = Eigen::Matrix<scalar_type, numDofPerCell, 1>;
+  using edge_rec_type	          = Eigen::Matrix<scalar_type, numDofPerCell, 1>;
+  using flux_jac_type             = Eigen::Matrix<scalar_type, numDofPerCell, numDofPerCell>;
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = delete;
 
   //
-  // constructor for Burgers2d periodic
+  // constructor for Burgers2d
   //
-  EigenApp(TagBurgersPeriodic /*tag*/,
-	   const MeshType & meshObj,
+  EigenApp(const MeshType & meshObj,
+	   ::pressiodemoapps::AdvectionDiffusion2d probEnum,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
 	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
 	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
-	   scalar_type icPulseMagnitude,
-	   scalar_type icSpread,
-	   scalar_type diffusionCoeff,
-	   scalar_type x0,
-	   scalar_type y0)
-    : m_numDofPerCell(2),
-      m_probEn(::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic),
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
+    : m_probEn(probEnum),
       m_inviscidFluxRecEn(inviscidFluxRecEn),
       m_inviscidFluxSchemeEn(invFluxSchemeEn),
       m_viscousFluxRecEn(visFluxRecEn),
       m_meshObj(meshObj),
-      m_burgers2d_icPulse(icPulseMagnitude),
-      m_burgers2d_icSpread(icSpread),
-      m_burgers2d_diffusion(diffusionCoeff),
-      m_burgers2d_x0(x0),
-      m_burgers2d_y0(y0)
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters)
   {
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
-    // don't need to allocate ghosts because it is periodic
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()  * numDofPerCell;
+
+    if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
+      allocateGhosts();
+    }
+
   }
 
-  state_type initialCondition() const
+#if !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+  EigenApp(const MeshType & meshObj,
+	   ::pressiodemoapps::AdvectionDiffusion2d probEnum,
+	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
+	   ::pressiodemoapps::InviscidFluxScheme invFluxSchemeEn,
+	   ::pressiodemoapps::ViscousFluxReconstruction visFluxRecEn,
+	   BCFunctorsHolderType && bcHolder,
+	   const std::vector<scalar_type> & icParameters,
+	   const std::vector<scalar_type> & physParameters)
+    : m_probEn(probEnum),
+      m_inviscidFluxRecEn(inviscidFluxRecEn),
+      m_inviscidFluxSchemeEn(invFluxSchemeEn),
+      m_viscousFluxRecEn(visFluxRecEn),
+      m_meshObj(meshObj),
+      m_ic_parameters(icParameters),
+      m_phys_parameters(physParameters),
+      m_bcFuncsHolder(std::move(bcHolder))
   {
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize()  * numDofPerCell;
+
+    if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
+	allocateGhosts();
+    }
+
+  }
+#endif
+
+  state_type initialCondition() const{
     state_type initialState(m_numDofStencilMesh);
 
-    if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
+    if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic ||
+	m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow)
       {
-	burgers2d_gaussian(initialState, m_meshObj,
-			   m_burgers2d_icPulse,
-			   m_burgers2d_icSpread,
-			   m_burgers2d_x0,
-			   m_burgers2d_y0);
+	burgers2d_gaussian(initialState, m_meshObj.get(),
+			   m_ic_parameters[ic1_pulseMag_i],
+			   m_ic_parameters[ic1_pulseSpread_i],
+			   m_ic_parameters[ic1_pulseX_i],
+			   m_ic_parameters[ic1_pulseY_i]);
       }
 
     return initialState;
   }
 
+public:
+  template <class T>
+  void setBCPointer(::pressiodemoapps::impl::GhostRelativeLocation rloc, T* ptr) {
+    m_bcFuncsHolder.setInternalPointer(rloc, ptr);
+  }
+
 protected:
+  int numDofPerCellImpl() const {
+    return numDofPerCell;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
-
     using Tr = Eigen::Triplet<scalar_type>;
     std::vector<Tr> trList;
 
-    // only need this since this is for now periodic
+    initializeJacobianForNearBoundaryCells(trList);
     initializeJacobianForInnerCells(trList);
-    J.setFromTriplets(trList.begin(), trList.end());
 
+    J.setFromTriplets(trList.begin(), trList.end());
     // compress to make it Csr
     if (!J.isCompressed()){
       J.makeCompressed();
@@ -182,15 +238,11 @@ protected:
 
       // for omp, these are private variables for each thread
       // edge reconstructions
-      edge_rec_type uMinusHalfNeg(m_numDofPerCell);
-      edge_rec_type uMinusHalfPos(m_numDofPerCell);
-      edge_rec_type uPlusHalfNeg(m_numDofPerCell);
-      edge_rec_type uPlusHalfPos(m_numDofPerCell);
+      edge_rec_type uMinusHalfNeg, uMinusHalfPos;
+      edge_rec_type uPlusHalfNeg, uPlusHalfPos;
       // fluxes
-      flux_type fluxL(m_numDofPerCell);
-      flux_type fluxF(m_numDofPerCell);;
-      flux_type fluxR(m_numDofPerCell);
-      flux_type fluxB(m_numDofPerCell);
+      flux_type fluxL, fluxF;
+      flux_type fluxR, fluxB;
 
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
       ::pressiodemoapps::set_zero_omp(V);
@@ -206,13 +258,28 @@ protected:
 #endif
       }
 
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+        fillGhosts(U, currentTime);
+      }
+      else {
+      	fillGhostsUseCustomFunctors(U, currentTime, m_meshObj, m_bcFuncsHolder,
+				    m_ghostLeft, m_ghostFront,
+				    m_ghostRight, m_ghostBack, numDofPerCell);
+      }
+
       if (J){
-	velocityAndJacobianPeriodicImpl(U, currentTime, V, *J,
-					fluxL, fluxF, fluxR, fluxB,
-					uMinusHalfNeg, uMinusHalfPos,
-					uPlusHalfNeg,  uPlusHalfPos);
+	velocityAndJacobianImpl(U, currentTime, V, *J,
+				fluxL, fluxF, fluxR, fluxB,
+				uMinusHalfNeg, uMinusHalfPos,
+				uPlusHalfNeg,  uPlusHalfPos);
       }
       else{
+        if (!m_meshObj.get().isFullyPeriodic()) {
+          velocityOnlyNearBdCellsImpl(U, currentTime, V,
+				      fluxL, fluxF, fluxR, fluxB,
+				      uMinusHalfNeg, uMinusHalfPos,
+				      uPlusHalfNeg,  uPlusHalfPos);
+	}
 
 	velocityOnlyInnerCellsImpl(U, currentTime, V,
 				   fluxL, fluxF, fluxR, fluxB,
@@ -227,6 +294,28 @@ protected:
   }
 
 private:
+  template<class U_t>
+  void fillGhosts(const U_t & U, const scalar_type currentTime) const
+  {
+    const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    if (m_probEn == pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow)
+    {
+      using ghost_filler_t  = Ghost2dOutflowFiller<
+	U_t, MeshType, ghost_container_type>;
+      ghost_filler_t ghF(stencilSize, numDofPerCell,
+			 U, m_meshObj.get(),
+			 m_ghostLeft, m_ghostFront,
+			 m_ghostRight, m_ghostBack);
+      const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
+	      ghF(rowsBd[it], it);
+      }
+    }
+  }
+
   template<class Tr>
   void initializeJacobianForInnerCells(std::vector<Tr> & trList)
   {
@@ -234,20 +323,20 @@ private:
     // the scheme wanted by the user, no special treatment needed
 
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
+    const auto & graph = m_meshObj.get().graph();
     // only grab the graph rows for INNER cells (i.e. AWAY from boundaries)
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
 
 	// find out which row in the jacobian we are dealing with
-	const auto jacRowOfCurrCellFirstDof = smPt*m_numDofPerCell;
+	const auto jacRowOfCurrCellFirstDof = smPt*numDofPerCell;
 
 	// initialize jacobian block entries wrt current cell's dofs
-	const auto jacColOfCurrCellRho = graph(smPt, 0)*m_numDofPerCell;
-	for (int k=0; k<m_numDofPerCell; ++k){
-	  for (int j=0; j<m_numDofPerCell; ++j){
+	const auto jacColOfCurrCellRho = graph(smPt, 0)*numDofPerCell;
+	for (int k=0; k<numDofPerCell; ++k){
+	  for (int j=0; j<numDofPerCell; ++j){
 	    trList.push_back( Tr(jacRowOfCurrCellFirstDof+k,
 				 jacColOfCurrCellRho+j,
 				 zero) );
@@ -270,9 +359,9 @@ private:
 	assert(numNeighbors > 0);
 
 	for (int i=1; i<=numNeighbors; ++i){
-	  const auto colInd = graph(smPt, i)*m_numDofPerCell;
-	  for (int k=0; k<m_numDofPerCell; ++k){
-	    for (int j=0; j<m_numDofPerCell; ++j){
+	  const auto colInd = graph(smPt, i)*numDofPerCell;
+	  for (int k=0; k<numDofPerCell; ++k){
+	    for (int j=0; j<numDofPerCell; ++j){
 	      trList.push_back( Tr(jacRowOfCurrCellFirstDof+k, colInd+j, zero) );
 	    }
 	  }
@@ -280,35 +369,93 @@ private:
       }
   }
 
+  template<class Tr>
+  void initializeJacobianForNearBoundaryCells(std::vector<Tr> & trList)
+  {
+    const scalar_type zero = 0;
+    const auto & graph = m_meshObj.get().graph();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsNearBd();
+    for (std::size_t it=0; it<targetGraphRows.size(); ++it)
+      {
+	const auto smPt = targetGraphRows[it];
+	const auto jacRowOfCurrCell = smPt*numDofPerCell;
+	const auto jacColOfCurrCell = graph(smPt, 0)*numDofPerCell;
+
+	// wrt current cell's dofs
+	for (int k=0; k<numDofPerCell; ++k){
+	  for (int j=0; j<numDofPerCell; ++j){
+	    trList.push_back( Tr(jacRowOfCurrCell+k, jacColOfCurrCell+j, zero) );
+	  }
+	}
+
+	// wrt neighbors
+	// for near-bd, we only do first-order Jacobian for now
+	for (int i=1; i<=4; ++i){
+	  const auto nID = graph(smPt, i);
+	  if (nID != -1){
+	    const auto ci = nID*numDofPerCell;
+	    for (int k=0; k<numDofPerCell; ++k){
+	      for (int j=0; j<numDofPerCell; ++j){
+		trList.push_back( Tr(jacRowOfCurrCell+k, ci+j, zero) );
+	      }
+	    }
+	  }
+	}
+      }
+  }
+
+
   template<class U_t, class V_t>
-  void velocityAndJacobianPeriodicImpl(const U_t & U,
-				       const scalar_type currentTime,
-				       V_t & V,
-				       jacobian_type & J,
-				       flux_type & fluxL,
-				       flux_type & fluxF,
-				       flux_type & fluxR,
-				       flux_type & fluxB,
-				       edge_rec_type & uMinusHalfNeg,
-				       edge_rec_type & uMinusHalfPos,
-				       edge_rec_type & uPlusHalfNeg,
-				       edge_rec_type & uPlusHalfPos) const
+  void velocityAndJacobianImpl(const U_t & U,
+			       const scalar_type currentTime,
+			       V_t & V,
+			       jacobian_type & J,
+			       flux_type & fluxL,
+			       flux_type & fluxF,
+			       flux_type & fluxR,
+			       flux_type & fluxB,
+			       edge_rec_type & uMinusHalfNeg,
+			       edge_rec_type & uMinusHalfPos,
+			       edge_rec_type & uPlusHalfNeg,
+			       edge_rec_type & uPlusHalfPos) const
   {
 
     // flux jacobians
-    flux_jac_type fluxJacLNeg(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacLPos(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacFNeg(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacFPos(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacRNeg(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacRPos(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacBNeg(m_numDofPerCell, m_numDofPerCell);
-    flux_jac_type fluxJacBPos(m_numDofPerCell, m_numDofPerCell);
+    flux_jac_type fluxJacLNeg;
+    flux_jac_type fluxJacLPos;
+    flux_jac_type fluxJacFNeg;
+    flux_jac_type fluxJacFPos;
+    flux_jac_type fluxJacRNeg;
+    flux_jac_type fluxJacRPos;
+    flux_jac_type fluxJacBNeg;
+    flux_jac_type fluxJacBPos;
 
     int nonZerosCountBeforeComputing = J.nonZeros();
 
-    // this is for periodic so we don't have boundary cells,
-    // all cells count as "inner cells"
+    if (!m_meshObj.get().isFullyPeriodic()){
+      if (m_inviscidFluxRecEn == InviscidFluxReconstruction::FirstOrder){
+	velocityAndJacNearBDCellsImplFirstOrder(U, currentTime, V, J,
+					      fluxL, fluxF, fluxR, fluxB,
+					      fluxJacLNeg, fluxJacLPos,
+					      fluxJacFNeg, fluxJacFPos,
+					      fluxJacRNeg, fluxJacRPos,
+					      fluxJacBNeg, fluxJacBPos,
+					      uMinusHalfNeg, uMinusHalfPos,
+					      uPlusHalfNeg,  uPlusHalfPos);
+      }
+      else{
+        velocityAndJacNearBDCellsImplDifferentSchemeNotFirstOrderInviscid(
+	 U, currentTime, V, J,
+	 fluxL, fluxF, fluxR, fluxB,
+	 fluxJacLNeg, fluxJacLPos,
+	 fluxJacFNeg, fluxJacFPos,
+	 fluxJacRNeg, fluxJacRPos,
+	 fluxJacBNeg, fluxJacBPos,
+	 uMinusHalfNeg, uMinusHalfPos,
+	 uPlusHalfNeg,  uPlusHalfPos);
+      }
+    }
+
     velocityAndJacInnerCellsImpl(U, currentTime, V, J,
 				 fluxL, fluxF, fluxR, fluxB,
 				 fluxJacLNeg, fluxJacLPos,
@@ -357,14 +504,14 @@ private:
     const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     assert(stencilSize >= reconstructionTypeToStencilSize(m_viscousFluxRecEn));
 
-    reconstruction_gradient_t gradLNeg(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradLPos(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradFNeg(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradFPos(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradRNeg(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradRPos(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradBNeg(m_numDofPerCell, stencilSize-1);
-    reconstruction_gradient_t gradBPos(m_numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradLNeg(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradLPos(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradFNeg(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradFPos(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradRNeg(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradRPos(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradBNeg(numDofPerCell, stencilSize-1);
+    reconstruction_gradient_t gradBPos(numDofPerCell, stencilSize-1);
 
     using functor_type =
       pda::impl::ComputeDirectionalFluxBalance<
@@ -377,47 +524,547 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
-		    J, xAxis, m_meshObj,
+		    J, xAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		    fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradLNeg, gradLPos, gradRNeg, gradRPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
-		    J, yAxis, m_meshObj,
+		    J, yAxis, m_meshObj.get(),
 		    /* end args for jac */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		    fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		    gradBNeg, gradBPos, gradFNeg, gradFPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
     {
       const auto smPt = graphRows[it];
-      Fx(smPt, m_numDofPerCell);
-      Fy(smPt, m_numDofPerCell);
+      Fx(smPt, numDofPerCell);
+      Fy(smPt, numDofPerCell);
 
-      if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic){
-	addBurgersDiffusionAndSourceToVelocityAndJacobianInnerCells(U, V, J, smPt);
+      addBurgersDiffusionToVelocityAndOptionalJacobianInnerCells(U, V, &J, smPt);
+    }
+  }
+
+  template<class state_t, class V_t>
+  void velocityAndJacNearBDCellsImplDifferentSchemeNotFirstOrderInviscid(
+						    const state_t & state,
+						    const scalar_type currentTime,
+						    V_t & V,
+						    jacobian_type & J,
+						    flux_type & fluxL,
+						    flux_type & fluxF,
+						    flux_type & fluxR,
+						    flux_type & fluxB,
+						    flux_jac_type & fluxJacLNeg,
+						    flux_jac_type & fluxJacLPos,
+						    flux_jac_type & fluxJacFNeg,
+						    flux_jac_type & fluxJacFPos,
+						    flux_jac_type & fluxJacRNeg,
+						    flux_jac_type & fluxJacRPos,
+						    flux_jac_type & fluxJacBNeg,
+						    flux_jac_type & fluxJacBPos,
+						    edge_rec_type & uMinusHalfNeg,
+						    edge_rec_type & uMinusHalfPos,
+						    edge_rec_type & uPlusHalfNeg,
+						    edge_rec_type & uPlusHalfPos) const
+  {
+    namespace pda = ::pressiodemoapps;
+    constexpr int xAxis = 1;
+    constexpr int yAxis = 2;
+
+    // if here, then the velocity must be computed with Weno,
+    /// while the jacobian must be computed with first order
+
+    using stencil_filler_t  = pda::impl::StencilFiller<dimensionality, stencil_container_type,
+						       state_t, MeshType, ghost_container_type>;
+
+    // *****************************
+    // *** functors for velocity ***
+    // *****************************
+    const auto stencilSizeForV = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    // this method should only be called for stencilsize 5 or 7, because
+    // the case =3 is handled specifically in another method
+    assert(stencilSizeForV == 5 or stencilSizeForV == 7);
+
+    stencil_container_type stencilValsForV(numDofPerCell*stencilSizeForV);
+
+    stencil_filler_t FillStencilVeloX(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
+				      state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
+				      stencilValsForV, xAxis);
+    stencil_filler_t FillStencilVeloY(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
+				      state, m_meshObj.get(), m_ghostBack, m_ghostFront,
+				      stencilValsForV, yAxis);
+
+    using velo_functor_type =
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impladvdiff2d::ComputeDirectionalFluxValues<
+	  pda::impl::ReconstructorFromStencil<
+	    edge_rec_type, stencil_container_type>,
+	  scalar_type, flux_type>,
+      V_t, scalar_type
+      >;
+
+    velo_functor_type funcVeloX(V, m_meshObj.get().dxInv(),
+				/* end args for velo */
+				m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
+				/* end args for flux */
+				toReconstructionScheme(m_inviscidFluxRecEn), stencilValsForV,
+				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+				/* end args for reconstructor */
+				);
+
+    velo_functor_type funcVeloY(V, m_meshObj.get().dyInv(),
+				/* end args for velo */
+				m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
+				/* end args for flux */
+				toReconstructionScheme(m_inviscidFluxRecEn), stencilValsForV,
+				uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+				/* end args for reconstructor */
+				);
+
+    // *****************************
+    // *** functors for jacobian ***
+    // *****************************
+    const auto firstOrderRec = pda::InviscidFluxReconstruction::FirstOrder;
+    const auto stencilSizeForJ = reconstructionTypeToStencilSize(firstOrderRec);
+    stencil_container_type stencilValsForJ(numDofPerCell*stencilSizeForJ);
+    stencil_filler_t FillStencilJacX(stencilSizeForJ,
+				     state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
+				     stencilValsForJ, xAxis);
+    stencil_filler_t FillStencilJacY(stencilSizeForJ,
+				     state, m_meshObj.get(), m_ghostBack, m_ghostFront,
+				     stencilValsForJ, yAxis);
+
+    using jac_functor_type =
+      pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	pda::impladvdiff2d::ComputeDirectionalFluxJacobians<
+	  pda::impl::ReconstructorFromStencil<
+	    edge_rec_type, stencil_container_type>,
+	  scalar_type, flux_jac_type>,
+      dimensionality, MeshType, jacobian_type
+      >;
+
+    jac_functor_type funcJacX(J, xAxis, m_meshObj.get(),
+			      /* end args for jac */
+			      m_probEn, m_inviscidFluxSchemeEn, normalX_,
+			      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
+			      /* end args for flux */
+			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
+			      uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+			      /* end args for reconstructor */
+			      );
+
+    jac_functor_type funcJacY(J, yAxis, m_meshObj.get(),
+			      /* end args for jac */
+			      m_probEn, m_inviscidFluxSchemeEn, normalY_,
+			      fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
+			      /* end args for flux */
+			      toReconstructionScheme(firstOrderRec), stencilValsForJ,
+			      uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+			      /* end args for reconstructor */
+			      );
+
+    // ************
+    // loop
+    // ************
+    const auto & graph     = m_meshObj.get().graph();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
+    const auto dxInvSq	   = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	   = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
+    const auto diffDxInvSq = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq = m_phys_parameters[diffusion_i]*dyInvSq;
+    constexpr auto two      = static_cast<scalar_type>(2);
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
+    {
+      const auto smPt = graphRows[it];
+      const auto vIndex = smPt*numDofPerCell;
+      const auto uIndex	= graph(smPt, 0)*numDofPerCell;
+      const auto uIndexLeft  = graph(smPt, 1)*numDofPerCell;
+      const auto uIndexFront = graph(smPt, 2)*numDofPerCell;
+      const auto uIndexRight = graph(smPt, 3)*numDofPerCell;
+      const auto uIndexBack  = graph(smPt, 4)*numDofPerCell;
+
+      // x-direction
+      FillStencilVeloX(smPt, it, numDofPerCell);
+      funcVeloX(smPt, numDofPerCell);
+      FillStencilJacX(smPt, it, numDofPerCell);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+        fillJacFactorsForCellBd(smPt, xAxis);
+      }
+      else{
+        fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcJacX(smPt, numDofPerCell, m_bcCellJacFactors);
+      // diffusion contribution to velocity
+      if (stencilSizeForV == 5){
+	V(vIndex)   += diffDxInvSq*( stencilValsForV(6) - two*stencilValsForV(4) + stencilValsForV(2) );
+	V(vIndex+1) += diffDxInvSq*( stencilValsForV(7) - two*stencilValsForV(5) + stencilValsForV(3) );
+      }
+      else if (stencilSizeForV == 7){
+	V(vIndex)   += diffDxInvSq*( stencilValsForV(8) - two*stencilValsForV(6) + stencilValsForV(4) );
+	V(vIndex+1) += diffDxInvSq*( stencilValsForV(9) - two*stencilValsForV(7) + stencilValsForV(5) );
+      }
+
+      // y-direction
+      FillStencilVeloY(smPt, it, numDofPerCell);
+      funcVeloY(smPt, numDofPerCell);
+      FillStencilJacY(smPt, it, numDofPerCell);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+        fillJacFactorsForCellBd(smPt, yAxis);
+      }
+      else{
+        fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcJacY(smPt, numDofPerCell, m_bcCellJacFactors);
+      // diffusion contribution to velocity
+      if (stencilSizeForV == 5){
+	V(vIndex)   += diffDyInvSq*( stencilValsForV(6) - two*stencilValsForV(4) + stencilValsForV(2) );
+	V(vIndex+1) += diffDyInvSq*( stencilValsForV(7) - two*stencilValsForV(5) + stencilValsForV(3) );
+      }
+      else if (stencilSizeForV == 7){
+	V(vIndex)   += diffDyInvSq*( stencilValsForV(8) - two*stencilValsForV(6) + stencilValsForV(4) );
+	V(vIndex+1) += diffDyInvSq*( stencilValsForV(9) - two*stencilValsForV(7) + stencilValsForV(5) );
+      }
+
+      // diffusion contribution to Jacobian
+      J.coeffRef(vIndex,   uIndex)   += -two*diffDxInvSq - two*diffDyInvSq;
+      J.coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
+
+      if (uIndexLeft > -1){
+	J.coeffRef(vIndex,   uIndexLeft)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexLeft+1) += diffDxInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+	J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+      }
+
+      if (uIndexFront > -1){
+	J.coeffRef(vIndex,   uIndexFront)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexFront+1) += diffDyInvSq;
+      }
+      else{
+        J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+      }
+
+      if (uIndexRight > -1){
+	J.coeffRef(vIndex,   uIndexRight)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexRight+1) += diffDxInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+      }
+
+      if (uIndexBack > -1){
+	J.coeffRef(vIndex,   uIndexBack)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexBack+1) += diffDyInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
       }
     }
   }
+
+  template<class state_t, class V_t>
+  void velocityAndJacNearBDCellsImplFirstOrder(const state_t & state,
+					       const scalar_type currentTime,
+					       V_t & V,
+					       jacobian_type & J,
+					       flux_type & fluxL,
+					       flux_type & fluxF,
+					       flux_type & fluxR,
+					       flux_type & fluxB,
+					       flux_jac_type & fluxJacLNeg,
+					       flux_jac_type & fluxJacLPos,
+					       flux_jac_type & fluxJacFNeg,
+					       flux_jac_type & fluxJacFPos,
+					       flux_jac_type & fluxJacRNeg,
+					       flux_jac_type & fluxJacRPos,
+					       flux_jac_type & fluxJacBNeg,
+					       flux_jac_type & fluxJacBPos,
+					       edge_rec_type & uMinusHalfNeg,
+					       edge_rec_type & uMinusHalfPos,
+					       edge_rec_type & uPlusHalfNeg,
+					       edge_rec_type & uPlusHalfPos) const
+  {
+    namespace pda = ::pressiodemoapps;
+    constexpr int xAxis = 1;
+    constexpr int yAxis = 2;
+    assert(m_inviscidFluxRecEn == InviscidFluxReconstruction::FirstOrder);
+
+    // if here, then the scheme for velocity matches
+    // the one for Jacobian so we can use same functors
+
+    const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+
+    using stencil_filler_t  = pda::impl::StencilFiller<
+    dimensionality, stencil_container_type, state_t, MeshType, ghost_container_type>;
+    stencil_filler_t FillStencilX(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
+				   state, m_meshObj.get(), m_ghostLeft, m_ghostRight,
+				   stencilVals, xAxis);
+
+    stencil_filler_t FillStencilY(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
+				   state, m_meshObj.get(), m_ghostBack, m_ghostFront,
+				   stencilVals, yAxis);
+
+    using functor_type =
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impl::ComputeDirectionalFluxBalanceFirstOrderJacobianOnBoundaryCell<
+	  pda::impladvdiff2d::ComputeDirectionalFluxValuesAndJacobians<
+	    pda::impl::ReconstructorFromStencil<
+	      edge_rec_type, stencil_container_type>,
+	    scalar_type, flux_type, flux_jac_type>,
+	  dimensionality, MeshType, jacobian_type>,
+      V_t, scalar_type
+      >;
+
+    functor_type funcx(V, m_meshObj.get().dxInv(),
+		       /* end args for velo */
+		       J, xAxis, m_meshObj.get(),
+		       /* end args for jac */
+		       m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
+		       fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
+		       /* end args for flux */
+		       toReconstructionScheme(m_inviscidFluxRecEn), stencilVals,
+		       uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+		       /* end args for reconstructor */
+		       );
+
+    functor_type funcy(V, m_meshObj.get().dyInv(),
+		       /* end args for velo */
+		       J, yAxis, m_meshObj.get(),
+		       /* end args for jac */
+		       m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
+		       fluxJacBNeg, fluxJacBPos, fluxJacFNeg, fluxJacFPos,
+		       /* end args for flux */
+		       toReconstructionScheme(m_inviscidFluxRecEn), stencilVals,
+		       uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+		       /* end args for reconstructor */
+		       );
+
+    const auto & graph      = m_meshObj.get().graph();
+    constexpr auto two      = static_cast<scalar_type>(2);
+    const auto & graphRows  = m_meshObj.get().graphRowsOfCellsNearBd();
+    const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
+
+#ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it)
+    {
+      const auto smPt = graphRows[it];
+      const auto vIndex      = smPt*numDofPerCell;
+      const auto uIndex	     = graph(smPt, 0)*numDofPerCell;
+      const auto uIndexLeft  = graph(smPt, 1)*numDofPerCell;
+      const auto uIndexFront = graph(smPt, 2)*numDofPerCell;
+      const auto uIndexRight = graph(smPt, 3)*numDofPerCell;
+      const auto uIndexBack  = graph(smPt, 4)*numDofPerCell;
+
+      // x-direction inviscid contributions
+      FillStencilX(smPt, it, numDofPerCell);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+        fillJacFactorsForCellBd(smPt, xAxis);
+      }
+      else {
+        fillJacFactorsCustomBCs(smPt, xAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcx(smPt, numDofPerCell, m_bcCellJacFactors);
+      // x-direction velocity contributions
+      V(vIndex)   += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+      V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+
+      // y-direction inviscid contributions
+      FillStencilY(smPt, it, numDofPerCell);
+      if constexpr(std::is_same_v<BCFunctorsHolderType, impl::NoOperation<void>>){
+	fillJacFactorsForCellBd(smPt, yAxis);
+      }
+      else {
+        fillJacFactorsCustomBCs(smPt, yAxis, m_meshObj, m_bcFuncsHolder,
+				m_bcCellJacFactors, numDofPerCell);
+      }
+      funcy(smPt, numDofPerCell, m_bcCellJacFactors);
+      // y-direction velocity contributions
+      V(vIndex)   += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+      V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+
+      // diffusion Jacobian contributions
+      J.coeffRef(vIndex,   uIndex)   += -two*diffDxInvSq - two*diffDyInvSq;
+      J.coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
+
+      if (uIndexLeft > -1){
+	J.coeffRef(vIndex,   uIndexLeft)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexLeft+1) += diffDxInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+	J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+      }
+
+      if (uIndexFront > -1){
+	J.coeffRef(vIndex,   uIndexFront)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexFront+1) += diffDyInvSq;
+      }
+      else{
+        J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+      }
+
+      if (uIndexRight > -1){
+	J.coeffRef(vIndex,   uIndexRight)   += diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndexRight+1) += diffDxInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDxInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDxInvSq;
+      }
+
+      if (uIndexBack > -1){
+	J.coeffRef(vIndex,   uIndexBack)   += diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndexBack+1) += diffDyInvSq;
+      }
+      else{
+	J.coeffRef(vIndex,   uIndex)   += -diffDyInvSq;
+        J.coeffRef(vIndex+1, uIndex+1) += -diffDyInvSq;
+      }
+    }
+  }
+
+  template<class state_t, class V_t>
+  void velocityOnlyNearBdCellsImpl(const state_t & state,
+				   const scalar_type currentTime,
+				   V_t & V,
+				   flux_type & fluxL,
+				   flux_type & fluxF,
+				   flux_type & fluxR,
+				   flux_type & fluxB,
+				   edge_rec_type & uMinusHalfNeg,
+				   edge_rec_type & uMinusHalfPos,
+				   edge_rec_type & uPlusHalfNeg,
+				   edge_rec_type & uPlusHalfPos) const
+  {
+    namespace pda = ::pressiodemoapps;
+    constexpr int xAxis = 1;
+    constexpr int yAxis = 2;
+
+    const auto stencilSize = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    stencil_container_type stencilVals(numDofPerCell*stencilSize);
+
+    // stencil filler needed because we are doing cells near boundaries
+    using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
+      dimensionality, stencil_container_type, state_t, MeshType, ghost_container_type>;
+
+    sfiller_t StencilFillerX(stencilSize, state, m_meshObj.get(), m_ghostLeft, m_ghostRight, stencilVals, xAxis);
+    sfiller_t StencilFillerY(stencilSize, state, m_meshObj.get(), m_ghostBack, m_ghostFront, stencilVals, yAxis);
+
+    using functor_type =
+      pda::impl::ComputeDirectionalFluxBalance<
+	pda::impladvdiff2d::ComputeDirectionalFluxValues<
+	  pda::impl::ReconstructorFromStencil<
+	    edge_rec_type, stencil_container_type>,
+	  scalar_type, flux_type>,
+      V_t, scalar_type
+      >;
+
+    functor_type Fx(V, m_meshObj.get().dxInv(),
+		    /* end args for velo */
+		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
+		    /* end args for flux */
+		    toReconstructionScheme(m_inviscidFluxRecEn), stencilVals,
+		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+		    /* end args for reconstructor */
+		    );
+
+    functor_type Fy(V, m_meshObj.get().dyInv(),
+		    /* end args for velo */
+		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
+		    /* end args for flux */
+		    toReconstructionScheme(m_inviscidFluxRecEn), stencilVals,
+		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg, uPlusHalfPos
+		    /* end args for reconstructor */
+		    );
+
+    constexpr auto two      = static_cast<scalar_type>(2);
+    const auto dxInvSq	    = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq	    = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
+
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsNearBd();
+#if defined PRESSIODEMOAPPS_ENABLE_OPENMP && !defined PRESSIODEMOAPPS_ENABLE_BINDINGS
+#pragma omp for schedule(static)
+#endif
+    for (std::size_t it=0; it<rows.size(); ++it)
+    {
+      const auto smPt        = rows[it];
+      const auto vIndex      = smPt*numDofPerCell;
+
+      StencilFillerX(smPt, it, numDofPerCell);
+      Fx(smPt, numDofPerCell);
+      // *** add X contribution of diffusion ***
+      if (stencilSize == 3){
+	V(vIndex)   += diffDxInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+      }
+      else if (stencilSize == 5){
+        V(vIndex)   += diffDxInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
+      }
+      else if (stencilSize == 7){
+        V(vIndex)   += diffDxInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
+        V(vIndex+1) += diffDxInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
+      }
+
+      // *** add Y contribution of diffusion ***
+      StencilFillerY(smPt, it, numDofPerCell);
+      Fy(smPt, numDofPerCell);
+      if (stencilSize == 3){
+	V(vIndex)   += diffDyInvSq*( stencilVals(4) - two*stencilVals(2) + stencilVals(0) );
+        V(vIndex+1) += diffDyInvSq*( stencilVals(5) - two*stencilVals(3) + stencilVals(1) );
+      }
+      else if (stencilSize == 5){
+        V(vIndex)   += diffDyInvSq*( stencilVals(6) - two*stencilVals(4) + stencilVals(2) );
+        V(vIndex+1) += diffDyInvSq*( stencilVals(7) - two*stencilVals(5) + stencilVals(3) );
+      }
+      else if (stencilSize == 7){
+        V(vIndex)   += diffDyInvSq*( stencilVals(8) - two*stencilVals(6) + stencilVals(4) );
+        V(vIndex+1) += diffDyInvSq*( stencilVals(9) - two*stencilVals(7) + stencilVals(5) );
+      }
+    }
+  }
+
 
   template<class U_t, class V_t>
   void velocityOnlyInnerCellsImpl(const U_t & U,
@@ -445,110 +1092,140 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type Fx(V, m_meshObj.dxInv(),
+    functor_type Fx(V, m_meshObj.get().dxInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalX_, fluxL, fluxR,
 		    /* end args for flux */
-		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    xAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    functor_type Fy(V, m_meshObj.dyInv(),
+    functor_type Fy(V, m_meshObj.get().dyInv(),
 		    /* end args for velo */
 		    m_probEn, m_inviscidFluxSchemeEn, normalY_, fluxB, fluxF,
 		    /* end args for flux */
-		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		    yAxis, toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		    uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		    /* end args for reconstructor */
 		    );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
-      Fx(smPt, m_numDofPerCell);
-      Fy(smPt, m_numDofPerCell);
+      Fx(smPt, numDofPerCell);
+      Fy(smPt, numDofPerCell);
 
-      if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic){
-	addBurgersDiffusionToVelocityInnerCells(U, V, smPt);
-      }
+      // diffusion contribution
+      addBurgersDiffusionToVelocityAndOptionalJacobianInnerCells(U, V, nullptr, smPt);
+    }
+  }
+
+  void fillJacFactorsForCellBd(index_t graphRow, int axis) const
+  {
+    assert(axis <= 2);
+
+    if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersOutflow) {
+	if (axis == 1 && m_meshObj.get().hasBdLeft2d(graphRow)){
+	  // homogeneous dirichlet
+	  m_bcCellJacFactors = {0., 0.};
+	  return;
+	}
+
+	if (axis == 1 && m_meshObj.get().hasBdRight2d(graphRow)){
+	  // homogeneous neumann
+	  m_bcCellJacFactors = {1., 1.};
+	  return;
+	}
+
+	if (axis == 2 && m_meshObj.get().hasBdBack2d(graphRow))
+	{
+	  // homogeneous dirichlet
+	  m_bcCellJacFactors = {0., 0.};
+	  return;
+        }
+
+	if (axis == 2 && m_meshObj.get().hasBdFront2d(graphRow))
+	{
+	  // homogeneous neumann
+	  m_bcCellJacFactors = {1., 1.};
+	  return;
+	}
+    }
+    else if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic) {
+        throw std::runtime_error("Should not be getting Jacobian factors for fully periodic problem.");
+    }
+    else {
+        throw std::runtime_error("Invalid problem enumeration.");
     }
   }
 
   template<class U_t, class V_t>
-  void addBurgersDiffusionToVelocityInnerCells(const U_t & U,
-					       V_t & V,
-					       index_t smPt) const
-  {
-    constexpr auto two  = static_cast<scalar_type>(2);
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
-    const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
-
-    const auto & graph     = m_meshObj.graph();
-    const auto vIndex      = smPt*m_numDofPerCell;
-    const auto uIndex      = graph(smPt, 0)*m_numDofPerCell;
-    const auto uIndexLeft  = graph(smPt, 1)*m_numDofPerCell;
-    const auto uIndexFront = graph(smPt, 2)*m_numDofPerCell;
-    const auto uIndexRight = graph(smPt, 3)*m_numDofPerCell;
-    const auto uIndexBack  = graph(smPt, 4)*m_numDofPerCell;
-    V(vIndex) += diffDxInvSq*( U(uIndexRight) - two*U(uIndex) + U(uIndexLeft) );
-    V(vIndex) += diffDyInvSq*( U(uIndexFront) - two*U(uIndex) + U(uIndexBack) );
-
-    V(vIndex+1) += diffDxInvSq*( U(uIndexRight+1) - two*U(uIndex+1) + U(uIndexLeft+1) );
-    V(vIndex+1) += diffDyInvSq*( U(uIndexFront+1) - two*U(uIndex+1) + U(uIndexBack+1) );
-  }
-
-  template<class U_t, class V_t>
-  void addBurgersDiffusionAndSourceToVelocityAndJacobianInnerCells(const U_t & U,
+  void addBurgersDiffusionToVelocityAndOptionalJacobianInnerCells(const U_t & U,
 								   V_t & V,
-								   jacobian_type & J,
+								   jacobian_type * J,
 								   index_t smPt) const
   {
     constexpr auto two  = static_cast<scalar_type>(2);
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto dyInvSq  = m_meshObj.dyInv()*m_meshObj.dyInv();
-    const auto diffDxInvSq  = m_burgers2d_diffusion*dxInvSq;
-    const auto diffDyInvSq  = m_burgers2d_diffusion*dyInvSq;
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto dyInvSq  = m_meshObj.get().dyInv()*m_meshObj.get().dyInv();
+    const auto diffDxInvSq  = m_phys_parameters[diffusion_i]*dxInvSq;
+    const auto diffDyInvSq  = m_phys_parameters[diffusion_i]*dyInvSq;
 
-    const auto & graph     = m_meshObj.graph();
-    const auto vIndex      = smPt*m_numDofPerCell;
-    const auto uIndex      = graph(smPt, 0)*m_numDofPerCell;
-    const auto uIndexLeft  = graph(smPt, 1)*m_numDofPerCell;
-    const auto uIndexFront = graph(smPt, 2)*m_numDofPerCell;
-    const auto uIndexRight = graph(smPt, 3)*m_numDofPerCell;
-    const auto uIndexBack  = graph(smPt, 4)*m_numDofPerCell;
+    const auto & graph     = m_meshObj.get().graph();
+    const auto vIndex      = smPt*numDofPerCell;
+    const auto uIndex      = graph(smPt, 0)*numDofPerCell;
+    const auto uIndexLeft  = graph(smPt, 1)*numDofPerCell;
+    const auto uIndexFront = graph(smPt, 2)*numDofPerCell;
+    const auto uIndexRight = graph(smPt, 3)*numDofPerCell;
+    const auto uIndexBack  = graph(smPt, 4)*numDofPerCell;
+
     V(vIndex) += diffDxInvSq*( U(uIndexRight) - two*U(uIndex) + U(uIndexLeft) );
     V(vIndex) += diffDyInvSq*( U(uIndexFront) - two*U(uIndex) + U(uIndexBack) );
 
     V(vIndex+1) += diffDxInvSq*( U(uIndexRight+1) - two*U(uIndex+1) + U(uIndexLeft+1) );
     V(vIndex+1) += diffDyInvSq*( U(uIndexFront+1) - two*U(uIndex+1) + U(uIndexBack+1) );
 
-    J.coeffRef(vIndex, uIndex) += -two*diffDxInvSq - two*diffDyInvSq;
-    J.coeffRef(vIndex, uIndexLeft)  += diffDxInvSq;
-    J.coeffRef(vIndex, uIndexFront) += diffDyInvSq;
-    J.coeffRef(vIndex, uIndexRight) += diffDxInvSq;
-    J.coeffRef(vIndex, uIndexBack)  += diffDyInvSq;
-    J.coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
-    J.coeffRef(vIndex+1, uIndexLeft+1)  += diffDxInvSq;
-    J.coeffRef(vIndex+1, uIndexFront+1) += diffDyInvSq;
-    J.coeffRef(vIndex+1, uIndexRight+1) += diffDxInvSq;
-    J.coeffRef(vIndex+1, uIndexBack+1)  += diffDyInvSq;
+    if (J){
+      J->coeffRef(vIndex, uIndex) += -two*diffDxInvSq - two*diffDyInvSq;
+      J->coeffRef(vIndex, uIndexLeft)  += diffDxInvSq;
+      J->coeffRef(vIndex, uIndexFront) += diffDyInvSq;
+      J->coeffRef(vIndex, uIndexRight) += diffDxInvSq;
+      J->coeffRef(vIndex, uIndexBack)  += diffDyInvSq;
+      J->coeffRef(vIndex+1, uIndex+1) += -two*diffDxInvSq - two*diffDyInvSq;
+      J->coeffRef(vIndex+1, uIndexLeft+1)  += diffDxInvSq;
+      J->coeffRef(vIndex+1, uIndexFront+1) += diffDyInvSq;
+      J->coeffRef(vIndex+1, uIndexRight+1) += diffDxInvSq;
+      J->coeffRef(vIndex+1, uIndexBack+1)  += diffDyInvSq;
+    }
+  }
+
+  void allocateGhosts()
+  {
+    const auto stencilSize    = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
+    const auto numGhostValues = numDofPerCell*((stencilSize-1)/2);
+
+    const index_t s1 = m_meshObj.get().numCellsNearBd();
+    ::pressiodemoapps::resize(m_ghostLeft, s1, numGhostValues);
+    ::pressiodemoapps::resize(m_ghostFront,s1, numGhostValues);
+    ::pressiodemoapps::resize(m_ghostRight,s1, numGhostValues);
+    ::pressiodemoapps::resize(m_ghostBack, s1, numGhostValues);
   }
 
 protected:
   // common to all problems
-  int m_numDofPerCell = {};
   ::pressiodemoapps::AdvectionDiffusion2d m_probEn;
   ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
+  std::reference_wrapper<const MeshType> m_meshObj;
+  std::vector<scalar_type> m_ic_parameters;
+  std::vector<scalar_type> m_phys_parameters;
+  BCFunctorsHolderType m_bcFuncsHolder = {};
 
-  const MeshType & m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 
@@ -557,19 +1234,14 @@ protected:
   mutable ghost_container_type m_ghostRight;
   mutable ghost_container_type m_ghostBack;
 
-  const std::array<scalar_type, 2> normalX_{1, 0};
-  const std::array<scalar_type, 2> normalY_{0, 1};
+  std::array<scalar_type, 2> normalX_{1, 0};
+  std::array<scalar_type, 2> normalY_{0, 1};
 
-  // parameters specific to problems
-  // will need to handle this better later
-  scalar_type m_burgers2d_icPulse = {};
-  scalar_type m_burgers2d_icSpread = {};
-  scalar_type m_burgers2d_diffusion = {};
-  scalar_type m_burgers2d_x0 = {};
-  scalar_type m_burgers2d_y0 = {};
+  mutable std::array<scalar_type, numDofPerCell> m_bcCellJacFactors;
 };
 
-template<class MeshType> constexpr int EigenApp<MeshType>::dimensionality;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::numDofPerCell;
+template<class T1, class T2> constexpr int EigenApp<T1,T2>::dimensionality;
 
 }}//end namespace
 #endif

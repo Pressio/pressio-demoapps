@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=80
-  ny=40
+  nx=26
+  ny=13
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("normalShock2d_solution.bin")

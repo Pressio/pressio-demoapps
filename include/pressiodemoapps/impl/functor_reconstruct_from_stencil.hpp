@@ -51,8 +51,6 @@
 
 namespace pressiodemoapps{ namespace impl{
 
-namespace
-{
 template<class ReconstructedValueType, class StencilDataType>
 struct _ReconstructorFromStencilMembers
 {
@@ -78,7 +76,6 @@ struct _ReconstructorFromStencilMembers
   ReconstructedValueType & m_uPlusHalfNeg;
   ReconstructedValueType & m_uPlusHalfPos;
 };
-} // anonym namespace
 
 template<class ReconstructedValueType, class StencilDataType>
 class ReconstructorFromStencil

@@ -329,28 +329,80 @@ private:
 
     switch(m_stencilSize)
     {
-    case 3:
+      case 3:
+	{
+	  const auto l0 = (m_axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
+	  const auto r0 = (m_axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+
+	  if (l0 == -1){ m_stencilVals(0) = m_ghostLeft(ghostRow, 0); }
+	  else{ m_stencilVals(0) = m_state(l0); }
+
+	  m_stencilVals(1)  = m_state(uIndex);
+
+	  if (r0 == -1){ m_stencilVals(2)  = m_ghostRight(ghostRow, 0); }
+	  else{ m_stencilVals(2)  = m_state(r0); }
+
+	  break;
+	}
+
+      case 5:
+	{
+	  const auto uIndex = graph(smPt, 0);
+	  const auto l0 = (m_axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+	  const auto r0 = (m_axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+	  const auto l1 = (m_axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+	  const auto r1 = (m_axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+
+	  if (l1 == -1){ m_stencilVals(0) = m_ghostLeft(ghostRow, 1); }
+	  else{          m_stencilVals(0) = m_state(l1); }
+
+	  if (l0 == -1){ m_stencilVals(1) = m_ghostLeft(ghostRow, 0); }
+	  else{          m_stencilVals(1) = m_state(l0); }
+
+	  m_stencilVals(2) = m_state(uIndex);
+
+	  if (r0 == -1){ m_stencilVals(3) = m_ghostRight(ghostRow, 0); }
+	  else{	         m_stencilVals(3) = m_state(r0); }
+
+	  if (r1 == -1){ m_stencilVals(4) = m_ghostRight(ghostRow, 1); }
+	  else{          m_stencilVals(4) = m_state(r1); }
+
+	  break;
+	}//case 5
+
+    case 7:
       {
-	const auto l0 = (m_axis == 1) ? graph(smPt, 1) : graph(smPt, 4);
-	const auto r0 = (m_axis == 1) ? graph(smPt, 3) : graph(smPt, 2);
+	const auto uIndex = graph(smPt, 0);
+	const auto l0 = (m_axis == 1) ? graph(smPt, 1)  : graph(smPt, 4);
+	const auto r0 = (m_axis == 1) ? graph(smPt, 3)  : graph(smPt, 2);
+	const auto l1 = (m_axis == 1) ? graph(smPt, 5)  : graph(smPt, 8);
+	const auto r1 = (m_axis == 1) ? graph(smPt, 7)  : graph(smPt, 6);
+	const auto l2 = (m_axis == 1) ? graph(smPt, 9)  : graph(smPt, 12);
+	const auto r2 = (m_axis == 1) ? graph(smPt, 11) : graph(smPt, 10);
 
-	if (l0 == -1){
-	  m_stencilVals(0) = m_ghostLeft(ghostRow, 0);
-	}else{
-	  const auto index = l0*numDofPerCell;
-	  m_stencilVals(0) = m_state(index);
-	}
+	if (l2 == -1){ m_stencilVals(0) = m_ghostLeft(ghostRow, 2); }
+	else{          m_stencilVals(0) = m_state(l2); }
 
-	m_stencilVals(1)  = m_state(uIndex);
+	if (l1 == -1){ m_stencilVals(1) = m_ghostLeft(ghostRow, 1); }
+	else{          m_stencilVals(1) = m_state(l1); }
 
-	if (r0 == -1){
-	  m_stencilVals(2)  = m_ghostRight(ghostRow, 0);
-	}else{
-	  const auto index = r0*numDofPerCell;
-	  m_stencilVals(2)  = m_state(index);
-	}
+	if (l0 == -1){ m_stencilVals(2)  = m_ghostLeft(ghostRow, 0); }
+	else{	       m_stencilVals(2)  = m_state(l0); }
+
+	m_stencilVals(3) = m_state(uIndex);
+
+	if (r0 == -1){ m_stencilVals(4) = m_ghostRight(ghostRow, 0); }
+	else{	       m_stencilVals(4) = m_state(r0); }
+
+	if (r1 == -1){ m_stencilVals(5) = m_ghostRight(ghostRow, 1); }
+	else{          m_stencilVals(5) = m_state(r1); }
+
+	if (r2 == -1){ m_stencilVals(6) = m_ghostRight(ghostRow, 2); }
+	else{          m_stencilVals(6) = m_state(r2); }
+
 	break;
-      }
+      }//case 7
+
     }
   }
 

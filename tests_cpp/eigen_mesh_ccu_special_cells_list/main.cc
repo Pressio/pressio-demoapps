@@ -17,7 +17,7 @@ int main()
   if (goldBd != nearBd ){ std::puts("FAILED"); return 0; }
 
   auto s1 = meshObj.numCellsInner();
-  auto s2 = meshObj.numCellsBd();
+  auto s2 = meshObj.numCellsNearBd();
   if (s1!=9 or s2!=16){
   std::puts("FAILED");
   }

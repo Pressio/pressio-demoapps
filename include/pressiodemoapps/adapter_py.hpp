@@ -95,6 +95,10 @@ public:
     ::pressiodemoapps::set_zero(m_velocity);
   }
 
+  int numDofPerCell() const {
+    return T::numDofPerCellImpl();
+  }
+
   typename T::index_t totalDofSampleMesh()  const{
     return T::m_numDofSampleMesh;
   }

@@ -9,8 +9,8 @@ def computePressure(rho, u, v, E):
   return (gamma - 1.) * (E - rho*vel*0.5)
 
 if __name__== "__main__":
-  nx=50
-  ny=50
+  nx=25
+  ny=25
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("sedov2dsym_solution.bin")
@@ -18,7 +18,7 @@ if __name__== "__main__":
   D = np.reshape(D, (nt, fomTotDofs))
   D = D[-1, :]
 
-  # np.savetxt("state.txt", D)
+  np.savetxt("state.txt", D)
   # D = np.reshape(D, (nx*ny, 4))
   # rho = D[:,0]
   # u   = D[:,1]/rho

@@ -93,13 +93,10 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
-	{
-	  burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg,
-					       uMinusHalfPos, m_normal);
-	  burgers_rusanov_flux_2d<scalar_type>(m_fluxR, uPlusHalfNeg,
-					       uPlusHalfPos, m_normal);
-	}
+	burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg,
+					     uMinusHalfPos, m_normal);
+	burgers_rusanov_flux_2d<scalar_type>(m_fluxR, uPlusHalfNeg,
+					     uPlusHalfPos, m_normal);
 	break;
       }
   }
@@ -154,15 +151,12 @@ public:
       {
 
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
-	{
-	  burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacLNeg, m_fluxJacLPos,
-							uMinusHalfNeg, uMinusHalfPos,
-							m_normal);
-	  burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacRNeg, m_fluxJacRPos,
-							uPlusHalfNeg, uPlusHalfPos,
-							m_normal);
-	}
+	burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacLNeg, m_fluxJacLPos,
+						      uMinusHalfNeg, uMinusHalfPos,
+						      m_normal);
+	burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacRNeg, m_fluxJacRPos,
+						      uPlusHalfNeg, uPlusHalfPos,
+						      m_normal);
 	break;
       }
   }
@@ -223,18 +217,15 @@ public:
     switch(m_fluxEnum)
       {
       case ::pressiodemoapps::InviscidFluxScheme::Rusanov:
-	if (m_probEn == ::pressiodemoapps::AdvectionDiffusion2d::BurgersPeriodic)
-        {
-	  burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_normal);
-	  burgers_rusanov_flux_2d<scalar_type>(m_fluxR, uPlusHalfNeg, uPlusHalfPos, m_normal);
+	burgers_rusanov_flux_2d<scalar_type>(m_fluxL, uMinusHalfNeg, uMinusHalfPos, m_normal);
+	burgers_rusanov_flux_2d<scalar_type>(m_fluxR, uPlusHalfNeg, uPlusHalfPos, m_normal);
 
-	  burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacLNeg, m_fluxJacLPos,
-							uMinusHalfNeg, uMinusHalfPos,
-							m_normal);
-	  burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacRNeg, m_fluxJacRPos,
-							uPlusHalfNeg, uPlusHalfPos,
-							m_normal);
-	}
+	burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacLNeg, m_fluxJacLPos,
+						      uMinusHalfNeg, uMinusHalfPos,
+						      m_normal);
+	burgers_rusanov_flux_jacobian_2d<scalar_type>(m_fluxJacRNeg, m_fluxJacRPos,
+						      uPlusHalfNeg, uPlusHalfPos,
+						      m_normal);
 	break;
       }
   }

@@ -24,9 +24,9 @@ int main()
   state_t state(appObj.initialCondition());
 
   auto stepperObj = pressio::ode::create_rk4_stepper(appObj);
-  FomObserver<state_t> Obs("smooth2d_solution.bin", 5);
+  FomObserver<state_t> Obs("smooth2d_solution.bin", 50);
 
-  const auto dt = 0.001;
+  const auto dt = 0.01;
   const auto Nsteps = pressio::ode::StepCount(2.0/dt);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 

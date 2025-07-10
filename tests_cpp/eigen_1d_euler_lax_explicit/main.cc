@@ -26,10 +26,10 @@ int main()
   state_t state(appObj.initialCondition());
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
-  FomObserver<state_t> Obs("1d_lax_solution.bin", 1);
+  FomObserver<state_t> Obs("1d_lax_solution.bin", 10);
 
   const auto dt = 0.0001;
-  const auto Nsteps = pressio::ode::StepCount(int(1.3/dt));
+  const auto Nsteps = pressio::ode::StepCount(100);
   pressio::ode::advance_n_steps(stepperObj, state, 0., dt, Nsteps, Obs);
 
   return 0;

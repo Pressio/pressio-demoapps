@@ -78,6 +78,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using mesh_connectivity_graph_type = typename MeshType::graph_t;
 
 private:
   static constexpr int dimensionality{1};
@@ -92,6 +93,8 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = delete;
+
   EigenApp(const MeshType & meshObj,
 	   ::pressiodemoapps::Euler1d probEnum,
 	   ::pressiodemoapps::InviscidFluxReconstruction recEnum,
@@ -104,8 +107,8 @@ public:
       m_meshObj(meshObj)
   {
 
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * m_numDofPerCell;
     allocateGhostValues();
   }
 
@@ -116,16 +119,16 @@ public:
     state_type initialState(m_numDofStencilMesh);
 
     if (m_probEn == ::pressiodemoapps::Euler1d::PeriodicSmooth){
-      euler1dsineInitialCondition(initialState, m_meshObj, m_gamma);
+      euler1dsineInitialCondition(initialState, m_meshObj.get(), m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::Sod){
-      sod1dInitialCondition(initialState, m_meshObj, m_gamma);
+      sod1dInitialCondition(initialState, m_meshObj.get(), m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::Lax){
-      lax1dInitialCondition(initialState, m_meshObj, m_gamma);
+      lax1dInitialCondition(initialState, m_meshObj.get(), m_gamma);
     }
     else if (m_probEn == ::pressiodemoapps::Euler1d::ShuOsher){
-      shuOsherInitialCondition(initialState, m_meshObj, m_gamma);
+      shuOsherInitialCondition(initialState, m_meshObj.get(), m_gamma);
     }
     else{
       //nothing
@@ -134,6 +137,10 @@ public:
   }
 
 protected:
+  int numDofPerCellImpl() const {
+    return m_numDofPerCell;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
@@ -198,7 +205,7 @@ protected:
       }
       else
       {
-	if (!m_meshObj.isFullyPeriodic()){
+	if (!m_meshObj.get().isFullyPeriodic()){
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp single
 #endif
@@ -228,8 +235,8 @@ private:
     // wanted by the user, no special treatment is needed
 
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graph = m_meshObj.get().graph();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
@@ -263,8 +270,8 @@ private:
   void initializeJacobianForNearBoundaryCells(std::vector<Tr> & trList)
   {
     const scalar_type zero = 0;
-    const auto & graph = m_meshObj.graph();
-    const auto & targetGraphRows = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & graph = m_meshObj.get().graph();
+    const auto & targetGraphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<targetGraphRows.size(); ++it)
       {
 	const auto smPt = targetGraphRows[it];
@@ -320,7 +327,7 @@ private:
       ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj,
 			 m_ghostLeft, m_ghostRight);
 
-      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
       for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it, m_numDofPerCell);
       }
@@ -349,16 +356,16 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type F(V, m_meshObj.dxInv(),
+    functor_type F(V, m_meshObj.get().dxInv(),
 		   /* end args for velo */
 		   m_inviscidFluxSchemeEn, m_gamma, fluxL, fluxR,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -399,7 +406,7 @@ private:
     // near boundary I have be careful because
     // the jacobian can only be first order for now
     // also, in 1d there is not enough work to justify threading
-    if (!m_meshObj.isFullyPeriodic())
+    if (!m_meshObj.get().isFullyPeriodic())
       {
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp single
@@ -471,20 +478,20 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type F(V, m_meshObj.dxInv(),
+    functor_type F(V, m_meshObj.get().dxInv(),
 		   /* end args for velo */
-		   J, xAxis, m_meshObj,
+		   J, xAxis, m_meshObj.get(),
 		   /* end args for jac */
 		   m_inviscidFluxSchemeEn, m_gamma, fluxL, fluxR,
 		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
 		   );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsAwayFromBd();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -513,7 +520,7 @@ private:
       dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilF(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				  U, m_meshObj, m_ghostLeft, m_ghostRight,
+				  U, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				  stencilVals);
 
     using functor_type =
@@ -525,7 +532,7 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type func(V, m_meshObj.dxInv(),
+    functor_type func(V, m_meshObj.get().dxInv(),
 		      /* end args for velo */
 		      m_inviscidFluxSchemeEn, m_gamma, fluxL, fluxR,
 		      /* end args for flux */
@@ -534,7 +541,7 @@ private:
 		      /* end args for reconstructor */
 		      );
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       FillStencilF(smPt, it, m_numDofPerCell);
@@ -572,7 +579,7 @@ private:
       dimensionality, stencil_container_type,
       U_t, MeshType, ghost_container_type>;
     stencil_filler_t FillStencilF(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				  U, m_meshObj, m_ghostLeft, m_ghostRight,
+				  U, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				  stencilVals);
 
     using functor_type =
@@ -586,9 +593,9 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type func(V, m_meshObj.dxInv(),
+    functor_type func(V, m_meshObj.get().dxInv(),
 		      /* end args for velo */
-		      J, xAxis, m_meshObj,
+		      J, xAxis, m_meshObj.get(),
 		      /* end args for jac */
 		      m_inviscidFluxSchemeEn, m_gamma, fluxL, fluxR,
 		      fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
@@ -602,7 +609,7 @@ private:
     // both Sod and Lax have Neumann BC type
     bdCellJacFactors.fill(static_cast<scalar_type>(1));
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       FillStencilF(smPt, it, m_numDofPerCell);
@@ -644,7 +651,7 @@ private:
     stencil_container_type stencilValsV(m_numDofPerCell*stencilSizeV);
 
     stencil_filler_t FillStencilVelo(reconstructionTypeToStencilSize(m_inviscidFluxRecEn),
-				     U, m_meshObj, m_ghostLeft, m_ghostRight,
+				     U, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				     stencilValsV);
 
     using velo_functor_type =
@@ -656,7 +663,7 @@ private:
       V_t, scalar_type
       >;
 
-    velo_functor_type funcVelo(V, m_meshObj.dxInv(),
+    velo_functor_type funcVelo(V, m_meshObj.get().dxInv(),
 			       /* end args for velo */
 			       m_inviscidFluxSchemeEn, m_gamma, fluxL, fluxR,
 			       /* end args for flux */
@@ -672,7 +679,7 @@ private:
     const auto stencilSizeForJ = reconstructionTypeToStencilSize(firstOrderRec);
     stencil_container_type stencilValsForJ(m_numDofPerCell*stencilSizeForJ);
     stencil_filler_t FillStencilJac(stencilSizeForJ,
-				    U, m_meshObj, m_ghostLeft, m_ghostRight,
+				    U, m_meshObj.get(), m_ghostLeft, m_ghostRight,
 				    stencilValsForJ);
 
     using jac_functor_type =
@@ -684,7 +691,7 @@ private:
       dimensionality, MeshType, jacobian_type
       >;
 
-    jac_functor_type funcJac(J, xAxis, m_meshObj,
+    jac_functor_type funcJac(J, xAxis, m_meshObj.get(),
 			     /* end args for jac */
 			     m_inviscidFluxSchemeEn, m_gamma,
 			     fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos,
@@ -700,7 +707,7 @@ private:
     std::array<scalar_type, 3> bdCellJacFactors;
     bdCellJacFactors.fill(static_cast<scalar_type>(1));
 
-    const auto & graphRows = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & graphRows = m_meshObj.get().graphRowsOfCellsNearBd();
     for (decltype(graphRows.size()) it=0; it<graphRows.size(); ++it){
       const auto smPt = graphRows[it];
       FillStencilVelo(smPt, it, m_numDofPerCell);
@@ -758,7 +765,7 @@ private:
 
     const auto stencilSize    = reconstructionTypeToStencilSize(m_inviscidFluxRecEn);
     const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
-    const index_t s1 = m_meshObj.numCellsBd();
+    const index_t s1 = m_meshObj.get().numCellsNearBd();
     ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
   }
@@ -770,7 +777,8 @@ protected:
   ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
   scalar_type m_gamma = {};
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
+
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
 

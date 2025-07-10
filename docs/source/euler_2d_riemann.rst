@@ -14,11 +14,15 @@ where the pressure :math:`p` is related to the conserved quantities through the 
    p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2)).
 
 
-- Various initial conditions are supported:
+- Various initial conditions are supported, with various default parameterizations:
 
   - ``icId==1``:
 
-    - See page 15 of `paper1 <https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations>`_
+    - Accepts the following user-specified parameters
+
+      - ``riemannTopRightPressure``: pressure in the upper right quadrant (default: 0.4)
+
+    - Default setting follows those on page 15 of `paper1 <https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations>`_
 
       :math:`\left\{\begin{matrix}\rho = 0.5313, u = 0, v = 0, p = 0.4; & x\geq 1/2, y\geq 1/2\\ \rho = 1, u = 0.7276, v = 0, p = 1; & x<1/2, y\geq 1/2 \\ \rho = 4/5, u = 0, v = 0, p = 1; & x<1/2, y<1/2 \\ \rho = 1, u = 0, v = 0.7276, p = 1;& x>1/2, y<1/2 \end{matrix}\right.`
 
@@ -29,7 +33,21 @@ where the pressure :math:`p` is related to the conserved quantities through the 
 
   - ``icId==2``:
 
-    - See configuration 3 of `paper2 <http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf>`_
+    - Accepts the following user-specified parameters
+
+      - ``riemannTopRightPressure``: pressure in upper right quadrant (default: 1.5)
+
+      - ``riemannTopRightXVel``: x-velocity in upper right quadrant (default: 0.0)
+
+      - ``riemannTopRightYVel``: y-velocity in upper right quadrant (default: 0.0)
+
+      - ``riemannTopRightDensity``: density in upper right quadrant (default: 1.5)
+
+      - ``riemannBotLeftPressure``: pressure in lower left quadrant (default: 0.029)
+
+    - The remaining, unspecified primitive state values are computed following the compatibility relations provided by Configuration 3 of `paper2 <https://epubs.siam.org/doi/pdf/10.1137/0524006>`_
+
+    - Default settings follow those in configuration 3 of `paper3 <http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf>`_
 
       :math:`\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; & x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; & x<4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &x<4/5, y<4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;& x>4/5, y<4/5 \end{matrix}\right.`
 
@@ -86,11 +104,11 @@ C++ synopsis
 
      const auto probId = pda::Euler2d::Riemann;
      const auto scheme = pda::InviscidFluxReconstruction::FirstOrder; //or Weno3, Weno5
-     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId]);
+     auto problem      = pda::create_problem_eigen(meshObj, probId, scheme [, icId, userParams]);
      auto state	     = problem.initialCondition();
    }
 
-Where the ``icId`` is an integer identifying the initial condition above.
+Where the ``icId`` is an integer identifying the initial condition above, and ``userParams`` is an ``std::unordered_map<std::string, decltype(meshObj)::scalar_type>`` mapping user-specified parameter names to their designated values (see above for valid parameter names and their default values for each ``icId``).
 
 Python synopsis
 ---------------

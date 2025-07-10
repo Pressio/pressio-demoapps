@@ -30,7 +30,6 @@ if __name__== "__main__":
   x_fom = np.reshape(x_fom, (ny,nx))
   y_fom = np.reshape(y_fom, (ny,nx))
 
-  
   fomTestD = np.fromfile("swe_slipWall2d_solution.bin")
   nt = int(np.size(fomTestD)/fomTotDofs)
   print("fomTest: nt = ", nt)
@@ -42,8 +41,6 @@ if __name__== "__main__":
     fomS = fomTestD[i,:]
     fomS = np.reshape(fomS, (nx*ny, 3))
     heightAtCenter[i] = fomS[:,0].flatten()[zeroIndx]
-
-    
 
   plt.clf()
   ax = plt.gca()

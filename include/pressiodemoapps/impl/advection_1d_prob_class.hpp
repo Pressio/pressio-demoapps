@@ -78,6 +78,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type, Eigen::Dynamic, 1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using mesh_connectivity_graph_type = typename MeshType::graph_t;
 
 private:
   static constexpr int dimensionality{1};
@@ -87,6 +88,8 @@ private:
   using reconstruction_gradient_t = Eigen::Matrix<scalar_type, Eigen::Dynamic, Eigen::Dynamic>;
 
 public:
+  EigenApp() = delete;
+
   EigenApp(TagLinearAdvection /*tag*/,
 	   const MeshType & meshObj,
 	   ::pressiodemoapps::InviscidFluxReconstruction inviscidFluxRecEn,
@@ -101,13 +104,13 @@ public:
       m_icIdentifier(icIdentifier),
       m_linear_adv_vel(velocity)
   {
-    m_numDofStencilMesh = m_meshObj.stencilMeshSize() * m_numDofPerCell;
-    m_numDofSampleMesh  = m_meshObj.sampleMeshSize() * m_numDofPerCell;
+    m_numDofStencilMesh = m_meshObj.get().stencilMeshSize() * m_numDofPerCell;
+    m_numDofSampleMesh  = m_meshObj.get().sampleMeshSize() * m_numDofPerCell;
   }
 
   state_type initialCondition() const{
     state_type res(m_numDofStencilMesh);
-    const auto & x = m_meshObj.viewX();
+    const auto & x = m_meshObj.get().viewX();
 
     for (int i=0; i<::pressiodemoapps::extent(x,0); ++i){
       if (m_icIdentifier == 1){
@@ -153,6 +156,10 @@ public:
   }
 
 protected:
+  int numDofPerCellImpl() const {
+    return m_numDofPerCell;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
@@ -161,8 +168,8 @@ protected:
     std::vector<Tr> trList;
 
     const auto zero = static_cast<scalar_type>(0);
-    const auto & graph = m_meshObj.graph();
-    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
+    const auto & graph = m_meshObj.get().graph();
+    for (int cell=0; cell<m_meshObj.get().sampleMeshSize(); ++cell)
       {
 	const auto jacRowOfCurrentCell = cell*m_numDofPerCell;
 	const auto ci  = graph(cell, 0)*m_numDofPerCell;
@@ -239,7 +246,7 @@ private:
 			  jacobian_type & J) const
   {
     (void) currentTime;
-    
+
     namespace pda = ::pressiodemoapps;
     constexpr int xAxis = 1;
 
@@ -278,20 +285,20 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type F(V, m_meshObj.dxInv(),
+    functor_type F(V, m_meshObj.get().dxInv(),
 		   /* end args for velo */
-		   J, xAxis, m_meshObj,
+		   J, xAxis, m_meshObj.get(),
 		   /* end args for jac */
 		   m_inviscidFluxSchemeEn, fluxL, fluxR,
 		   fluxJacLNeg, fluxJacLPos, fluxJacRNeg, fluxJacRPos, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos,
 		   gradLNeg, gradLPos, gradRNeg, gradRPos
 		   /* end args for reconstructor */
 		   );
 
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
+    const auto sampleMeshSize = m_meshObj.get().sampleMeshSize();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -326,16 +333,16 @@ private:
       V_t, scalar_type
       >;
 
-    functor_type F(V, m_meshObj.dxInv(),
+    functor_type F(V, m_meshObj.get().dxInv(),
 		   /* end args for velo */
 		   m_inviscidFluxSchemeEn, fluxL, fluxR, m_linear_adv_vel,
 		   /* end args for flux */
-		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj,
+		   toReconstructionScheme(m_inviscidFluxRecEn), U, m_meshObj.get(),
 		   uMinusHalfNeg, uMinusHalfPos, uPlusHalfNeg,  uPlusHalfPos
 		   /* end args for reconstructor */
 		   );
 
-    const auto sampleMeshSize = m_meshObj.sampleMeshSize();
+    const auto sampleMeshSize = m_meshObj.get().sampleMeshSize();
 #ifdef PRESSIODEMOAPPS_ENABLE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -350,7 +357,7 @@ protected:
   ::pressiodemoapps::Advection1d m_probEn;
   ::pressiodemoapps::InviscidFluxReconstruction m_inviscidFluxRecEn;
   ::pressiodemoapps::InviscidFluxScheme m_inviscidFluxSchemeEn;
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
   int m_icIdentifier = {};
 
   index_t m_numDofStencilMesh = {};

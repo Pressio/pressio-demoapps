@@ -3,8 +3,8 @@ import numpy as np
 import sys, os
 
 if __name__== "__main__":
-  nx=80
-  ny=40
+  nx=40
+  ny=20
   fomTotDofs = nx*ny*4
 
   D = np.fromfile("eulerCrossShock2d_solution.bin")

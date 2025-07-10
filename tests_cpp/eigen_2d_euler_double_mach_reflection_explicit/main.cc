@@ -21,8 +21,8 @@ int main()
   using state_t = typename app_t::state_type;
 
   state_t state = appObj.initialCondition();
-  const auto dt = 0.0005;
-  const auto Nsteps = pressio::ode::StepCount(500);
+  const auto dt = 0.001;
+  const auto Nsteps = pressio::ode::StepCount(150);
 
   auto stepperObj = pressio::ode::create_ssprk3_stepper(appObj);
   FomObserver<state_t> Obs("doubleMach2d_solution.bin", 50);

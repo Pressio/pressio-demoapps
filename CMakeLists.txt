@@ -57,8 +57,8 @@ if(PRESSIODEMOAPPS_ENABLE_BINDINGS)
 
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen/eigen3)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tpls/pybind11)
+    ${CMAKE_CURRENT_SOURCE_DIR}/tpls/eigen3)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tpls/pybind11-2.10.4)
 
   if(PRESSIODEMOAPPS_ENABLE_OPENMP)
     link_libraries(OpenMP::OpenMP_CXX)

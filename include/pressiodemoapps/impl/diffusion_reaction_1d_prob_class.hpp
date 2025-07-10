@@ -71,6 +71,7 @@ public:
   using state_type    = Eigen::Matrix<scalar_type,Eigen::Dynamic,1>;
   using velocity_type = state_type;
   using jacobian_type = Eigen::SparseMatrix<scalar_type, Eigen::RowMajor, index_t>;
+  using mesh_connectivity_graph_type = typename MeshType::graph_t;
 
 private:
   static constexpr int dimensionality{1};
@@ -81,6 +82,8 @@ private:
 					     Eigen::RowMajor>;
 
 public:
+  EigenApp() = delete;
+
   template<class SourceT>
   EigenApp(TagProblemA /*tag*/,
 	   const MeshType & meshObj,
@@ -92,13 +95,13 @@ public:
       m_probEn(::pressiodemoapps::DiffusionReaction1d::ProblemA),
       m_viscousFluxRecEn(recEnum),
       m_meshObj(meshObj),
-      m_numDofStencilMesh(m_meshObj.stencilMeshSize()),
-      m_numDofSampleMesh(m_meshObj.sampleMeshSize()),
+      m_numDofStencilMesh(m_meshObj.get().stencilMeshSize()),
+      m_numDofSampleMesh(m_meshObj.get().sampleMeshSize()),
       m_probA_diffusionCoeff(diffusionCoeff),
       m_probA_reactionCoeff(reactionCoeff)
   {
 
-    if (m_meshObj.stencilSize() != 3){
+    if (m_meshObj.get().stencilSize() != 3){
       throw std::runtime_error("DiffusionReaction1d currently only supports 3-pt stencil");
     }
 
@@ -118,6 +121,10 @@ public:
   }
 
 protected:
+  int numDofPerCellImpl() const {
+    return m_numDofPerCell;
+  }
+
   void initializeJacobian(jacobian_type & J)
   {
     J.resize(m_numDofSampleMesh, m_numDofStencilMesh);
@@ -126,8 +133,8 @@ protected:
     std::vector<Tr> trList;
 
     constexpr auto val0 = static_cast<scalar_type>(0);
-    const auto & graph = m_meshObj.graph();
-    for (int cell=0; cell<m_meshObj.sampleMeshSize(); ++cell)
+    const auto & graph = m_meshObj.get().graph();
+    for (int cell=0; cell<m_meshObj.get().sampleMeshSize(); ++cell)
       {
 	const auto ci   = graph(cell, 0)*m_numDofPerCell;
 	trList.push_back( Tr(cell, ci, val0) );
@@ -180,9 +187,9 @@ private:
     if (m_probEn == ::pressiodemoapps::DiffusionReaction1d::ProblemA){
       using ghost_filler_t  = GhostFillerProblemA1d<U_t, MeshType, ghost_container_type>;
       const auto stencilSizeNeeded = reconstructionTypeToStencilSize(m_viscousFluxRecEn);
-      ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj, m_ghostLeft, m_ghostRight);
+      ghost_filler_t ghF(stencilSizeNeeded, U, m_meshObj.get(), m_ghostLeft, m_ghostRight);
 
-      const auto & rowsBd = m_meshObj.graphRowsOfCellsNearBd();
+      const auto & rowsBd = m_meshObj.get().graphRowsOfCellsNearBd();
       for (decltype(rowsBd.size()) it=0; it<rowsBd.size(); ++it){
 	ghF(rowsBd[it], it);
       }
@@ -207,18 +214,18 @@ private:
     // stencil filler needed because we are doing cells near boundaries
     using sfiller_t  = ::pressiodemoapps::impl::StencilFiller<
       dimensionality, stencil_values_t, U_t, MeshType, ghost_container_type>;
-    sfiller_t StencilFiller(stencilSize, U, m_meshObj,
+    sfiller_t StencilFiller(stencilSize, U, m_meshObj.get(),
 			    m_ghostLeft, m_ghostRight, stencilVals);
 
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
-    const auto & graph  = m_meshObj.graph();
-    const auto & x      = m_meshObj.viewX();
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
+    const auto & graph  = m_meshObj.get().graph();
+    const auto & x      = m_meshObj.get().viewX();
     constexpr auto two  = static_cast<scalar_type>(2);
     constexpr auto three= static_cast<scalar_type>(3);
     const auto twoReacCoeff = m_probA_reactionCoeff*two;
     const auto diffDxInvSq  = m_probA_diffusionCoeff*dxInvSq;
 
-    const auto & rows   = m_meshObj.graphRowsOfCellsNearBd();
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsNearBd();
     for (std::size_t it=0; it<rows.size(); ++it)
     {
       const auto smPt        = rows[it];
@@ -262,14 +269,14 @@ private:
 					     jacobian_type * J) const
   {
 
-    const auto & x      = m_meshObj.viewX();
-    const auto & graph  = m_meshObj.graph();
+    const auto & x      = m_meshObj.get().viewX();
+    const auto & graph  = m_meshObj.get().graph();
     constexpr auto two  = static_cast<scalar_type>(2);
     const auto twoReacCoeff = m_probA_reactionCoeff*two;
-    const auto dxInvSq  = m_meshObj.dxInv()*m_meshObj.dxInv();
+    const auto dxInvSq  = m_meshObj.get().dxInv()*m_meshObj.get().dxInv();
     const auto diffDxInvSq  = m_probA_diffusionCoeff*dxInvSq;
 
-    const auto & rows   = m_meshObj.graphRowsOfCellsAwayFromBd();
+    const auto & rows   = m_meshObj.get().graphRowsOfCellsAwayFromBd();
     for (std::size_t it=0; it<rows.size(); ++it)
     {
       const auto smPt        = rows[it];
@@ -301,7 +308,7 @@ private:
   {
     const auto stencilSize    = reconstructionTypeToStencilSize(m_viscousFluxRecEn);
     const auto numGhostValues = m_numDofPerCell*((stencilSize-1)/2);
-    const index_t s1 = m_meshObj.numCellsBd();
+    const index_t s1 = m_meshObj.get().numCellsNearBd();
     ::pressiodemoapps::resize(m_ghostLeft,  s1, numGhostValues);
     ::pressiodemoapps::resize(m_ghostRight, s1, numGhostValues);
   }
@@ -311,7 +318,7 @@ protected:
   int m_numDofPerCell = {};
   ::pressiodemoapps::DiffusionReaction1d m_probEn;
   ::pressiodemoapps::ViscousFluxReconstruction m_viscousFluxRecEn;
-  const MeshType & m_meshObj;
+  std::reference_wrapper<const MeshType> m_meshObj;
   index_t m_numDofStencilMesh = {};
   index_t m_numDofSampleMesh  = {};
   mutable ghost_container_type m_ghostLeft;

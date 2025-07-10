@@ -46,8 +46,11 @@ jobs:
 
       - name: Install packages
         run: |
+          echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
           sudo apt-get update
+          sudo apt-get install libssl1.1
           sudo apt-get install -y --install-suggests $APT_PACKAGES
+          sudo rm /etc/apt/sources.list.d/focal-security.list
 
       - name: Install CMake
         run: |
@@ -93,6 +96,7 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ matrix.config.mode }} \
             -DPRESSIODEMOAPPS_ENABLE_TESTS:BOOL=ON \
             -DPRESSIODEMOAPPS_ENABLE_BINDINGS:BOOL=OFF \
+            -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-but-set-variable -Werror" \
             -B $BUILD_DIR -S $DEMOAPPS_HOME
 
       # NOTE: -j2 caused g++ crash (out of memory)

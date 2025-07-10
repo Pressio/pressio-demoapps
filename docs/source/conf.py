@@ -63,10 +63,8 @@ def get_version():
   with open("../../version.txt") as version_file:
     return version_file.read().strip()
 
-version = get_version()
-
 # The full version, including alpha/beta/rc tags.
-release = version
+release = get_version()
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

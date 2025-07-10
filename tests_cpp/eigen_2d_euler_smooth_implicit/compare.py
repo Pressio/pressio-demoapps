@@ -16,8 +16,8 @@ def computePressure(rho, u, v, E):
 if __name__== "__main__":
   st = int(sys.argv[1])
 
-  nx=25
-  ny=25
+  nx=13
+  ny=13
   dt=0.025
   finalTime = 2.
   fomTotDofs = nx*ny*4
@@ -42,4 +42,4 @@ if __name__== "__main__":
   print("Linf error wrt analytical = ", err)
 
   if(st==3):
-    assert(math.isclose(err, 0.19860721814207727))
+    assert(math.isclose(err, 0.1985874411911701))

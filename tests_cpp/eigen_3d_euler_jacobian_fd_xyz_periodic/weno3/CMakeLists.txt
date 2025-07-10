@@ -12,7 +12,7 @@ COMMAND ${CMAKE_COMMAND}
 -DOUTDIR=${CMAKE_CURRENT_BINARY_DIR}
 -DEXENAME=$<TARGET_FILE:${exename}>
 -DSTENCILVAL=5
--P ${CMAKE_CURRENT_SOURCE_DIR}/../test.cmake
+-P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake
 )
 
 set_tests_properties(${testname}

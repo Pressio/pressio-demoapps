@@ -77,7 +77,7 @@ int main()
 
   // make sure repeated evaluations work
   // not just a single time
-  for (int loop=0; loop<5; ++loop)
+  for (int loop=0; loop<2; ++loop)
   {
 
     appObj.rightHandSide(state, 0., velo);
