@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="1d Problems" href="problems_1d.html" /><link rel="prev" title="Step-by-step in Python" href="endtoend_py.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>Step-by-step in C++ - pressio-demoapps v0.14.0</title>
+        <title>Step-by-step in C++ - pressio-demoapps v0.16.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.14.0</div></a>
+v0.16.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -143,7 +143,7 @@ v0.14.0</div></a>
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -156,7 +156,7 @@ v0.14.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.14.0</span>
+v0.16.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -192,8 +192,9 @@ v0.14.0</span>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advection_diffusion_reaction_2d.html">2D single-species advection-reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -243,7 +244,7 @@ v0.14.0</span>
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -251,8 +252,309 @@ v0.14.0</span>
         <article role="main">
           <section id="step-by-step-in-c">
 <h1>Step-by-step in C++<a class="headerlink" href="#step-by-step-in-c" title="Permalink to this heading">#</a></h1>
-<p>This page shows you how to setup, run and visualize your first problem in C++.</p>
-<p><strong>finish</strong></p>
+<p>This page shows you how to setup, build, run and visualize your first problem in C++.</p>
+<p>For demonstration purposes, we show how to run the <strong>1D Sod</strong> problem,
+but the <em>same</em> process applies to <em>every</em> other problem.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>You can copy each snippet below by moving your mouse over
+the snippet’s box, and clicking the copy icon
+appearing on the top-right corner.</p>
+</div>
+<section id="step-1-prepare">
+<h2>Step 1: Prepare<a class="headerlink" href="#step-1-prepare" title="Permalink to this heading">#</a></h2>
+<p>The C++ library is header-only so it does not need to be compiled and installed.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>&lt;path-to-your-CXX-compiler&gt;<span class="w"> </span><span class="c1"># must support C++17</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MYTEST</span><span class="o">=</span>/home/myDemoTest
+mkdir<span class="w"> </span><span class="nv">$MYTEST</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$MYTEST</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:Pressio/pressio-demoapps.git
+<span class="nb">cd</span><span class="w"> </span>pressio-demoapps
+</pre></div>
+</div>
+</section>
+<section id="step-2-generate-the-mesh">
+<span id="step-2"></span><h2>Step 2: Generate the mesh<a class="headerlink" href="#step-2-generate-the-mesh" title="Permalink to this heading">#</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span><span class="nv">$MYTEST</span>/pressio-demoapps/meshing_scripts/create_full_mesh_for.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--problem<span class="w"> </span>sod1d_s7<span class="w"> </span>--outdir<span class="w"> </span><span class="si">${</span><span class="nv">MYTEST</span><span class="si">}</span>/mesh<span class="w"> </span>-n<span class="w"> </span><span class="m">500</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">sod1d_s7</span></code> specifies that we want Sod1d and
+a 7-point stencil, and <code class="docutils literal notranslate"><span class="pre">500</span></code> is the number of cells.
+The mesh files are generated inside <code class="docutils literal notranslate"><span class="pre">${MYTEST}/mesh</span></code>.</p>
+</section>
+<section id="step-3-create-main-file">
+<h2>Step 3: Create Main File<a class="headerlink" href="#step-3-create-main-file" title="Permalink to this heading">#</a></h2>
+<p>Create a <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>touch<span class="w"> </span><span class="nv">$MYTEST</span>/main.cpp
+</pre></div>
+</div>
+<p>and open it in a text editor.</p>
+<p>The next sections explain the program line-by-line. To jump to the complete, uncommented code,
+see <a class="reference internal" href="#complete-file-label"><span class="std std-ref">Complete File</span></a>.</p>
+<section id="includes">
+<h3>Includes<a class="headerlink" href="#includes" title="Permalink to this heading">#</a></h3>
+<p>First, we need to include Pressio’s explicit steppers. These are abstractions that
+represent “how” to take a step when applying an explicit scheme to initial value problems.</p>
+<p>You can read more about them in the <a class="reference external" href="https://pressio.github.io/pressio-rom/components/ode_steppers_explicit.html">pressio-rom documentation</a>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressio/ode_steppers_explicit.hpp&quot;</span>
+</pre></div>
+</div>
+<p>Next, we need functions to advance our stepper object forward in time.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressio/ode_advancers.hpp&quot;</span>
+</pre></div>
+</div>
+<p>Finally, we include the default 1D Euler problem that we will solve (more information on
+the problem can be found <a class="reference external" href="https://pressio.github.io/pressio-demoapps/euler_1d_sod.html">here</a>).</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressiodemoapps/euler1d.hpp&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="observer-class-to-monitor-and-sample-the-simulation-s-state">
+<h3>Observer class to monitor and sample the simulation’s state<a class="headerlink" href="#observer-class-to-monitor-and-sample-the-simulation-s-state" title="Permalink to this heading">#</a></h3>
+<p>In order to write out the state with a specified frequency,
+we need to create an instance of the observer class.
+This can be implemented with the following code:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">StateType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Observer</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Observer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">f0</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">freq</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">myfile0_</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">out</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span><span class="p">),</span>
+<span class="w">        </span><span class="n">sampleFreq_</span><span class="p">(</span><span class="n">freq</span><span class="p">){}</span>
+
+<span class="w">    </span><span class="o">~</span><span class="n">Observer</span><span class="p">(){</span>
+<span class="w">        </span><span class="n">myfile0_</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">TimeType</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">StepCount</span><span class="w"> </span><span class="n">stepIn</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">TimeType</span><span class="w"> </span><span class="cm">/*currentTime, unused*/</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">StateType</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stepIn</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">step</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">sampleFreq_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">ext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">);</span>
+<span class="w">            </span><span class="n">myfile0_</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span><span class="w"> </span><span class="n">ext</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">private</span><span class="o">:</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">myfile0_</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">sampleFreq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="main">
+<h3>main()<a class="headerlink" href="#main" title="Permalink to this heading">#</a></h3>
+<p>Create your main function:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All of the subsequent code will go inside of the <code class="docutils literal notranslate"><span class="pre">main()</span></code> function.</p>
+</div>
+<p>First, we’ll create an alias to simplify our program.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Then we load the mesh that we created in <a class="reference internal" href="#step-2"><span class="std std-ref">Step 2: Generate the mesh</span></a>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code> (above) assumes that <code class="docutils literal notranslate"><span class="pre">mesh/</span></code> is located in the same directory as <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> (this should be your <code class="docutils literal notranslate"><span class="pre">$MYTEST</span></code> directory).</p>
+</div>
+<p>For this demonstration, we will use First-Order Inviscid Flux Reconstruction.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Now we create the simulation problem for Euler 1D equations and initialize the state.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">appObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">);</span>
+<span class="k">using</span><span class="w"> </span><span class="n">app_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">appObj</span><span class="p">);</span>
+<span class="k">using</span><span class="w"> </span><span class="n">state_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">app_t</span><span class="o">::</span><span class="n">state_type</span><span class="p">;</span>
+<span class="n">state_t</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">appObj</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>We use built-in time stepping with Runge-Kutta4 and instantiate our Observer class
+such that the state is observed and saved to file every step.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">stepperObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">create_rk4_stepper</span><span class="p">(</span><span class="n">appObj</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">observeEveryNSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="n">Observer</span><span class="o">&lt;</span><span class="n">state_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Obs</span><span class="p">(</span><span class="s">&quot;sod1d_solution.bin&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">observeEveryNSteps</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Then we set our simulation parameters, where <code class="docutils literal notranslate"><span class="pre">dt</span></code> is the time step size and
+the total number of steps is given by <code class="docutils literal notranslate"><span class="pre">Nsteps</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.001</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">Nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">StepCount</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Then we advance the simulation forward <code class="docutils literal notranslate"><span class="pre">Nsteps</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">advance_n_steps</span><span class="p">(</span><span class="n">stepperObj</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">Nsteps</span><span class="p">,</span><span class="w"> </span><span class="n">Obs</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Finally, we return <code class="docutils literal notranslate"><span class="pre">0</span></code> if the process succeeds.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="complete-file">
+<span id="complete-file-label"></span><h3>Complete File<a class="headerlink" href="#complete-file" title="Permalink to this heading">#</a></h3>
+<p>The full, uncommented file is:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressio/ode_steppers_explicit.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressio/ode_advancers.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressiodemoapps/euler1d.hpp&quot;</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">StateType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Observer</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Observer</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">f0</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">freq</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">myfile0_</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">out</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span><span class="p">),</span>
+<span class="w">        </span><span class="n">sampleFreq_</span><span class="p">(</span><span class="n">freq</span><span class="p">){}</span>
+
+<span class="w">    </span><span class="o">~</span><span class="n">Observer</span><span class="p">(){</span>
+<span class="w">        </span><span class="n">myfile0_</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">TimeType</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">StepCount</span><span class="w"> </span><span class="n">stepIn</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">TimeType</span><span class="w"> </span><span class="cm">/*currentTime, unused*/</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">StateType</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stepIn</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">step</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">sampleFreq_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">ext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">);</span>
+<span class="w">        </span><span class="n">myfile0_</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span><span class="w"> </span><span class="n">ext</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">myfile0_</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sampleFreq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="p">};</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">appObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">);</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">app_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">appObj</span><span class="p">);</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">state_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">app_t</span><span class="o">::</span><span class="n">state_type</span><span class="p">;</span>
+<span class="w">    </span><span class="n">state_t</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">appObj</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">stepperObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">create_rk4_stepper</span><span class="p">(</span><span class="n">appObj</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">observeEveryNSteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Observer</span><span class="o">&lt;</span><span class="n">state_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Obs</span><span class="p">(</span><span class="s">&quot;sod1d_solution.bin&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">observeEveryNSteps</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.001</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">Nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">StepCount</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pressio</span><span class="o">::</span><span class="n">ode</span><span class="o">::</span><span class="n">advance_n_steps</span><span class="p">(</span><span class="n">stepperObj</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">Nsteps</span><span class="p">,</span><span class="w"> </span><span class="n">Obs</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-4-compile-and-run">
+<h2>Step 4: Compile and Run<a class="headerlink" href="#step-4-compile-and-run" title="Permalink to this heading">#</a></h2>
+<p>You can compile <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> either on the command line or using <code class="docutils literal notranslate"><span class="pre">cmake</span></code>.</p>
+<section id="command-line">
+<h3>Command line<a class="headerlink" href="#command-line" title="Permalink to this heading">#</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">$CXX</span><span class="w"> </span><span class="se">\</span>
+-I<span class="w"> </span><span class="nv">$MYTEST</span>/pressio-demoapps/include<span class="w"> </span><span class="se">\</span>
+-I<span class="w"> </span><span class="nv">$MYTEST</span>/pressio-demoapps/tpls/eigen3<span class="w"> </span><span class="se">\</span>
+-I<span class="w"> </span><span class="nv">$MYTEST</span>/pressio-demoapps/tests_cpp/pressio/include<span class="w"> </span><span class="se">\</span>
+main.cpp<span class="w"> </span>-o<span class="w"> </span>main
+</pre></div>
+</div>
+</section>
+<section id="running">
+<h3>Running<a class="headerlink" href="#running" title="Permalink to this heading">#</a></h3>
+<p>Once you have compiled your code, you will have a new <code class="docutils literal notranslate"><span class="pre">main</span></code> executable in <code class="docutils literal notranslate"><span class="pre">$MYTEST</span></code>.
+To execute it, simply run:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./main
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-5-visualize-results">
+<h2>Step 5: Visualize Results<a class="headerlink" href="#step-5-visualize-results" title="Permalink to this heading">#</a></h2>
+<p>Running <code class="docutils literal notranslate"><span class="pre">main</span></code> will produce a binary file <code class="docutils literal notranslate"><span class="pre">sod1d_solution.bin</span></code> that holds the state
+at every timestep.</p>
+<p>To visualize the results, you can use the following steps.</p>
+<ol class="arabic simple">
+<li><p>Create a Python file, <code class="docutils literal notranslate"><span class="pre">plot.py</span></code>, in the <code class="docutils literal notranslate"><span class="pre">$MYTEST</span></code> directory
+and fill its content with:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">LA</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extractN</span><span class="p">(</span><span class="n">ns</span><span class="p">):</span>
+    <span class="n">reg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&#39;</span><span class="o">+</span><span class="n">ns</span><span class="o">+</span><span class="s1">&#39;.+&#39;</span><span class="p">)</span>
+    <span class="n">file1</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;mesh/info.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">strings</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">file1</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="n">file1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">strings</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1">##########################</span>
+<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="c1">##########################</span>
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">extractN</span><span class="p">(</span><span class="s1">&#39;nx&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span>
+    <span class="n">fomTotDofs</span> <span class="o">=</span> <span class="n">nx</span><span class="o">*</span><span class="mi">3</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;mesh/coordinates.dat&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="s2">&quot;sod1d_solution.bin&quot;</span><span class="p">)</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">/</span><span class="n">fomTotDofs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fomTest: nt = &quot;</span><span class="p">,</span> <span class="n">nt</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">fomTotDofs</span><span class="p">))</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">density_t0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="mi">3</span><span class="p">))[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">density_thalf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">nt</span><span class="o">/</span><span class="mi">2</span><span class="p">),:],</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="mi">3</span><span class="p">))[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">density_tfinal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">nt</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="mi">3</span><span class="p">))[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">density_t0</span><span class="p">,</span> <span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;density at t=0&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">density_thalf</span><span class="p">,</span> <span class="s1">&#39;-g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;density at t=T/2&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">density_tfinal</span><span class="p">,</span> <span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;density at t=T&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Solution&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;solution.png&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may have to specify the paths to <code class="docutils literal notranslate"><span class="pre">info.data</span></code> and <code class="docutils literal notranslate"><span class="pre">coordinates.dat</span></code> (which are in the the <code class="docutils literal notranslate"><span class="pre">mesh</span></code> directory that you generated in <a class="reference internal" href="#step-2"><span class="std std-ref">Step 2: Generate the mesh</span></a>).</p>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Run the script from your <code class="docutils literal notranslate"><span class="pre">$MYTEST</span></code> directory.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may need to install some packages, like <code class="docutils literal notranslate"><span class="pre">numpy</span></code> or <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>, into your Python environment.</p>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>visualize_state.py
+</pre></div>
+</div>
+<p>This should display the following figure:</p>
+<a class="reference internal image-reference" href="_images/doc_sod1d_endtoend_cpp.png"><img alt="Alternative text" class="align-center" src="_images/doc_sod1d_endtoend_cpp.png" style="width: 65%;" /></a>
+</section>
 </section>
 
         </article>
@@ -290,7 +592,7 @@ v0.14.0</span>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jun 29, 2023</div>
+              Last updated on Jul 10, 2025</div>
           </div>
           <div class="right-details">
             <div class="icons">
@@ -301,8 +603,41 @@ v0.14.0</span>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Step-by-step in C++</a><ul>
+<li><a class="reference internal" href="#step-1-prepare">Step 1: Prepare</a></li>
+<li><a class="reference internal" href="#step-2-generate-the-mesh">Step 2: Generate the mesh</a></li>
+<li><a class="reference internal" href="#step-3-create-main-file">Step 3: Create Main File</a><ul>
+<li><a class="reference internal" href="#includes">Includes</a></li>
+<li><a class="reference internal" href="#observer-class-to-monitor-and-sample-the-simulation-s-state">Observer class to monitor and sample the simulation’s state</a></li>
+<li><a class="reference internal" href="#main">main()</a></li>
+<li><a class="reference internal" href="#complete-file">Complete File</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#step-4-compile-and-run">Step 4: Compile and Run</a><ul>
+<li><a class="reference internal" href="#command-line">Command line</a></li>
+<li><a class="reference internal" href="#running">Running</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#step-5-visualize-results">Step 5: Visualize Results</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

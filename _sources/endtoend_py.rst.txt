@@ -20,7 +20,7 @@ Let's make a directory to run things and export the C++ compiler:
 
 .. code-block:: shell
 
-  export CXX=<path-to-your-CXX-compiler> #must support C++14
+  export CXX=<path-to-your-CXX-compiler> #must support C++17
   export MYTEST=/home/myDemoTest
   mkdir $MYTEST && cd $MYTEST
   git clone --recursive git@github.com:Pressio/pressio-demoapps.git

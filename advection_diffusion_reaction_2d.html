@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Build/install" href="installation.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Burgers (Periodic BCs)" href="burgers_2d_periodic.html" /><link rel="prev" title="2d Problems" href="problems_2d.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>pressio-demoapps v0.16.0</title>
+        <title>2D single-species advection-reaction-diffusion - pressio-demoapps v0.16.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -131,7 +131,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">pressio-demoapps
+      <a href="index.html"><div class="brand">pressio-demoapps
 v0.16.0</div></a>
     </div>
     <div class="header-right">
@@ -152,7 +152,7 @@ v0.16.0</div></a>
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
   <span class="sidebar-brand-text">pressio-demoapps
@@ -176,7 +176,7 @@ v0.16.0</span>
 </li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Problems</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="your_first_problem.html">Run your first problem!</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_py.html">Step-by-step in Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="endtoend_cpp.html">Step-by-step in C++</a></li>
@@ -191,8 +191,8 @@ v0.16.0</span>
 <li class="toctree-l2"><a class="reference internal" href="euler_1d_shu_osher.html">1D Euler Shu-Osher</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="advection_diffusion_reaction_2d.html">2D single-species advection-reaction-diffusion</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">2D single-species advection-reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
@@ -250,80 +250,102 @@ v0.16.0</span>
           </label>
         </div>
         <article role="main">
-          <section id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">#</a></h1>
-<p>pressio-demoapps is a collection of 1D, 2D and 3D problems
-of varying complexity (from linear advection, to reaction-diffusion and compressible Euler)
-that can be used for a variety of purposes.</p>
-<section id="is-this-another-physics-solver">
-<h2>Is this <em>another</em> physics solver?<a class="headerlink" href="#is-this-another-physics-solver" title="Permalink to this heading">#</a></h2>
-<p>No! This will <strong>not</strong> become a full solver. The scope is and will stay limited.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>The main distinguishing feature from other codes is the built-in support
-to handle a sample mesh (which, in brief, is the capability of evaluating
-the residual at a disjoint subset of the mesh cells),
-and the focus on providing self-contained and well-defined <em>problems</em> to study.</p>
+          <section id="d-single-species-advection-reaction-diffusion">
+<h1>2D single-species advection-reaction-diffusion<a class="headerlink" href="#d-single-species-advection-reaction-diffusion" title="Permalink to this heading">#</a></h1>
+<p>This problem focuses on the following 2D PDE:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \phi}{\partial t} + u \frac{\partial \phi}{\partial x} + v \frac{\partial \phi}{\partial y} = D \left(\frac{\partial^2 \phi}{\partial x^2} + \frac{\partial^2 \phi}{\partial y^2} \right) - \sigma \phi + f(x, y, t)\]</div>
 </div>
-<p>This code, in fact, was originally started as part of the Pressio project
-to create a suite of benchmark problems to test ROMs and hyper-reduction techniques,
-but it is being developed to be self-contained.
-For example, you can just use it for doing “standard” simulations,
-or you can just use the Python meshing scripts, or leverage the sample
-mesh capability to study function approximations.
-One of the objectives is to provide a testbed to explore the impact
-of varying numerical schemes, and test new sample mesh
-and hyper-reduction techniques.</p>
-<p>Some features of this work include:</p>
 <ul class="simple">
-<li><p>support for both C++ and Python</p></li>
-<li><p>cell-centered finite volume discretization with various numerical schemes and <em>exact Jacobians</em></p></li>
-<li><p>built-in support for sample mesh in 1D, 2D and 3D for varying stencil sizes</p></li>
-<li><p>focus on providing self-contained and well-defined problems</p></li>
+<li><p>Initial conditions: <span class="math notranslate nohighlight">\(\phi(x, y, 0) = 0\)</span></p></li>
+<li><p>Default settings:</p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(u = 0.5 \cos(\pi/3), v = 0.5 \sin(\pi/3)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(D = 0.001\)</span>, <span class="math notranslate nohighlight">\(\sigma = 1\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(f(x, y, t) = 1\)</span></p></li>
+</ul>
+</li>
+<li><p>Domain is unit square <span class="math notranslate nohighlight">\([0,1]^2\)</span> with homogeneous Dirichlet BC</p></li>
+<li><p><span class="math notranslate nohighlight">\(u, v, D, \sigma\)</span> can be customized via the problem constructor (more below)</p></li>
+</ul>
+<section id="mesh">
+<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this heading">#</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>pressio-demoapps/meshing_scripts/create_full_mesh_for.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--problem<span class="w"> </span>advdiffreac2d_s&lt;stencilSize&gt;<span class="w"> </span>-n<span class="w"> </span>Nx<span class="w"> </span>Ny<span class="w"> </span>--outDir<span class="w"> </span>&lt;destination-path&gt;
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nx,</span> <span class="pre">Ny</span></code> is the number of cells you want along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> respectively</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;stencilSize&gt;</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">or</span> <span class="pre">5</span> <span class="pre">or</span> <span class="pre">7</span></code>: defines the neighboring connectivity of each cell</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;destination-path&gt;</span></code> is where you want the mesh files to be generated</p></li>
 </ul>
 </section>
-<section id="enough-text-show-me-some-code">
-<h2>Enough text, show me some code!<a class="headerlink" href="#enough-text-show-me-some-code" title="Permalink to this heading">#</a></h2>
-<p>A C++ representative snippet showing our idea of a <em>problem</em>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pressiodemoapps/euler1d.hpp&gt;</span>
+<section id="c-synopsis">
+<h2>C++ synopsis<a class="headerlink" href="#c-synopsis" title="Permalink to this heading">#</a></h2>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pressiodemoapps/advection_diffusion_reaction2d.hpp&quot;</span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(){</span>
-<span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;&lt;path-to-mesh-files&gt;&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">scheme</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">Weno5</span><span class="p">;</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">problemId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler1d</span><span class="o">::</span><span class="n">Sod</span><span class="p">;</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">problemId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="p">);</span>
+<span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">pda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">meshObj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">load_cellcentered_uniform_mesh_eigen</span><span class="p">(</span><span class="s">&quot;path-to-mesh&quot;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">inviscidScheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOder</span><span class="p">;</span><span class="w"> </span><span class="c1">//or Weno3, Weno5</span>
+
+<span class="w">  </span><span class="c1">// A. constructor for problem using default values</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">probId</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">AdvectionDiffusionReaction2d</span><span class="o">::</span><span class="n">ProblemA</span><span class="p">;</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">inviscidScheme</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// B. setting custom coefficients</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">decltype</span><span class="p">(</span><span class="n">meshObj</span><span class="p">)</span><span class="o">::</span><span class="n">scalar_t</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">ux</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">uy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.8</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">diff</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">scalar_type</span><span class="w"> </span><span class="n">sigma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.5</span><span class="p">;</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_advdiffreac_2d_problem_A_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">inviscidScheme</span><span class="p">,</span>
+<span class="w">                                                              </span><span class="n">ux</span><span class="p">,</span><span class="w"> </span><span class="n">uy</span><span class="p">,</span><span class="w"> </span><span class="n">diff</span><span class="p">,</span><span class="w"> </span><span class="n">sigma</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Read more on <a class="reference external" href="howtouse">how to use a problem instance</a> or checkout <a class="reference external" href="apicpp">the C++ public API</a>.</p>
-<p>If you prefer, you can use directly Python:</p>
+</section>
+<section id="python-synopsis">
+<h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this heading">#</a></h2>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pda</span>
 
-<span class="n">mesh</span>      <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">&quot;&lt;path-to-mesh-files&gt;&quot;</span><span class="p">)</span>
-<span class="n">scheme</span>    <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">Weno5</span>
-<span class="n">problemId</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">Euler1d</span><span class="o">.</span><span class="n">Sod</span>
-<span class="n">problem</span>   <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">problemId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+<span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">&quot;path-to-mesh&quot;</span><span class="p">)</span>
+
+<span class="n">scheme</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">InviscidFluxReconstruction</span><span class="o">.</span><span class="n">FirstOrder</span> <span class="c1"># or Weno3, Weno5</span>
+
+<span class="c1"># A. constructor for problem using default values</span>
+<span class="n">probId</span>  <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">AdvectionDiffusionReaction2d</span><span class="o">.</span><span class="n">ProblemA</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_problem</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">probId</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+
+<span class="c1"># B. setting custom coefficients</span>
+<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">myD</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mf">1.5</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">create_adv_diff_reac_2d_problem_A</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">myD</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Read more on <a class="reference external" href="howtouse">how to use a problem instance</a> or checkout <a class="reference external" href="apipy">the Python public API</a>.</p>
 </section>
-<section id="core-development-principles">
-<h2>Core development principles<a class="headerlink" href="#core-development-principles" title="Permalink to this heading">#</a></h2>
-<ul class="simple">
-<li><p><strong>simplicity</strong>: we use high-level abstractions and well-defined APIs aiming
-to make this code as simple as possible to use, thus minimizing the number
-of steps needed to set up and run a problem.
-The main idea is a three-step process: (1) generate the mesh, (2) load the mesh and (3) create a problem instance that has a specific API.</p></li>
-<li><p><strong>quality assurance</strong>: we maintain a test suite for both the C++ code and Python bindings to ensure stability and reliability;</p></li>
-<li><p><strong>extensibility</strong>: easily add new problems, other numerical schemes (e.g. fluxes, reconstruction methods) and different data types.</p></li>
-</ul>
-<div class="toctree-wrapper compound">
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading">#</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Currently, for this problem the viscous schemes is fixed
+such that it yields a second-order viscuous scheme.</p>
 </div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
+</section>
+<section id="sample-solution">
+<h2>Sample Solution<a class="headerlink" href="#sample-solution" title="Permalink to this heading">#</a></h2>
+<p>Representative plot at <span class="math notranslate nohighlight">\(t=0\)</span> (left) and <span class="math notranslate nohighlight">\(t=3\)</span>,
+using a <code class="docutils literal notranslate"><span class="pre">50x50</span></code> mesh with Weno5 and RK4 time integration with <span class="math notranslate nohighlight">\(dt = 0.01\)</span>,
+and default values for the physical coefficients:</p>
+<a class="reference internal image-reference" href="_images/wiki_2d_advdiffreac_probA_solution0.png"><img alt="_images/wiki_2d_advdiffreac_probA_solution0.png" src="_images/wiki_2d_advdiffreac_probA_solution0.png" style="width: 44%;" /></a>
+<a class="reference internal image-reference" href="_images/wiki_2d_advdiffreac_probA_solution1.png"><img alt="_images/wiki_2d_advdiffreac_probA_solution1.png" src="_images/wiki_2d_advdiffreac_probA_solution1.png" style="width: 44%;" /></a>
 </section>
 </section>
 
@@ -332,16 +354,26 @@ The main idea is a three-step process: (1) generate the mesh, (2) load the mesh 
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="installation.html">
+          <a class="next-page" href="burgers_2d_periodic.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Build/install</div>
+                <div class="title">2D Burgers (Periodic BCs)</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          
+          <a class="prev-page" href="problems_2d.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">2d Problems</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -375,12 +407,12 @@ The main idea is a three-step process: (1) generate the mesh, (2) load the mesh 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Overview</a><ul>
-<li><a class="reference internal" href="#is-this-another-physics-solver">Is this <em>another</em> physics solver?</a></li>
-<li><a class="reference internal" href="#enough-text-show-me-some-code">Enough text, show me some code!</a></li>
-<li><a class="reference internal" href="#core-development-principles">Core development principles</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#">2D single-species advection-reaction-diffusion</a><ul>
+<li><a class="reference internal" href="#mesh">Mesh</a></li>
+<li><a class="reference internal" href="#c-synopsis">C++ synopsis</a></li>
+<li><a class="reference internal" href="#python-synopsis">Python synopsis</a></li>
+<li><a class="reference internal" href="#notes">Notes:</a></li>
+<li><a class="reference internal" href="#sample-solution">Sample Solution</a></li>
 </ul>
 </li>
 </ul>
@@ -401,5 +433,6 @@ The main idea is a three-step process: (1) generate the mesh, (2) load the mesh 
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
     <script src="_static/design-tabs.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

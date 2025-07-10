@@ -6,11 +6,11 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="2D Euler Normal Shock" href="euler_2d_normal_shock.html" /><link rel="prev" title="2D Euler Sedov (with symmetry)" href="euler_2d_sedov_symmetry.html" />
 
     <meta name="generator" content="sphinx-5.0.1, furo 2022.06.04.1"/>
-        <title>2D Euler Riemann - pressio-demoapps v0.14.0</title>
+        <title>2D Euler Riemann - pressio-demoapps v0.16.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -132,7 +132,7 @@
     </div>
     <div class="header-center">
       <a href="index.html"><div class="brand">pressio-demoapps
-v0.14.0</div></a>
+v0.16.0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -156,7 +156,7 @@ v0.14.0</div></a>
   
   
   <span class="sidebar-brand-text">pressio-demoapps
-v0.14.0</span>
+v0.16.0</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -192,8 +192,9 @@ v0.14.0</span>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="problems_2d.html">2d Problems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advection_diffusion_reaction_2d.html">2D single-species advection-reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="burgers_2d_periodic.html">2D Burgers (Periodic BCs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diffusion_reaction_2d.html">2D single-species reaction diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grayscott_2d.html">2D Gray Scott reaction-diffusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swe_2d.html">2D Shallow water equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="euler_2d_smooth.html">2D Euler Smooth</a></li>
@@ -262,11 +263,16 @@ v0.14.0</span>
 \[p=(\gamma -1)(\rho E-\frac{1}{2}\rho (u_x^2 + u_y^2)).\]</div>
 </div>
 <ul>
-<li><p>Various initial conditions are supported:</p>
+<li><p>Various initial conditions are supported, with various default parameterizations:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">icId==1</span></code>:</p>
 <ul>
-<li><p>See page 15 of <a class="reference external" href="https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations">paper1</a></p>
+<li><p>Accepts the following user-specified parameters</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannTopRightPressure</span></code>: pressure in the upper right quadrant (default: 0.4)</p></li>
+</ul>
+</li>
+<li><p>Default setting follows those on page 15 of <a class="reference external" href="https://www.researchgate.net/publication/269636534_A_Compact_Third-Order_Gas-Kinetic_Scheme_for_Compressible_Euler_and_Navier-Stokes_Equations">paper1</a></p>
 <p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho = 0.5313, u = 0, v = 0, p = 0.4; &amp; x\geq 1/2, y\geq 1/2\\ \rho = 1, u = 0.7276, v = 0, p = 1; &amp; x&lt;1/2, y\geq 1/2 \\ \rho = 4/5, u = 0, v = 0, p = 1; &amp; x&lt;1/2, y&lt;1/2 \\ \rho = 1, u = 0, v = 0.7276, p = 1;&amp; x&gt;1/2, y&lt;1/2 \end{matrix}\right.\)</span></p>
 </li>
 <li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
@@ -275,7 +281,17 @@ v0.14.0</span>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">icId==2</span></code>:</p>
 <ul>
-<li><p>See configuration 3 of <a class="reference external" href="http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf">paper2</a></p>
+<li><p>Accepts the following user-specified parameters</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannTopRightPressure</span></code>: pressure in upper right quadrant (default: 1.5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannTopRightXVel</span></code>: x-velocity in upper right quadrant (default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannTopRightYVel</span></code>: y-velocity in upper right quadrant (default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannTopRightDensity</span></code>: density in upper right quadrant (default: 1.5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">riemannBotLeftPressure</span></code>: pressure in lower left quadrant (default: 0.029)</p></li>
+</ul>
+</li>
+<li><p>The remaining, unspecified primitive state values are computed following the compatibility relations provided by Configuration 3 of <a class="reference external" href="https://epubs.siam.org/doi/pdf/10.1137/0524006">paper2</a></p></li>
+<li><p>Default settings follow those in configuration 3 of <a class="reference external" href="http://www.amsc-ouc.ac.cn/Files/Papers/2016_Don_Hybrid%20Compact-WENO%20finite%20difference%20scheme%20with%20conjugate%20Fourier%20shock%20detection%20algorithm%20for%20hyperbolic%20conservation%20laws.pdf">paper3</a></p>
 <p><span class="math notranslate nohighlight">\(\left\{\begin{matrix}\rho = 1.5, u = 0, v = 0, p = 1.5; &amp; x\geq 4/5, y\geq 4/5\\ \rho = 0.5323, u = 1.206, v = 0, p = 0.3; &amp; x&lt;4/5, y\geq 4/5 \\ \rho = 0.138, u = 1.206, v = 1.206, p = 0.029; &amp;x&lt;4/5, y&lt;4/5 \\ \rho = 0.5323, u = 0, v = 1.206, p = 0.3;&amp; x&gt;4/5, y&lt;4/5 \end{matrix}\right.\)</span></p>
 </li>
 <li><p>This IC is used to create the corresponding initial conditions in conservative variables.</p></li>
@@ -321,16 +337,16 @@ The script creates the directory if it does not exist.</p></li>
 
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">probId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">Euler2d</span><span class="o">::</span><span class="n">Riemann</span><span class="p">;</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">InviscidFluxReconstruction</span><span class="o">::</span><span class="n">FirstOrder</span><span class="p">;</span><span class="w"> </span><span class="c1">//or Weno3, Weno5</span>
-<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="p">[,</span><span class="w"> </span><span class="n">icId</span><span class="p">]);</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">pda</span><span class="o">::</span><span class="n">create_problem_eigen</span><span class="p">(</span><span class="n">meshObj</span><span class="p">,</span><span class="w"> </span><span class="n">probId</span><span class="p">,</span><span class="w"> </span><span class="n">scheme</span><span class="w"> </span><span class="p">[,</span><span class="w"> </span><span class="n">icId</span><span class="p">,</span><span class="w"> </span><span class="n">userParams</span><span class="p">]);</span>
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">state</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">initialCondition</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Where the <code class="docutils literal notranslate"><span class="pre">icId</span></code> is an integer identifying the initial condition above.</p>
+<p>Where the <code class="docutils literal notranslate"><span class="pre">icId</span></code> is an integer identifying the initial condition above, and <code class="docutils literal notranslate"><span class="pre">userParams</span></code> is an <code class="docutils literal notranslate"><span class="pre">std::unordered_map&lt;std::string,</span> <span class="pre">decltype(meshObj)::scalar_type&gt;</span></code> mapping user-specified parameter names to their designated values (see above for valid parameter names and their default values for each <code class="docutils literal notranslate"><span class="pre">icId</span></code>).</p>
 </section>
 <section id="python-synopsis">
 <h2>Python synopsis<a class="headerlink" href="#python-synopsis" title="Permalink to this heading">#</a></h2>
-<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pressiodemoapps</span> <span class="k">as</span> <span class="nn">pda</span>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pressiodemoapps</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pda</span>
 
 <span class="n">meshObj</span> <span class="o">=</span> <span class="n">pda</span><span class="o">.</span><span class="n">load_cellcentered_uniform_mesh</span><span class="p">(</span><span class="s2">&quot;path-to-mesh&quot;</span><span class="p">)</span>
 
@@ -385,7 +401,7 @@ SSPRK3 time integration:</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on Jun 29, 2023</div>
+              Last updated on Jul 10, 2025</div>
           </div>
           <div class="right-details">
             <div class="icons">

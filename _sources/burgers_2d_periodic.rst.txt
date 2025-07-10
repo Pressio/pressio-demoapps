@@ -59,12 +59,12 @@ C++ synopsis
 
      const auto meshObj = pda::load_cellcentered_uniform_mesh_eigen("path-to-mesh");
 
+     const auto probId  = pda::AdvectionDiffusion2d::BurgersPeriodic;
      const auto inviscidScheme = pda::InviscidFluxReconstruction::FirstOrder; // or Weno3, Weno5
      const auto viscousScheme  = pda::ViscousFluxReconstruction::FirstOrder;  // must be FirstOrder
 
      // A. constructor for problem using default values
      {
-       const auto probId = pda::AdvectionDiffusion2d::BurgersPeriodic;
        auto problem = pda::create_problem_eigen(meshObj, probId, inviscidScheme, viscousScheme);
      }
 
@@ -76,9 +76,9 @@ C++ synopsis
        const auto D      = /* something */;
        const auto x0     = /* something */;
        const auto y0     = /* something */;
-       auto problem = pda::create_periodic_burgers_2d_problem_eigen(meshObj, inviscidScheme,
-								    viscousScheme, alpha,
-								    delta, D, x0, y0)
+       auto problem = pda::create_problem_eigen(meshObj, probId, inviscidScheme,
+						viscousScheme, alpha,
+						delta, D, x0, y0)
      }
    }
 
@@ -91,11 +91,11 @@ Python synopsis
 
    meshObj = pda.load_cellcentered_uniform_mesh("path-to-mesh")
 
+   probId  = pda.AdvectionDiffusion2d.BurgersPeriodic
    inviscidScheme = pda.InviscidFluxReconstruction.FirstOrder; # or Weno3, Weno5
    viscousScheme  = pda.ViscousFluxReconstruction.FirstOrder;  # must be FirstOrder
 
    # A. constructor for problem using default values
-   probId  = pda.AdvectionDiffusion2d.BurgersPeriodic
    problem = pda.create_problem(meshObj, probId, inviscidScheme, viscousScheme)
 
    # B. setting custom coefficients
@@ -104,9 +104,9 @@ Python synopsis
    D      = # something
    x0     = # something
    y0     = # something
-   problem = pda.create_periodic_burgers_2d_problem(meshObj, inviscidScheme,
-                                                    viscousScheme, alpha,
-                                                    delta, D, x0, y0)
+   problem = pda.create_burgers_2d_problem(meshObj, probId, inviscidScheme,
+					   viscousScheme, alpha,
+					   delta, D, x0, y0)
 
 
 Sample Plot
