@@ -154,7 +154,10 @@ jobs:
 
       - name: Run Python tests
         shell: bash
-        run: python -m pytest -s
+        run: |
+          cd "$RUNNER_TEMP"
+          python -c "import pressiodemoapps; print(pressiodemoapps.__file__)"
+          python -m pytest -c "$GITHUB_WORKSPACE/pytest.ini" "$GITHUB_WORKSPACE/tests_py" -s
 
   test-python-versions:
     needs: ci-gate
@@ -199,4 +202,7 @@ jobs:
 
       - name: Run Python tests
         shell: bash
-        run: python -m pytest -s
+        run: |
+          cd "$RUNNER_TEMP"
+          python -c "import pressiodemoapps; print(pressiodemoapps.__file__)"
+          python -m pytest -c "$GITHUB_WORKSPACE/pytest.ini" "$GITHUB_WORKSPACE/tests_py" -s
