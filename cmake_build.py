@@ -95,18 +95,16 @@ class CMakeBuild:
 
     def _check_os_env_vars(self):
         """ Checks environment variables. """
-        if "CXX" not in os.environ:
-            if platform.system() != 'Windows':
-                compiler = subprocess.run(['which', 'g++'], capture_output=True)
-                if compiler.returncode == 1:
-                    print("CXX env var missing, needs to point to your target C++ compiler")
-                    exit(1)
-                cxx = compiler.stdout.decode('utf-8').replace('\n', '')
-                os.environ["CXX"] = cxx
-            else:
+        if "CXX" not in os.environ and platform.system() != 'Windows':
+            compiler = subprocess.run(['which', 'g++'], capture_output=True)
+            if compiler.returncode == 1:
                 print("CXX env var missing, needs to point to your target C++ compiler")
                 exit(1)
+            cxx = compiler.stdout.decode('utf-8').replace('\n', '')
+            os.environ["CXX"] = cxx
 
+        # On Windows, leave CXX unset and allow the selected CMake generator
+        # (for example, Visual Studio 17 2022) to choose MSVC.
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             self.build_args.extend(["--parallel", "4"])
 
