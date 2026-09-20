@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.18.0)
 project(pressiodemoapps CXX)
 
@@ -12,11 +13,12 @@ message("pressiodemoapps version = ${PDA_VERSION}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-# CMake maps CMAKE_CXX_STANDARD=17 to the compiler-appropriate flag
-# (for example, -std=c++17 for GCC/Clang and /std:c++17 for MSVC).
-# CMAKE_CXX_STANDARD_REQUIRED makes configuration fail if C++17 is not
-# available, so an explicit compiler-specific flag probe is unnecessary.
+# test if compiler supports standard
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-std=c++17" COMPILER_SUPPORT_CPP17)
+if(NOT COMPILER_SUPPORT_CPP17)
+  message(FATAL_ERROR "Compiler does not support -std=c++17. This is required.")
+endif()
 
 # force C++17 for pressio too
 set(PRESSIO_ENABLE_CXX17 ON)
