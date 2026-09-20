@@ -59,14 +59,13 @@ class CMakeBuild:
         """ Support for common line arguments. """
         parser = argparse.ArgumentParser()
         parser.add_argument("--openmp", action="store_true", help="Enables OpenMP if given")
-        parser.add_argument("--build_mode", help="Defines build mode: Release or Debug")
+        parser.add_argument("--build_mode", choices=["Release", "Debug"],
+                            help="Defines build mode: Release or Debug")
         args = parser.parse_args()
         if args.openmp:
             self.enable_omp = True
-        if args.openmp == 'Debug':
-            self.build_mode = 'Debug'
-        else:
-            self.build_mode = 'Release'
+        if args.build_mode is not None:
+            self.build_mode = args.build_mode
 
     @staticmethod
     def _check_and_create_dir(directory: str):
