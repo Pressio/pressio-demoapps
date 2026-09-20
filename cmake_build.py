@@ -59,14 +59,13 @@ class CMakeBuild:
         """ Support for common line arguments. """
         parser = argparse.ArgumentParser()
         parser.add_argument("--openmp", action="store_true", help="Enables OpenMP if given")
-        parser.add_argument("--build_mode", help="Defines build mode: Release or Debug")
+        parser.add_argument("--build_mode", choices=["Release", "Debug"],
+                            help="Defines build mode: Release or Debug")
         args = parser.parse_args()
         if args.openmp:
             self.enable_omp = True
-        if args.openmp == 'Debug':
-            self.build_mode = 'Debug'
-        else:
-            self.build_mode = 'Release'
+        if args.build_mode is not None:
+            self.build_mode = args.build_mode
 
     @staticmethod
     def _check_and_create_dir(directory: str):
@@ -100,26 +99,47 @@ class CMakeBuild:
             if platform.system() != 'Windows':
                 compiler = subprocess.run(['which', 'g++'], capture_output=True)
                 if compiler.returncode == 1:
-                    print(f"CXX env var missing, needs to point to your target C++ compiler")
+                    print("CXX env var missing, needs to point to your target C++ compiler")
                     exit(1)
-                else:
-                    cxx = compiler.stdout.decode('utf-8').replace('\n', '')
-                    os.environ["CXX"] = cxx
+                cxx = compiler.stdout.decode('utf-8').replace('\n', '')
+                os.environ["CXX"] = cxx
             else:
-                print(f"CXX env var missing, needs to point to your target C++ compiler")
+                print("CXX env var missing, needs to point to your target C++ compiler")
                 exit(1)
+
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
-            self.build_args.append('-j4')
+            self.build_args.extend(["--parallel", "4"])
 
     def build(self):
         """ Builds library with Cmake. """
         self._check_os_env_vars()
-        cmake_args = [f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={self.library}", f"-DPYTHON_EXECUTABLE={sys.executable}",
-                      f"-DCMAKE_BUILD_TYPE={self.build_mode}", "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
-                      "-DCMAKE_VERBOSE_MAKEFILE=On", f"-DPRESSIODEMOAPPS_ENABLE_OPENMP={self.enable_omp}"]
+
+        cmake_args = [
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={self.library}",
+            f"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY={self.library}",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DCMAKE_BUILD_TYPE={self.build_mode}",
+            "-DPRESSIODEMOAPPS_ENABLE_BINDINGS=On",
+            "-DCMAKE_VERBOSE_MAKEFILE=On",
+            f"-DPRESSIODEMOAPPS_ENABLE_OPENMP={self.enable_omp}",
+        ]
+
+        # Multi-config generators such as Visual Studio append the configuration
+        # directory unless a per-config output location is provided.
+        if platform.system() == 'Windows':
+            config = self.build_mode.upper()
+            cmake_args.extend([
+                f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{config}={self.library}",
+                f"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{config}={self.library}",
+            ])
 
         subprocess.check_call(["cmake", project_path] + cmake_args, cwd=self.temp_dir)
-        subprocess.check_call(["cmake", "--build", "."] + self.build_args, cwd=self.temp_dir)
+
+        build_command = ["cmake", "--build", "."]
+        if platform.system() == 'Windows':
+            build_command.extend(["--config", self.build_mode])
+        build_command.extend(self.build_args)
+        subprocess.check_call(build_command, cwd=self.temp_dir)
 
 
 if __name__ == '__main__':
