@@ -91,7 +91,7 @@ jobs:
     env:
       CXX: ${{ matrix.cxx }}
       DEMOAPPS_HOME: ${{ github.workspace }}
-      BUILD_DIR: ${{ runner.temp }}/pressio-demoapps-build
+      BUILD_DIR: ${{ github.workspace }}/build-ci
 
     steps:
       - uses: actions/checkout@v4
